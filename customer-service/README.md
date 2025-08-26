@@ -44,6 +44,9 @@ curl -X POST "http://localhost:8084/customer/v1/customers" \
 
 * Swagger UI → `http://localhost:8084/customer/swagger-ui/index.html`
 * OpenAPI JSON → `http://localhost:8084/customer/v3/api-docs`
+* OpenAPI YAML → `http://localhost:8084/customer/v3/api-docs.yaml`
+
+➡️ The YAML/JSON spec above is what the client module (`customer-service-client`) consumes when generating code.
 
 ---
 
@@ -68,7 +71,11 @@ docker run --rm -p 8084:8084 \
 
 ```bash
 cd customer-service
-docker compose up --build
+docker compose up --build -d
+```
+
+```bash
+docker compose down
 ```
 
 ---
@@ -77,4 +84,5 @@ docker compose up --build
 
 * Demonstrates **generic `ApiResponse<T>`** pattern.
 * Uses **Swagger customizers** to teach OpenAPI about generic wrappers.
+* OpenAPI spec (`/v3/api-docs.yaml`) is the source for client generation.
 * Focused on clarity and minimal setup for demo purposes.
