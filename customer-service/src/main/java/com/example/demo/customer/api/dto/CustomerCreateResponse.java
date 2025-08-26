@@ -5,4 +5,5 @@ import java.time.Instant;
 public record CustomerCreateResponse(
         CustomerDto customer,
         Instant createdAt
-) {}
+) {
+}
