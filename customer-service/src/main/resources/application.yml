@@ -1,0 +1,20 @@
+server:
+  port: ${APP_PORT:8084}
+  servlet:
+    context-path: /customer
+
+spring:
+  application:
+    name: customer-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    com.example.demo: DEBUG
+
+app:
+  openapi:
+    base-url: http://localhost:${server.port}${server.servlet.context-path}

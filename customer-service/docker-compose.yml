@@ -1,0 +1,14 @@
+services:
+  customer-service:
+    container_name: customer-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: customer-service:latest
+    restart: on-failure
+    environment:
+      APP_PORT: ${APP_PORT:-8084}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      JAVA_OPTS: ${JAVA_OPTS:-}
+    ports:
+      - "${APP_PORT:-8084}:${APP_PORT:-8084}"
