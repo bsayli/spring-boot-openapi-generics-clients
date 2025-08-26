@@ -1,13 +1,16 @@
 package com.example.demo.common.api.config;
 
-import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 
 import static com.example.demo.common.api.config.OpenApiSchemas.*;
 
 public final class OpenApiSchemaUtils {
-    private OpenApiSchemaUtils() {}
+    private OpenApiSchemaUtils() {
+    }
 
     public static Schema<?> createComposedWrapper(String dataRefName) {
         var schema = new ComposedSchema();

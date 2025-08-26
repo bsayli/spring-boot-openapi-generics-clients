@@ -31,7 +31,11 @@ curl -X POST "http://localhost:8084/customer/v1/customers" \
   "status": 201,
   "message": "CREATED",
   "data": {
-    "customer": { "id": 1, "name": "Jane Doe", "email": "jane@example.com" },
+    "customer": {
+      "id": 1,
+      "name": "Jane Doe",
+      "email": "jane@example.com"
+    },
     "createdAt": "2025-01-01T12:34:56Z"
   },
   "errors": []

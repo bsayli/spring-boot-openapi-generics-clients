@@ -1,0 +1,113 @@
+openapi: 3.1.0
+info:
+  title: Customer Service API
+  description: "Demo: type-safe generic API responses with OpenAPI"
+  version: 0.1.0
+servers:
+  - url: http://localhost:8084/customer/customer
+    description: Local service URL
+paths:
+  /v1/customers:
+    post:
+      tags:
+        - customer-controller
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerCreateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCustomerCreateResponse"
+components:
+  schemas:
+    CustomerCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          minLength: 2
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+        - email
+        - name
+    ApiError:
+      type: object
+      properties:
+        errorCode:
+          type: string
+        message:
+          type: string
+    ApiResponseCustomerCreateResponse:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CustomerCreateResponse"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CustomerCreateResponse
+    CustomerCreateResponse:
+      type: object
+      properties:
+        customer:
+          $ref: "#/components/schemas/CustomerDto"
+        createdAt:
+          type: string
+          format: date-time
+    CustomerDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        email:
+          type: string
+    ApiResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              errorCode:
+                type: string
+              message:
+                type: string
+    ApiResponseVoid:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: object
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              errorCode:
+                type: string
+              message:
+                type: string
