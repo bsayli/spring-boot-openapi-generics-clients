@@ -1,47 +1,51 @@
 # customer-service-client
 
-A minimal Java client for the demo **customer-service**, showing how to use **type-safe generic responses** with OpenAPI
-and a custom template (`ApiClientResponse<T>`).
+Generated Java client for the demo **customer-service**, showcasing **type‑safe generic responses** with OpenAPI + a tiny custom template (wrapping payloads in a reusable `ApiClientResponse<T>`).
 
 ---
 
-## 📦 Contents
+## ✅ What you get
 
-* Generated sources via **OpenAPI Generator** (`restclient` using Spring `RestClient`)
-* Custom wrapper generation using `ApiClientResponse<T>`
-* Spring config for wiring (`CustomerApiClientConfig`)
-* Integration test with **MockWebServer** (`CustomerClientIT`)
+* Generated code using **OpenAPI Generator** (`restclient` with Spring Framework `RestClient`)
+* A thin wrapper class per endpoint (e.g. `ApiResponseCustomerCreateResponse`) that **extends**:
+
+    * `src/main/java/com/example/demo/client/common/ApiClientResponse.java`
+* Minimal Spring wiring to expose the generated API as beans:
+
+    * `com.example.demo.client.adapter.config.CustomerApiClientConfig`
+* A focused integration test with **OkHttp MockWebServer**:
+
+    * `com.example.demo.client.adapter.CustomerClientIT`
 
 ---
 
-## 🔧 Requirements
+## 🧪 Quick pipeline (3 steps)
 
-* JDK 21
-* Maven 3.9+
-* OpenAPI spec at:
-
-```
-src/main/resources/customer-api-docs.yaml
-```
-
-To refresh from a running service:
+1. **Run the sample service**
 
 ```bash
+cd customer-service
+mvn spring-boot:run
+# Service base URL: http://localhost:8084/customer
+```
+
+2. **Pull the OpenAPI spec into this module**
+
+```bash
+cd customer-service-client
 curl -s http://localhost:8084/customer/v3/api-docs.yaml \
   -o src/main/resources/customer-api-docs.yaml
 ```
 
----
+> You can also skip this if the spec is already checked in.
 
-## 🚀 Build & Generate
-
-Run:
+3. **Generate & build the client**
 
 ```bash
 mvn clean install
 ```
 
-Generated sources land in:
+Generated sources will land under:
 
 ```
 target/generated-sources/openapi/src/gen/java/main
@@ -49,85 +53,109 @@ target/generated-sources/openapi/src/gen/java/main
 
 ---
 
-## 🧩 Generics support
+## 🚀 Using the client in your application
 
-Custom templates ensure wrappers extend one reusable class:
+### Option A — Spring configuration (recommended)
 
-```java
-public class ApiResponseCustomerCreateResponse
-        extends com.example.demo.client.common.ApiClientResponse<CustomerCreateResponse> {
-}
-```
-
-This keeps response envelopes consistent and type-safe.
-
----
-
-## 🧪 Tests
-
-Integration test `CustomerClientIT` runs against a **MockWebServer**, verifying that a `201 CREATED` response maps
-correctly into `ApiResponseCustomerCreateResponse`.
-
-Run tests with:
-
-```bash
-mvn test
-```
-
----
-
-## 🧰 Usage
-
-Add config to your application:
+Add this module as a dependency and set the base URL. The module contributes a small configuration:
 
 ```java
 @Configuration
 public class CustomerApiClientConfig {
   @Bean
-  RestClient customerRestClient(RestClient.Builder builder,
-                                @Value("${customer.api.base-url}") String baseUrl) {
+  public RestClient customerRestClient(RestClient.Builder builder,
+                                       @Value("${customer.api.base-url}") String baseUrl) {
     return builder.baseUrl(baseUrl).build();
   }
 
   @Bean
-  CustomerControllerApi customerControllerApi(ApiClient apiClient) {
-    return new CustomerControllerApi(apiClient);
+  public com.example.demo.client.generated.invoker.ApiClient customerApiClient(
+      RestClient customerRestClient,
+      @Value("${customer.api.base-url}") String baseUrl) {
+    return new com.example.demo.client.generated.invoker.ApiClient(customerRestClient)
+        .setBasePath(baseUrl);
+  }
+
+  @Bean
+  public com.example.demo.client.generated.api.CustomerControllerApi customerControllerApi(
+      com.example.demo.client.generated.invoker.ApiClient apiClient) {
+    return new com.example.demo.client.generated.api.CustomerControllerApi(apiClient);
   }
 }
 ```
 
-Use in code:
-
-```java
-@Autowired
-private CustomerControllerApi customerApi;
-
-public void createCustomer() {
-  var req = new CustomerCreateRequest().name("Jane Doe").email("jane@example.com");
-  var resp = customerApi.create(req);
-  System.out.println(resp.getStatus()); // 201
-}
-```
-
-Property required:
+**Configure the base URL** in your app:
 
 ```properties
 customer.api.base-url=http://localhost:8084/customer
 ```
 
+**Call the API**:
+
+```java
+@Autowired
+private com.example.demo.client.generated.api.CustomerControllerApi customerApi;
+
+public void createCustomer() {
+  var req = new com.example.demo.client.generated.dto.CustomerCreateRequest()
+      .name("Jane Doe")
+      .email("jane@example.com");
+
+  var resp = customerApi.create(req); // ApiResponseCustomerCreateResponse
+  System.out.println(resp.getStatus());                 // 201
+  System.out.println(resp.getData().getCustomer().getName()); // "Jane Doe"
+}
+```
+
+### Option B — Manual wiring (no Spring context)
+
+```java
+var rest = RestClient.builder().baseUrl("http://localhost:8084/customer").build();
+var apiClient = new com.example.demo.client.generated.invoker.ApiClient(rest)
+    .setBasePath("http://localhost:8084/customer");
+var customerApi = new com.example.demo.client.generated.api.CustomerControllerApi(apiClient);
+```
+
+---
+
+## 🧩 How the generics work
+
+The template at `src/main/resources/openapi-templates/api_wrapper.mustache` emits thin wrappers like:
+
+```java
+// e.g., ApiResponseCustomerCreateResponse
+public class ApiResponseCustomerCreateResponse
+    extends com.example.demo.client.common.ApiClientResponse<CustomerCreateResponse> { }
+```
+
+Only `api_wrapper.mustache` is customized for this demo; **all other models** use the stock templates/behavior.
+
+---
+
+## 🧪 Tests
+
+Run the integration-style test with MockWebServer:
+
+```bash
+mvn -q -DskipITs=false test
+```
+
+It enqueues a `201` response and asserts mapping into `ApiResponseCustomerCreateResponse`.
+
 ---
 
 ## 📚 Notes
 
-* Core deps (`spring-web`, `spring-context`, `jackson-*`, `jakarta.*`) are **provided**.
-* Custom templates:
+* Dependencies like `spring-web`, `spring-context`, `jackson-*`, `jakarta.*` are marked **provided**. Your host app supplies them.
+* Generator options: Spring 6 `RestClient`, Jakarta EE, Jackson, Java 21.
+* OpenAPI spec path used by the build:
 
-    * `api_wrapper.mustache` (main customization)
-    * `model.mustache` (delegates to wrapper conditionally)
-* Others use stock OpenAPI Generator templates.
+```
+src/main/resources/customer-api-docs.yaml
+```
 
 ---
 
 ## 🛡 License
 
-MIT
+This repository is licensed under **MIT** (root `LICENSE`). Submodules don’t duplicate license files; the root license applies.
