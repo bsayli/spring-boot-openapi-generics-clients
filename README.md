@@ -1,16 +1,14 @@
 # spring-boot-openapi-generics-clients
 
 **Type-safe client generation with Spring Boot & OpenAPI using generics.**
-This repository demonstrates how to teach OpenAPI Generator to work with generics in order to avoid boilerplate, reduce
-duplicated wrappers, and keep client code clean.
+This repository demonstrates how to teach OpenAPI Generator to work with generics in order to avoid boilerplate, reduce duplicated wrappers, and keep client code clean.
 
 ---
 
 ## 🚀 Problem Statement
 
 Most backend teams standardize responses with a generic wrapper like `ApiResponse<T>`.
-However, **OpenAPI Generator does not natively support generics** — instead, it generates one wrapper per endpoint (
-duplicating fields like `status`, `message`, and `errors`).
+However, **OpenAPI Generator does not natively support generics** — instead, it generates one wrapper per endpoint (duplicating fields like `status`, `message`, and `errors`).
 This creates:
 
 * ❌ Dozens of almost-identical classes
@@ -58,17 +56,19 @@ spring-boot-openapi-generics-clients/
    cd customer-service
    mvn spring-boot:run
    ```
+
 2. **Generate the client**
 
    ```bash
    cd customer-service-client
    mvn clean install
    ```
+
 3. **Use the generated API**
 
    ```java
    ApiClientResponse<CustomerCreateResponse> response =
-       customerControllerApi.createCustomer(request);
+       customerControllerApi.create(request);
    ```
 
 ---
