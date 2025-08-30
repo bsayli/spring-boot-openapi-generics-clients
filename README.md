@@ -5,6 +5,12 @@
 ![OpenAPI](https://img.shields.io/badge/OpenAPI-Generator-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
+<p align="center">
+  <img src="docs/images/social-preview.png" alt="Social preview" width="720"/>
+  <br/>
+  <em>Social preview banner used for GitHub and sharing</em>
+</p>
+
 **Type-safe client generation with Spring Boot & OpenAPI using generics.**
 This repository demonstrates how to teach OpenAPI Generator to work with generics in order to avoid boilerplate, reduce duplicated wrappers, and keep client code clean.
 
