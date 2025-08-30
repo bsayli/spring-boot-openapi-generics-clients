@@ -1,4 +1,3 @@
-// src/main/java/com/example/demo/client/adapter/config/CustomerApiClientConfig.java
 package com.example.demo.client.adapter.config;
 
 import com.example.demo.client.generated.api.CustomerControllerApi;
