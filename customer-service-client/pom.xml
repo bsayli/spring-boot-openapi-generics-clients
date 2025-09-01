@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.example.demo</groupId>
+    <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
     <version>0.1.0</version>
     <name>customer-service-client</name>
@@ -124,9 +124,9 @@
                             <output>${project.build.directory}/generated-sources/openapi</output>
 
                             <!-- Packages for generated code -->
-                            <apiPackage>com.example.demo.client.generated.api</apiPackage>
-                            <modelPackage>com.example.demo.client.generated.dto</modelPackage>
-                            <invokerPackage>com.example.demo.client.generated.invoker</invokerPackage>
+                            <apiPackage>io.github.bsayli.openapi.client.generated.api</apiPackage>
+                            <modelPackage>io.github.bsayli.openapi.client.generated.dto</modelPackage>
+                            <invokerPackage>io.github.bsayli.openapi.client.generated.invoker</invokerPackage>
 
                             <!-- Use our custom templates that implement generics-aware wrappers -->
                             <templateDirectory>${project.basedir}/src/main/resources/openapi-templates</templateDirectory>

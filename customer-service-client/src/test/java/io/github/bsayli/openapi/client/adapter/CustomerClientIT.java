@@ -1,8 +1,8 @@
-package com.example.demo.client.adapter;
+package io.github.bsayli.openapi.client.adapter;
 
-import com.example.demo.client.adapter.config.CustomerApiClientConfig;
-import com.example.demo.client.generated.api.CustomerControllerApi;
-import com.example.demo.client.generated.dto.CustomerCreateRequest;
+import io.github.bsayli.openapi.client.adapter.config.CustomerApiClientConfig;
+import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
+import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;

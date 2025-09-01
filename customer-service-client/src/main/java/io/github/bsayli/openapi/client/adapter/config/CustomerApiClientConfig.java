@@ -1,7 +1,7 @@
-package com.example.demo.client.adapter.config;
+package io.github.bsayli.openapi.client.adapter.config;
 
-import com.example.demo.client.generated.api.CustomerControllerApi;
-import com.example.demo.client.generated.invoker.ApiClient;
+import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
+import io.github.bsayli.openapi.client.generated.invoker.ApiClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

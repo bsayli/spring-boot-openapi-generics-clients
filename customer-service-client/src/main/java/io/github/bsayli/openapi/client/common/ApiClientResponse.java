@@ -1,4 +1,4 @@
-package com.example.demo.client.common;
+package io.github.bsayli.openapi.client.common;
 
 import java.util.List;
 import java.util.Objects;
