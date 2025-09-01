@@ -1,10 +1,10 @@
-package com.example.demo.client.adapter.impl;
+package io.github.bsayli.openapi.client.adapter.impl;
 
-import com.example.demo.client.adapter.CustomerClientAdapter;
-import com.example.demo.client.common.ApiClientResponse;
-import com.example.demo.client.generated.api.CustomerControllerApi;
-import com.example.demo.client.generated.dto.CustomerCreateRequest;
-import com.example.demo.client.generated.dto.CustomerCreateResponse;
+import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
+import io.github.bsayli.openapi.client.common.ApiClientResponse;
+import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
+import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
+import io.github.bsayli.openapi.client.generated.dto.CustomerCreateResponse;
 import org.springframework.stereotype.Service;
 
 @Service
