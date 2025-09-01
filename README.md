@@ -1,5 +1,6 @@
 # spring-boot-openapi-generics-clients
 
+![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)
 ![Java](https://img.shields.io/badge/Java-21-red)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4-green)
 ![OpenAPI](https://img.shields.io/badge/OpenAPI-Generator-blue)
