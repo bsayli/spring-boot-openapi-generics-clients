@@ -13,14 +13,16 @@
 </p>
 
 **Type-safe client generation with Spring Boot & OpenAPI using generics.**
-This repository demonstrates how to teach OpenAPI Generator to work with generics in order to avoid boilerplate, reduce duplicated wrappers, and keep client code clean.
+This repository demonstrates how to teach OpenAPI Generator to work with generics in order to avoid boilerplate, reduce
+duplicated wrappers, and keep client code clean.
 
 ---
 
 ## 🚀 Problem Statement
 
 Most backend teams standardize responses with a generic wrapper like `ApiResponse<T>`.
-However, **OpenAPI Generator does not natively support generics** — instead, it generates one wrapper per endpoint (duplicating fields like `status`, `message`, and `errors`).
+However, **OpenAPI Generator does not natively support generics** — instead, it generates one wrapper per endpoint
+(duplicating fields like `status`, `message`, and `errors`).
 
 This creates:
 
@@ -60,7 +62,7 @@ Use the generated API:
 
 ```java
 ApiClientResponse<CustomerCreateResponse> response =
-    customerControllerApi.create(request);
+    customerControllerApi.createCustomer(request);
 ```
 
 ### 🖼 Demo Swagger Screenshot
@@ -74,6 +76,8 @@ Here’s what the `create customer` endpoint looks like in Swagger UI after runn
 And here’s the corresponding generated client class showing the generic wrapper:
 
 ![Generated client wrapper](docs/images/generated-client-wrapper.png)
+
+---
 
 ## 🛠 Tech Stack & Features
 
@@ -92,7 +96,7 @@ And here’s the corresponding generated client class showing the generic wrappe
 spring-boot-openapi-generics-clients/
  ├── customer-service/          # Sample Spring Boot microservice (API producer)
  ├── customer-service-client/   # Generated client using custom templates
- └── README.md
+ └── README.md                  # Root documentation
 ```
 
 ---
@@ -149,7 +153,7 @@ This pattern is useful when:
 
    ```java
    ApiClientResponse<CustomerCreateResponse> response =
-       customerControllerApi.create(request);
+       customerControllerApi.createCustomer(request);
    ```
 
 ---
@@ -174,5 +178,6 @@ If parameters include spaces or special characters, wrap them in quotes `"..."`.
 
 ## 💬 Feedback
 
-If you spot any mistakes in this README or have questions about the project, feel free to open an issue or start a discussion.
+If you spot any mistakes in this README or have questions about the project, feel free to open an issue or start a
+discussion.
 I’m happy to improve the documentation and clarify concepts further!

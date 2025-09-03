@@ -1,8 +1,10 @@
 # customer-service-client
 
-Generated Java client for the demo **customer-service**, showcasing **type‑safe generic responses** with OpenAPI + a custom Mustache template (wrapping payloads in a reusable `ApiClientResponse<T>`).
+Generated Java client for the demo **customer-service**, showcasing **type-safe generic responses** with OpenAPI + a
+custom Mustache template (wrapping payloads in a reusable `ApiClientResponse<T>`).
 
-This module demonstrates how to evolve OpenAPI Generator with minimal customization to support generic response envelopes — avoiding duplicated wrappers and preserving strong typing.
+This module demonstrates how to evolve OpenAPI Generator with minimal customization to support generic response
+envelopes — avoiding duplicated wrappers and preserving strong typing.
 
 ---
 
@@ -10,9 +12,9 @@ This module demonstrates how to evolve OpenAPI Generator with minimal customizat
 
 * Generated code using **OpenAPI Generator** (`restclient` with Spring Framework `RestClient`).
 * A reusable generic base: `io.github.bsayli.openapi.client.common.ApiClientResponse<T>`.
-* Thin wrappers per endpoint (e.g. `ApiResponseCustomerCreateResponse`) that extend the base.
-* Spring Boot configuration to auto‑expose the client as beans.
-* A focused integration test using **OkHttp MockWebServer**.
+* Thin wrappers per endpoint (e.g. `ApiResponseCustomerCreateResponse`, `ApiResponseCustomerUpdateResponse`).
+* Spring Boot configuration to auto-expose the client as beans.
+* Focused integration tests using **OkHttp MockWebServer** covering all CRUD endpoints.
 
 ---
 
@@ -23,14 +25,14 @@ This module demonstrates how to evolve OpenAPI Generator with minimal customizat
 ```bash
 cd customer-service
 mvn spring-boot:run
-# Service base URL: http://localhost:8084/customer
+# Service base URL: http://localhost:8084/customer-service
 ```
 
 2. **Pull the OpenAPI spec into this module**
 
 ```bash
 cd customer-service-client
-curl -s http://localhost:8084/customer/v3/api-docs.yaml \
+curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
   -o src/main/resources/customer-api-docs.yaml
 ```
 
@@ -83,7 +85,7 @@ public class CustomerApiClientConfig {
 **application.properties:**
 
 ```properties
-customer.api.base-url=http://localhost:8084/customer
+customer.api.base-url=http://localhost:8084/customer-service
 ```
 
 **Usage example:**
@@ -97,9 +99,9 @@ public void createCustomer() {
       .name("Jane Doe")
       .email("jane@example.com");
 
-  var resp = customerApi.create(req); // ApiResponseCustomerCreateResponse
+  var resp = customerApi.createCustomer(req); // ApiResponseCustomerCreateResponse
 
-  System.out.println(resp.getStatus());                 // 201
+  System.out.println(resp.getStatus());                      // 201
   System.out.println(resp.getData().getCustomer().getName()); // "Jane Doe"
 }
 ```
@@ -107,9 +109,9 @@ public void createCustomer() {
 ### Option B — Manual Wiring (no Spring context)
 
 ```java
-var rest = RestClient.builder().baseUrl("http://localhost:8084/customer").build();
+var rest = RestClient.builder().baseUrl("http://localhost:8084/customer-service").build();
 var apiClient = new io.github.bsayli.openapi.client.generated.invoker.ApiClient(rest)
-    .setBasePath("http://localhost:8084/customer");
+    .setBasePath("http://localhost:8084/customer-service");
 var customerApi = new io.github.bsayli.openapi.client.generated.api.CustomerControllerApi(apiClient);
 ```
 
@@ -125,8 +127,7 @@ package io.github.bsayli.openapi.client.adapter.impl;
 import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
 import io.github.bsayli.openapi.client.common.ApiClientResponse;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
-import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
-import io.github.bsayli.openapi.client.generated.dto.CustomerCreateResponse;
+import io.github.bsayli.openapi.client.generated.dto.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -139,8 +140,28 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
     }
 
     @Override
-    public ApiClientResponse<CustomerCreateResponse> create(CustomerCreateRequest request) {
-        return customerControllerApi.create(request);
+    public ApiClientResponse<CustomerCreateResponse> createCustomer(CustomerCreateRequest request) {
+        return customerControllerApi.createCustomer(request);
+    }
+
+    @Override
+    public ApiClientResponse<CustomerDto> getCustomer(Integer customerId) {
+        return customerControllerApi.getCustomer(customerId);
+    }
+
+    @Override
+    public ApiClientResponse<CustomerListResponse> getCustomers() {
+        return customerControllerApi.getCustomers();
+    }
+
+    @Override
+    public ApiClientResponse<CustomerUpdateResponse> updateCustomer(Integer customerId, CustomerUpdateRequest request) {
+        return customerControllerApi.updateCustomer(customerId, request);
+    }
+
+    @Override
+    public ApiClientResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId) {
+        return customerControllerApi.deleteCustomer(customerId);
     }
 }
 ```
@@ -149,6 +170,7 @@ This ensures:
 
 * Generated code stays isolated.
 * Business code depends only on the adapter interface.
+* Naming conventions are consistent with the service (createCustomer, getCustomer, getCustomers, updateCustomer, deleteCustomer).
 
 ---
 
@@ -177,7 +199,7 @@ Integration test with MockWebServer:
 mvn -q -DskipITs=false test
 ```
 
-It enqueues a `201` response and asserts correct mapping into `ApiResponseCustomerCreateResponse`.
+It enqueues responses for **all CRUD operations** and asserts correct mapping into the respective wrappers (e.g. `ApiResponseCustomerCreateResponse`, `ApiResponseCustomerUpdateResponse`).
 
 ---
 
