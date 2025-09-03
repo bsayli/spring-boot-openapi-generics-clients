@@ -2,16 +2,88 @@ openapi: 3.1.0
 info:
   title: Customer Service API
   description: "Demo: type-safe generic API responses with OpenAPI"
-  version: 0.1.0
+  version: 0.3.0
 servers:
-  - url: http://localhost:8084/customer
+  - url: http://localhost:8084/customer-service
     description: Local service URL
 paths:
+  /v1/customers/{customerId}:
+    get:
+      tags:
+        - customer-controller
+      operationId: getCustomer
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCustomerDto"
+    put:
+      tags:
+        - customer-controller
+      operationId: updateCustomer
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCustomerUpdateResponse"
+    delete:
+      tags:
+        - customer-controller
+      operationId: deleteCustomer
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCustomerDeleteResponse"
   /v1/customers:
+    get:
+      tags:
+        - customer-controller
+      operationId: getCustomers
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCustomerListResponse"
     post:
       tags:
         - customer-controller
-      operationId: create
+      operationId: createCustomer
       requestBody:
         content:
           application/json:
@@ -27,7 +99,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseCustomerCreateResponse"
 components:
   schemas:
-    CustomerCreateRequest:
+    CustomerUpdateRequest:
       type: object
       properties:
         name:
@@ -48,6 +120,47 @@ components:
           type: string
         message:
           type: string
+    ApiResponseCustomerUpdateResponse:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CustomerUpdateResponse"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CustomerUpdateResponse
+    CustomerDto:
+      type: object
+      properties:
+        customerId:
+          type: integer
+          format: int32
+        name:
+          type: string
+        email:
+          type: string
+    CustomerUpdateResponse:
+      type: object
+      properties:
+        customer:
+          $ref: "#/components/schemas/CustomerDto"
+        updatedAt:
+          type: string
+          format: date-time
+    CustomerCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          minLength: 2
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+        - email
+        - name
     ApiResponseCustomerCreateResponse:
       allOf:
         - $ref: "#/components/schemas/ApiResponse"
@@ -65,16 +178,49 @@ components:
         createdAt:
           type: string
           format: date-time
-    CustomerDto:
+    ApiResponseCustomerListResponse:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CustomerListResponse"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CustomerListResponse
+    CustomerListResponse:
       type: object
       properties:
-        id:
+        customers:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomerDto"
+    ApiResponseCustomerDto:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CustomerDto"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CustomerDto
+    ApiResponseCustomerDeleteResponse:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CustomerDeleteResponse"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CustomerDeleteResponse
+    CustomerDeleteResponse:
+      type: object
+      properties:
+        customerId:
           type: integer
-          format: int64
-        name:
+          format: int32
+        deletedAt:
           type: string
-        email:
-          type: string
+          format: date-time
     ApiResponse:
       type: object
       properties:

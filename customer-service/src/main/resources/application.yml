@@ -1,7 +1,12 @@
 server:
   port: ${APP_PORT:8084}
   servlet:
-    context-path: /customer
+    context-path: /customer-service
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
 
 spring:
   application:
@@ -17,4 +22,4 @@ logging:
 
 app:
   openapi:
-    base-url: http://localhost:${server.port}${server.servlet.context-path}
+    base-url: "http://localhost:${server.port}${server.servlet.context-path:}"

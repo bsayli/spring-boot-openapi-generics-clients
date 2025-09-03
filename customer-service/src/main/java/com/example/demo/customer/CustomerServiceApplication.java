@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = "com.example.demo")
 public class CustomerServiceApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(CustomerServiceApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(CustomerServiceApplication.class, args);
+  }
 }

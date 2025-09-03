@@ -6,7 +6,7 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
-    <version>0.2.1</version>
+    <version>0.3.0</version>
     <name>customer-service-client</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
@@ -129,7 +129,8 @@
                             <invokerPackage>io.github.bsayli.openapi.client.generated.invoker</invokerPackage>
 
                             <!-- Use our custom templates that implement generics-aware wrappers -->
-                            <templateDirectory>${project.basedir}/src/main/resources/openapi-templates</templateDirectory>
+                            <templateDirectory>${project.basedir}/src/main/resources/openapi-templates
+                            </templateDirectory>
 
                             <!-- Keep output lean -->
                             <generateSupportingFiles>true</generateSupportingFiles>

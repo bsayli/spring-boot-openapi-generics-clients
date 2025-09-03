@@ -10,22 +10,22 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
-    @Value("${app.openapi.base-url:}")
-    private String baseUrl;
+  @Value("${app.openapi.base-url:}")
+  private String baseUrl;
 
-    @Bean
-    public OpenAPI customerServiceOpenAPI() {
-        var openapi = new OpenAPI()
-                .info(new Info()
-                        .title("Customer Service API")
-                        .version("0.1.0")
-                        .description("Demo: type-safe generic API responses with OpenAPI"));
+  @Bean
+  public OpenAPI customerServiceOpenAPI() {
+    var openapi =
+        new OpenAPI()
+            .info(
+                new Info()
+                    .title("Customer Service API")
+                    .version("0.3.0")
+                    .description("Demo: type-safe generic API responses with OpenAPI"));
 
-        if (baseUrl != null && !baseUrl.isBlank()) {
-            openapi.addServersItem(new Server()
-                    .url(baseUrl)
-                    .description("Local service URL"));
-        }
-        return openapi;
+    if (baseUrl != null && !baseUrl.isBlank()) {
+      openapi.addServersItem(new Server().url(baseUrl).description("Local service URL"));
     }
+    return openapi;
+  }
 }
