@@ -179,5 +179,8 @@ If parameters include spaces or special characters, wrap them in quotes `"..."`.
 ## 💬 Feedback
 
 If you spot any mistakes in this README or have questions about the project, feel free to open an issue or start a
-discussion.
-I’m happy to improve the documentation and clarify concepts further!
+discussion. I’m happy to improve the documentation and clarify concepts further!
+
+## ⭐ Support
+
+If you found this project useful, please consider giving it a star ⭐ on GitHub — it helps others discover it too!
