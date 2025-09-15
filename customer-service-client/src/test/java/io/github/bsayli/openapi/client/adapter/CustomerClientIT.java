@@ -23,8 +23,7 @@ class CustomerClientIT {
 
   static MockWebServer server;
 
-  @Autowired
-  private CustomerControllerApi api;
+  @Autowired private CustomerControllerApi api;
 
   @BeforeAll
   static void startServer() throws Exception {
@@ -43,7 +42,7 @@ class CustomerClientIT {
   @DisplayName("POST /v1/customers -> 201 CREATED + CustomerCreateResponse")
   void createCustomer_shouldReturn201_andMappedBody() {
     var body =
-            """
+        """
             {
               "status": 201,
               "message": "CREATED",
@@ -55,7 +54,8 @@ class CustomerClientIT {
             }
             """;
 
-    server.enqueue(new MockResponse()
+    server.enqueue(
+        new MockResponse()
             .setResponseCode(201)
             .addHeader("Content-Type", "application/json")
             .setBody(body));
@@ -74,7 +74,7 @@ class CustomerClientIT {
   @DisplayName("GET /v1/customers/{id} -> 200 OK + CustomerDto")
   void getCustomer_shouldReturn200_andMappedBody() {
     var body =
-            """
+        """
             {
               "status": 200,
               "message": "OK",
@@ -83,7 +83,8 @@ class CustomerClientIT {
             }
             """;
 
-    server.enqueue(new MockResponse()
+    server.enqueue(
+        new MockResponse()
             .setResponseCode(200)
             .addHeader("Content-Type", "application/json")
             .setBody(body));
@@ -101,7 +102,7 @@ class CustomerClientIT {
   @DisplayName("GET /v1/customers -> 200 OK + CustomerListResponse")
   void getCustomers_shouldReturn200_andMappedBody() {
     var body =
-            """
+        """
             {
               "status": 200,
               "message": "LISTED",
@@ -115,7 +116,8 @@ class CustomerClientIT {
             }
             """;
 
-    server.enqueue(new MockResponse()
+    server.enqueue(
+        new MockResponse()
             .setResponseCode(200)
             .addHeader("Content-Type", "application/json")
             .setBody(body));
@@ -133,7 +135,7 @@ class CustomerClientIT {
   @DisplayName("PUT /v1/customers/{id} -> 200 OK + CustomerUpdateResponse")
   void updateCustomer_shouldReturn200_andMappedBody() {
     var body =
-            """
+        """
             {
               "status": 200,
               "message": "UPDATED",
@@ -145,7 +147,8 @@ class CustomerClientIT {
             }
             """;
 
-    server.enqueue(new MockResponse()
+    server.enqueue(
+        new MockResponse()
             .setResponseCode(200)
             .addHeader("Content-Type", "application/json")
             .setBody(body));
@@ -164,7 +167,7 @@ class CustomerClientIT {
   @DisplayName("DELETE /v1/customers/{id} -> 200 OK + CustomerDeleteResponse")
   void deleteCustomer_shouldReturn200_andMappedBody() {
     var body =
-            """
+        """
             {
               "status": 200,
               "message": "DELETED",
@@ -176,7 +179,8 @@ class CustomerClientIT {
             }
             """;
 
-    server.enqueue(new MockResponse()
+    server.enqueue(
+        new MockResponse()
             .setResponseCode(200)
             .addHeader("Content-Type", "application/json")
             .setBody(body));

@@ -1,20 +1,20 @@
-package com.example.demo.common.api.config;
+package com.example.demo.common.openapi;
 
-import static com.example.demo.common.api.config.OpenApiSchemas.*;
+import static com.example.demo.common.openapi.OpenApiSchemas.*;
 
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 
-public final class OpenApiSchemaUtils {
-  private OpenApiSchemaUtils() {}
+public final class ApiResponseSchemaFactory {
+  private ApiResponseSchemaFactory() {}
 
   public static Schema<?> createComposedWrapper(String dataRefName) {
     var schema = new ComposedSchema();
     schema.setAllOf(
         List.of(
-            new Schema<>().$ref("#/components/schemas/" + SCHEMA_API_RESPONSE),
+            new Schema<>().$ref("#/components/schemas/" + SCHEMA_SERVICE_RESPONSE),
             new ObjectSchema()
                 .addProperty(
                     PROP_DATA, new Schema<>().$ref("#/components/schemas/" + dataRefName))));

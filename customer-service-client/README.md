@@ -1,7 +1,7 @@
 # customer-service-client
 
 Generated Java client for the demo **customer-service**, showcasing **type-safe generic responses** with OpenAPI + a
-custom Mustache template (wrapping payloads in a reusable `ApiClientResponse<T>`).
+custom Mustache template (wrapping payloads in a reusable `ServiceClientResponse<T>`).
 
 This module demonstrates how to evolve OpenAPI Generator with minimal customization to support generic response
 envelopes — avoiding duplicated wrappers and preserving strong typing.
@@ -11,8 +11,8 @@ envelopes — avoiding duplicated wrappers and preserving strong typing.
 ## ✅ What You Get
 
 * Generated code using **OpenAPI Generator** (`restclient` with Spring Framework `RestClient`).
-* A reusable generic base: `io.github.bsayli.openapi.client.common.ApiClientResponse<T>`.
-* Thin wrappers per endpoint (e.g. `ApiResponseCustomerCreateResponse`, `ApiResponseCustomerUpdateResponse`).
+* A reusable generic base: `io.github.bsayli.openapi.client.common.ServiceClientResponse<T>`.
+* Thin wrappers per endpoint (e.g. `ServiceResponseCustomerCreateResponse`, `ServiceResponseCustomerUpdateResponse`).
 * Spring Boot configuration to auto-expose the client as beans.
 * Focused integration tests using **OkHttp MockWebServer** covering all CRUD endpoints.
 
@@ -57,28 +57,29 @@ target/generated-sources/openapi/src/gen/java/main
 Include this module as a dependency and configure the base URL:
 
 ```java
+
 @Configuration
 public class CustomerApiClientConfig {
 
-  @Bean
-  public RestClient customerRestClient(RestClient.Builder builder,
-                                       @Value("${customer.api.base-url}") String baseUrl) {
-    return builder.baseUrl(baseUrl).build();
-  }
+    @Bean
+    public RestClient customerRestClient(RestClient.Builder builder,
+                                         @Value("${customer.api.base-url}") String baseUrl) {
+        return builder.baseUrl(baseUrl).build();
+    }
 
-  @Bean
-  public io.github.bsayli.openapi.client.generated.invoker.ApiClient customerApiClient(
-      RestClient customerRestClient,
-      @Value("${customer.api.base-url}") String baseUrl) {
-    return new io.github.bsayli.openapi.client.generated.invoker.ApiClient(customerRestClient)
-        .setBasePath(baseUrl);
-  }
+    @Bean
+    public io.github.bsayli.openapi.client.generated.invoker.ApiClient customerApiClient(
+            RestClient customerRestClient,
+            @Value("${customer.api.base-url}") String baseUrl) {
+        return new io.github.bsayli.openapi.client.generated.invoker.ApiClient(customerRestClient)
+                .setBasePath(baseUrl);
+    }
 
-  @Bean
-  public io.github.bsayli.openapi.client.generated.api.CustomerControllerApi customerControllerApi(
-      io.github.bsayli.openapi.client.generated.invoker.ApiClient apiClient) {
-    return new io.github.bsayli.openapi.client.generated.api.CustomerControllerApi(apiClient);
-  }
+    @Bean
+    public io.github.bsayli.openapi.client.generated.api.CustomerControllerApi customerControllerApi(
+            io.github.bsayli.openapi.client.generated.invoker.ApiClient apiClient) {
+        return new io.github.bsayli.openapi.client.generated.api.CustomerControllerApi(apiClient);
+    }
 }
 ```
 
@@ -91,27 +92,93 @@ customer.api.base-url=http://localhost:8084/customer-service
 **Usage example:**
 
 ```java
+
 @Autowired
 private io.github.bsayli.openapi.client.generated.api.CustomerControllerApi customerApi;
 
 public void createCustomer() {
-  var req = new io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest()
-      .name("Jane Doe")
-      .email("jane@example.com");
+    var req = new io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest()
+            .name("Jane Doe")
+            .email("jane@example.com");
 
-  var resp = customerApi.createCustomer(req); // ApiResponseCustomerCreateResponse
+    var resp = customerApi.createCustomer(req); // ServiceResponseCustomerCreateResponse
 
-  System.out.println(resp.getStatus());                      // 201
-  System.out.println(resp.getData().getCustomer().getName()); // "Jane Doe"
+    System.out.println(resp.getStatus());                       // 201
+    System.out.println(resp.getData().getCustomer().getName()); // "Jane Doe"
 }
 ```
+
+---
+
+### Option A.2 — Alternative with HttpClient5 (connection pooling)
+
+If you want more control (connection pooling, timeouts, etc.), you can wire the client with **Apache HttpClient5**:
+
+```java
+
+@Configuration
+public class CustomerApiClientConfig {
+
+    @Bean(destroyMethod = "close")
+    CloseableHttpClient customerHttpClient(
+            @Value("${customer.api.max-connections-total:64}") int maxTotal,
+            @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute) {
+
+        var cm = PoolingHttpClientConnectionManagerBuilder.create()
+                .setMaxConnTotal(maxTotal)
+                .setMaxConnPerRoute(maxPerRoute)
+                .build();
+
+        return HttpClients.custom()
+                .setConnectionManager(cm)
+                .evictExpiredConnections()
+                .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
+                .setUserAgent("customer-service-client")
+                .disableAutomaticRetries()
+                .build();
+    }
+
+    @Bean
+    HttpComponentsClientHttpRequestFactory customerRequestFactory(
+            CloseableHttpClient customerHttpClient,
+            @Value("${customer.api.connect-timeout-seconds:10}") long connect,
+            @Value("${customer.api.connection-request-timeout-seconds:10}") long connReq,
+            @Value("${customer.api.read-timeout-seconds:15}") long read) {
+
+        var f = new HttpComponentsClientHttpRequestFactory(customerHttpClient);
+        f.setConnectTimeout(Duration.ofSeconds(connect));
+        f.setConnectionRequestTimeout(Duration.ofSeconds(connReq));
+        f.setReadTimeout(Duration.ofSeconds(read));
+        return f;
+    }
+
+    @Bean
+    RestClient customerRestClient(RestClient.Builder builder,
+                                  HttpComponentsClientHttpRequestFactory rf) {
+        return builder.requestFactory(rf).build();
+    }
+
+    @Bean
+    ApiClient customerApiClient(RestClient restClient,
+                                @Value("${customer.api.base-url}") String baseUrl) {
+        return new ApiClient(restClient).setBasePath(baseUrl);
+    }
+
+    @Bean
+    CustomerControllerApi customerControllerApi(ApiClient apiClient) {
+        return new CustomerControllerApi(apiClient);
+    }
+}
+```
+
+---
 
 ### Option B — Manual Wiring (no Spring context)
 
 ```java
 var rest = RestClient.builder().baseUrl("http://localhost:8084/customer-service").build();
 var apiClient = new io.github.bsayli.openapi.client.generated.invoker.ApiClient(rest)
-    .setBasePath("http://localhost:8084/customer-service");
+        .setBasePath("http://localhost:8084/customer-service");
 var customerApi = new io.github.bsayli.openapi.client.generated.api.CustomerControllerApi(apiClient);
 ```
 
@@ -125,7 +192,7 @@ For larger applications, encapsulate the generated API in an adapter:
 package io.github.bsayli.openapi.client.adapter.impl;
 
 import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
-import io.github.bsayli.openapi.client.common.ApiClientResponse;
+import io.github.bsayli.openapi.client.common.ServiceClientResponse;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
 import io.github.bsayli.openapi.client.generated.dto.*;
 import org.springframework.stereotype.Service;
@@ -140,27 +207,27 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
     }
 
     @Override
-    public ApiClientResponse<CustomerCreateResponse> createCustomer(CustomerCreateRequest request) {
+    public ServiceClientResponse<CustomerCreateResponse> createCustomer(CustomerCreateRequest request) {
         return customerControllerApi.createCustomer(request);
     }
 
     @Override
-    public ApiClientResponse<CustomerDto> getCustomer(Integer customerId) {
+    public ServiceClientResponse<CustomerDto> getCustomer(Integer customerId) {
         return customerControllerApi.getCustomer(customerId);
     }
 
     @Override
-    public ApiClientResponse<CustomerListResponse> getCustomers() {
+    public ServiceClientResponse<CustomerListResponse> getCustomers() {
         return customerControllerApi.getCustomers();
     }
 
     @Override
-    public ApiClientResponse<CustomerUpdateResponse> updateCustomer(Integer customerId, CustomerUpdateRequest request) {
+    public ServiceClientResponse<CustomerUpdateResponse> updateCustomer(Integer customerId, CustomerUpdateRequest request) {
         return customerControllerApi.updateCustomer(customerId, request);
     }
 
     @Override
-    public ApiClientResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId) {
+    public ServiceClientResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId) {
         return customerControllerApi.deleteCustomer(customerId);
     }
 }
@@ -170,7 +237,8 @@ This ensures:
 
 * Generated code stays isolated.
 * Business code depends only on the adapter interface.
-* Naming conventions are consistent with the service (createCustomer, getCustomer, getCustomers, updateCustomer, deleteCustomer).
+* Naming conventions are consistent with the service (createCustomer, getCustomer, getCustomers, updateCustomer,
+  deleteCustomer).
 
 ---
 
@@ -179,11 +247,11 @@ This ensures:
 The template at `src/main/resources/openapi-templates/api_wrapper.mustache` emits wrappers like:
 
 ```java
-import io.github.bsayli.openapi.client.common.ApiClientResponse;
+import io.github.bsayli.openapi.client.common.ServiceClientResponse;
 
-// e.g., ApiResponseCustomerCreateResponse
-public class ApiResponseCustomerCreateResponse
-        extends ApiClientResponse<CustomerCreateResponse> {
+// e.g., ServiceResponseCustomerCreateResponse
+public class ServiceResponseCustomerCreateResponse
+        extends ServiceClientResponse<CustomerCreateResponse> {
 }
 ```
 
@@ -199,13 +267,15 @@ Integration test with MockWebServer:
 mvn -q -DskipITs=false test
 ```
 
-It enqueues responses for **all CRUD operations** and asserts correct mapping into the respective wrappers (e.g. `ApiResponseCustomerCreateResponse`, `ApiResponseCustomerUpdateResponse`).
+It enqueues responses for **all CRUD operations** and asserts correct mapping into the respective wrappers (e.g.
+`ServiceResponseCustomerCreateResponse`, `ServiceResponseCustomerUpdateResponse`).
 
 ---
 
 ## 📚 Notes
 
-* Dependencies like `spring-web`, `spring-context`, `jackson-*`, `jakarta.*` are marked **provided**; your host app supplies them.
+* Dependencies like `spring-web`, `spring-context`, `jackson-*`, `jakarta.*` are marked **provided**; your host app
+  supplies them.
 * Generator options: Spring 6 `RestClient`, Jakarta EE, Jackson, Java 21.
 * OpenAPI spec path:
 

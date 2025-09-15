@@ -1,11 +1,11 @@
 package com.example.demo.customer.api.controller;
 
-import static com.example.demo.common.api.ApiMessages.CREATED;
-import static com.example.demo.common.api.ApiMessages.DELETED;
-import static com.example.demo.common.api.ApiMessages.LISTED;
-import static com.example.demo.common.api.ApiMessages.UPDATED;
+import static com.example.demo.common.api.ResponseMessages.CREATED;
+import static com.example.demo.common.api.ResponseMessages.DELETED;
+import static com.example.demo.common.api.ResponseMessages.LISTED;
+import static com.example.demo.common.api.ResponseMessages.UPDATED;
 
-import com.example.demo.common.api.response.ApiResponse;
+import com.example.demo.common.api.response.ServiceResponse;
 import com.example.demo.customer.api.dto.CustomerCreateRequest;
 import com.example.demo.customer.api.dto.CustomerCreateResponse;
 import com.example.demo.customer.api.dto.CustomerDeleteResponse;
@@ -34,40 +34,41 @@ public class CustomerController {
   }
 
   @PostMapping
-  public ResponseEntity<ApiResponse<CustomerCreateResponse>> createCustomer(
+  public ResponseEntity<ServiceResponse<CustomerCreateResponse>> createCustomer(
       @Valid @RequestBody CustomerCreateRequest request) {
     CustomerDto created = customerService.createCustomer(request);
     CustomerCreateResponse body = new CustomerCreateResponse(created, Instant.now());
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(ApiResponse.of(HttpStatus.CREATED, CREATED, body));
+        .body(ServiceResponse.of(HttpStatus.CREATED, CREATED, body));
   }
 
   @GetMapping("/{customerId}")
-  public ResponseEntity<ApiResponse<CustomerDto>> getCustomer(@PathVariable Integer customerId) {
+  public ResponseEntity<ServiceResponse<CustomerDto>> getCustomer(
+      @PathVariable Integer customerId) {
     CustomerDto dto = customerService.getCustomer(customerId);
-    return ResponseEntity.ok(ApiResponse.ok(dto));
+    return ResponseEntity.ok(ServiceResponse.ok(dto));
   }
 
   @GetMapping
-  public ResponseEntity<ApiResponse<CustomerListResponse>> getCustomers() {
+  public ResponseEntity<ServiceResponse<CustomerListResponse>> getCustomers() {
     List<CustomerDto> all = customerService.getCustomers();
     CustomerListResponse body = new CustomerListResponse(all);
-    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, LISTED, body));
+    return ResponseEntity.ok(ServiceResponse.of(HttpStatus.OK, LISTED, body));
   }
 
   @PutMapping("/{customerId}")
-  public ResponseEntity<ApiResponse<CustomerUpdateResponse>> updateCustomer(
+  public ResponseEntity<ServiceResponse<CustomerUpdateResponse>> updateCustomer(
       @PathVariable Integer customerId, @Valid @RequestBody CustomerUpdateRequest request) {
     CustomerDto updated = customerService.updateCustomer(customerId, request);
     CustomerUpdateResponse body = new CustomerUpdateResponse(updated, Instant.now());
-    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, UPDATED, body));
+    return ResponseEntity.ok(ServiceResponse.of(HttpStatus.OK, UPDATED, body));
   }
 
   @DeleteMapping("/{customerId}")
-  public ResponseEntity<ApiResponse<CustomerDeleteResponse>> deleteCustomer(
+  public ResponseEntity<ServiceResponse<CustomerDeleteResponse>> deleteCustomer(
       @PathVariable Integer customerId) {
     customerService.deleteCustomer(customerId);
     CustomerDeleteResponse body = new CustomerDeleteResponse(customerId, Instant.now());
-    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, DELETED, body));
+    return ResponseEntity.ok(ServiceResponse.of(HttpStatus.OK, DELETED, body));
   }
 }

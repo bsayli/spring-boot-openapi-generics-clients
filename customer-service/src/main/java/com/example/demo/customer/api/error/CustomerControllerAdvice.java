@@ -1,11 +1,11 @@
 package com.example.demo.customer.api.error;
 
-import static com.example.demo.common.api.ApiErrorCodes.BAD_REQUEST;
-import static com.example.demo.common.api.ApiErrorCodes.INTERNAL_ERROR;
-import static com.example.demo.common.api.ApiErrorCodes.NOT_FOUND;
-import static com.example.demo.common.api.ApiErrorCodes.VALIDATION_FAILED;
+import static com.example.demo.common.api.ServiceErrorCodes.BAD_REQUEST;
+import static com.example.demo.common.api.ServiceErrorCodes.INTERNAL_ERROR;
+import static com.example.demo.common.api.ServiceErrorCodes.NOT_FOUND;
+import static com.example.demo.common.api.ServiceErrorCodes.VALIDATION_FAILED;
 
-import com.example.demo.common.api.response.ApiResponse;
+import com.example.demo.common.api.response.ServiceResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
@@ -26,38 +26,38 @@ public class CustomerControllerAdvice {
   private static final Logger log = LoggerFactory.getLogger(CustomerControllerAdvice.class);
 
   @ExceptionHandler(NoSuchElementException.class)
-  public ResponseEntity<ApiResponse<ErrorPayload>> handleNotFound(NoSuchElementException ex) {
+  public ResponseEntity<ServiceResponse<ErrorPayload>> handleNotFound(NoSuchElementException ex) {
     var payload = new ErrorPayload(NOT_FOUND, ex.getMessage(), Instant.now(), List.of());
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(ApiResponse.of(HttpStatus.NOT_FOUND, NOT_FOUND, payload));
+        .body(ServiceResponse.of(HttpStatus.NOT_FOUND, NOT_FOUND, payload));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiResponse<ErrorPayload>> handleMethodArgInvalid(
+  public ResponseEntity<ServiceResponse<ErrorPayload>> handleMethodArgInvalid(
       MethodArgumentNotValidException ex) {
     List<Violation> violations =
         ex.getBindingResult().getFieldErrors().stream().map(this::toViolation).toList();
     var payload = new ErrorPayload(VALIDATION_FAILED, BAD_REQUEST, Instant.now(), violations);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(ApiResponse.of(HttpStatus.BAD_REQUEST, BAD_REQUEST, payload));
+        .body(ServiceResponse.of(HttpStatus.BAD_REQUEST, BAD_REQUEST, payload));
   }
 
   @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<ApiResponse<ErrorPayload>> handleConstraintViolation(
+  public ResponseEntity<ServiceResponse<ErrorPayload>> handleConstraintViolation(
       ConstraintViolationException ex) {
     List<Violation> violations =
         ex.getConstraintViolations().stream().map(this::toViolation).toList();
     var payload = new ErrorPayload(VALIDATION_FAILED, BAD_REQUEST, Instant.now(), violations);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(ApiResponse.of(HttpStatus.BAD_REQUEST, BAD_REQUEST, payload));
+        .body(ServiceResponse.of(HttpStatus.BAD_REQUEST, BAD_REQUEST, payload));
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ApiResponse<ErrorPayload>> handleGeneric(Exception ex) {
+  public ResponseEntity<ServiceResponse<ErrorPayload>> handleGeneric(Exception ex) {
     log.error("Unhandled exception", ex);
     var payload = new ErrorPayload(INTERNAL_ERROR, ex.getMessage(), Instant.now(), List.of());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ApiResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, INTERNAL_ERROR, payload));
+        .body(ServiceResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, INTERNAL_ERROR, payload));
   }
 
   private Violation toViolation(FieldError fe) {

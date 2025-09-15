@@ -132,7 +132,7 @@ docker compose down
 
 ## 📖 Notes
 
-* Demonstrates **generic `ApiResponse<T>`** pattern.
+* Demonstrates **generic `ServiceResponse<T>`** pattern.
 * Uses **Swagger customizers** to teach OpenAPI about generic wrappers.
 * OpenAPI spec (`/v3/api-docs.yaml`) is the source for client generation.
 * Includes **exception handling via `CustomerControllerAdvice`**.

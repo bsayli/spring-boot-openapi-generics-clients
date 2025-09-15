@@ -1,7 +1,7 @@
 package io.github.bsayli.openapi.client.adapter.impl;
 
 import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
-import io.github.bsayli.openapi.client.common.ApiClientResponse;
+import io.github.bsayli.openapi.client.common.ServiceClientResponse;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
 import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
 import io.github.bsayli.openapi.client.generated.dto.CustomerCreateResponse;
@@ -22,28 +22,29 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
   }
 
   @Override
-  public ApiClientResponse<CustomerCreateResponse> createCustomer(CustomerCreateRequest request) {
+  public ServiceClientResponse<CustomerCreateResponse> createCustomer(
+      CustomerCreateRequest request) {
     return customerControllerApi.createCustomer(request);
   }
 
   @Override
-  public ApiClientResponse<CustomerDto> getCustomer(Integer customerId) {
+  public ServiceClientResponse<CustomerDto> getCustomer(Integer customerId) {
     return customerControllerApi.getCustomer(customerId);
   }
 
   @Override
-  public ApiClientResponse<CustomerListResponse> getCustomers() {
+  public ServiceClientResponse<CustomerListResponse> getCustomers() {
     return customerControllerApi.getCustomers();
   }
 
   @Override
-  public ApiClientResponse<CustomerUpdateResponse> updateCustomer(
-          Integer customerId, CustomerUpdateRequest request) {
+  public ServiceClientResponse<CustomerUpdateResponse> updateCustomer(
+      Integer customerId, CustomerUpdateRequest request) {
     return customerControllerApi.updateCustomer(customerId, request);
   }
 
   @Override
-  public ApiClientResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId) {
+  public ServiceClientResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId) {
     return customerControllerApi.deleteCustomer(customerId);
   }
 }

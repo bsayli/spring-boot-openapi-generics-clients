@@ -1,10 +1,10 @@
 package com.example.demo.customer.api.controller;
 
-import static com.example.demo.common.api.ApiMessages.*;
+import static com.example.demo.common.api.ResponseMessages.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.example.demo.common.api.response.ApiResponse;
+import com.example.demo.common.api.response.ServiceResponse;
 import com.example.demo.customer.api.dto.*;
 import com.example.demo.customer.service.CustomerService;
 import java.time.Instant;
@@ -44,7 +44,8 @@ class CustomerControllerTest {
     var request = new CustomerCreateRequest("John Smith", "john.smith@example.com");
     when(customerService.createCustomer(request)).thenReturn(dto1);
 
-    ResponseEntity<ApiResponse<CustomerCreateResponse>> resp = controller.createCustomer(request);
+    ResponseEntity<ServiceResponse<CustomerCreateResponse>> resp =
+        controller.createCustomer(request);
 
     assertEquals(HttpStatus.CREATED, resp.getStatusCode());
     assertNotNull(resp.getBody());
@@ -60,7 +61,7 @@ class CustomerControllerTest {
   void getCustomer_shouldReturnOk() {
     when(customerService.getCustomer(1)).thenReturn(dto1);
 
-    ResponseEntity<ApiResponse<CustomerDto>> resp = controller.getCustomer(1);
+    ResponseEntity<ServiceResponse<CustomerDto>> resp = controller.getCustomer(1);
 
     assertEquals(HttpStatus.OK, resp.getStatusCode());
     assertNotNull(resp.getBody());
@@ -74,7 +75,7 @@ class CustomerControllerTest {
   void getCustomers_shouldReturnListed() {
     when(customerService.getCustomers()).thenReturn(List.of(dto1, dto2));
 
-    ResponseEntity<ApiResponse<CustomerListResponse>> resp = controller.getCustomers();
+    ResponseEntity<ServiceResponse<CustomerListResponse>> resp = controller.getCustomers();
 
     assertEquals(HttpStatus.OK, resp.getStatusCode());
     assertNotNull(resp.getBody());
@@ -92,7 +93,8 @@ class CustomerControllerTest {
     var updated = new CustomerDto(1, req.name(), req.email());
     when(customerService.updateCustomer(1, req)).thenReturn(updated);
 
-    ResponseEntity<ApiResponse<CustomerUpdateResponse>> resp = controller.updateCustomer(1, req);
+    ResponseEntity<ServiceResponse<CustomerUpdateResponse>> resp =
+        controller.updateCustomer(1, req);
 
     assertEquals(HttpStatus.OK, resp.getStatusCode());
     assertNotNull(resp.getBody());
@@ -108,7 +110,7 @@ class CustomerControllerTest {
   void deleteCustomer_shouldReturnDeleted() {
     doNothing().when(customerService).deleteCustomer(1);
 
-    ResponseEntity<ApiResponse<CustomerDeleteResponse>> resp = controller.deleteCustomer(1);
+    ResponseEntity<ServiceResponse<CustomerDeleteResponse>> resp = controller.deleteCustomer(1);
 
     assertEquals(HttpStatus.OK, resp.getStatusCode());
     assertNotNull(resp.getBody());
