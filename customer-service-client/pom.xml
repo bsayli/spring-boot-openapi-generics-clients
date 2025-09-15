@@ -6,57 +6,41 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
     <name>customer-service-client</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>21</java.version>
 
-        <!-- Tooling versions -->
-        <openapi.generator.version>7.14.0</openapi.generator.version>
+        <spring-boot.version>3.4.9</spring-boot.version>
+        <openapi.generator.version>7.15.0</openapi.generator.version>
         <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
         <build.helper.plugin.version>3.6.0</build.helper.plugin.version>
 
-        <!-- Libraries used by generated code -->
-        <spring.framework.version>6.2.10</spring.framework.version> <!-- for RestClient -->
-        <jackson.version>2.18.4</jackson.version>
-        <jakarta.validation.version>3.0.2</jakarta.validation.version>
-        <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
+        <jakarta.validation.version>3.1.1</jakarta.validation.version>
+        <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <mockwebserver.version>5.1.0</mockwebserver.version>
+        <httpclient5.version>5.5</httpclient5.version>
         <junit-jupiter.version>5.13.4</junit-jupiter.version>
     </properties>
 
     <dependencies>
-        <!-- Generated invoker uses Spring Framework RestClient -->
 
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.framework.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.framework.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <version>${spring-boot.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -66,6 +50,7 @@
             <version>${jakarta.validation.version}</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
@@ -73,36 +58,41 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Spring test utilities -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.framework.version}</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>${httpclient5.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring-boot.version}</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- JUnit 5 -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit-jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- OkHttp MockWebServer -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>mockwebserver</artifactId>
             <version>${mockwebserver.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/*.yaml</exclude>
+                    <exclude>openapi-templates/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
+
         <plugins>
 
-            <!-- Generate client sources from OpenAPI spec using custom templates -->
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
@@ -114,25 +104,18 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <!-- Use a checked-in spec; later you can overwrite this file by curling /v3/api-docs.yaml -->
                             <inputSpec>${project.basedir}/src/main/resources/customer-api-docs.yaml</inputSpec>
-
                             <generatorName>java</generatorName>
                             <library>restclient</library>
-
-                            <!-- Where generated code will be placed -->
                             <output>${project.build.directory}/generated-sources/openapi</output>
 
-                            <!-- Packages for generated code -->
                             <apiPackage>io.github.bsayli.openapi.client.generated.api</apiPackage>
                             <modelPackage>io.github.bsayli.openapi.client.generated.dto</modelPackage>
                             <invokerPackage>io.github.bsayli.openapi.client.generated.invoker</invokerPackage>
 
-                            <!-- Use our custom templates that implement generics-aware wrappers -->
                             <templateDirectory>${project.basedir}/src/main/resources/openapi-templates
                             </templateDirectory>
 
-                            <!-- Keep output lean -->
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <generateApiDocumentation>false</generateApiDocumentation>
                             <generateApiTests>false</generateApiTests>
@@ -141,8 +124,6 @@
                             <cleanupOutput>true</cleanupOutput>
                             <skipValidateSpec>false</skipValidateSpec>
 
-
-                            <!-- Generator options -->
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <useJakartaEe>true</useJakartaEe>
@@ -157,7 +138,6 @@
                 </executions>
             </plugin>
 
-            <!-- Add the generated sources to the compile path -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -178,7 +158,6 @@
                 </executions>
             </plugin>
 
-            <!-- Java compiler setup -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -188,7 +167,6 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 </project>

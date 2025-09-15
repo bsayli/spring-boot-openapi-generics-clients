@@ -22,4 +22,5 @@ logging:
 
 app:
   openapi:
+    version: @project.version@
     base-url: "http://localhost:${server.port}${server.servlet.context-path:}"

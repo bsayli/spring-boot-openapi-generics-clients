@@ -25,7 +25,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseCustomerDto"
+                $ref: "#/components/schemas/ServiceResponseCustomerDto"
     put:
       tags:
         - customer-controller
@@ -49,7 +49,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseCustomerUpdateResponse"
+                $ref: "#/components/schemas/ServiceResponseCustomerUpdateResponse"
     delete:
       tags:
         - customer-controller
@@ -67,7 +67,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseCustomerDeleteResponse"
+                $ref: "#/components/schemas/ServiceResponseCustomerDeleteResponse"
   /v1/customers:
     get:
       tags:
@@ -79,7 +79,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseCustomerListResponse"
+                $ref: "#/components/schemas/ServiceResponseCustomerListResponse"
     post:
       tags:
         - customer-controller
@@ -96,7 +96,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseCustomerCreateResponse"
+                $ref: "#/components/schemas/ServiceResponseCustomerCreateResponse"
 components:
   schemas:
     CustomerUpdateRequest:
@@ -113,22 +113,6 @@ components:
       required:
         - email
         - name
-    ApiError:
-      type: object
-      properties:
-        errorCode:
-          type: string
-        message:
-          type: string
-    ApiResponseCustomerUpdateResponse:
-      allOf:
-        - $ref: "#/components/schemas/ApiResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/CustomerUpdateResponse"
-      x-api-wrapper: true
-      x-api-wrapper-datatype: CustomerUpdateResponse
     CustomerDto:
       type: object
       properties:
@@ -147,6 +131,22 @@ components:
         updatedAt:
           type: string
           format: date-time
+    ErrorDetail:
+      type: object
+      properties:
+        errorCode:
+          type: string
+        message:
+          type: string
+    ServiceResponseCustomerUpdateResponse:
+      allOf:
+        - $ref: "#/components/schemas/ServiceResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CustomerUpdateResponse"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CustomerUpdateResponse
     CustomerCreateRequest:
       type: object
       properties:
@@ -161,15 +161,6 @@ components:
       required:
         - email
         - name
-    ApiResponseCustomerCreateResponse:
-      allOf:
-        - $ref: "#/components/schemas/ApiResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/CustomerCreateResponse"
-      x-api-wrapper: true
-      x-api-wrapper-datatype: CustomerCreateResponse
     CustomerCreateResponse:
       type: object
       properties:
@@ -178,15 +169,15 @@ components:
         createdAt:
           type: string
           format: date-time
-    ApiResponseCustomerListResponse:
+    ServiceResponseCustomerCreateResponse:
       allOf:
-        - $ref: "#/components/schemas/ApiResponse"
+        - $ref: "#/components/schemas/ServiceResponse"
         - type: object
           properties:
             data:
-              $ref: "#/components/schemas/CustomerListResponse"
+              $ref: "#/components/schemas/CustomerCreateResponse"
       x-api-wrapper: true
-      x-api-wrapper-datatype: CustomerListResponse
+      x-api-wrapper-datatype: CustomerCreateResponse
     CustomerListResponse:
       type: object
       properties:
@@ -194,24 +185,24 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CustomerDto"
-    ApiResponseCustomerDto:
+    ServiceResponseCustomerListResponse:
       allOf:
-        - $ref: "#/components/schemas/ApiResponse"
+        - $ref: "#/components/schemas/ServiceResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CustomerListResponse"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CustomerListResponse
+    ServiceResponseCustomerDto:
+      allOf:
+        - $ref: "#/components/schemas/ServiceResponse"
         - type: object
           properties:
             data:
               $ref: "#/components/schemas/CustomerDto"
       x-api-wrapper: true
       x-api-wrapper-datatype: CustomerDto
-    ApiResponseCustomerDeleteResponse:
-      allOf:
-        - $ref: "#/components/schemas/ApiResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/CustomerDeleteResponse"
-      x-api-wrapper: true
-      x-api-wrapper-datatype: CustomerDeleteResponse
     CustomerDeleteResponse:
       type: object
       properties:
@@ -221,7 +212,16 @@ components:
         deletedAt:
           type: string
           format: date-time
-    ApiResponse:
+    ServiceResponseCustomerDeleteResponse:
+      allOf:
+        - $ref: "#/components/schemas/ServiceResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CustomerDeleteResponse"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CustomerDeleteResponse
+    ServiceResponse:
       type: object
       properties:
         status:
@@ -238,7 +238,7 @@ components:
                 type: string
               message:
                 type: string
-    ApiResponseVoid:
+    ServiceResponseVoid:
       type: object
       properties:
         status:

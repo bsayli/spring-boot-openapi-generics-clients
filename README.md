@@ -1,10 +1,11 @@
 # spring-boot-openapi-generics-clients
 
-![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)
-![Java](https://img.shields.io/badge/Java-21-red)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4-green)
-![OpenAPI](https://img.shields.io/badge/OpenAPI-Generator-blue)
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/bsayli/spring-boot-openapi-generics-clients?logo=github&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
+[![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.9-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![OpenAPI](https://img.shields.io/badge/OpenAPI-Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <p align="center">
   <img src="docs/images/social-preview.png" alt="Social preview" width="720"/>
@@ -20,9 +21,9 @@ duplicated wrappers, and keep client code clean.
 
 ## 🚀 Problem Statement
 
-Most backend teams standardize responses with a generic wrapper like `ApiResponse<T>`.
-However, **OpenAPI Generator does not natively support generics** — instead, it generates one wrapper per endpoint
-(duplicating fields like `status`, `message`, and `errors`).
+Most backend teams standardize responses with a generic wrapper like `ServiceResponse<T>`.
+However, **OpenAPI Generator does not natively support generics** — instead, it generates one wrapper per endpoint (
+duplicating fields like `status`, `message`, and `errors`).
 
 This creates:
 
@@ -61,8 +62,8 @@ mvn clean install
 Use the generated API:
 
 ```java
-ApiClientResponse<CustomerCreateResponse> response =
-    customerControllerApi.createCustomer(request);
+ServiceClientResponse<CustomerCreateResponse> response =
+        customerControllerApi.createCustomer(request);
 ```
 
 ### 🖼 Demo Swagger Screenshot
@@ -73,20 +74,26 @@ Here’s what the `create customer` endpoint looks like in Swagger UI after runn
 
 ### 🖼 Generated Client Wrapper
 
-And here’s the corresponding generated client class showing the generic wrapper:
+Comparison of how OpenAPI Generator outputs looked **before** vs **after** adding the generics-aware wrapper:
 
-![Generated client wrapper](docs/images/generated-client-wrapper.png)
+**Before (duplicated full model):**
 
+![Generated client (before)](docs/images/generated-client-wrapper-before.png)
+
+**After (thin generic wrapper):**
+
+![Generated client (after)](docs/images/generated-client-wrapper-after.png)
 ---
 
 ## 🛠 Tech Stack & Features
 
 * 🚀 **Java 21** — modern language features
-* 🍃 **Spring Boot 3.4** — microservice foundation
+* 🍃 **Spring Boot 3.4.9** — microservice foundation
 * 📖 **Springdoc OpenAPI** — API documentation
 * 🔧 **OpenAPI Generator 7.x** — client code generation
 * 🧩 **Custom Mustache templates** — generics-aware wrappers
 * 🧪 **JUnit 5 + MockWebServer** — integration testing
+* 🌐 **Apache HttpClient 5** — connection pooling & timeouts
 
 ---
 
@@ -103,7 +110,7 @@ spring-boot-openapi-generics-clients/
 
 ## 🧩 Key Features
 
-* ✅ **Generic base model**: `ApiClientResponse<T>`
+* ✅ **Generic base model**: `ServiceClientResponse<T>`
 * ✅ **Thin wrappers**: endpoint-specific shells extending the base
 * ✅ **Strong typing preserved**: `getData()` returns the exact payload type
 * ✅ **No duplicated fields** across wrappers
@@ -152,7 +159,7 @@ This pattern is useful when:
 3. **Use the generated API**
 
    ```java
-   ApiClientResponse<CustomerCreateResponse> response =
+   ServiceClientResponse<CustomerCreateResponse> response =
        customerControllerApi.createCustomer(request);
    ```
 

@@ -1,6 +1,6 @@
-package com.example.demo.common.api.config;
+package com.example.demo.common.openapi;
 
-import static com.example.demo.common.api.config.OpenApiSchemas.*;
+import static com.example.demo.common.openapi.OpenApiSchemas.*;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
@@ -16,11 +16,11 @@ public class SwaggerResponseCustomizer {
   @Bean
   public OpenApiCustomizer responseEnvelopeSchemas() {
     return openApi -> {
-      if (!openApi.getComponents().getSchemas().containsKey(SCHEMA_API_RESPONSE)) {
+      if (!openApi.getComponents().getSchemas().containsKey(SCHEMA_SERVICE_RESPONSE)) {
         openApi
             .getComponents()
             .addSchemas(
-                SCHEMA_API_RESPONSE,
+                SCHEMA_SERVICE_RESPONSE,
                 new ObjectSchema()
                     .addProperty(PROP_STATUS, new IntegerSchema().format("int32"))
                     .addProperty(PROP_MESSAGE, new StringSchema())
@@ -33,11 +33,11 @@ public class SwaggerResponseCustomizer {
                                     .addProperty(PROP_MESSAGE, new StringSchema()))));
       }
 
-      if (!openApi.getComponents().getSchemas().containsKey(SCHEMA_API_RESPONSE_VOID)) {
+      if (!openApi.getComponents().getSchemas().containsKey(SCHEMA_SERVICE_RESPONSE_VOID)) {
         openApi
             .getComponents()
             .addSchemas(
-                SCHEMA_API_RESPONSE_VOID,
+                SCHEMA_SERVICE_RESPONSE_VOID,
                 new ObjectSchema()
                     .addProperty(PROP_STATUS, new IntegerSchema().format("int32"))
                     .addProperty(PROP_MESSAGE, new StringSchema())
