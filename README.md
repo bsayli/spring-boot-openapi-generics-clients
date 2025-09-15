@@ -10,7 +10,7 @@
 <p align="center">
   <img src="docs/images/social-preview.png" alt="Social preview" width="720"/>
   <br/>
-  <em>Social preview banner used for GitHub and sharing</em>
+  <em>Type-safe API responses without boilerplate — powered by Spring Boot & OpenAPI Generator</em>
 </p>
 
 **Type-safe client generation with Spring Boot & OpenAPI using generics.**

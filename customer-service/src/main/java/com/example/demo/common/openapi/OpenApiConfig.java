@@ -19,16 +19,16 @@ public class OpenApiConfig {
   @Bean
   public OpenAPI customerServiceOpenAPI() {
     var openapi =
-            new OpenAPI()
-                    .info(
-                            new Info()
-                                    .title(OpenApiConstants.TITLE)
-                                    .version(version)
-                                    .description(OpenApiConstants.DESCRIPTION));
+        new OpenAPI()
+            .info(
+                new Info()
+                    .title(OpenApiConstants.TITLE)
+                    .version(version)
+                    .description(OpenApiConstants.DESCRIPTION));
 
     if (baseUrl != null && !baseUrl.isBlank()) {
       openapi.addServersItem(
-              new Server().url(baseUrl).description(OpenApiConstants.SERVER_DESCRIPTION));
+          new Server().url(baseUrl).description(OpenApiConstants.SERVER_DESCRIPTION));
     }
     return openapi;
   }

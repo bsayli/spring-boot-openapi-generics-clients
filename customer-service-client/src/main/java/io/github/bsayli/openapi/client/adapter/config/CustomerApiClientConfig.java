@@ -51,18 +51,18 @@ public class CustomerApiClientConfig {
 
   @Bean
   RestClient customerRestClient(
-      RestClient.Builder builder, HttpComponentsClientHttpRequestFactory rf) {
-    return builder.requestFactory(rf).build();
+      RestClient.Builder builder, HttpComponentsClientHttpRequestFactory customerRequestFactory) {
+    return builder.requestFactory(customerRequestFactory).build();
   }
 
   @Bean
   ApiClient customerApiClient(
-      RestClient restClient, @Value("${customer.api.base-url}") String baseUrl) {
-    return new ApiClient(restClient).setBasePath(baseUrl);
+      RestClient customerRestClient, @Value("${customer.api.base-url}") String baseUrl) {
+    return new ApiClient(customerRestClient).setBasePath(baseUrl);
   }
 
   @Bean
-  CustomerControllerApi customerControllerApi(ApiClient apiClient) {
-    return new CustomerControllerApi(apiClient);
+  CustomerControllerApi customerControllerApi(ApiClient customerApiClient) {
+    return new CustomerControllerApi(customerApiClient);
   }
 }
