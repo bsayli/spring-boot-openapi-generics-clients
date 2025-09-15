@@ -13,7 +13,7 @@
 
     <groupId>com.example.demo</groupId>
     <artifactId>customer-service</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0-SNAPSHOT</version>
     <name>customer-service</name>
     <description>Demo service: Spring Boot 3.4 + Springdoc (OpenAPI) for generics-aware client generation</description>
 
