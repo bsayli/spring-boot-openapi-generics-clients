@@ -159,7 +159,7 @@ public class CustomerApiClientConfig {
     }
 
     @Bean
-    ApiClient customerApiClient(RestClient restClient,
+    ApiClient customerApiClient(RestClient customerRestClient,
                                 @Value("${customer.api.base-url}") String baseUrl) {
         return new ApiClient(restClient).setBasePath(baseUrl);
     }
