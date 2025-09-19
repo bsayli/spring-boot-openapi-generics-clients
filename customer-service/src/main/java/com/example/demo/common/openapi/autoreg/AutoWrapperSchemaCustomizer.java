@@ -17,35 +17,32 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 @Configuration
 public class AutoWrapperSchemaCustomizer {
 
-    private final Set<String> dataRefs;
+  private final Set<String> dataRefs;
 
-    public AutoWrapperSchemaCustomizer(
-            ListableBeanFactory beanFactory, ResponseTypeIntrospector introspector) {
-        Set<String> refs = new LinkedHashSet<>();
-        Map<String, RequestMappingHandlerMapping> mappings =
-                beanFactory.getBeansOfType(RequestMappingHandlerMapping.class);
-        mappings
-                .values()
-                .forEach(
-                        rmh ->
-                                rmh.getHandlerMethods()
-                                        .values()
-                                        .stream()
-                                        .map(HandlerMethod::getMethod)
-                                        .forEach(
-                                                m ->
-                                                        introspector.extractDataRefName(m).ifPresent(refs::add)));
-        this.dataRefs = Collections.unmodifiableSet(refs);
-    }
+  public AutoWrapperSchemaCustomizer(
+      ListableBeanFactory beanFactory, ResponseTypeIntrospector introspector) {
+    Set<String> refs = new LinkedHashSet<>();
+    Map<String, RequestMappingHandlerMapping> mappings =
+        beanFactory.getBeansOfType(RequestMappingHandlerMapping.class);
+    mappings
+        .values()
+        .forEach(
+            rmh ->
+                rmh.getHandlerMethods().values().stream()
+                    .map(HandlerMethod::getMethod)
+                    .forEach(m -> introspector.extractDataRefName(m).ifPresent(refs::add)));
+    this.dataRefs = Collections.unmodifiableSet(refs);
+  }
 
-    @Bean
-    public OpenApiCustomizer autoResponseWrappers() {
-        return openApi -> dataRefs.forEach(
-                ref -> {
-                    String name = OpenApiSchemas.SCHEMA_SERVICE_RESPONSE + ref;
-                    openApi
-                            .getComponents()
-                            .addSchemas(name, ApiResponseSchemaFactory.createComposedWrapper(ref));
-                });
-    }
+  @Bean
+  public OpenApiCustomizer autoResponseWrappers() {
+    return openApi ->
+        dataRefs.forEach(
+            ref -> {
+              String name = OpenApiSchemas.SCHEMA_SERVICE_RESPONSE + ref;
+              openApi
+                  .getComponents()
+                  .addSchemas(name, ApiResponseSchemaFactory.createComposedWrapper(ref));
+            });
+  }
 }
