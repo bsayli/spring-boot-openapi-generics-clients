@@ -45,7 +45,7 @@ mvn clean install
 Generated sources will be placed under:
 
 ```
-target/generated-sources/openapi/src/gen/java/main
+target/generated-sources/openapi/src/gen/java
 ```
 
 ---
