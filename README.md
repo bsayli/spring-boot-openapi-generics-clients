@@ -118,6 +118,27 @@ spring-boot-openapi-generics-clients/
 
 ---
 
+### ✨ Usage Example: Adapter Interface
+
+Sometimes you don’t want to expose all the thin wrappers directly.  
+A simple adapter interface can consolidate them into clean, type-safe methods:
+
+```java
+public interface CustomerClientAdapter {
+   ServiceClientResponse<CustomerCreateResponse> createCustomer(CustomerCreateRequest request);
+
+   ServiceClientResponse<CustomerDto> getCustomer(Integer customerId);
+
+   ServiceClientResponse<CustomerListResponse> getCustomers();
+
+   ServiceClientResponse<CustomerUpdateResponse> updateCustomer(
+           Integer customerId, CustomerUpdateRequest request);
+
+   ServiceClientResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId);
+}
+```
+---
+
 ## 🔍 Why This Matters
 
 Without generics support, OpenAPI client generation creates bloated and repetitive code.
