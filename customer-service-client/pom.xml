@@ -20,16 +20,20 @@
         <openapi.generator.version>7.15.0</openapi.generator.version>
         <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
         <build.helper.plugin.version>3.6.0</build.helper.plugin.version>
+        <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
+        <maven.dependency.plugin.version>3.8.1</maven.dependency.plugin.version>
 
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <mockwebserver.version>5.1.0</mockwebserver.version>
         <httpclient5.version>5.5</httpclient5.version>
         <junit-jupiter.version>5.13.4</junit-jupiter.version>
+
+        <openapi.templates.upstream>${project.build.directory}/upstream-templates</openapi.templates.upstream>
+        <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -80,18 +84,90 @@
     </dependencies>
 
     <build>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <excludes>
-                    <exclude>**/*.yaml</exclude>
                     <exclude>openapi-templates/**</exclude>
                 </excludes>
             </resource>
         </resources>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven.dependency.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>unpack-openapi-upstream-templates</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.openapitools</groupId>
+                                    <artifactId>openapi-generator</artifactId>
+                                    <version>${openapi.generator.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <includes>templates/Java/**</includes>
+                                    <outputDirectory>${openapi.templates.upstream}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven.resources.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>copy-upstream-to-effective</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${openapi.templates.effective}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${openapi.templates.upstream}/templates</directory>
+                                    <includes>
+                                        <include>Java/**</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>overlay-local-templates</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${openapi.templates.effective}/Java</outputDirectory>
+                            <overwrite>true</overwrite>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/openapi-templates</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>**/*.mustache</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <groupId>org.openapitools</groupId>
@@ -100,6 +176,7 @@
                 <executions>
                     <execution>
                         <id>generate-client</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -113,8 +190,7 @@
                             <modelPackage>io.github.bsayli.openapi.client.generated.dto</modelPackage>
                             <invokerPackage>io.github.bsayli.openapi.client.generated.invoker</invokerPackage>
 
-                            <templateDirectory>${project.basedir}/src/main/resources/openapi-templates
-                            </templateDirectory>
+                            <templateDirectory>${openapi.templates.effective}/Java</templateDirectory>
 
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <generateApiDocumentation>false</generateApiDocumentation>
@@ -131,7 +207,7 @@
                                 <dateLibrary>java8</dateLibrary>
                                 <useBeanValidation>true</useBeanValidation>
                                 <openApiNullable>false</openApiNullable>
-                                <sourceFolder>src/gen/java/main</sourceFolder>
+                                <sourceFolder>src/gen/java</sourceFolder>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -151,7 +227,7 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>${project.build.directory}/generated-sources/openapi/src/gen/java/main</source>
+                                <source>${project.build.directory}/generated-sources/openapi/src/gen/java</source>
                             </sources>
                         </configuration>
                     </execution>
