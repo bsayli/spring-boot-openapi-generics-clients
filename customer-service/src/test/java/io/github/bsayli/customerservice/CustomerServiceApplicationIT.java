@@ -10,9 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 @DisplayName("Integration Test: Application Context")
 class CustomerServiceApplicationIT {
 
-    @Test
-    @DisplayName("Spring context should load without issues")
-    void contextLoads() {
-        // If the context fails to start, this test will fail
-    }
+  @Test
+  @DisplayName("Spring context should load without issues")
+  void contextLoads() {
+    // If the context fails to start, this test will fail
+  }
 }

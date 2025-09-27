@@ -169,27 +169,24 @@ class CustomerControllerIT {
   void createCustomer_badJson_notReadable() throws Exception {
     var malformed = "{ \"name\": \"John\", \"email\": }"; // invalid JSON
 
-    mvc.perform(
-                    post("/v1/customers")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(malformed))
-            .andExpect(status().isBadRequest())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message").value("BAD_REQUEST"))
-            .andExpect(jsonPath("$.data.code").value("VALIDATION_FAILED"))
-            .andExpect(jsonPath("$.data.violations").isArray());
+    mvc.perform(post("/v1/customers").contentType(MediaType.APPLICATION_JSON).content(malformed))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("BAD_REQUEST"))
+        .andExpect(jsonPath("$.data.code").value("VALIDATION_FAILED"))
+        .andExpect(jsonPath("$.data.violations").isArray());
   }
 
   @Test
   @DisplayName("GET /v1/customers/{id} -> 400 Bad Request on @Min violation (id=0)")
   void getCustomer_constraintViolation_min() throws Exception {
     mvc.perform(get("/v1/customers/{id}", 0)) // @Min(1) violated
-            .andExpect(status().isBadRequest())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message").value("BAD_REQUEST"))
-            .andExpect(jsonPath("$.data.code").value("VALIDATION_FAILED"))
-            .andExpect(jsonPath("$.data.violations").isArray())
-            .andExpect(jsonPath("$.data.violations[0].message").exists());
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("BAD_REQUEST"))
+        .andExpect(jsonPath("$.data.code").value("VALIDATION_FAILED"))
+        .andExpect(jsonPath("$.data.violations").isArray())
+        .andExpect(jsonPath("$.data.violations[0].message").exists());
   }
 
   @Test
@@ -198,11 +195,11 @@ class CustomerControllerIT {
     when(customerService.getCustomer(1)).thenThrow(new RuntimeException("Boom"));
 
     mvc.perform(get("/v1/customers/{id}", 1))
-            .andExpect(status().isInternalServerError())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message").value("INTERNAL_ERROR"))
-            .andExpect(jsonPath("$.data.code").value("INTERNAL_ERROR"))
-            .andExpect(jsonPath("$.data.message").value("Boom"));
+        .andExpect(status().isInternalServerError())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("INTERNAL_ERROR"))
+        .andExpect(jsonPath("$.data.code").value("INTERNAL_ERROR"))
+        .andExpect(jsonPath("$.data.message").value("Boom"));
   }
 
   @AfterEach

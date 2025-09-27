@@ -43,7 +43,7 @@ class SwaggerResponseCustomizerTest {
     customizer.customise(openAPI);
 
     Schema<?> result =
-            openAPI.getComponents().getSchemas().get(OpenApiSchemas.SCHEMA_SERVICE_RESPONSE);
+        openAPI.getComponents().getSchemas().get(OpenApiSchemas.SCHEMA_SERVICE_RESPONSE);
     assertSame(existing, result, "Existing schema should remain unchanged");
   }
 }
