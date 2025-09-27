@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,3 +28,24 @@ jobs:
       - name: Build customer-service-client
         run: mvn -B clean verify
         working-directory: customer-service-client
+
+      - name: List generated sources and spec
+        run: |
+          ls -R customer-service-client/target/generated-sources/openapi/src/gen/java || true
+          ls -l customer-service-client/target/classes/customer-api-docs.yaml || true
+
+      - name: Upload generated client sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-client-sources
+          path: customer-service-client/target/generated-sources/openapi/src/gen/java
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload OpenAPI spec (YAML)
+        uses: actions/upload-artifact@v4
+        with:
+          name: customer-api-docs
+          path: customer-service-client/target/classes/customer-api-docs.yaml
+          if-no-files-found: warn
+          retention-days: 7

@@ -1,12 +1,12 @@
+FROM eclipse-temurin:21-jdk AS build
+WORKDIR /src
+COPY . .
+RUN ./mvnw -q -DskipTests package
+
 FROM eclipse-temurin:21-jre-alpine
-
+RUN addgroup -S app && adduser -S app -G app
+USER app
 WORKDIR /app
-COPY target/customer-service-*.jar app.jar
-
-ENV APP_PORT=8084 \
-    SPRING_PROFILES_ACTIVE=local \
-    JAVA_OPTS=""
-
+COPY --from=build /src/customer-service/target/customer-service-*.jar app.jar
 EXPOSE 8084
-
-ENTRYPOINT ["sh","-c","exec java $JAVA_OPTS -Dserver.port=${APP_PORT} -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar app.jar"]
+ENTRYPOINT ["sh","-c","exec java $JAVA_OPTS -jar app.jar"]

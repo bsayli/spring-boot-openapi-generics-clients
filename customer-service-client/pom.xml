@@ -6,7 +6,7 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
-    <version>0.6.1</version>
+    <version>0.6.2</version>
     <name>customer-service-client</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
@@ -16,7 +16,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>21</java.version>
 
-        <spring-boot.version>3.4.9</spring-boot.version>
+        <spring-boot.version>3.4.10</spring-boot.version>
         <openapi.generator.version>7.15.0</openapi.generator.version>
         <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
         <build.helper.plugin.version>3.6.0</build.helper.plugin.version>

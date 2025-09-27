@@ -1,7 +1,7 @@
 # spring-boot-openapi-generics-clients
 
 [![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml)
-[![Release](https://img.shields.io/github/v/release/bsayli/spring-boot-openapi-generics-clients?logo=github&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
+[![Release](https://img.shields.io/github/v/release/bsayli/spring-boot-openapi-generics-clients?logo=github\&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
 [![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.9-green?logo=springboot)](https://spring.io/projects/spring-boot)
 [![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
@@ -14,7 +14,7 @@
 </p>
 
 **Type-safe client generation with Spring Boot & OpenAPI using generics.**
-This repository demonstrates how to teach OpenAPI Generator to work with generics in order to avoid boilerplate, reduce
+This repository demonstrates how to extend OpenAPI Generator to work with generics in order to avoid boilerplate, reduce
 duplicated wrappers, and keep client code clean.
 
 ---
@@ -43,9 +43,40 @@ This project shows how to:
 
 ---
 
+### How it works (under the hood)
+
+At generation time, the reference service **auto-registers** wrapper schemas in the OpenAPI doc:
+
+* A Spring `OpenApiCustomizer` scans controller return types and unwraps `ResponseEntity`, `CompletionStage`, Reactor (
+  `Mono`/`Flux`), etc. until it reaches `ServiceResponse<T>`.
+* For every discovered `T`, it adds a `ServiceResponse{T}` schema that composes the base envelope + the concrete `data`
+  type, and marks it with vendor extensions:
+
+    * `x-api-wrapper: true`
+    * `x-api-wrapper-datatype: <T>`
+
+The Java client then uses a tiny Mustache override to render **thin shells** for those marked schemas:
+
+```mustache
+// api_wrapper.mustache
+public class {{classname}}
+    extends io.github.bsayli.openapi.client.common.ServiceClientResponse<{{vendorExtensions.x-api-wrapper-datatype}}> {
+}
+```
+
+This is what turns e.g. `ServiceResponseCustomerCreateResponse` into:
+
+```java
+public class ServiceResponseCustomerCreateResponse
+        extends ServiceClientResponse<CustomerCreateResponse> {
+}
+```
+
+---
+
 ## ⚡ Quick Start
 
-Run the sample service:
+Run the reference service:
 
 ```bash
 cd customer-service
@@ -66,11 +97,11 @@ ServiceClientResponse<CustomerCreateResponse> response =
         customerControllerApi.createCustomer(request);
 ```
 
-### 🖼 Demo Swagger Screenshot
+### 🖼 Swagger Screenshot
 
 Here’s what the `create customer` endpoint looks like in Swagger UI after running the service:
 
-![Customer create demo](docs/images/swagger-customer-create.png)
+![Customer create example](docs/images/swagger-customer-create.png)
 
 ### 🖼 Generated Client Wrapper
 
@@ -83,6 +114,18 @@ Comparison of how OpenAPI Generator outputs looked **before** vs **after** addin
 **After (thin generic wrapper):**
 
 ![Generated client (after)](docs/images/generated-client-wrapper-after.png)
+
+---
+
+## ✅ Verify in 60 Seconds
+
+1. Clone this repo
+2. Run `mvn clean install -q`
+3. Open `customer-service-client/target/generated-sources/...`
+4. See the generated wrappers → they now extend a **generic base class** instead of duplicating fields.
+
+You don’t need to write a single line of code — the generator does the work.
+
 ---
 
 ## 🛠 Tech Stack & Features
@@ -120,23 +163,24 @@ spring-boot-openapi-generics-clients/
 
 ### ✨ Usage Example: Adapter Interface
 
-Sometimes you don’t want to expose all the thin wrappers directly.  
+Sometimes you don’t want to expose all the thin wrappers directly.
 A simple adapter interface can consolidate them into clean, type-safe methods:
 
 ```java
 public interface CustomerClientAdapter {
-   ServiceClientResponse<CustomerCreateResponse> createCustomer(CustomerCreateRequest request);
+    ServiceClientResponse<CustomerCreateResponse> createCustomer(CustomerCreateRequest request);
 
-   ServiceClientResponse<CustomerDto> getCustomer(Integer customerId);
+    ServiceClientResponse<CustomerDto> getCustomer(Integer customerId);
 
-   ServiceClientResponse<CustomerListResponse> getCustomers();
+    ServiceClientResponse<CustomerListResponse> getCustomers();
 
-   ServiceClientResponse<CustomerUpdateResponse> updateCustomer(
-           Integer customerId, CustomerUpdateRequest request);
+    ServiceClientResponse<CustomerUpdateResponse> updateCustomer(
+            Integer customerId, CustomerUpdateRequest request);
 
-   ServiceClientResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId);
+    ServiceClientResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId);
 }
 ```
+
 ---
 
 ## 🔍 Why This Matters
@@ -163,7 +207,7 @@ This pattern is useful when:
 
 ## 🔧 How to Run
 
-1. **Start the sample service**
+1. **Start the reference service**
 
    ```bash
    cd customer-service
@@ -183,6 +227,24 @@ This pattern is useful when:
    ServiceClientResponse<CustomerCreateResponse> response =
        customerControllerApi.createCustomer(request);
    ```
+
+---
+
+## 👤 Who Should Use This?
+
+* Backend developers maintaining multiple microservices
+* API platform teams standardizing response envelopes
+* Teams already invested in OpenAPI Generator looking to reduce boilerplate
+
+---
+
+## ⚠️ Why Not Use It?
+
+This project may not be the right fit if:
+
+* Your APIs do **not** use a common response wrapper
+* You are fine with duplicated wrapper models
+* You don’t generate client code from OpenAPI specs
 
 ---
 

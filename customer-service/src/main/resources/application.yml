@@ -24,3 +24,7 @@ app:
   openapi:
     version: @project.version@
     base-url: "http://localhost:${server.port}${server.servlet.context-path:}"
+
+springdoc:
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

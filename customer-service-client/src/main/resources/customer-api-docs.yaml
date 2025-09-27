@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Customer Service API
-  description: "Demo: type-safe generic API responses with OpenAPI"
-  version: 0.6.1
+  description: Customer Service API with type-safe generic responses using OpenAPI
+  version: 0.6.2
 servers:
   - url: http://localhost:8084/customer-service
     description: Local service URL
@@ -19,11 +19,12 @@ paths:
           schema:
             type: integer
             format: int32
+            minimum: 1
       responses:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseCustomerDto"
     put:
@@ -37,6 +38,7 @@ paths:
           schema:
             type: integer
             format: int32
+            minimum: 1
       requestBody:
         content:
           application/json:
@@ -47,7 +49,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseCustomerUpdateResponse"
     delete:
@@ -61,11 +63,12 @@ paths:
           schema:
             type: integer
             format: int32
+            minimum: 1
       responses:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseCustomerDeleteResponse"
   /v1/customers:
@@ -77,7 +80,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseCustomerListResponse"
     post:
@@ -91,10 +94,10 @@ paths:
               $ref: "#/components/schemas/CustomerCreateRequest"
         required: true
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseCustomerCreateResponse"
 components:

@@ -6,6 +6,22 @@ This module is part of the parent repo: `spring-boot-openapi-generics-clients`.
 
 ---
 
+## 🎯 Purpose
+
+`customer-service` provides a **minimal but complete backend** that exposes CRUD endpoints for customers. Its primary
+role in this repository is:
+
+* To **serve as the API producer** that publishes an OpenAPI spec (`/v3/api-docs.yaml`).
+* To **feed the `customer-service-client` module**, where the spec is consumed and turned into a type-safe client with
+  generics-aware wrappers.
+* To demonstrate how **Swagger customizers** can teach OpenAPI about generic wrappers so that the generated client stays
+  clean and DRY.
+
+Think of this module as the **server-side anchor**: without it, the client module would have nothing to generate
+against.
+
+---
+
 ## 🚀 How to Run (Local JVM)
 
 ```bash
@@ -70,7 +86,8 @@ http://localhost:8084/customer-service/v1/customers
 * OpenAPI JSON → `http://localhost:8084/customer-service/v3/api-docs`
 * OpenAPI YAML → `http://localhost:8084/customer-service/v3/api-docs.yaml`
 
-➡️ The YAML/JSON spec above is what the client module (`customer-service-client`) consumes when generating code.
+➡️ The YAML/JSON spec above is the **contract** that the client module (`customer-service-client`) consumes when
+generating code.
 
 ---
 
@@ -133,8 +150,11 @@ docker compose down
 ## 📖 Notes
 
 * Demonstrates **generic `ServiceResponse<T>`** pattern.
-* Uses **Swagger customizers** to teach OpenAPI about generic wrappers.
-* OpenAPI spec (`/v3/api-docs.yaml`) is the source for client generation.
+* Acts as the **API producer** for the generated client.
+* Uses **Swagger customizers** to mark wrappers for OpenAPI.
+* Auto-registers **wrapper schemas** in OpenAPI using `OpenApiCustomizer` and `ResponseTypeIntrospector` (adds
+  `x-api-wrapper` vendor extensions).
+* OpenAPI spec (`/v3/api-docs.yaml`) is the input for client generation.
 * Includes **exception handling via `CustomerControllerAdvice`**.
 * Provides **unit tests** for both controller and service layers.
-* Focused on clarity and minimal setup for demo purposes.
+* Focused on clarity and minimal setup.

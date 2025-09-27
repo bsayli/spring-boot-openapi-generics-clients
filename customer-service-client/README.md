@@ -1,10 +1,29 @@
 # customer-service-client
 
-Generated Java client for the demo **customer-service**, showcasing **type-safe generic responses** with OpenAPI + a
+Generated Java client for the **customer-service**, showcasing **type-safe generic responses** with OpenAPI + a
 custom Mustache template (wrapping payloads in a reusable `ServiceClientResponse<T>`).
 
 This module demonstrates how to evolve OpenAPI Generator with minimal customization to support generic response
 envelopes — avoiding duplicated wrappers and preserving strong typing.
+
+---
+
+## 🔧 TL;DR: Generate in 1 minute
+
+```bash
+# 1) Start the customer service server (in another shell)
+cd customer-service && mvn -q spring-boot:run
+
+# 2) Pull the OpenAPI spec into the client module
+cd ../customer-service-client
+curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
+  -o src/main/resources/customer-api-docs.yaml
+
+# 3) Generate & compile the client
+mvn -q clean install
+```
+
+Generated sources → `target/generated-sources/openapi/src/gen/java`
 
 ---
 
@@ -42,11 +61,14 @@ curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
 mvn clean install
 ```
 
-Generated sources will be placed under:
+### What got generated?
 
-```
-target/generated-sources/openapi/src/gen/java
-```
+Look for these classes under `target/generated-sources/openapi/src/gen/java`:
+
+* `io.github.bsayli.openapi.client.generated.dto.ServiceResponseCustomerCreateResponse`
+* `...ServiceResponseCustomerUpdateResponse`, etc.
+
+Each is a **thin shell** extending `ServiceClientResponse<PayloadType>`.
 
 ---
 
@@ -108,6 +130,10 @@ public void createCustomer() {
 }
 ```
 
+> Tip — The return type is strongly typed: `ServiceClientResponse<CustomerCreateResponse>`.
+> You can safely navigate `resp.getData().getCustomer()` without casting.
+> Handle non-2xx via Spring exceptions (e.g., `HttpClientErrorException`) as usual.
+
 ---
 
 ### Option A.2 — Alternative with HttpClient5 (connection pooling)
@@ -161,7 +187,7 @@ public class CustomerApiClientConfig {
     @Bean
     ApiClient customerApiClient(RestClient customerRestClient,
                                 @Value("${customer.api.base-url}") String baseUrl) {
-        return new ApiClient(restClient).setBasePath(baseUrl);
+        return new ApiClient(customerRestClient).setBasePath(baseUrl);
     }
 
     @Bean
@@ -257,6 +283,20 @@ public class ServiceResponseCustomerCreateResponse
 
 Only this Mustache partial is customized. All other models use stock templates.
 
+### Template overlay (Mustache)
+
+This module overlays **two** tiny Mustache files on top of the stock Java generator:
+
+* `src/main/resources/openapi-templates/api_wrapper.mustache`
+* `src/main/resources/openapi-templates/model.mustache`
+
+At build time, the Maven `maven-dependency-plugin` unpacks the upstream templates and the
+`maven-resources-plugin` overlays the two local files. That’s what enables thin generic wrappers.
+
+**Disable templates (optional):**
+set `<templateDirectory>` to a non-existent path or comment the overlay steps in `pom.xml`
+to compare stock output vs generic wrappers.
+
 ---
 
 ## 🧪 Tests
@@ -277,14 +317,25 @@ It enqueues responses for **all CRUD operations** and asserts correct mapping in
 * Dependencies like `spring-web`, `spring-context`, `jackson-*`, `jakarta.*` are marked **provided**; your host app
   supplies them.
 * Generator options: Spring 6 `RestClient`, Jakarta EE, Jackson, Java 21.
-* OpenAPI spec path:
+* OpenAPI spec lives at: `src/main/resources/customer-api-docs.yaml`.
+  If you re-run the server and want an updated client, re-pull the spec:
 
-```
-src/main/resources/customer-api-docs.yaml
-```
+  ```bash
+  curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
+    -o src/main/resources/customer-api-docs.yaml
+  mvn -q clean install
+  ```
 
 ---
 
 ## 🛡 License
 
 This repository is licensed under **MIT** (root `LICENSE`). Submodules inherit the license.
+
+### Packaging note (optional)
+
+This module is **reference-oriented**. If you want to publish it as a reusable library later:
+
+* remove `provided` scopes and pin minimal runtime deps,
+* add a semantic version and release process (e.g., GitHub Release + `mvn deploy` to Maven Central),
+* keep the Mustache overlay in-repo for transparent builds.
