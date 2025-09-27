@@ -13,5 +13,16 @@ comment:
   behavior: default
 
 ignore:
+  - "customer-service-client/target/**"
+  - "customer-service/target/**"
+  - "**/target/**"
+  - "**/generated-sources/**"
   - "**/generated/**"
-  - "**/openapi/**"
+
+flags:
+  customer-service:
+    paths:
+      - "customer-service/"
+  customer-service-client:
+    paths:
+      - "customer-service-client/"
