@@ -128,6 +128,7 @@ class CustomerClientIT {
     assertEquals(200, resp.getStatus());
     assertEquals("LISTED", resp.getMessage());
     assertNotNull(resp.getData());
+    assertNotNull(resp.getData().getCustomers());
     assertEquals(2, resp.getData().getCustomers().size());
   }
 

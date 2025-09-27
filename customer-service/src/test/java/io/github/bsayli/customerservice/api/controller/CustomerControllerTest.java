@@ -1,10 +1,9 @@
-package io.github.bsayli.customerservice.customer.api.controller;
+package io.github.bsayli.customerservice.api.controller;
 
 import static io.github.bsayli.customerservice.common.api.ApiConstants.Response.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import io.github.bsayli.customerservice.api.controller.CustomerController;
 import io.github.bsayli.customerservice.api.dto.*;
 import io.github.bsayli.customerservice.common.api.response.ServiceResponse;
 import io.github.bsayli.customerservice.service.CustomerService;

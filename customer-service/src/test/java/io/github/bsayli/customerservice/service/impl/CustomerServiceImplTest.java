@@ -1,4 +1,4 @@
-package io.github.bsayli.customerservice.customer.service.impl;
+package io.github.bsayli.customerservice.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -6,7 +6,6 @@ import io.github.bsayli.customerservice.api.dto.CustomerCreateRequest;
 import io.github.bsayli.customerservice.api.dto.CustomerDto;
 import io.github.bsayli.customerservice.api.dto.CustomerUpdateRequest;
 import io.github.bsayli.customerservice.service.CustomerService;
-import io.github.bsayli.customerservice.service.impl.CustomerServiceImpl;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;

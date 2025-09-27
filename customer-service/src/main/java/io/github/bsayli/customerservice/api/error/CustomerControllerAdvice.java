@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-@RestControllerAdvice(basePackages = "com.example.demo.customer.api.controller")
+@RestControllerAdvice(basePackages = "io.github.bsayli.customerservice.api.controller")
 public class CustomerControllerAdvice {
 
   private static final Logger log = LoggerFactory.getLogger(CustomerControllerAdvice.class);

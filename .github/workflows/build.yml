@@ -7,10 +7,12 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,19 +22,17 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: maven
 
-      - name: Build customer-service
-        run: mvn -B clean verify
+      - name: Build customer-service (tests + coverage)
+        run: mvn -B -q -ntp clean verify
         working-directory: customer-service
 
-      - name: Build customer-service-client
-        run: mvn -B clean verify
+
+      - name: Build customer-service-client (tests + coverage)
+        run: mvn -B -q -ntp clean verify
         working-directory: customer-service-client
 
-      - name: List generated sources and spec
-        run: |
-          ls -R customer-service-client/target/generated-sources/openapi/src/gen/java || true
-          ls -l customer-service-client/target/classes/customer-api-docs.yaml || true
 
       - name: Upload generated client sources
         uses: actions/upload-artifact@v4
@@ -49,3 +49,25 @@ jobs:
           path: customer-service-client/target/classes/customer-api-docs.yaml
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Upload coverage (customer-service)
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: |
+            customer-service/target/site/jacoco/jacoco.xml
+            customer-service/target/site/jacoco-it/jacoco.xml
+          flags: customer-service
+          name: customer-service
+          fail_ci_if_error: false
+
+      - name: Upload coverage (customer-service-client)
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: |
+            customer-service-client/target/site/jacoco/jacoco.xml
+            customer-service-client/target/site/jacoco-it/jacoco.xml
+          flags: customer-service-client
+          name: customer-service-client
+          fail_ci_if_error: false
