@@ -140,6 +140,19 @@ You don’t need to write a single line of code — the generator does the work.
 
 ---
 
+## 📦 Next Steps: Dependency-based Adoption
+
+The long-term goal is to publish the core pieces as standalone modules, so that any project using
+a generic response type like `ServiceResponse<T>` can enable the same behavior with **just one dependency**:
+
+- `io.github.bsayli:openapi-generics-autoreg` → **server-side**: automatically registers wrapper schemas in the OpenAPI spec.
+- `io.github.bsayli:openapi-generics-templates` → **client-side**: plugs into OpenAPI Generator for thin, type-safe wrappers.
+
+This will let teams adopt **generics-aware OpenAPI support** without copying customizers or Mustache templates —
+just by adding a Maven/Gradle dependency.
+
+---
+
 ## 📂 Project Structure
 
 ```text
