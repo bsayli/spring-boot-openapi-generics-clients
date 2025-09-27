@@ -16,9 +16,11 @@ import io.github.bsayli.customerservice.service.CustomerService;
 import io.github.bsayli.customerservice.testconfig.TestControllerMocksConfig;
 import java.util.List;
 import java.util.NoSuchElementException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -160,5 +162,51 @@ class CustomerControllerIT {
         .andExpect(jsonPath("$.message").value("DELETED"))
         .andExpect(jsonPath("$.data.customerId").value(1))
         .andExpect(jsonPath("$.data.deletedAt").exists());
+  }
+
+  @Test
+  @DisplayName("POST /v1/customers -> 400 Bad Request when JSON is malformed")
+  void createCustomer_badJson_notReadable() throws Exception {
+    var malformed = "{ \"name\": \"John\", \"email\": }"; // invalid JSON
+
+    mvc.perform(
+                    post("/v1/customers")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(malformed))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.message").value("BAD_REQUEST"))
+            .andExpect(jsonPath("$.data.code").value("VALIDATION_FAILED"))
+            .andExpect(jsonPath("$.data.violations").isArray());
+  }
+
+  @Test
+  @DisplayName("GET /v1/customers/{id} -> 400 Bad Request on @Min violation (id=0)")
+  void getCustomer_constraintViolation_min() throws Exception {
+    mvc.perform(get("/v1/customers/{id}", 0)) // @Min(1) violated
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.message").value("BAD_REQUEST"))
+            .andExpect(jsonPath("$.data.code").value("VALIDATION_FAILED"))
+            .andExpect(jsonPath("$.data.violations").isArray())
+            .andExpect(jsonPath("$.data.violations[0].message").exists());
+  }
+
+  @Test
+  @DisplayName("GET /v1/customers/{id} -> 500 Internal Server Error handled by advice")
+  void getCustomer_internalServerError_generic() throws Exception {
+    when(customerService.getCustomer(1)).thenThrow(new RuntimeException("Boom"));
+
+    mvc.perform(get("/v1/customers/{id}", 1))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.message").value("INTERNAL_ERROR"))
+            .andExpect(jsonPath("$.data.code").value("INTERNAL_ERROR"))
+            .andExpect(jsonPath("$.data.message").value("Boom"));
+  }
+
+  @AfterEach
+  void resetMocks() {
+    Mockito.reset(customerService);
   }
 }
