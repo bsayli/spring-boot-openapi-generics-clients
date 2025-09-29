@@ -10,6 +10,18 @@
 
 ---
 
+<p align="center">
+  <img src="docs/images/social-preview.png" alt="Social preview" width="720"/>
+  <br/>
+  <em>Type-safe API responses without boilerplate — powered by Spring Boot & OpenAPI Generator</em>
+</p>
+
+**Type-safe client generation with Spring Boot & OpenAPI using generics.**
+This repository demonstrates how to extend OpenAPI Generator to work with generics in order to avoid boilerplate, reduce
+duplicated wrappers, and keep client code clean.
+
+---
+
 ## 📑 Table of Contents
 
 - 📦 [Modules](#-modules-in-this-repository)
@@ -41,18 +53,6 @@ This repository consists of two main modules:
 | **Springdoc OpenAPI**   | 2.8.13  |
 | **OpenAPI Generator**   | 7.15.0  |
 | **Apache HttpClient 5** | 5.5     |
-
----
-
-<p align="center">
-  <img src="docs/images/social-preview.png" alt="Social preview" width="720"/>
-  <br/>
-  <em>Type-safe API responses without boilerplate — powered by Spring Boot & OpenAPI Generator</em>
-</p>
-
-**Type-safe client generation with Spring Boot & OpenAPI using generics.**
-This repository demonstrates how to extend OpenAPI Generator to work with generics in order to avoid boilerplate, reduce
-duplicated wrappers, and keep client code clean.
 
 ---
 
