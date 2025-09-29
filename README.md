@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients/branch/main/graph/badge.svg)](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients)
 [![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.10-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.16.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
@@ -51,7 +51,7 @@ This repository consists of two main modules:
 | **Java**                | 21      |
 | **Spring Boot**         | 3.4.10  |
 | **Springdoc OpenAPI**   | 2.8.13  |
-| **OpenAPI Generator**   | 7.15.0  |
+| **OpenAPI Generator**   | 7.16.0  |
 | **Apache HttpClient 5** | 5.5     |
 
 ---

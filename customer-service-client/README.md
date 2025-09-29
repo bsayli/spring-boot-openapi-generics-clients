@@ -2,7 +2,7 @@
 
 [![Java 21](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.10-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.15.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.16.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 
 Generated Java client for the **customer-service**, showcasing **type-safe generic responses** with OpenAPI + a
