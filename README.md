@@ -8,6 +8,42 @@
 [![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+---
+
+## 📑 Table of Contents
+
+- 📦 [Modules](#-modules-in-this-repository)
+- 🛠 [Compatibility Matrix](#-compatibility-matrix)
+- 🚀 [Problem Statement](#-problem-statement)
+- 💡 [Solution](#-solution)
+- ⚡ [Quick Start](#-quick-start)
+- 🧩 [Tech Stack](#-tech-stack--features)
+- ✅ [Key Features](#-key-features)
+- ✨ [Usage Example](#-usage-example-adapter-interface)
+- 📦 [Related Modules](#-related-modules-quick-view)
+
+### 📦 Modules in this Repository
+
+This repository consists of two main modules:
+
+- [**customer-service**](customer-service/README.md) — Sample API producer (Spring Boot microservice + OpenAPI spec)
+- [**customer-service-client**](customer-service-client/README.md) — Generated Java client (generics support via custom
+  templates)
+
+---
+
+### 🔧 Compatibility Matrix
+
+| Component               | Version |
+|-------------------------|---------|
+| **Java**                | 21      |
+| **Spring Boot**         | 3.4.10  |
+| **Springdoc OpenAPI**   | 2.8.13  |
+| **OpenAPI Generator**   | 7.15.0  |
+| **Apache HttpClient 5** | 5.5     |
+
+---
+
 <p align="center">
   <img src="docs/images/social-preview.png" alt="Social preview" width="720"/>
   <br/>
@@ -287,6 +323,24 @@ If parameters include spaces or special characters, wrap them in quotes `"..."`.
 If you spot any mistakes in this README or have questions about the project, feel free to open an issue or start a
 discussion. I’m happy to improve the documentation and clarify concepts further!
 
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!  
+Feel free to [open an issue](../../issues) or submit a PR.
+
+---
+
 ## ⭐ Support
 
 If you found this project useful, please consider giving it a star ⭐ on GitHub — it helps others discover it too!
+
+---
+
+## 📦 Related Modules (Quick View)
+
+| Module                         | Description                                 | Docs                                        |
+|--------------------------------|---------------------------------------------|---------------------------------------------|
+| 🟢 **customer-service**        | Spring Boot sample API (producer)           | [README](customer-service/README.md)        |
+| 🔵 **customer-service-client** | Generated Java client with generics support | [README](customer-service-client/README.md) |

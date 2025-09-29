@@ -1,5 +1,10 @@
 # customer-service-client
 
+[![Java 21](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.10-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.15.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
+
 Generated Java client for the **customer-service**, showcasing **type-safe generic responses** with OpenAPI + a
 custom Mustache template (wrapping payloads in a reusable `ServiceClientResponse<T>`).
 
@@ -72,11 +77,116 @@ Each is a **thin shell** extending `ServiceClientResponse<PayloadType>`.
 
 ---
 
+## 🚫 Not a Published Library (Re-generate in your project)
+
+This module is a **reference demo**, not a published library.
+To apply the same approach in your own project:
+
+1. Generate your own OpenAPI spec (`/v3/api-docs.yaml`).
+2. Copy the two Mustache templates (`api_wrapper.mustache`, `model.mustache`) into your project.
+3. Run OpenAPI Generator with your spec + templates → you’ll get type-safe wrappers.
+
+> ⚠️ **Do not add `customer-service-client` as a Maven/Gradle dependency in your project.**
+> Instead, re-generate your own client using **your service’s OpenAPI spec** and the provided Mustache templates.
+
+---
+
+## 📦 Prerequisites
+
+Before generating or using the client, make sure you have:
+
+* **Java 21** or newer
+* **Maven 3.9+** (or Gradle 8+ if you adapt the build)
+* A running instance of the `customer-service` exposing its OpenAPI spec
+
+---
+
+## 🎯 Scope & Non-Goals
+
+This module focuses on **generics-aware client generation** only. Specifically, it demonstrates:
+
+* Marking wrapper schemas via OpenAPI **vendor extensions** (e.g., `x-api-wrapper`, `x-api-wrapper-datatype`)
+* A tiny **Mustache overlay** that emits **thin wrapper classes** extending a reusable `ServiceClientResponse<T>`
+* How those wrappers enable **compile-time type safety** in consumer code (see the adapter example)
+
+**Out of scope (non-goals):**
+
+* Runtime concerns such as error handling strategies for non-2xx responses, retries, logging, metrics, circuit-breaking
+* Business validation, pagination conventions, or API design guidelines
+* Authentication/authorization configuration
+* Packaging and publishing this client as a reusable library
+
+If you need those capabilities, add them in your host application or platform code. This repo is intentionally minimal
+to keep the focus on the **wrapper generation pattern**.
+
+---
+
+## 🔄 How thin wrappers are produced (end-to-end flow)
+
+```
+Controller returns `ServiceResponse<T>`
+        │
+        ▼
+Springdoc `OpenApiCustomizer` discovers `T` and marks wrapper schemas
+(vendor extensions: `x-api-wrapper: true`, `x-api-wrapper-datatype: <T>`)
+        │
+        ▼
+OpenAPI spec (YAML/JSON) contains `ServiceResponse{T}` schemas with vendor extensions
+        │
+        ▼
+OpenAPI Generator runs with a tiny Mustache overlay
+(`api_wrapper.mustache`, `model.mustache`)
+        │
+        ▼
+Generated Java classes:
+- Thin wrappers like `ServiceResponseCustomerCreateResponse`
+  extending `ServiceClientResponse<CustomerCreateResponse>`
+- No duplicated envelope fields
+        │
+        ▼
+Consumer code (e.g., adapter) gets compile-time type safety
+```
+
+**Key files**
+
+* Templates: `src/main/resources/openapi-templates/api_wrapper.mustache`, `.../model.mustache`
+* Generated output: `target/generated-sources/openapi/src/gen/java`
+* Packages (from `pom.xml`): `apiPackage`, `modelPackage`, `invokerPackage`
+
+---
+
+## 🧰 Troubleshooting (quick)
+
+* **No thin wrappers generated?**
+  Check your spec contains vendor extensions on wrapper schemas (look for `x-api-wrapper: true`).
+  Also verify the generator uses your overlay via `<templateDirectory>`.
+
+* **Wrong packages or missing classes?**
+  Ensure `apiPackage`, `modelPackage`, and `invokerPackage` in the plugin configuration match what you expect.
+  Delete `target/` and re-run: `mvn clean install`.
+
+* **Spec is stale?**
+  Re-pull it:
+
+  ```bash
+  curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
+    -o src/main/resources/customer-api-docs.yaml
+  mvn -q clean install
+  ```
+
+* **Validation/annotations not found at runtime?**
+  Some dependencies (e.g., `spring-web`, `jakarta.*`) are marked **provided**.
+  Your host app must supply them on the classpath.
+
+* **Base URL not applied?**
+  If you use the Spring configuration, set `customer.api.base-url` correctly and ensure the `RestClient` bean is
+  created.
+
+---
+
 ## 🧩 Using the Client
 
 ### Option A — Spring Configuration (recommended)
-
-Include this module as a dependency and configure the base URL:
 
 ```java
 
@@ -339,3 +449,11 @@ This module is **reference-oriented**. If you want to publish it as a reusable l
 * remove `provided` scopes and pin minimal runtime deps,
 * add a semantic version and release process (e.g., GitHub Release + `mvn deploy` to Maven Central),
 * keep the Mustache overlay in-repo for transparent builds.
+
+---
+
+## 📦 Related Module
+
+This client is generated from the OpenAPI spec exposed by:
+
+* [customer-service](../customer-service/README.md) — Sample Spring Boot microservice (API producer).

@@ -1,8 +1,9 @@
 # customer-service
 
-Sample Spring Boot 3.4 microservice demonstrating **type-safe generic API responses** with OpenAPI.
-
-This module is part of the parent repo: `spring-boot-openapi-generics-clients`.
+[![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.10-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
+[![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml)
 
 ---
 
@@ -19,6 +20,16 @@ role in this repository is:
 
 Think of this module as the **server-side anchor**: without it, the client module would have nothing to generate
 against.
+
+---
+
+## 📊 Architecture at a Glance
+
+```text
+client <--> customer-service <--> OpenAPI Spec (YAML/JSON) <--> customer-service-client
+```
+
+This module defines the contract; the client module consumes it.
 
 ---
 
@@ -76,6 +87,43 @@ Example full URL for listing customers:
 
 ```
 http://localhost:8084/customer-service/v1/customers
+```
+
+### Example Response: Get Customer
+
+```json
+{
+  "status": 200,
+  "message": "OK",
+  "data": {
+    "customerId": 1,
+    "name": "Jane Doe",
+    "email": "jane@example.com"
+  },
+  "errors": []
+}
+```
+
+### Example Response: List Customers
+
+```json
+{
+  "status": 200,
+  "message": "OK",
+  "data": [
+    {
+      "customerId": 1,
+      "name": "Jane Doe",
+      "email": "jane@example.com"
+    },
+    {
+      "customerId": 2,
+      "name": "John Smith",
+      "email": "john@example.com"
+    }
+  ],
+  "errors": []
+}
 ```
 
 ---
@@ -147,6 +195,17 @@ docker compose down
 
 ---
 
+## 🧪 Testing
+
+Run unit and integration tests:
+
+```bash
+cd customer-service
+mvn test
+```
+
+---
+
 ## 📖 Notes
 
 * Demonstrates **generic `ServiceResponse<T>`** pattern.
@@ -157,4 +216,27 @@ docker compose down
 * OpenAPI spec (`/v3/api-docs.yaml`) is the input for client generation.
 * Includes **exception handling via `CustomerControllerAdvice`**.
 * Provides **unit tests** for both controller and service layers.
+* Profiles: `local` (default) and `dev` available — can be extended per environment.
 * Focused on clarity and minimal setup.
+
+---
+
+## 📦 Related Module
+
+This service is the API producer for the generated client:
+
+* [customer-service-client](../customer-service-client/README.md) — Java client generated from this service's OpenAPI
+  spec.
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+Feel free to [open an issue](../../issues) or submit a PR.
+
+---
+
+## 🛡 License
+
+MIT
