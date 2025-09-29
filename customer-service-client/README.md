@@ -434,7 +434,40 @@ It enqueues responses for **all CRUD operations** and asserts correct mapping in
   curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
     -o src/main/resources/customer-api-docs.yaml
   mvn -q clean install
-  ```
+  ``` 
+
+---
+
+### ⚙️ Optional: Extra Class Annotations
+
+The generator also supports an **optional vendor extension** to attach annotations directly on top of the generated
+wrapper classes.
+
+For example, if the OpenAPI schema contains:
+
+```yaml
+components:
+  schemas:
+    ServiceResponseCustomerDeleteResponse:
+      type: object
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CustomerDeleteResponse
+      x-class-extra-annotation: "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)"
+```
+
+The generated wrapper becomes:
+
+```java
+
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+public class ServiceResponseCustomerDeleteResponse
+        extends io.github.bsayli.openapi.client.common.ServiceClientResponse<CustomerDeleteResponse> {
+}
+```
+
+By default this feature is **not required** and we recommend using the plain `ServiceClientResponse<T>` wrappers
+as-is. However, the hook is available if your project needs to enforce additional annotations (e.g., Jackson, Lombok)
+on top of generated wrapper classes.
 
 ---
 

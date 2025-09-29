@@ -24,6 +24,8 @@ app:
   openapi:
     version: @project.version@
     base-url: "http://localhost:${server.port}${server.servlet.context-path:}"
+    #wrapper:
+    #class-extra-annotation: "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)"
 
 springdoc:
   default-consumes-media-type: application/json

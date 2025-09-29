@@ -17,6 +17,7 @@ public final class OpenApiSchemas {
   // Vendor extensions
   public static final String EXT_API_WRAPPER = "x-api-wrapper";
   public static final String EXT_API_WRAPPER_DATATYPE = "x-api-wrapper-datatype";
+  public static final String EXT_CLASS_EXTRA_ANNOTATION = "x-class-extra-annotation";
 
   private OpenApiSchemas() {}
 }
