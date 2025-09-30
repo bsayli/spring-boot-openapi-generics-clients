@@ -33,6 +33,7 @@ duplicated wrappers, and keep client code clean.
 - ✅ [Key Features](#-key-features)
 - ✨ [Usage Example](#-usage-example-adapter-interface)
 - 📦 [Related Modules](#-related-modules-quick-view)
+- 📘 [Adoption Guides](#-adoption-guides)
 
 ### 📦 Modules in this Repository
 
@@ -344,3 +345,13 @@ If you found this project useful, please consider giving it a star ⭐ on GitHub
 |--------------------------------|---------------------------------------------|---------------------------------------------|
 | 🟢 **customer-service**        | Spring Boot sample API (producer)           | [README](customer-service/README.md)        |
 | 🔵 **customer-service-client** | Generated Java client with generics support | [README](customer-service-client/README.md) |
+
+---
+
+## 📘 Adoption Guides
+
+Looking to integrate this approach into your own project?  
+See the detailed guides under [`docs/adoption`](docs/adoption):
+
+- [Server-Side Adoption](docs/adoption/server-side-adoption.md)
+- [Client-Side Adoption](docs/adoption/client-side-adoption.md)
