@@ -200,4 +200,12 @@ your-service-client/
 
 ---
 
+## 11) Maven Setup
+
+See [Client-Side Adoption (POM Setup)](client-side-adoption-pom.md) for the full `pom.xml` configuration, including
+required plugins (`maven-dependency-plugin`, `maven-resources-plugin`, `openapi-generator-maven-plugin`, etc.)
+and dependency declarations.
+
+---
+
 ✅ With this setup, your client project generates **type-safe wrappers** that align with `ServiceResponse<T>` from the server side, without any boilerplate duplication.
