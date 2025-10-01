@@ -229,8 +229,7 @@ mvn test
 * Focused on clarity and minimal setup.
 * Optional: You can attach extra annotations (e.g., Jackson) to generated wrapper classes by setting  
   `app.openapi.wrapper.class-extra-annotation` in `application.yml`.  
-  See [customer-service-client README](../customer-service-client/README.md#-optional-extra-class-annotations) for
-  details.
+  See [customer-service-client README](../customer-service-client/README.md#optional-extra-class-annotations) for details.
 
 ---
 

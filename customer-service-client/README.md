@@ -497,7 +497,8 @@ It enqueues responses for **all CRUD operations** and asserts correct mapping in
 
 ---
 
-### ⚙️ Optional: Extra Class Annotations
+### Optional: Extra Class Annotations
+*(⚙️ advanced feature — use only if needed)*
 
 The generator also supports an **optional vendor extension** to attach annotations directly on top of the generated
 wrapper classes.
