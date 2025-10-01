@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Client-Side Build Setup (Maven Plugins & Dependencies)
+title: Client-Side Build Setup
 parent: Client-Side Adoption
 nav_order: 1
 ---
