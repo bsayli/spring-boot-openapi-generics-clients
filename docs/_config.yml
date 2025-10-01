@@ -1,6 +1,9 @@
 title: Spring Boot OpenAPI Generics Clients
 description: Type-safe OpenAPI clients with generics (Spring Boot + OpenAPI Generator)
 
+just_the_docs:
+  custom_css: assets/css/custom.css
+
 remote_theme: just-the-docs/just-the-docs
 
 plugins:

@@ -13,13 +13,6 @@ This site is generated from the [
 
 ---
 
----
-layout: default
-title: Adoption Guides
-nav_order: 2
-has_children: true
----
-
 ## 📘 Adoption Guides
 
 * [Server-Side Adoption](adoption/server-side-adoption.md)
