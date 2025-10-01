@@ -1,6 +1,8 @@
+import {{commonPackage}}.ServiceClientResponse;
+
 {{#vendorExtensions.x-class-extra-annotation}}
 {{{vendorExtensions.x-class-extra-annotation}}}
 {{/vendorExtensions.x-class-extra-annotation}}
 public class {{classname}}
-    extends {{commonPackage}}.ServiceClientResponse<{{vendorExtensions.x-api-wrapper-datatype}}> {
+    extends ServiceClientResponse<{{vendorExtensions.x-api-wrapper-datatype}}> {
 }

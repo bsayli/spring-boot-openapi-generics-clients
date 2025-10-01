@@ -28,7 +28,10 @@ curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
 mvn -q clean install
 ```
 
-Generated sources → `target/generated-sources/openapi/src/gen/java`
+*Generated sources → `target/generated-sources/openapi/src/gen/java`*
+
+> ℹ️ **Multi-module builds:** If your project is multi-module, ensure the generated path is compiled via
+`build-helper-maven-plugin` (already configured in this repo’s `pom.xml`).
 
 ---
 
@@ -88,6 +91,14 @@ To apply the same approach in your own project:
 
 > ⚠️ **Do not add `customer-service-client` as a Maven/Gradle dependency in your project.**
 > Instead, re-generate your own client using **your service’s OpenAPI spec** and the provided Mustache templates.
+
+## 📘 Adoption Guides
+
+Looking to integrate this approach into your own project?  
+See the detailed guides under [`docs/adoption`](../docs/adoption):
+
+- [Server-Side Adoption](../docs/adoption/server-side-adoption.md)
+- [Client-Side Adoption](../docs/adoption/client-side-adoption.md)
 
 ---
 
@@ -157,9 +168,12 @@ Consumer code (e.g., adapter) gets compile-time type safety
 
 ## 🧰 Troubleshooting (quick)
 
-* **No thin wrappers generated?**
-  Check your spec contains vendor extensions on wrapper schemas (look for `x-api-wrapper: true`).
-  Also verify the generator uses your overlay via `<templateDirectory>`.
+* **No thin wrappers generated?**  
+  Ensure wrapper schemas in your OpenAPI spec include the vendor extensions:  
+  `x-api-wrapper: true` and `x-api-wrapper-datatype`.  
+  Confirm your generator points to the correct `<templateDirectory>` **and** that effective templates are copied (see
+  the `maven-dependency-plugin` + `maven-resources-plugin` steps).  
+  If unsure, delete `target/` and run `mvn clean install`.
 
 * **Wrong packages or missing classes?**
   Ensure `apiPackage`, `modelPackage`, and `invokerPackage` in the plugin configuration match what you expect.
@@ -186,32 +200,37 @@ Consumer code (e.g., adapter) gets compile-time type safety
 
 ## 🧩 Using the Client
 
-### Option A — Spring Configuration (recommended)
+### Option A — Quick Start (simple RestClient for demos/dev)
 
 ```java
+
+package your.pkg;
+
+import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
+import io.github.bsayli.openapi.client.generated.invoker.ApiClient;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestClient;
 
 @Configuration
 public class CustomerApiClientConfig {
 
-    @Bean
-    public RestClient customerRestClient(RestClient.Builder builder,
-                                         @Value("${customer.api.base-url}") String baseUrl) {
-        return builder.baseUrl(baseUrl).build();
-    }
+  @Bean
+  RestClient customerRestClient(RestClient.Builder builder) {
+    return builder.build();
+  }
 
-    @Bean
-    public io.github.bsayli.openapi.client.generated.invoker.ApiClient customerApiClient(
-            RestClient customerRestClient,
-            @Value("${customer.api.base-url}") String baseUrl) {
-        return new io.github.bsayli.openapi.client.generated.invoker.ApiClient(customerRestClient)
-                .setBasePath(baseUrl);
-    }
+  @Bean
+  ApiClient customerApiClient(RestClient customerRestClient,
+                              @Value("${customer.api.base-url}") String baseUrl) {
+    return new ApiClient(customerRestClient).setBasePath(baseUrl);
+  }
 
-    @Bean
-    public io.github.bsayli.openapi.client.generated.api.CustomerControllerApi customerControllerApi(
-            io.github.bsayli.openapi.client.generated.invoker.ApiClient apiClient) {
-        return new io.github.bsayli.openapi.client.generated.api.CustomerControllerApi(apiClient);
-    }
+  @Bean
+  CustomerControllerApi customerControllerApi(ApiClient customerApiClient) {
+    return new CustomerControllerApi(customerApiClient);
+  }
 }
 ```
 
@@ -224,19 +243,32 @@ customer.api.base-url=http://localhost:8084/customer-service
 **Usage example:**
 
 ```java
+import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
+import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
+import io.github.bsayli.openapi.client.generated.dto.CustomerCreateResponse;
+import io.github.bsayli.openapi.client.common.ServiceClientResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@Autowired
-private io.github.bsayli.openapi.client.generated.api.CustomerControllerApi customerApi;
+@Component
+public class CustomerClientExample {
 
-public void createCustomer() {
-    var req = new io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest()
+  private final CustomerControllerApi customerApi;
+  
+  public CustomerClientExample(CustomerControllerApi customerApi) {
+    this.customerApi = customerApi;
+  }
+
+  public void createCustomer() {
+    CustomerCreateRequest req = new CustomerCreateRequest()
             .name("Jane Doe")
             .email("jane@example.com");
 
-    var resp = customerApi.createCustomer(req); // ServiceResponseCustomerCreateResponse
+    ServiceClientResponse<CustomerCreateResponse> resp = customerApi.createCustomer(req);
 
     System.out.println(resp.getStatus());                       // 201
     System.out.println(resp.getData().getCustomer().getName()); // "Jane Doe"
+  }
 }
 ```
 
@@ -246,11 +278,22 @@ public void createCustomer() {
 
 ---
 
-### Option A.2 — Alternative with HttpClient5 (connection pooling)
+### Option B — Recommended (production-ready with HttpClient5 pooling)
 
 If you want more control (connection pooling, timeouts, etc.), you can wire the client with **Apache HttpClient5**:
 
 ```java
+import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
+import io.github.bsayli.openapi.client.generated.invoker.ApiClient;
+import java.time.Duration;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
 
 @Configuration
 public class CustomerApiClientConfig {
@@ -301,15 +344,31 @@ public class CustomerApiClientConfig {
     }
 
     @Bean
-    CustomerControllerApi customerControllerApi(ApiClient apiClient) {
-        return new CustomerControllerApi(apiClient);
+    CustomerControllerApi customerControllerApi(ApiClient customerApiClient) {
+        return new CustomerControllerApi(customerApiClient);
     }
 }
 ```
 
+> **Requires:** `org.apache.httpcomponents.client5:httpclient5` (already included in this module).
+
+**application.properties:**
+
+```properties
+# Base URL
+customer.api.base-url=http://localhost:8084/customer-service
+# HttpClient5 pool settings
+customer.api.max-connections-total=64
+customer.api.max-connections-per-route=16
+# Timeouts (in seconds)
+customer.api.connect-timeout-seconds=10
+customer.api.connection-request-timeout-seconds=10
+customer.api.read-timeout-seconds=15
+```
+
 ---
 
-### Option B — Manual Wiring (no Spring context)
+### Option C — Manual Wiring (no Spring context)
 
 ```java
 var rest = RestClient.builder().baseUrl("http://localhost:8084/customer-service").build();

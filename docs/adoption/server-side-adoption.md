@@ -64,9 +64,9 @@ After this guide, your service will:
 Add your usual build plugins (compiler, surefire/failsafe, jacoco) as you prefer.
 
 > **Note:** Make sure all `common.openapi` configuration classes are inside your main
-Spring Boot application’s component scan (same base package or a sub-package).
-If you place them elsewhere, adjust `@SpringBootApplication(scanBasePackages=...)`
-to include their package.
+> Spring Boot application’s component scan (same base package or a sub-package).
+> If you place them elsewhere, adjust `@SpringBootApplication(scanBasePackages=...)`
+> to include their package.
 
 ---
 
@@ -102,12 +102,16 @@ public record ServiceResponse<T>(int status, String message, T data, List<ErrorD
 ```java
 package <your.base>.common.api.response;
 
-public record ErrorDetail(String errorCode, String message) {}
+public record ErrorDetail(String errorCode, String message) {
+}
 ```
-> **Note:** Ensure ServiceResponse and ErrorDetail are in a package visible to both controllers and OpenAPI config (e.g., common.api.response).
-If you place them in a different package, make sure springdoc picks them up in schema generation.
 
-> You can keep your existing error model; only the field names `status`, `message`, `data`, `errors` are used by the OpenAPI base envelope below.
+> **Note:** Ensure ServiceResponse and ErrorDetail are in a package visible to both controllers and OpenAPI config (
+> e.g., common.api.response).
+> If you place them in a different package, make sure springdoc picks them up in schema generation.
+
+> You can keep your existing error model; only the field names `status`, `message`, `data`, `errors` are used by the
+> OpenAPI base envelope below.
 
 ---
 
@@ -118,28 +122,31 @@ Create the following under `common/openapi/`.
 **`OpenApiSchemas.java`**
 
 ```java
-package <your.base>.common.openapi;
+package
+
+<your.base>.common.openapi;
 
 import <your.base>.common.api.response.ServiceResponse;
 
 public final class OpenApiSchemas {
-  // Base envelope schema names
-  public static final String SCHEMA_SERVICE_RESPONSE = ServiceResponse.class.getSimpleName();
-  public static final String SCHEMA_SERVICE_RESPONSE_VOID = SCHEMA_SERVICE_RESPONSE + "Void";
+    // Base envelope schema names
+    public static final String SCHEMA_SERVICE_RESPONSE = ServiceResponse.class.getSimpleName();
+    public static final String SCHEMA_SERVICE_RESPONSE_VOID = SCHEMA_SERVICE_RESPONSE + "Void";
 
-  // Common property keys
-  public static final String PROP_STATUS = "status";
-  public static final String PROP_MESSAGE = "message";
-  public static final String PROP_ERRORS = "errors";
-  public static final String PROP_ERROR_CODE = "errorCode";
-  public static final String PROP_DATA = "data";
+    // Common property keys
+    public static final String PROP_STATUS = "status";
+    public static final String PROP_MESSAGE = "message";
+    public static final String PROP_ERRORS = "errors";
+    public static final String PROP_ERROR_CODE = "errorCode";
+    public static final String PROP_DATA = "data";
 
-  // Vendor extension keys
-  public static final String EXT_API_WRAPPER = "x-api-wrapper";
-  public static final String EXT_API_WRAPPER_DATATYPE = "x-api-wrapper-datatype";
-  public static final String EXT_CLASS_EXTRA_ANNOTATION = "x-class-extra-annotation";
+    // Vendor extension keys
+    public static final String EXT_API_WRAPPER = "x-api-wrapper";
+    public static final String EXT_API_WRAPPER_DATATYPE = "x-api-wrapper-datatype";
+    public static final String EXT_CLASS_EXTRA_ANNOTATION = "x-class-extra-annotation";
 
-  private OpenApiSchemas() {}
+    private OpenApiSchemas() {
+    }
 }
 ```
 
@@ -435,7 +442,8 @@ class CustomerController {
 }
 ```
 
-> You can wrap *any* DTO type the same way. The auto‑registration picks up all controller methods that return `ServiceResponse<T>` (including `ResponseEntity<ServiceResponse<T>>`, `CompletionStage<...>`, etc.).
+> You can wrap *any* DTO type the same way. The auto‑registration picks up all controller methods that return
+`ServiceResponse<T>` (including `ResponseEntity<ServiceResponse<T>>`, `CompletionStage<...>`, etc.).
 
 ---
 
@@ -468,10 +476,13 @@ class CustomerController {
 
 ## 9) Common pitfalls
 
-* **No composed wrappers appear:** ensure your controllers actually return `ServiceResponse<T>` and that `AutoWrapperSchemaCustomizer` is loaded (it’s a `@Configuration`).
-* **Wrong `data` `$ref`:** the DTO class name must match the schema name Springdoc emits (usually the simple type name). If you use custom schema names, adapt `extractDataRefName` to your naming.
+* **No composed wrappers appear:** ensure your controllers actually return `ServiceResponse<T>` and that
+  `AutoWrapperSchemaCustomizer` is loaded (it’s a `@Configuration`).
+* **Wrong `data` `$ref`:** the DTO class name must match the schema name Springdoc emits (usually the simple type name).
+  If you use custom schema names, adapt `extractDataRefName` to your naming.
 * **Profiles/paths:** if you change `context-path` or port, also update `app.openapi.base-url`.
-* **Extra annotations:** if you don’t need additional annotations on generated client wrappers, keep `class-extra-annotation` **unset**.
+* **Extra annotations:** if you don’t need additional annotations on generated client wrappers, keep
+  `class-extra-annotation` **unset**.
 
 ---
 

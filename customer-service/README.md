@@ -25,8 +25,17 @@ against.
 
 ## 📊 Architecture at a Glance
 
-```text
-client <--> customer-service <--> OpenAPI Spec (YAML/JSON) <--> customer-service-client
+```
+Client
+   │
+   ▼
+Customer Service
+   │
+   ▼
+OpenAPI Spec (YAML/JSON)
+   │
+   ▼
+Customer Service Client
 ```
 
 This module defines the contract; the client module consumes it.

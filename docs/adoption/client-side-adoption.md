@@ -1,8 +1,10 @@
 # Client-Side Integration Guide
 
-This document describes how to integrate the **generics-aware OpenAPI client** into your own microservice project, based on the patterns demonstrated in the `customer-service-client` module.
+This document describes how to integrate the **generics-aware OpenAPI client** into your own microservice project, based
+on the patterns demonstrated in the `customer-service-client` module.
 
-The purpose is to generate **type-safe clients** that extend a reusable generic base (`ServiceClientResponse<T>`) instead of duplicating response envelopes.
+The purpose is to generate **type-safe clients** that extend a reusable generic base (`ServiceClientResponse<T>`)
+instead of duplicating response envelopes.
 
 ---
 
@@ -52,17 +54,19 @@ Ensure you copy the following **shared classes** into your client project:
 **`common/ServiceClientResponse.java`**
 
 ```java
-package <your.base>.openapi.client.common;
+package
+
+<your.base>.openapi.client.common;
 
 import java.util.List;
 import java.util.Objects;
 
 public class ServiceClientResponse<T> {
-  private Integer status;
-  private String message;
-  private List<ClientErrorDetail> errors;
-  private T data;
-  // getters, setters, equals, hashCode, toString
+    private Integer status;
+    private String message;
+    private List<ClientErrorDetail> errors;
+    private T data;
+    // getters, setters, equals, hashCode, toString
 }
 ```
 
@@ -71,7 +75,8 @@ public class ServiceClientResponse<T> {
 ```java
 package <your.base>.openapi.client.common;
 
-public record ClientErrorDetail(String errorCode, String message) {}
+public record ClientErrorDetail(String errorCode, String message) {
+}
 ```
 
 These are referenced by the Mustache templates and must exist in your client project.
@@ -89,11 +94,13 @@ src/main/resources/openapi-templates/
 **`api_wrapper.mustache`**
 
 ```mustache
+import {{commonPackage}}.ServiceClientResponse;
+
 {{#vendorExtensions.x-class-extra-annotation}}
 {{{vendorExtensions.x-class-extra-annotation}}}
 {{/vendorExtensions.x-class-extra-annotation}}
 public class {{classname}}
-    extends {{commonPackage}}.ServiceClientResponse<{{vendorExtensions.x-api-wrapper-datatype}}> {
+    extends ServiceClientResponse<{{vendorExtensions.x-api-wrapper-datatype}}> {
 }
 ```
 
@@ -108,14 +115,17 @@ These ensure generated wrappers extend the generic base instead of duplicating f
 Encapsulate generated APIs in an adapter interface:
 
 ```java
-package <your.base>.openapi.client.adapter;
+package
+
+<your.base>.openapi.client.adapter;
 
 import <your.base>.openapi.client.common.ServiceClientResponse;
-import <your.base>.openapi.client.generated.dto.*;
+import <your.base>.openapi.client.generated.dto .*;
 
 public interface YourClientAdapter {
-  ServiceClientResponse<YourDto> getYourEntity(Integer id);
-  ServiceClientResponse<YourCreateResponse> createYourEntity(YourCreateRequest request);
+    ServiceClientResponse<YourDto> getYourEntity(Integer id);
+
+    ServiceClientResponse<YourCreateResponse> createYourEntity(YourCreateRequest request);
 }
 ```
 
@@ -128,25 +138,26 @@ This shields your business code from generated artifacts and provides a stable c
 Example auto-wiring configuration:
 
 ```java
+
 @Configuration
 public class YourApiClientConfig {
 
-  @Bean
-  RestClient yourRestClient(RestClient.Builder builder,
+    @Bean
+    RestClient yourRestClient(RestClient.Builder builder,
+                              @Value("${your.api.base-url}") String baseUrl) {
+        return builder.baseUrl(baseUrl).build();
+    }
+
+    @Bean
+    ApiClient yourApiClient(RestClient yourRestClient,
                             @Value("${your.api.base-url}") String baseUrl) {
-    return builder.baseUrl(baseUrl).build();
-  }
+        return new ApiClient(yourRestClient).setBasePath(baseUrl);
+    }
 
-  @Bean
-  ApiClient yourApiClient(RestClient yourRestClient,
-                          @Value("${your.api.base-url}") String baseUrl) {
-    return new ApiClient(yourRestClient).setBasePath(baseUrl);
-  }
-
-  @Bean
-  YourControllerApi yourControllerApi(ApiClient apiClient) {
-    return new YourControllerApi(apiClient);
-  }
+    @Bean
+    YourControllerApi yourControllerApi(ApiClient yourApiClient) {
+        return new YourControllerApi(yourApiClient);
+    }
 }
 ```
 
@@ -161,6 +172,7 @@ your.api.base-url=http://localhost:8084/your-service
 ## 8) Usage Example
 
 ```java
+
 @Autowired
 private YourControllerApi yourApi;
 
@@ -178,7 +190,8 @@ public void demo() {
 
 * Dependencies like `spring-web`, `jakarta.*` are often marked **provided** — your host app must supply them.
 * Re-run `curl` + `mvn clean install` whenever your service’s OpenAPI spec changes.
-* Optional vendor extension `x-class-extra-annotation` can add annotations (e.g., Jackson or Lombok) on generated wrappers.
+* Optional vendor extension `x-class-extra-annotation` can add annotations (e.g., Jackson or Lombok) on generated
+  wrappers.
 
 ---
 
@@ -208,4 +221,5 @@ and dependency declarations.
 
 ---
 
-✅ With this setup, your client project generates **type-safe wrappers** that align with `ServiceResponse<T>` from the server side, without any boilerplate duplication.
+✅ With this setup, your client project generates **type-safe wrappers** that align with `ServiceResponse<T>` from the
+server side, without any boilerplate duplication.
