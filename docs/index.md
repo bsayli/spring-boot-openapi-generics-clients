@@ -1,3 +1,9 @@
+---
+layout: default
+title: Home
+nav_order: 1
+---
+
 # Spring Boot OpenAPI Generics Clients
 
 Welcome! 👋

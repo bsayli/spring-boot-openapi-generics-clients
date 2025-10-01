@@ -1,3 +1,10 @@
+---
+layout: default
+title: Server-Side Adoption
+parent: Adoption Guides
+nav_order: 1
+---
+
 # Adopt the server‑side pieces in your own Spring Boot service (MVC + Springdoc)
 
 **Purpose:** Copy the minimal set of classes/config from `customer-service` into your own microservice so that:

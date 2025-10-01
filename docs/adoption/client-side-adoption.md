@@ -1,3 +1,10 @@
+---
+layout: default
+title: Client-Side Adoption
+parent: Adoption Guides
+nav_order: 2
+---
+
 # Client-Side Integration Guide
 
 This document describes how to integrate the **generics-aware OpenAPI client** into your own microservice project, based
