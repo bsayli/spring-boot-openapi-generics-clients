@@ -1,3 +1,10 @@
+---
+layout: default
+title: Client-Side Build Setup (Maven Plugins & Dependencies)
+parent: Client-Side Adoption
+nav_order: 1
+---
+
 # Client-Side Build Setup (Maven Plugins & Dependencies)
 
 When adopting the **generics-aware OpenAPI client**, make sure to configure your `pom.xml` with the required plugins and
@@ -53,7 +60,22 @@ Add these dependencies to your client module:
 
 ---
 
-## 2) Maven Plugins
+## 2) Maven Properties
+
+Add these properties at the top level of your `pom.xml` (right under `<project>`), so that plugin versions and template
+paths are resolved correctly:
+
+```xml
+<properties>
+    <openapi.generator.version>7.16.0</openapi.generator.version>
+    <openapi.templates.upstream>${project.build.directory}/openapi-templates-upstream</openapi.templates.upstream>
+    <openapi.templates.effective>${project.build.directory}/openapi-templates-effective</openapi.templates.effective>
+</properties>
+```
+
+---
+
+## 3) Maven Plugins
 
 These plugins **work together** to unpack upstream templates, overlay your custom Mustache files, and generate type-safe
 client code.
@@ -189,7 +211,7 @@ client code.
 
 ---
 
-## 3) Why These Plugins Matter
+## 4) Why These Plugins Matter
 
 * **maven-dependency-plugin** → unpacks stock OpenAPI templates.
 * **maven-resources-plugin** → overlays your custom Mustache files.

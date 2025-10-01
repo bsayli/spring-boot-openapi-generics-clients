@@ -8,8 +8,16 @@ nav_order: 1
 
 Welcome! 👋
 
-This site is generated from the [`spring-boot-openapi-generics-clients`](https://github.com/bsayli/spring-boot-openapi-generics-clients) repository.
+This site is generated from the [
+`spring-boot-openapi-generics-clients`](https://github.com/bsayli/spring-boot-openapi-generics-clients) repository.
 
+---
+
+---
+layout: default
+title: Adoption Guides
+nav_order: 2
+has_children: true
 ---
 
 ## 📘 Adoption Guides

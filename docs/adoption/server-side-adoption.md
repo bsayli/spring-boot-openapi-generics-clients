@@ -34,37 +34,38 @@ After this guide, your service will:
 ## 2) Add dependencies (pom.xml)
 
 ```xml
+
 <dependencies>
-  <!-- Web + Bean Validation -->
-  <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-web</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-validation</artifactId>
-  </dependency>
+    <!-- Web + Bean Validation -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
 
-  <!-- Springdoc (OpenAPI 3.1 + Swagger UI) -->
-  <dependency>
-    <groupId>org.springdoc</groupId>
-    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-    <version>2.8.13</version>
-  </dependency>
+    <!-- Springdoc (OpenAPI 3.1 + Swagger UI) -->
+    <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        <version>2.8.13</version>
+    </dependency>
 
-  <!-- optional: configuration processor for metadata hints -->
-  <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-configuration-processor</artifactId>
-    <optional>true</optional>
-  </dependency>
+    <!-- optional: configuration processor for metadata hints -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-configuration-processor</artifactId>
+        <optional>true</optional>
+    </dependency>
 
-  <!-- test (optional) -->
-  <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-test</artifactId>
-    <scope>test</scope>
-  </dependency>
+    <!-- test (optional) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <scope>test</scope>
+    </dependency>
 </dependencies>
 ```
 
@@ -82,22 +83,28 @@ Add your usual build plugins (compiler, surefire/failsafe, jacoco) as you prefer
 **`common/api/response/ServiceResponse.java`**
 
 ```java
-package <your.base>.common.api.response;
+package
+
+<your.base>.common.api.response;
 
 import java.util.Collections;
 import java.util.List;
+
 import org.springframework.http.HttpStatus;
 
 public record ServiceResponse<T>(int status, String message, T data, List<ErrorDetail> errors) {
     public static <T> ServiceResponse<T> ok(T data) {
         return new ServiceResponse<>(HttpStatus.OK.value(), "OK", data, Collections.emptyList());
     }
+
     public static <T> ServiceResponse<T> of(HttpStatus status, String message, T data) {
         return new ServiceResponse<>(status.value(), message, data, Collections.emptyList());
     }
+
     public static <T> ServiceResponse<T> error(HttpStatus status, String message) {
         return new ServiceResponse<>(status.value(), message, null, Collections.emptyList());
     }
+
     public static <T> ServiceResponse<T> error(HttpStatus status, String message, List<ErrorDetail> errors) {
         return new ServiceResponse<>(status.value(), message, null, errors != null ? errors : Collections.emptyList());
     }
@@ -209,36 +216,40 @@ public class SwaggerResponseCustomizer {
 **`ApiResponseSchemaFactory.java`** — builds a *composed* wrapper per concrete `T` (e.g., `CustomerDto`).
 
 ```java
-package <your.base>.common.openapi;
+package
+
+<your.base>.common.openapi;
 
 import static <your.base>.common.openapi.OpenApiSchemas.*;
 
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+
 import java.util.List;
 
 public final class ApiResponseSchemaFactory {
-  private ApiResponseSchemaFactory() {}
-
-  public static Schema<?> createComposedWrapper(String dataRefName) {
-    return createComposedWrapper(dataRefName, null);
-  }
-
-  public static Schema<?> createComposedWrapper(String dataRefName, String classExtraAnnotation) {
-    var schema = new ComposedSchema();
-    schema.setAllOf(List.of(
-      new Schema<>().$ref("#/components/schemas/" + SCHEMA_SERVICE_RESPONSE),
-      new ObjectSchema().addProperty(PROP_DATA, new Schema<>().$ref("#/components/schemas/" + dataRefName))
-    ));
-
-    schema.addExtension(EXT_API_WRAPPER, true);
-    schema.addExtension(EXT_API_WRAPPER_DATATYPE, dataRefName);
-    if (classExtraAnnotation != null && !classExtraAnnotation.isBlank()) {
-      schema.addExtension(EXT_CLASS_EXTRA_ANNOTATION, classExtraAnnotation);
+    private ApiResponseSchemaFactory() {
     }
-    return schema;
-  }
+
+    public static Schema<?> createComposedWrapper(String dataRefName) {
+        return createComposedWrapper(dataRefName, null);
+    }
+
+    public static Schema<?> createComposedWrapper(String dataRefName, String classExtraAnnotation) {
+        var schema = new ComposedSchema();
+        schema.setAllOf(List.of(
+                new Schema<>().$ref("#/components/schemas/" + SCHEMA_SERVICE_RESPONSE),
+                new ObjectSchema().addProperty(PROP_DATA, new Schema<>().$ref("#/components/schemas/" + dataRefName))
+        ));
+
+        schema.addExtension(EXT_API_WRAPPER, true);
+        schema.addExtension(EXT_API_WRAPPER_DATATYPE, dataRefName);
+        if (classExtraAnnotation != null && !classExtraAnnotation.isBlank()) {
+            schema.addExtension(EXT_CLASS_EXTRA_ANNOTATION, classExtraAnnotation);
+        }
+        return schema;
+    }
 }
 ```
 
