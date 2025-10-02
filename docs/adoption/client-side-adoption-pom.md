@@ -18,6 +18,7 @@ project.
 Add these dependencies to your client module:
 
 ```xml
+
 <dependencies>
     <!-- Spring Boot (provided by host application) -->
     <dependency>
@@ -81,131 +82,146 @@ These plugins **work together** to unpack upstream templates, overlay your custo
 client code.
 
 ```xml
+
 <build>
-  <plugins>
-    <!-- Unpack upstream OpenAPI templates -->
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-dependency-plugin</artifactId>
-      <executions>
-        <execution>
-          <id>unpack-openapi-upstream-templates</id>
-          <phase>generate-sources</phase>
-          <goals><goal>unpack</goal></goals>
-          <configuration>
-            <artifactItems>
-              <artifactItem>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator</artifactId>
-                <version>${openapi.generator.version}</version>
-                <type>jar</type>
-                <includes>templates/Java/**</includes>
-                <outputDirectory>${openapi.templates.upstream}</outputDirectory>
-              </artifactItem>
-            </artifactItems>
-          </configuration>
-        </execution>
-      </executions>
-    </plugin>
+    <plugins>
+        <!-- Unpack upstream OpenAPI templates -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>unpack-openapi-upstream-templates</id>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>unpack</goal>
+                    </goals>
+                    <configuration>
+                        <artifactItems>
+                            <artifactItem>
+                                <groupId>org.openapitools</groupId>
+                                <artifactId>openapi-generator</artifactId>
+                                <version>${openapi.generator.version}</version>
+                                <type>jar</type>
+                                <includes>templates/Java/**</includes>
+                                <outputDirectory>${openapi.templates.upstream}</outputDirectory>
+                            </artifactItem>
+                        </artifactItems>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
 
-    <!-- Overlay local Mustache templates on top of upstream -->
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-resources-plugin</artifactId>
-      <executions>
-        <execution>
-          <id>copy-upstream-to-effective</id>
-          <phase>generate-sources</phase>
-          <goals><goal>copy-resources</goal></goals>
-          <configuration>
-            <outputDirectory>${openapi.templates.effective}</outputDirectory>
-            <resources>
-              <resource>
-                <directory>${openapi.templates.upstream}/templates</directory>
-                <includes><include>Java/**</include></includes>
-              </resource>
-            </resources>
-          </configuration>
-        </execution>
-        <execution>
-          <id>overlay-local-templates</id>
-          <phase>generate-sources</phase>
-          <goals><goal>copy-resources</goal></goals>
-          <configuration>
-            <outputDirectory>${openapi.templates.effective}/Java</outputDirectory>
-            <overwrite>true</overwrite>
-            <resources>
-              <resource>
-                <directory>src/main/resources/openapi-templates</directory>
-                <includes><include>**/*.mustache</include></includes>
-              </resource>
-            </resources>
-          </configuration>
-        </execution>
-      </executions>
-    </plugin>
+        <!-- Overlay local Mustache templates on top of upstream -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>copy-upstream-to-effective</id>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                        <outputDirectory>${openapi.templates.effective}</outputDirectory>
+                        <resources>
+                            <resource>
+                                <directory>${openapi.templates.upstream}/templates</directory>
+                                <includes>
+                                    <include>Java/**</include>
+                                </includes>
+                            </resource>
+                        </resources>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>overlay-local-templates</id>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                        <outputDirectory>${openapi.templates.effective}/Java</outputDirectory>
+                        <overwrite>true</overwrite>
+                        <resources>
+                            <resource>
+                                <directory>src/main/resources/openapi-templates</directory>
+                                <includes>
+                                    <include>**/*.mustache</include>
+                                </includes>
+                            </resource>
+                        </resources>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
 
-    <!-- Generate OpenAPI client code -->
-    <plugin>
-      <groupId>org.openapitools</groupId>
-      <artifactId>openapi-generator-maven-plugin</artifactId>
-      <version>${openapi.generator.version}</version>
-      <executions>
-        <execution>
-          <id>generate-client</id>
-          <phase>generate-sources</phase>
-          <goals><goal>generate</goal></goals>
-          <configuration>
-            <inputSpec>${project.basedir}/src/main/resources/your-api-docs.yaml</inputSpec>
-            <generatorName>java</generatorName>
-            <library>restclient</library>
-            <output>${project.build.directory}/generated-sources/openapi</output>
+        <!-- Generate OpenAPI client code -->
+        <plugin>
+            <groupId>org.openapitools</groupId>
+            <artifactId>openapi-generator-maven-plugin</artifactId>
+            <version>${openapi.generator.version}</version>
+            <executions>
+                <execution>
+                    <id>generate-client</id>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>generate</goal>
+                    </goals>
+                    <configuration>
+                        <inputSpec>${project.basedir}/src/main/resources/your-api-docs.yaml</inputSpec>
+                        <generatorName>java</generatorName>
+                        <library>restclient</library>
+                        <output>${project.build.directory}/generated-sources/openapi</output>
 
-            <apiPackage>your.base.openapi.client.generated.api</apiPackage>
-            <modelPackage>your.base.openapi.client.generated.dto</modelPackage>
-            <invokerPackage>your.base.openapi.client.generated.invoker</invokerPackage>
+                        <apiPackage>your.base.openapi.client.generated.api</apiPackage>
+                        <modelPackage>your.base.openapi.client.generated.dto</modelPackage>
+                        <invokerPackage>your.base.openapi.client.generated.invoker</invokerPackage>
 
-            <templateDirectory>${openapi.templates.effective}/Java</templateDirectory>
-            <generateSupportingFiles>true</generateSupportingFiles>
-            <generateApiTests>false</generateApiTests>
-            <generateModelTests>false</generateModelTests>
+                        <templateDirectory>${openapi.templates.effective}/Java</templateDirectory>
+                        <generateSupportingFiles>true</generateSupportingFiles>
+                        <generateApiTests>false</generateApiTests>
+                        <generateModelTests>false</generateModelTests>
 
-            <configOptions>
-              <useSpringBoot3>true</useSpringBoot3>
-              <useJakartaEe>true</useJakartaEe>
-              <serializationLibrary>jackson</serializationLibrary>
-              <dateLibrary>java8</dateLibrary>
-              <useBeanValidation>true</useBeanValidation>
-              <openApiNullable>false</openApiNullable>
-              <sourceFolder>src/gen/java</sourceFolder>
-            </configOptions>
+                        <configOptions>
+                            <useSpringBoot3>true</useSpringBoot3>
+                            <useJakartaEe>true</useJakartaEe>
+                            <serializationLibrary>jackson</serializationLibrary>
+                            <dateLibrary>java8</dateLibrary>
+                            <useBeanValidation>true</useBeanValidation>
+                            <openApiNullable>false</openApiNullable>
+                            <sourceFolder>src/gen/java</sourceFolder>
+                        </configOptions>
 
-            <additionalProperties>
-              <additionalProperty>commonPackage=your.base.openapi.client.common</additionalProperty>
-            </additionalProperties>
-          </configuration>
-        </execution>
-      </executions>
-    </plugin>
+                        <additionalProperties>
+                            <additionalProperty>commonPackage=your.base.openapi.client.common</additionalProperty>
+                        </additionalProperties>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
 
-    <!-- Add generated sources to compilation -->
-    <plugin>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>build-helper-maven-plugin</artifactId>
-      <executions>
-        <execution>
-          <id>add-generated-sources</id>
-          <phase>generate-sources</phase>
-          <goals><goal>add-source</goal></goals>
-          <configuration>
-            <sources>
-              <source>${project.build.directory}/generated-sources/openapi/src/gen/java</source>
-            </sources>
-          </configuration>
-        </execution>
-      </executions>
-    </plugin>
-  </plugins>
+        <!-- Add generated sources to compilation -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>add-generated-sources</id>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>add-source</goal>
+                    </goals>
+                    <configuration>
+                        <sources>
+                            <source>${project.build.directory}/generated-sources/openapi/src/gen/java</source>
+                        </sources>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
 </build>
 ```
 

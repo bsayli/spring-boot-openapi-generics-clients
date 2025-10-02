@@ -167,7 +167,9 @@ public final class OpenApiSchemas {
 **`SwaggerResponseCustomizer.java`** — defines the *base* `ServiceResponse` envelope as a schema once.
 
 ```java
-package <your.base>.common.openapi;
+package
+
+<your.base>.common.openapi;
 
 import static <your.base>.common.openapi.OpenApiSchemas.*;
 
@@ -182,34 +184,34 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerResponseCustomizer {
 
-  @Bean
-  public OpenApiCustomizer responseEnvelopeSchemas() {
-    return openApi -> {
-      if (!openApi.getComponents().getSchemas().containsKey(SCHEMA_SERVICE_RESPONSE)) {
-        openApi.getComponents().addSchemas(
-          SCHEMA_SERVICE_RESPONSE,
-          new ObjectSchema()
-            .addProperty(PROP_STATUS, new IntegerSchema().format("int32"))
-            .addProperty(PROP_MESSAGE, new StringSchema())
-            .addProperty(PROP_ERRORS, new ArraySchema().items(
-                new ObjectSchema()
-                  .addProperty(PROP_ERROR_CODE, new StringSchema())
-                  .addProperty(PROP_MESSAGE, new StringSchema()))));
-      }
-      if (!openApi.getComponents().getSchemas().containsKey(SCHEMA_SERVICE_RESPONSE_VOID)) {
-        openApi.getComponents().addSchemas(
-          SCHEMA_SERVICE_RESPONSE_VOID,
-          new ObjectSchema()
-            .addProperty(PROP_STATUS, new IntegerSchema().format("int32"))
-            .addProperty(PROP_MESSAGE, new StringSchema())
-            .addProperty(PROP_DATA, new ObjectSchema())
-            .addProperty(PROP_ERRORS, new ArraySchema().items(
-                new ObjectSchema()
-                  .addProperty(PROP_ERROR_CODE, new StringSchema())
-                  .addProperty(PROP_MESSAGE, new StringSchema()))));
-      }
-    };
-  }
+    @Bean
+    public OpenApiCustomizer responseEnvelopeSchemas() {
+        return openApi -> {
+            if (!openApi.getComponents().getSchemas().containsKey(SCHEMA_SERVICE_RESPONSE)) {
+                openApi.getComponents().addSchemas(
+                        SCHEMA_SERVICE_RESPONSE,
+                        new ObjectSchema()
+                                .addProperty(PROP_STATUS, new IntegerSchema().format("int32"))
+                                .addProperty(PROP_MESSAGE, new StringSchema())
+                                .addProperty(PROP_ERRORS, new ArraySchema().items(
+                                        new ObjectSchema()
+                                                .addProperty(PROP_ERROR_CODE, new StringSchema())
+                                                .addProperty(PROP_MESSAGE, new StringSchema()))));
+            }
+            if (!openApi.getComponents().getSchemas().containsKey(SCHEMA_SERVICE_RESPONSE_VOID)) {
+                openApi.getComponents().addSchemas(
+                        SCHEMA_SERVICE_RESPONSE_VOID,
+                        new ObjectSchema()
+                                .addProperty(PROP_STATUS, new IntegerSchema().format("int32"))
+                                .addProperty(PROP_MESSAGE, new StringSchema())
+                                .addProperty(PROP_DATA, new ObjectSchema())
+                                .addProperty(PROP_ERRORS, new ArraySchema().items(
+                                        new ObjectSchema()
+                                                .addProperty(PROP_ERROR_CODE, new StringSchema())
+                                                .addProperty(PROP_MESSAGE, new StringSchema()))));
+            }
+        };
+    }
 }
 ```
 
@@ -256,7 +258,9 @@ public final class ApiResponseSchemaFactory {
 **`ResponseTypeIntrospector.java`** — unwraps return types until it finds `ServiceResponse<T>` and extracts `T`.
 
 ```java
-package <your.base>.common.openapi.introspector;
+package
+
+<your.base>.common.openapi.introspector;
 
 import <your.base>.common.api.response.ServiceResponse;
 import java.lang.reflect.Method;
@@ -264,6 +268,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ResolvableType;
@@ -274,55 +279,59 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 
 @Component
 public final class ResponseTypeIntrospector {
-  private static final Logger log = LoggerFactory.getLogger(ResponseTypeIntrospector.class);
-  private static final int MAX_UNWRAP_DEPTH = 8;
-  private static final Set<String> REACTOR_WRAPPERS = Set.of("reactor.core.publisher.Mono", "reactor.core.publisher.Flux");
+    private static final Logger log = LoggerFactory.getLogger(ResponseTypeIntrospector.class);
+    private static final int MAX_UNWRAP_DEPTH = 8;
+    private static final Set<String> REACTOR_WRAPPERS = Set.of("reactor.core.publisher.Mono", "reactor.core.publisher.Flux");
 
-  public Optional<String> extractDataRefName(Method method) {
-    if (method == null) return Optional.empty();
-    ResolvableType type = ResolvableType.forMethodReturnType(method);
-    type = unwrapToServiceResponse(type);
+    public Optional<String> extractDataRefName(Method method) {
+        if (method == null) return Optional.empty();
+        ResolvableType type = ResolvableType.forMethodReturnType(method);
+        type = unwrapToServiceResponse(type);
 
-    Class<?> raw = type.resolve();
-    if (raw == null || !ServiceResponse.class.isAssignableFrom(raw)) return Optional.empty();
-    if (!type.hasGenerics()) return Optional.empty();
+        Class<?> raw = type.resolve();
+        if (raw == null || !ServiceResponse.class.isAssignableFrom(raw)) return Optional.empty();
+        if (!type.hasGenerics()) return Optional.empty();
 
-    Class<?> dataClass = type.getGeneric(0).resolve();
-    Optional<String> ref = Optional.ofNullable(dataClass).map(Class::getSimpleName);
+        Class<?> dataClass = type.getGeneric(0).resolve();
+        Optional<String> ref = Optional.ofNullable(dataClass).map(Class::getSimpleName);
 
-    if (log.isDebugEnabled()) {
-      log.debug("Introspected method [{}]: wrapper [{}], data [{}]", method.toGenericString(), raw.getSimpleName(), ref.orElse("<none>"));
+        if (log.isDebugEnabled()) {
+            log.debug("Introspected method [{}]: wrapper [{}], data [{}]", method.toGenericString(), raw.getSimpleName(), ref.orElse("<none>"));
+        }
+        return ref;
     }
-    return ref;
-  }
 
-  private ResolvableType unwrapToServiceResponse(ResolvableType type) {
-    for (int guard = 0; guard < MAX_UNWRAP_DEPTH; guard++) {
-      Class<?> raw = type.resolve();
-      if (raw == null || ServiceResponse.class.isAssignableFrom(raw)) return type;
-      ResolvableType next = nextLayer(type, raw);
-      if (next == null) return type;
-      type = next;
+    private ResolvableType unwrapToServiceResponse(ResolvableType type) {
+        for (int guard = 0; guard < MAX_UNWRAP_DEPTH; guard++) {
+            Class<?> raw = type.resolve();
+            if (raw == null || ServiceResponse.class.isAssignableFrom(raw)) return type;
+            ResolvableType next = nextLayer(type, raw);
+            if (next == null) return type;
+            type = next;
+        }
+        return type;
     }
-    return type;
-  }
 
-  private ResolvableType nextLayer(ResolvableType current, Class<?> raw) {
-    return switch (raw) {
-      case Class<?> c when ResponseEntity.class.isAssignableFrom(c) -> current.getGeneric(0);
-      case Class<?> c when CompletionStage.class.isAssignableFrom(c) || Future.class.isAssignableFrom(c) -> current.getGeneric(0);
-      case Class<?> c when DeferredResult.class.isAssignableFrom(c) || WebAsyncTask.class.isAssignableFrom(c) -> current.getGeneric(0);
-      case Class<?> c when REACTOR_WRAPPERS.contains(c.getName()) -> current.getGeneric(0);
-      default -> null;
-    };
-  }
+    private ResolvableType nextLayer(ResolvableType current, Class<?> raw) {
+        return switch (raw) {
+            case Class<?> c when ResponseEntity.class.isAssignableFrom(c) -> current.getGeneric(0);
+            case Class<?> c when CompletionStage.class.isAssignableFrom(c) || Future.class.isAssignableFrom(c) ->
+                    current.getGeneric(0);
+            case Class<?> c when DeferredResult.class.isAssignableFrom(c) || WebAsyncTask.class.isAssignableFrom(c) ->
+                    current.getGeneric(0);
+            case Class<?> c when REACTOR_WRAPPERS.contains(c.getName()) -> current.getGeneric(0);
+            default -> null;
+        };
+    }
 }
 ```
 
 **`autoreg/AutoWrapperSchemaCustomizer.java`** — collects all controller return types and registers composed schemas.
 
 ```java
-package <your.base>.common.openapi.autoreg;
+package
+
+<your.base>.common.openapi.autoreg;
 
 import <your.base>.common.openapi.ApiResponseSchemaFactory;
 import <your.base>.common.openapi.OpenApiSchemas;
@@ -330,6 +339,7 @@ import <your.base>.common.openapi.introspector.ResponseTypeIntrospector;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -340,38 +350,40 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 @Configuration
 public class AutoWrapperSchemaCustomizer {
-  private final Set<String> dataRefs;
-  private final String classExtraAnnotation;
+    private final Set<String> dataRefs;
+    private final String classExtraAnnotation;
 
-  public AutoWrapperSchemaCustomizer(
-      ListableBeanFactory beanFactory,
-      ResponseTypeIntrospector introspector,
-      @Value("${app.openapi.wrapper.class-extra-annotation:}") String classExtraAnnotation) {
+    public AutoWrapperSchemaCustomizer(
+            ListableBeanFactory beanFactory,
+            ResponseTypeIntrospector introspector,
+            @Value("${app.openapi.wrapper.class-extra-annotation:}") String classExtraAnnotation) {
 
-    Set<String> refs = new LinkedHashSet<>();
-    beanFactory.getBeansOfType(RequestMappingHandlerMapping.class).values()
-      .forEach(rmh -> rmh.getHandlerMethods().values().stream()
-        .map(HandlerMethod::getMethod)
-        .forEach(m -> introspector.extractDataRefName(m).ifPresent(refs::add)));
+        Set<String> refs = new LinkedHashSet<>();
+        beanFactory.getBeansOfType(RequestMappingHandlerMapping.class).values()
+                .forEach(rmh -> rmh.getHandlerMethods().values().stream()
+                        .map(HandlerMethod::getMethod)
+                        .forEach(m -> introspector.extractDataRefName(m).ifPresent(refs::add)));
 
-    this.dataRefs = Collections.unmodifiableSet(refs);
-    this.classExtraAnnotation = (classExtraAnnotation == null || classExtraAnnotation.isBlank()) ? null : classExtraAnnotation;
-  }
+        this.dataRefs = Collections.unmodifiableSet(refs);
+        this.classExtraAnnotation = (classExtraAnnotation == null || classExtraAnnotation.isBlank()) ? null : classExtraAnnotation;
+    }
 
-  @Bean
-  public OpenApiCustomizer autoResponseWrappers() {
-    return openApi -> dataRefs.forEach(ref -> {
-      String name = OpenApiSchemas.SCHEMA_SERVICE_RESPONSE + ref;
-      openApi.getComponents().addSchemas(name, ApiResponseSchemaFactory.createComposedWrapper(ref, classExtraAnnotation));
-    });
-  }
+    @Bean
+    public OpenApiCustomizer autoResponseWrappers() {
+        return openApi -> dataRefs.forEach(ref -> {
+            String name = OpenApiSchemas.SCHEMA_SERVICE_RESPONSE + ref;
+            openApi.getComponents().addSchemas(name, ApiResponseSchemaFactory.createComposedWrapper(ref, classExtraAnnotation));
+        });
+    }
 }
 ```
 
 **`OpenApiConfig.java`** — optional, for title/version/server URL.
 
 ```java
-package <your.base>.common.openapi;
+package
+
+<your.base>.common.openapi;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -382,19 +394,19 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenApiConfig {
-  @Value("${app.openapi.version:${project.version:unknown}}")
-  private String version;
-  @Value("${app.openapi.base-url:}")
-  private String baseUrl;
+    @Value("${app.openapi.version:${project.version:unknown}}")
+    private String version;
+    @Value("${app.openapi.base-url:}")
+    private String baseUrl;
 
-  @Bean
-  public OpenAPI serviceOpenAPI() {
-    var openapi = new OpenAPI().info(new Info().title("Your Service API").version(version).description("Generic responses via OpenAPI"));
-    if (baseUrl != null && !baseUrl.isBlank()) {
-      openapi.addServersItem(new Server().url(baseUrl).description("Local service URL"));
+    @Bean
+    public OpenAPI serviceOpenAPI() {
+        var openapi = new OpenAPI().info(new Info().title("Your Service API").version(version).description("Generic responses via OpenAPI"));
+        if (baseUrl != null && !baseUrl.isBlank()) {
+            openapi.addServersItem(new Server().url(baseUrl).description("Local service URL"));
+        }
+        return openapi;
     }
-    return openapi;
-  }
 }
 ```
 
@@ -436,27 +448,31 @@ springdoc:
 Example controller method (update to your domain):
 
 ```java
+
 @RestController
 @RequestMapping(value = "/v1/customers", produces = MediaType.APPLICATION_JSON_VALUE)
 @Validated
 class CustomerController {
-  private final CustomerService customerService;
-  public CustomerController(CustomerService customerService) { this.customerService = customerService; }
+    private final CustomerService customerService;
 
-  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-  @ResponseStatus(HttpStatus.CREATED)
-  public ResponseEntity<ServiceResponse<CustomerCreateResponse>> createCustomer(@Valid @RequestBody CustomerCreateRequest request) {
-    CustomerDto created = customerService.createCustomer(request);
-    CustomerCreateResponse body = new CustomerCreateResponse(created, Instant.now());
-    URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.customerId()).toUri();
-    return ResponseEntity.created(location).body(ServiceResponse.of(HttpStatus.CREATED, "CREATED", body));
-  }
+    public CustomerController(CustomerService customerService) {
+        this.customerService = customerService;
+    }
 
-  @GetMapping("/{customerId}")
-  public ResponseEntity<ServiceResponse<CustomerDto>> getCustomer(@PathVariable @Min(1) Integer customerId) {
-    CustomerDto dto = customerService.getCustomer(customerId);
-    return ResponseEntity.ok(ServiceResponse.ok(dto));
-  }
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<ServiceResponse<CustomerCreateResponse>> createCustomer(@Valid @RequestBody CustomerCreateRequest request) {
+        CustomerDto created = customerService.createCustomer(request);
+        CustomerCreateResponse body = new CustomerCreateResponse(created, Instant.now());
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.customerId()).toUri();
+        return ResponseEntity.created(location).body(ServiceResponse.of(HttpStatus.CREATED, "CREATED", body));
+    }
+
+    @GetMapping("/{customerId}")
+    public ResponseEntity<ServiceResponse<CustomerDto>> getCustomer(@PathVariable @Min(1) Integer customerId) {
+        CustomerDto dto = customerService.getCustomer(customerId);
+        return ResponseEntity.ok(ServiceResponse.ok(dto));
+    }
 }
 ```
 

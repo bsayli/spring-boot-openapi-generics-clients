@@ -216,21 +216,21 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class CustomerApiClientConfig {
 
-  @Bean
-  RestClient customerRestClient(RestClient.Builder builder) {
-    return builder.build();
-  }
+    @Bean
+    RestClient customerRestClient(RestClient.Builder builder) {
+        return builder.build();
+    }
 
-  @Bean
-  ApiClient customerApiClient(RestClient customerRestClient,
-                              @Value("${customer.api.base-url}") String baseUrl) {
-    return new ApiClient(customerRestClient).setBasePath(baseUrl);
-  }
+    @Bean
+    ApiClient customerApiClient(RestClient customerRestClient,
+                                @Value("${customer.api.base-url}") String baseUrl) {
+        return new ApiClient(customerRestClient).setBasePath(baseUrl);
+    }
 
-  @Bean
-  CustomerControllerApi customerControllerApi(ApiClient customerApiClient) {
-    return new CustomerControllerApi(customerApiClient);
-  }
+    @Bean
+    CustomerControllerApi customerControllerApi(ApiClient customerApiClient) {
+        return new CustomerControllerApi(customerApiClient);
+    }
 }
 ```
 
@@ -253,22 +253,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomerClientExample {
 
-  private final CustomerControllerApi customerApi;
-  
-  public CustomerClientExample(CustomerControllerApi customerApi) {
-    this.customerApi = customerApi;
-  }
+    private final CustomerControllerApi customerApi;
 
-  public void createCustomer() {
-    CustomerCreateRequest req = new CustomerCreateRequest()
-            .name("Jane Doe")
-            .email("jane@example.com");
+    public CustomerClientExample(CustomerControllerApi customerApi) {
+        this.customerApi = customerApi;
+    }
 
-    ServiceClientResponse<CustomerCreateResponse> resp = customerApi.createCustomer(req);
+    public void createCustomer() {
+        CustomerCreateRequest req = new CustomerCreateRequest()
+                .name("Jane Doe")
+                .email("jane@example.com");
 
-    System.out.println(resp.getStatus());                       // 201
-    System.out.println(resp.getData().getCustomer().getName()); // "Jane Doe"
-  }
+        ServiceClientResponse<CustomerCreateResponse> resp = customerApi.createCustomer(req);
+
+        System.out.println(resp.getStatus());                       // 201
+        System.out.println(resp.getData().getCustomer().getName()); // "Jane Doe"
+    }
 }
 ```
 
@@ -285,7 +285,9 @@ If you want more control (connection pooling, timeouts, etc.), you can wire the 
 ```java
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
 import io.github.bsayli.openapi.client.generated.invoker.ApiClient;
+
 import java.time.Duration;
+
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
