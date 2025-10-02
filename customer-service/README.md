@@ -26,19 +26,40 @@ against.
 ## 📊 Architecture at a Glance
 
 ```
-Client
-   │
-   ▼
-Customer Service
-   │
-   ▼
-OpenAPI Spec (YAML/JSON)
-   │
-   ▼
-Customer Service Client
+[customer-service]  ── publishes ──>  /v3/api-docs.yaml (OpenAPI contract)
+        │
+        └─ consumed by OpenAPI Generator (+ generics-aware templates)
+                 │
+                 └─> [customer-service-client]  (type-safe wrappers)
+                          │
+                          └─ used by consumer apps (your services)
 ```
 
-This module defines the contract; the client module consumes it.
+### Explanation
+
+* **customer-service** exposes the OpenAPI contract at `/v3/api-docs.yaml` (and Swagger UI).
+* **customer-service-client** runs the OpenAPI Generator against that contract, applying generics-aware Mustache
+  templates to produce **thin wrapper classes**.
+* **Your applications** then depend on this generated client. They call `CustomerControllerApi` (and other APIs)
+  directly without worrying about HTTP details, connection management, or response parsing.
+
+➡️ This separation keeps the **server-side contract** clear, the **client auto-generated**, and the **consumer apps
+strongly typed**.
+
+---
+
+## 🛠 Tech Stack
+
+* **Java 21**
+* **Spring Boot 3.4.10**
+    - spring-boot-starter-web
+    - spring-boot-starter-validation
+    - spring-boot-starter-test (test scope)
+* **OpenAPI / Swagger**
+    - springdoc-openapi-starter-webmvc-ui (2.8.13)
+* **Build & Tools**
+    - Maven 3.9+
+    - JaCoCo, Surefire, Failsafe for test & coverage
 
 ---
 
@@ -225,7 +246,6 @@ mvn test
 * OpenAPI spec (`/v3/api-docs.yaml`) is the input for client generation.
 * Includes **exception handling via `CustomerControllerAdvice`**.
 * Provides **unit tests** for both controller and service layers.
-* Profiles: `local` (default) and `dev` available — can be extended per environment.
 * Focused on clarity and minimal setup.
 * Optional: You can attach extra annotations (e.g., Jackson) to generated wrapper classes by setting  
   `app.openapi.wrapper.class-extra-annotation` in `application.yml`.  

@@ -485,17 +485,40 @@ It enqueues responses for **all CRUD operations** and asserts correct mapping in
 
 ## 📚 Notes
 
-* Dependencies like `spring-web`, `spring-context`, `jackson-*`, `jakarta.*` are marked **provided**; your host app
-  supplies them.
-* Generator options: Spring 6 `RestClient`, Jakarta EE, Jackson, Java 21.
-* OpenAPI spec lives at: `src/main/resources/customer-api-docs.yaml`.
-  If you re-run the server and want an updated client, re-pull the spec:
+* **Provided (host app must supply):**
+    - `org.springframework.boot:spring-boot-starter-web`
+    - `org.springframework.boot:spring-boot-starter`
+    - `jakarta.validation:jakarta.validation-api` ← required for generated model annotations (`@NotNull`, `@Size`, etc.)
+    - `jakarta.annotation:jakarta.annotation-api`
 
+  These are marked as **provided** in the POM. Your host application must include them on the classpath.
+
+* **Included runtime dependency:**
+    - `org.apache.httpcomponents.client5:httpclient5`  
+      Required if you use **Option B (HttpClient5 pooling)**. Already declared as a normal dependency in the POM.
+
+* **Generator & Toolchain:**
+    - Java 21
+    - OpenAPI Generator 7.16.0
+    - Generator options: `useJakartaEe=true`, `serializationLibrary=jackson`, `dateLibrary=java8`,
+      `useBeanValidation=true`
+    - Note: `useBeanValidation=true` → generated code includes **Jakarta Validation** annotations (requires
+      `jakarta.validation-api`).
+
+* **Frameworks (host app / examples):**
+    - Spring Boot 3.4.10
+    - Jakarta Validation API 3.1.1
+    - Apache HttpClient 5.5 (only needed if using Option B)
+
+* **OpenAPI spec location:**
+  `src/main/resources/customer-api-docs.yaml`
+
+  To refresh the spec after restarting the service:
   ```bash
   curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
     -o src/main/resources/customer-api-docs.yaml
   mvn -q clean install
-  ``` 
+  ```
 
 ---
 
@@ -529,7 +552,8 @@ public class ServiceResponseCustomerDeleteResponse
 ```
 
 By default this feature is **not required** and we recommend using the plain `ServiceClientResponse<T>` wrappers
-as-is. However, the hook is available if your project needs to enforce additional annotations (e.g., Jackson, Lombok)
+as-is. However, the hook is available if your project needs to enforce additional annotations (e.g., Jackson, Jakarta
+Validation)
 on top of generated wrapper classes.
 
 ---
@@ -537,14 +561,6 @@ on top of generated wrapper classes.
 ## 🛡 License
 
 This repository is licensed under **MIT** (root `LICENSE`). Submodules inherit the license.
-
-### Packaging note (optional)
-
-This module is **reference-oriented**. If you want to publish it as a reusable library later:
-
-* remove `provided` scopes and pin minimal runtime deps,
-* add a semantic version and release process (e.g., GitHub Release + `mvn deploy` to Maven Central),
-* keep the Mustache overlay in-repo for transparent builds.
 
 ---
 
