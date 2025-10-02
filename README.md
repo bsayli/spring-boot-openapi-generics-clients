@@ -98,8 +98,10 @@ The Java client then uses a tiny Mustache override to render **thin shells** for
 
 ```mustache
 // api_wrapper.mustache
+import {{commonPackage}}.ServiceClientResponse;
+
 public class {{classname}}
-    extends io.github.bsayli.openapi.client.common.ServiceClientResponse<{{vendorExtensions.x-api-wrapper-datatype}}> {
+    extends ServiceClientResponse<{{vendorExtensions.x-api-wrapper-datatype}}> {
 }
 ```
 
@@ -311,7 +313,7 @@ This project may not be the right fit if:
 
 ## 🛡 License
 
-MIT
+This repository is licensed under **MIT** (see [LICENSE](LICENSE)). Submodules inherit the license.
 
 ---
 
