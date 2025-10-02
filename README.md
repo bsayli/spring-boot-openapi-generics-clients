@@ -28,12 +28,13 @@ duplicated wrappers, and keep client code clean.
 - 🛠 [Compatibility Matrix](#-compatibility-matrix)
 - 🚀 [Problem Statement](#-problem-statement)
 - 💡 [Solution](#-solution)
-- ⚡ [Quick Start](#-quick-start)
+- ⚡  [Quick Start](#-quick-start)
 - 🧩 [Tech Stack](#-tech-stack--features)
 - ✅ [Key Features](#-key-features)
 - ✨ [Usage Example](#-usage-example-adapter-interface)
 - 📦 [Related Modules](#-related-modules-quick-view)
 - 📘 [Adoption Guides](#-adoption-guides)
+- 🔗 [References & Links](#-references--links)
 
 ### 📦 Modules in this Repository
 
@@ -301,10 +302,10 @@ This project may not be the right fit if:
 
 ---
 
-## 📖 Related Article
+## 📂 References & Links
 
-This repository is based on my article:
-👉 [Type-Safe Generic API Responses with Spring Boot 3.4, OpenAPI Generator, and Custom Templates](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+- 📘 [Medium Article — Type-Safe Generic API Responses](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+- 🌐 [GitHub Pages (Adoption Guides)](https://bsayli.github.io/spring-boot-openapi-generics-clients/)
 
 ---
 
