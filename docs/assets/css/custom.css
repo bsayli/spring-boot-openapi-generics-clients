@@ -8,16 +8,13 @@
 }
 
 .callout {
-    border-left: 4px solid #0ea5e9; /* cyan */
-    background: #f8fafc;            /* very light slate */
+    border-left: 4px solid #0ea5e9;
+    background: #f8fafc;
     padding: 0.85rem 1rem;
     margin: 1.25rem 0;
     border-radius: 8px;
 }
-.callout .title {
-    font-weight: 700;
-    margin-bottom: 0.35rem;
-}
-.callout.learn-more {
-    border-left-color: #2563eb; /* blue-600 */
-}
+.callout.learn-more { border-left-color: #2563eb; }
+
+.callout ul { margin: 0.25rem 0 0 1rem; }
+.callout li { margin: 0.25rem 0; }
