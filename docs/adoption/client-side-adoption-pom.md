@@ -67,6 +67,7 @@ Add these properties at the top level of your `pom.xml` (right under `<project>`
 paths are resolved correctly:
 
 ```xml
+
 <properties>
     <openapi.generator.version>7.16.0</openapi.generator.version>
     <openapi.templates.upstream>${project.build.directory}/openapi-templates-upstream</openapi.templates.upstream>

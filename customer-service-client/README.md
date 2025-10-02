@@ -241,6 +241,7 @@ public class CustomerApiClientConfig {
 ```properties
 customer.api.base-url=http://localhost:8084/customer-service
 ```
+
 **Usage example:**
 
 ```java

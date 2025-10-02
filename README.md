@@ -306,7 +306,10 @@ This project may not be the right fit if:
 
 ## 📂 References & Links
 
-- 📘 [Medium Article — Type-Safe Generic API Responses](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+-
+
+📘 [Medium Article — Type-Safe Generic API Responses](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+
 - 🌐 [GitHub Pages (Adoption Guides)](https://bsayli.github.io/spring-boot-openapi-generics-clients/)
 
 ---

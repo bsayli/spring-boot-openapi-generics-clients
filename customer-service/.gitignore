@@ -46,9 +46,7 @@ target/
 
 # IDE specific files and folders
 .idea/
-.project
-.classpath
-.settings/
+*.iml
 
 # Maven specific files and folders
 **/target/
@@ -64,7 +62,6 @@ buildNumber.properties
 
 
 # Generated source folders (common choices)
-target/
 generated-sources/
 generated-classes/
 /HELP.md

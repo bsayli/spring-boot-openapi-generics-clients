@@ -40,10 +40,11 @@ against.
 * **customer-service** exposes an **enhanced OpenAPI contract** at `/v3/api-docs.yaml` (and Swagger UI).  
   It auto-registers generic wrappers (`ServiceResponse<T>`) using `OpenApiCustomizer` and `ResponseTypeIntrospector`,  
   enriching the spec with vendor extensions:
-  - `x-api-wrapper: true`
-  - `x-api-wrapper-datatype: <T>`
+    - `x-api-wrapper: true`
+    - `x-api-wrapper-datatype: <T>`
 
-* **customer-service-client** runs the OpenAPI Generator against this enhanced contract, applying generics-aware Mustache templates to generate **thin wrapper classes** instead of duplicating full models.
+* **customer-service-client** runs the OpenAPI Generator against this enhanced contract, applying generics-aware
+  Mustache templates to generate **thin wrapper classes** instead of duplicating full models.
 
 ---
 
@@ -163,7 +164,8 @@ http://localhost:8084/customer-service/v1/customers
 * OpenAPI JSON → `http://localhost:8084/customer-service/v3/api-docs`
 * OpenAPI YAML → `http://localhost:8084/customer-service/v3/api-docs.yaml`
 
-➡️ The YAML/JSON spec above is the **contract** that the client module (`customer-service-client`) consumes when generating code.<br/>
+➡️ The YAML/JSON spec above is the **contract** that the client module (`customer-service-client`) consumes when
+generating code.<br/>
 For clarity, in this repository it is saved under the client module as `src/main/resources/customer-api-docs.yaml`.
 ---
 
@@ -183,6 +185,7 @@ ServiceResponseCustomerDto:
   x-api-wrapper: true
   x-api-wrapper-datatype: CustomerDto
 ```
+
 ➡️ These `x-api-wrapper` fields are added automatically by the  
 `OpenApiCustomizer` and `ResponseTypeIntrospector` so that the client  
 generator knows which classes should become **thin wrappers** extending the  

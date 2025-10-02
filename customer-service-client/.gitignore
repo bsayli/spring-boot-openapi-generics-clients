@@ -46,9 +46,7 @@ target/
 
 # IDE specific files and folders
 .idea/
-.project
-.classpath
-.settings/
+*.iml
 
 # Maven specific files and folders
 **/target/
