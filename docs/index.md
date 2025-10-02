@@ -79,8 +79,7 @@ Generated wrappers can be found under:
 
 ---
 
-## 📖 More Docs
+## 📂 References & Links
 
-[![View on GitHub](https://img.shields.io/badge/GitHub-View%20Repo-blue?logo=github)](https://github.com/bsayli/spring-boot-openapi-generics-clients)
-
-See the full [README on GitHub](https://github.com/bsayli/spring-boot-openapi-generics-clients#readme).
+- 🌐 [GitHub Repository](https://github.com/bsayli/spring-boot-openapi-generics-clients)
+- 📘 [Medium Article — Type-Safe Generic API Responses](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)  
