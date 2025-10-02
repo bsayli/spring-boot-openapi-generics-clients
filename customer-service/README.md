@@ -26,7 +26,7 @@ against.
 ## 📊 Architecture at a Glance
 
 ```
-[customer-service]  ── publishes ──>  /v3/api-docs.yaml (OpenAPI contract)
+[customer-service]  ── publishes ──>  /v3/api-docs.yaml (OpenAPI contract with x-api-wrapper extensions)
         │
         └─ consumed by OpenAPI Generator (+ generics-aware templates)
                  │
@@ -37,14 +37,13 @@ against.
 
 ### Explanation
 
-* **customer-service** exposes the OpenAPI contract at `/v3/api-docs.yaml` (and Swagger UI).
-* **customer-service-client** runs the OpenAPI Generator against that contract, applying generics-aware Mustache
-  templates to produce **thin wrapper classes**.
-* **Your applications** then depend on this generated client. They call `CustomerControllerApi` (and other APIs)
-  directly without worrying about HTTP details, connection management, or response parsing.
+* **customer-service** exposes an **enhanced OpenAPI contract** at `/v3/api-docs.yaml` (and Swagger UI).  
+  It auto-registers generic wrappers (`ServiceResponse<T>`) using `OpenApiCustomizer` and `ResponseTypeIntrospector`,  
+  enriching the spec with vendor extensions:
+  - `x-api-wrapper: true`
+  - `x-api-wrapper-datatype: <T>`
 
-➡️ This separation keeps the **server-side contract** clear, the **client auto-generated**, and the **consumer apps
-strongly typed**.
+* **customer-service-client** runs the OpenAPI Generator against this enhanced contract, applying generics-aware Mustache templates to generate **thin wrapper classes** instead of duplicating full models.
 
 ---
 
@@ -81,7 +80,7 @@ curl -X POST "http://localhost:8084/customer-service/v1/customers" \
   -d '{"name":"Jane Doe","email":"jane@example.com"}'
 ```
 
-**Expected response (shape):**
+**Expected response (wrapped in `ServiceResponse<CustomerCreateResponse>`):**
 
 ```json
 {
@@ -165,7 +164,32 @@ http://localhost:8084/customer-service/v1/customers
 * OpenAPI YAML → `http://localhost:8084/customer-service/v3/api-docs.yaml`
 
 ➡️ The YAML/JSON spec above is the **contract** that the client module (`customer-service-client`) consumes when
-generating code.
+generating code.  
+For clarity, in this repository the file is saved under the client module as  
+`src/main/resources/customer-api-docs.yaml`.
+
+---
+
+### Example Wrapper Snippet
+
+The generated OpenAPI YAML (`/v3/api-docs.yaml`) includes wrapper schemas
+with vendor extensions that mark generic response envelopes:
+
+```yaml
+ServiceResponseCustomerDto:
+  allOf:
+    - $ref: "#/components/schemas/ServiceResponse"
+    - type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/CustomerDto"
+  x-api-wrapper: true
+  x-api-wrapper-datatype: CustomerDto
+```
+➡️ These `x-api-wrapper` fields are added automatically by the  
+`OpenApiCustomizer` and `ResponseTypeIntrospector` so that the client  
+generator knows which classes should become **thin wrappers** extending the  
+generic base.
 
 ---
 
