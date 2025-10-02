@@ -66,7 +66,7 @@ curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
 3. **Generate & build the client**
 
 ```bash
-mvn clean install
+mvn -q clean install
 ```
 
 ### What got generated?
@@ -242,41 +242,10 @@ public class CustomerApiClientConfig {
 customer.api.base-url=http://localhost:8084/customer-service
 ```
 
-**Usage example:**
-
-```java
-import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
-import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
-import io.github.bsayli.openapi.client.generated.dto.CustomerCreateResponse;
-import io.github.bsayli.openapi.client.common.ServiceClientResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-@Component
-public class CustomerClientExample {
-
-    private final CustomerControllerApi customerApi;
-
-    public CustomerClientExample(CustomerControllerApi customerApi) {
-        this.customerApi = customerApi;
-    }
-
-    public void createCustomer() {
-        CustomerCreateRequest req = new CustomerCreateRequest()
-                .name("Jane Doe")
-                .email("jane@example.com");
-
-        ServiceClientResponse<CustomerCreateResponse> resp = customerApi.createCustomer(req);
-
-        System.out.println(resp.getStatus());                       // 201
-        System.out.println(resp.getData().getCustomer().getName()); // "Jane Doe"
-    }
-}
-```
-
-> Tip — The return type is strongly typed: `ServiceClientResponse<CustomerCreateResponse>`.
-> You can safely navigate `resp.getData().getCustomer()` without casting.
-> Handle non-2xx via Spring exceptions (e.g., `HttpClientErrorException`) as usual.
+> **Note — demo only:**  
+> The configuration above wires the generated client beans for quick local demos.  
+> In production, you should encapsulate `CustomerControllerApi` behind your own Adapter (see [✅ Using the Client in Another Microservice](#-using-the-client-in-another-microservice) below).  
+> This keeps generated code isolated and lets your services depend only on stable adapter interfaces.
 
 ---
 
@@ -438,6 +407,101 @@ This ensures:
 * Business code depends only on the adapter interface.
 * Naming conventions are consistent with the service (createCustomer, getCustomer, getCustomers, updateCustomer,
   deleteCustomer).
+
+---
+
+## 🔗 Using the Client in Another Microservice
+
+When another microservice (e.g., `payment-service`) depends on `customer-service-client`, the recommended approach is to wrap the generated adapter behind a stable interface in your own project.
+
+This keeps generated code fully encapsulated and exposes only a clean contract to the rest of your service.
+
+---
+
+### Example Structure in `payment-service`
+
+```
+com.example.payment.client.customer
+ ├─ CustomerServiceClient.java        (interface)
+ └─ CustomerServiceClientImpl.java    (implementation using injected adapter)
+```
+
+### Interface
+
+```java
+package com.example.payment.client.customer;
+
+import io.github.bsayli.openapi.client.common.ServiceClientResponse;
+import io.github.bsayli.openapi.client.generated.dto.*;
+
+public interface CustomerServiceClient {
+
+    ServiceClientResponse<CustomerCreateResponse> createCustomer(CustomerCreateRequest request);
+
+    ServiceClientResponse<CustomerDto> getCustomer(Integer customerId);
+
+    ServiceClientResponse<CustomerListResponse> getCustomers();
+
+    ServiceClientResponse<CustomerUpdateResponse> updateCustomer(Integer customerId, CustomerUpdateRequest request);
+
+    ServiceClientResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId);
+}
+```
+
+### Implementation
+
+```java
+package com.example.payment.client.customer;
+
+import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
+import io.github.bsayli.openapi.client.common.ServiceClientResponse;
+import io.github.bsayli.openapi.client.generated.dto.*;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CustomerServiceClientImpl implements CustomerServiceClient {
+
+    private final CustomerClientAdapter adapter;
+
+    public CustomerServiceClientImpl(CustomerClientAdapter adapter) {
+        this.adapter = adapter;
+    }
+
+    @Override
+    public ServiceClientResponse<CustomerCreateResponse> createCustomer(CustomerCreateRequest request) {
+        return adapter.createCustomer(request);
+    }
+
+    @Override
+    public ServiceClientResponse<CustomerDto> getCustomer(Integer customerId) {
+        return adapter.getCustomer(customerId);
+    }
+
+    @Override
+    public ServiceClientResponse<CustomerListResponse> getCustomers() {
+        return adapter.getCustomers();
+    }
+
+    @Override
+    public ServiceClientResponse<CustomerUpdateResponse> updateCustomer(Integer customerId, CustomerUpdateRequest request) {
+        return adapter.updateCustomer(customerId, request);
+    }
+
+    @Override
+    public ServiceClientResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId) {
+        return adapter.deleteCustomer(customerId);
+    }
+}
+```
+
+### Why This Matters
+
+* **Encapsulation**: Generated code (`CustomerControllerApi`, DTOs, wrappers) stays hidden.
+* **Stable API**: Your microservice depends only on `CustomerServiceClient`.
+* **Flexibility**: If client generation changes, your service contract remains intact.
+* **Consistency**: All outbound calls to `customer-service` go through one interface.
+
+✅ With this pattern, you can safely evolve generated clients without leaking implementation details across microservices.
 
 ---
 
