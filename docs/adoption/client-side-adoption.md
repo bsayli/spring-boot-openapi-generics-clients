@@ -100,6 +100,8 @@ src/main/resources/openapi-templates/
 
 **`api_wrapper.mustache`**
 
+{% raw %}
+
 ```mustache
 import {{commonPackage}}.ServiceClientResponse;
 
@@ -110,6 +112,8 @@ public class {{classname}}
     extends ServiceClientResponse<{{vendorExtensions.x-api-wrapper-datatype}}> {
 }
 ```
+
+{% endraw %}
 
 **`model.mustache`** (partial overlay to delegate wrapper classes to `api_wrapper.mustache`).
 
