@@ -109,6 +109,7 @@ Before generating or using the client, make sure you have:
 * **Java 21** or newer
 * **Maven 3.9+** (or Gradle 8+ if you adapt the build)
 * A running instance of the `customer-service` exposing its OpenAPI spec
+* OpenAPI spec (saved locally in this repo as `src/main/resources/customer-api-docs.yaml`)
 
 ---
 
@@ -160,7 +161,8 @@ Consumer code (e.g., adapter) gets compile-time type safety
 
 **Key files**
 
-* Templates: `src/main/resources/openapi-templates/api_wrapper.mustache`, `.../model.mustache`
+* Template directory: `src/main/resources/openapi-templates/`
+* Templates (overlay): `src/main/resources/openapi-templates/api_wrapper.mustache`, `.../model.mustache`
 * Generated output: `target/generated-sources/openapi/src/gen/java`
 * Packages (from `pom.xml`): `apiPackage`, `modelPackage`, `invokerPackage`
 
@@ -239,7 +241,6 @@ public class CustomerApiClientConfig {
 ```properties
 customer.api.base-url=http://localhost:8084/customer-service
 ```
-
 **Usage example:**
 
 ```java
@@ -556,11 +557,6 @@ as-is. However, the hook is available if your project needs to enforce additiona
 Validation)
 on top of generated wrapper classes.
 
----
-
-## 🛡 License
-
-This repository is licensed under **MIT** (root `LICENSE`). Submodules inherit the license.
 
 ---
 
@@ -569,3 +565,17 @@ This repository is licensed under **MIT** (root `LICENSE`). Submodules inherit t
 This client is generated from the OpenAPI spec exposed by:
 
 * [customer-service](../customer-service/README.md) — Sample Spring Boot microservice (API producer).
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!  
+Feel free to [open an issue](../../issues) or submit a PR.
+
+---
+
+## 🛡 License
+
+This repository is licensed under **MIT** (root `LICENSE`). Submodules inherit the license.
+
