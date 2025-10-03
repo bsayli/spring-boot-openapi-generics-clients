@@ -131,7 +131,7 @@ package
 <your.base>.openapi.client.adapter;
 
 import <your.base>.openapi.client.common.ServiceClientResponse;
-import <your.base>.openapi.client.generated.dto .*;
+import <your.base>.openapi.client.generated.dto.*;
 
 public interface YourClientAdapter {
     ServiceClientResponse<YourDto> getYourEntity(Integer id);
@@ -144,19 +144,17 @@ This shields your business code from generated artifacts and provides a stable c
 
 ---
 
-## 7) Spring Boot Configuration (Optional)
+7) Spring Boot Configuration — Quick Start (for demos/dev)
 
-Example auto-wiring configuration:
+For quick experiments or local development, you can wire the generated client with a simple RestClient:
 
 ```java
-
 @Configuration
 public class YourApiClientConfig {
 
     @Bean
-    RestClient yourRestClient(RestClient.Builder builder,
-                              @Value("${your.api.base-url}") String baseUrl) {
-        return builder.baseUrl(baseUrl).build();
+    RestClient yourRestClient(RestClient.Builder builder) {
+        return builder.build();
     }
 
     @Bean
@@ -178,20 +176,41 @@ public class YourApiClientConfig {
 your.api.base-url=http://localhost:8084/your-service
 ```
 
+> **Note:** This setup is for **demos/local development**.  
+> For production, encapsulate `YourControllerApi` behind an **Adapter interface** and use a **pooled HTTP client** (e.g., Apache HttpClient5).
 ---
 
 ## 8) Usage Example
 
 ```java
+package <your.base>.openapi.client.usecase;
 
-@Autowired
-private YourControllerApi yourApi;
+import <your.base>.openapi.client.adapter.YourClientAdapter;
+import <your.base>.openapi.client.common.ServiceClientResponse;
+import <your.base>.openapi.client.generated.dto.YourCreateRequest;
+import <your.base>.openapi.client.generated.dto.YourCreateResponse;
+import org.springframework.stereotype.Component;
 
-public void demo() {
-    var req = new YourCreateRequest().name("Alice");
-    var resp = yourApi.createYourEntity(req);
-    System.out.println(resp.getStatus());
-    System.out.println(resp.getData().getName());
+@Component
+public class DemoUseCase {
+
+    private final YourClientAdapter yourClient;
+
+    public DemoUseCase(YourClientAdapter yourClient) {
+        this.yourClient = yourClient;
+    }
+
+    public void run() {
+        YourCreateRequest req = new YourCreateRequest();
+        req.setName("Alice");
+
+        ServiceClientResponse<YourCreateResponse> resp = yourClient.createYourEntity(req);
+
+        var payload = resp.getData();
+        var response = yourClient.createYourEntity(req);
+        var data = response.getData();
+        log.info("Created entity id={} name={}", data.getId(), data.getName());
+    }
 }
 ```
 
