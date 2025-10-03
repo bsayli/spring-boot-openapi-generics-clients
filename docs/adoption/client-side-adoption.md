@@ -144,7 +144,7 @@ This shields your business code from generated artifacts and provides a stable c
 
 ---
 
-7) Spring Boot Configuration — Quick Start (for demos/dev)
+## 7) Spring Boot Configuration — Quick Start (for demos/dev)
 
 For quick experiments or local development, you can wire the generated client with a simple RestClient:
 
