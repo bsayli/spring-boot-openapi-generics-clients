@@ -1,4 +1,4 @@
-# spring-boot-openapi-generics-clients
+# Spring Boot + OpenAPI Generator — Type-Safe Generics for Clean API Clients
 
 [![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/release/bsayli/spring-boot-openapi-generics-clients?logo=github&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
@@ -11,7 +11,7 @@
 ---
 
 <p align="center">
-  <img src="docs/images/social-preview.png" alt="Social preview" width="720"/>
+  <img src="docs/images/openapi-generics-cover.png" alt="OpenAPI Generics Cover" width="720"/>
   <br/>
   <em>Type-safe API responses without boilerplate — powered by Spring Boot & OpenAPI Generator</em>
 </p>
@@ -28,13 +28,15 @@ duplicated wrappers, and keep client code clean.
 - 🛠 [Compatibility Matrix](#-compatibility-matrix)
 - 🚀 [Problem Statement](#-problem-statement)
 - 💡 [Solution](#-solution)
-- ⚡  [Quick Start](#-quick-start)
-- 🧩 [Tech Stack](#-tech-stack--features)
+- ⚡ [Quick Start](#-quick-start)
+- 🧩 [Tech Stack & Features](#-tech-stack--features)
 - ✅ [Key Features](#-key-features)
-- ✨ [Usage Example](#-usage-example-adapter-interface)
-- 📦 [Related Modules](#-related-modules-quick-view)
+- ✨ [Usage Example (Adapter Interface)](#-usage-example-adapter-interface)
+- 📦 [Related Modules (Quick View)](#-related-modules-quick-view)
 - 📘 [Adoption Guides](#-adoption-guides)
 - 🔗 [References & Links](#-references--links)
+
+> *A practical reference for type-safe OpenAPI client generation using Spring Boot 3.4, Java 21, and Mustache templates.*
 
 ### 📦 Modules in this Repository
 
@@ -82,7 +84,7 @@ This project shows how to:
 
 ---
 
-### How it works (under the hood)
+## 🧠 How It Works (Under the Hood)
 
 At generation time, the reference service **auto-registers** wrapper schemas in the OpenAPI doc:
 
@@ -181,7 +183,9 @@ You don’t need to write a single line of code — the generator does the work.
 
 ---
 
-## 📦 Next Steps: Dependency-based Adoption
+## 📦 Next Steps — Dependency-Based Adoption
+
+This pattern is evolving toward a plug-and-play module approach, so teams can adopt it without manual template setup.
 
 The long-term goal is to publish the core pieces as standalone modules, so that any project using
 a generic response type like `ServiceResponse<T>` can enable the same behavior with **just one dependency**:
@@ -306,9 +310,9 @@ This project may not be the right fit if:
 
 ## 📂 References & Links
 
-- 📘 [Medium Article — Type-Safe Generic API Responses](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
-
-- 🌐 [GitHub Pages (Adoption Guides)](https://bsayli.github.io/spring-boot-openapi-generics-clients/)
+- 🌐 [GitHub Pages — Adoption Guides](https://bsayli.github.io/spring-boot-openapi-generics-clients/)
+- 📘 [Medium — Type-Safe Generic API Responses](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+- 💬 [Dev.to — Type-Safe Generic API Clients Without Boilerplate](https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f)
 
 ---
 
@@ -318,15 +322,19 @@ This repository is licensed under **MIT** (see [LICENSE](LICENSE)). Submodules i
 
 ---
 
-✅ **Note:** CLI examples should always be provided **on a single line**.
+✅ **Note:** CLI examples should always be provided on a single line.  
 If parameters include spaces or special characters, wrap them in quotes `"..."`.
 
 ---
 
 ## 💬 Feedback
 
-If you spot any mistakes in this README or have questions about the project, feel free to open an issue or start a
-discussion. I’m happy to improve the documentation and clarify concepts further!
+If you spot any mistakes in this README or have questions about the project, feel free to open an issue or start a discussion. I’m happy to improve the documentation and clarify concepts further!
+
+---
+
+**Barış Saylı**  
+[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli)
 
 ---
 
