@@ -307,6 +307,24 @@ This project may not be the right fit if:
 * You don’t generate client code from OpenAPI specs
 
 ---
+## 📦 Related Modules (Quick View)
+
+| Module                         | Description                                 | Docs                                        |
+|--------------------------------|---------------------------------------------|---------------------------------------------|
+| 🟢 **customer-service**        | Spring Boot sample API (producer)           | [README](customer-service/README.md)        |
+| 🔵 **customer-service-client** | Generated Java client with generics support | [README](customer-service-client/README.md) |
+
+---
+
+## 📘 Adoption Guides
+
+Looking to integrate this approach into your own project?  
+See the detailed guides under [`docs/adoption`](docs/adoption):
+
+- [Server-Side Adoption](docs/adoption/server-side-adoption.md)
+- [Client-Side Adoption](docs/adoption/client-side-adoption.md)
+
+---
 
 ## 📂 References & Links
 
@@ -333,11 +351,6 @@ If you spot any mistakes in this README or have questions about the project, fee
 
 ---
 
-**Barış Saylı**  
-[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli)
-
----
-
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome!  
@@ -351,19 +364,5 @@ If you found this project useful, please consider giving it a star ⭐ on GitHub
 
 ---
 
-## 📦 Related Modules (Quick View)
-
-| Module                         | Description                                 | Docs                                        |
-|--------------------------------|---------------------------------------------|---------------------------------------------|
-| 🟢 **customer-service**        | Spring Boot sample API (producer)           | [README](customer-service/README.md)        |
-| 🔵 **customer-service-client** | Generated Java client with generics support | [README](customer-service-client/README.md) |
-
----
-
-## 📘 Adoption Guides
-
-Looking to integrate this approach into your own project?  
-See the detailed guides under [`docs/adoption`](docs/adoption):
-
-- [Server-Side Adoption](docs/adoption/server-side-adoption.md)
-- [Client-Side Adoption](docs/adoption/client-side-adoption.md)
+**Barış Saylı**  
+[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli)
