@@ -9,12 +9,15 @@
 
 ## 🎯 Purpose
 
-`customer-service` provides a **minimal yet production-grade backend** exposing CRUD endpoints for customers. Its primary role is to act as the **OpenAPI producer** that defines the canonical contract consumed by the generated client module.
+`customer-service` provides a **minimal yet production-grade backend** exposing CRUD endpoints for customers. Its
+primary role is to act as the **OpenAPI producer** that defines the canonical contract consumed by the generated client
+module.
 
 **Key responsibilities:**
 
 * Publishes OpenAPI spec (`/v3/api-docs.yaml`) enriched with **vendor extensions** for generics and nested wrappers.
-* Feeds the [`customer-service-client`](../customer-service-client/README.md) module for type-safe, boilerplate-free client generation.
+* Feeds the [`customer-service-client`](../customer-service-client/README.md) module for type-safe, boilerplate-free
+  client generation.
 * Demonstrates **automatic schema registration** and **generic wrapper introspection** via custom Springdoc extensions.
 
 This module serves as the **server-side anchor**: the reference point for generics-aware OpenAPI code generation.
@@ -35,14 +38,15 @@ This module serves as the **server-side anchor**: the reference point for generi
 
 ### Explanation
 
-* **customer-service** auto-registers `ServiceResponse<T>` and `ServiceResponse<Page<T>>` schemas through the `AutoWrapperSchemaCustomizer` and `ResponseTypeIntrospector`.
+* **customer-service** auto-registers `ServiceResponse<T>` and `ServiceResponse<Page<T>>` schemas through the
+  `AutoWrapperSchemaCustomizer` and `ResponseTypeIntrospector`.
 
 * The OpenAPI document is enriched with vendor extensions:
 
-  * `x-api-wrapper: true`
-  * `x-api-wrapper-datatype: <T>`
-  * `x-data-container: <Container>` (e.g., `Page`)
-  * `x-data-item: <Item>` (e.g., `CustomerDto`)
+    * `x-api-wrapper: true`
+    * `x-api-wrapper-datatype: <T>`
+    * `x-data-container: <Container>` (e.g., `Page`)
+    * `x-data-item: <Item>` (e.g., `CustomerDto`)
 
 * These hints allow the OpenAPI Generator to produce nested generic clients such as:
 
@@ -50,7 +54,8 @@ This module serves as the **server-side anchor**: the reference point for generi
   class CustomerListResponse extends ServiceClientResponse<Page<CustomerDto>> {}
   ```
 
-* **customer-service-client** uses custom templates to emit **thin wrappers** extending the base `ServiceClientResponse<T>` without repeating model definitions.
+* **customer-service-client** uses custom templates to emit **thin wrappers** extending the base
+  `ServiceClientResponse<T>` without repeating model definitions.
 
 ---
 
@@ -59,16 +64,16 @@ This module serves as the **server-side anchor**: the reference point for generi
 * **Java 21**
 * **Spring Boot 3.4.10**
 
-  * spring-boot-starter-web
-  * spring-boot-starter-validation
-  * spring-boot-starter-test (test scope)
+    * spring-boot-starter-web
+    * spring-boot-starter-validation
+    * spring-boot-starter-test (test scope)
 * **OpenAPI / Swagger**
 
-  * springdoc-openapi-starter-webmvc-ui (2.8.13)
+    * springdoc-openapi-starter-webmvc-ui (2.8.13)
 * **Build & Tools**
 
-  * Maven 3.9+
-  * JaCoCo, Surefire, Failsafe for test & coverage
+    * Maven 3.9+
+    * JaCoCo, Surefire, Failsafe for test & coverage
 
 ---
 
@@ -111,7 +116,7 @@ curl -X POST "http://localhost:8084/customer-service/v1/customers" \
 ## 📙 CRUD Endpoints
 
 | Method | Path                         | Description         | Returns                  |
-| ------ | ---------------------------- | ------------------- | ------------------------ |
+|--------|------------------------------|---------------------|--------------------------|
 | POST   | `/v1/customers`              | Create new customer | `CustomerDto`            |
 | GET    | `/v1/customers/{customerId}` | Get single customer | `CustomerDto`            |
 | GET    | `/v1/customers`              | List all customers  | `Page<CustomerDto>`      |
@@ -141,8 +146,16 @@ curl -X POST "http://localhost:8084/customer-service/v1/customers" \
 {
   "data": {
     "content": [
-      { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
-      { "customerId": 2, "name": "John Smith", "email": "john@example.com" }
+      {
+        "customerId": 1,
+        "name": "Jane Doe",
+        "email": "jane@example.com"
+      },
+      {
+        "customerId": 2,
+        "name": "John Smith",
+        "email": "john@example.com"
+      }
     ],
     "page": 0,
     "size": 5,
@@ -150,7 +163,12 @@ curl -X POST "http://localhost:8084/customer-service/v1/customers" \
   },
   "meta": {
     "serverTime": "2025-01-01T12:35:00Z",
-    "sort": [ { "field": "customerId", "direction": "asc" } ]
+    "sort": [
+      {
+        "field": "customerId",
+        "direction": "asc"
+      }
+    ]
   }
 }
 ```
@@ -188,7 +206,8 @@ ServiceResponsePageCustomerDto:
   x-data-item: CustomerDto
 ```
 
-These fields are added automatically by the `AutoWrapperSchemaCustomizer` and `ResponseTypeIntrospector`, allowing the client generator to produce nested generics like:
+These fields are added automatically by the `AutoWrapperSchemaCustomizer` and `ResponseTypeIntrospector`, allowing the
+client generator to produce nested generics like:
 
 ```java
 ServiceClientResponse<Page<CustomerDto>>
@@ -287,7 +306,8 @@ mvn test
 
 This service is the API producer for the generated client:
 
-* [customer-service-client](../customer-service-client/README.md) — Java client generated from this service's OpenAPI spec, supporting nested generic wrappers and problem decoding.
+* [customer-service-client](../customer-service-client/README.md) — Java client generated from this service's OpenAPI
+  spec, supporting nested generic wrappers and problem decoding.
 
 ---
 

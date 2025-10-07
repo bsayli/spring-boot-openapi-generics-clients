@@ -16,8 +16,11 @@
   <em>End-to-end generics-aware OpenAPI clients — unified <code>{ data, meta }</code> responses without boilerplate.</em>
 </p>
 
-**Modern, type-safe OpenAPI client generation** — powered by **Spring Boot 3.4**, **Java 21**, and **OpenAPI Generator 7.16.0**.
-This repository demonstrates a production-grade architecture where backend and client are fully aligned through generics, enabling nested generic envelopes (ServiceResponse<Page<T>>) and RFC 7807 ProblemDetail (Problem Details for HTTP APIs)–based error handling.
+**Modern, type-safe OpenAPI client generation** — powered by **Spring Boot 3.4**, **Java 21**, and **OpenAPI Generator
+7.16.0**.
+This repository demonstrates a production-grade architecture where backend and client are fully aligned through
+generics, enabling nested generic envelopes (ServiceResponse<Page<T>>) and RFC 7807 ProblemDetail (Problem Details for
+HTTP APIs)–based error handling.
 
 ---
 
@@ -36,14 +39,16 @@ This repository demonstrates a production-grade architecture where backend and c
 * 📘 [Adoption Guides](#-adoption-guides)
 * 🔗 [References & Links](#-references--links)
 
-> *A clean architecture pattern for building generics-aware OpenAPI clients that stay fully type-safe, consistent, and boilerplate-free.*
+> *A clean architecture pattern for building generics-aware OpenAPI clients that stay fully type-safe, consistent, and
+boilerplate-free.*
 
 ---
 
 ## 📦 Modules
 
 * [**customer-service**](customer-service/README.md) — sample backend exposing `/v3/api-docs.yaml` via Springdoc
-* [**customer-service-client**](customer-service-client/README.md) — generated OpenAPI client with generics-aware wrappers
+* [**customer-service-client**](customer-service-client/README.md) — generated OpenAPI client with generics-aware
+  wrappers
 
 ---
 
@@ -54,6 +59,7 @@ When backend APIs wrap payloads in `ServiceResponse<T>` (e.g., the unified `{ da
 the generator produces **duplicated models per endpoint** instead of a single reusable generic base.
 
 This results in:
+
 * ❌ Dozens of almost-identical response classes
 * ❌ Higher maintenance overhead
 * ❌ Harder to evolve a single envelope contract across services
@@ -66,7 +72,8 @@ This project provides a **full-stack pattern** to align Spring Boot services and
 
 ### Server-Side (Producer)
 
-A `Springdoc` customizer automatically scans controller return types and marks generic wrappers (`ServiceResponse<T>`) using vendor extensions:
+A `Springdoc` customizer automatically scans controller return types and marks generic wrappers (`ServiceResponse<T>`)
+using vendor extensions:
 
 ```yaml
 x-api-wrapper: true
@@ -77,15 +84,18 @@ x-data-item: CustomerDto
 
 ### Client-Side (Consumer)
 
-Mustache overlays redefine OpenAPI templates to generate **thin, type-safe wrappers** extending a reusable base class `ServiceClientResponse<T>`.
+Mustache overlays redefine OpenAPI templates to generate **thin, type-safe wrappers** extending a reusable base class
+`ServiceClientResponse<T>`.
 
 **Example generated output:**
 
 ```java
-public class ServiceResponseCustomerDto extends ServiceClientResponse<CustomerDto> {}
+public class ServiceResponseCustomerDto extends ServiceClientResponse<CustomerDto> {
+}
 ```
 
-This pattern supports **nested generics** like `ServiceClientResponse<Page<CustomerDto>>` and maps all error responses into **ProblemDetail** objects.
+This pattern supports **nested generics** like `ServiceClientResponse<Page<CustomerDto>>` and maps all error responses
+into **ProblemDetail** objects.
 
 ---
 
@@ -98,7 +108,7 @@ This pattern supports **nested generics** like `ServiceClientResponse<Page<Custo
 </p>
 
 | Layer                 | Description                                                               |
-| --------------------- | ------------------------------------------------------------------------- |
+|-----------------------|---------------------------------------------------------------------------|
 | **Server (Producer)** | Publishes OpenAPI 3.1 spec with auto-registered wrapper schemas           |
 | **Client (Consumer)** | Uses OpenAPI Generator 7.16.0 + Mustache overlays for generics support    |
 | **Envelope Model**    | Unified `{ data, meta }` response structure                               |
@@ -159,8 +169,16 @@ The unified envelope applies to both single and paged responses. Below is a page
 {
   "data": {
     "content": [
-      { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
-      { "customerId": 2, "name": "John Smith", "email": "john@example.com" }
+      {
+        "customerId": 1,
+        "name": "Jane Doe",
+        "email": "jane@example.com"
+      },
+      {
+        "customerId": 2,
+        "name": "John Smith",
+        "email": "john@example.com"
+      }
     ],
     "page": 0,
     "size": 5,
@@ -172,7 +190,10 @@ The unified envelope applies to both single and paged responses. Below is a page
   "meta": {
     "serverTime": "2025-01-01T12:34:56Z",
     "sort": [
-      { "field": "CUSTOMER_ID", "direction": "ASC" }
+      {
+        "field": "CUSTOMER_ID",
+        "direction": "ASC"
+      }
     ]
   }
 }
@@ -186,9 +207,12 @@ ServiceClientResponse<Page<CustomerDto>> resp =
                 "Jane", null, 0, 5, SortField.CUSTOMER_ID, SortDirection.ASC);
 
 Page<CustomerDto> page = resp.getData();
-for (CustomerDto c : page.content()) {
+for(
+CustomerDto c :page.
+
+content()){
         // ...
-}
+        }
 ```
 
 ---
@@ -196,7 +220,7 @@ for (CustomerDto c : page.content()) {
 ## 🧩 Tech Stack
 
 | Component             | Version | Purpose                               |
-| --------------------- | ------- | ------------------------------------- |
+|-----------------------|---------|---------------------------------------|
 | **Java**              | 21      | Language baseline                     |
 | **Spring Boot**       | 3.4.10  | REST + OpenAPI provider               |
 | **Springdoc**         | 2.8.13  | OpenAPI 3.1 integration               |
@@ -244,8 +268,13 @@ See the detailed integration steps under [`docs/adoption`](docs/adoption):
 ## 🔗 References & Links
 
 * 🌐 [GitHub Pages — Adoption Guides](https://bsayli.github.io/spring-boot-openapi-generics-clients/)
-* 📘 [Medium — Type-Safe Generic API Responses](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
-* 💬 [Dev.to — Type-Safe OpenAPI Clients Without Boilerplate](https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f)
+*
+
+📘 [Medium — Type-Safe Generic API Responses](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+
+*
+
+💬 [Dev.to — Type-Safe OpenAPI Clients Without Boilerplate](https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f)
 
 ---
 

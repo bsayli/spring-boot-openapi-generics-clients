@@ -36,7 +36,8 @@ mvn -q clean install
 ## ✅ What You Get
 
 * Java client using **OpenAPI Generator 7.16.0** with the **Spring `RestClient`** library.
-* A reusable generic base: `io.github.bsayli.openapi.client.common.ServiceClientResponse<T>` containing `data` and `meta`.
+* A reusable generic base: `io.github.bsayli.openapi.client.common.ServiceClientResponse<T>` containing `data` and
+  `meta`.
 * **Nested generics support**: wrappers such as `ServiceClientResponse<Page<CustomerDto>>`.
 * **RFC 7807 Problem decoding** via `ClientProblemException`.
 * **Spring Boot configuration** for pooled HttpClient5 + `RestClientCustomizer` for error handling.
@@ -46,7 +47,8 @@ mvn -q clean install
 
 ## 🧠 How the Thin Wrappers Are Produced
 
-Server marks wrapper schemas with vendor extensions. The Mustache overlay generates thin wrappers extending the generic base.
+Server marks wrapper schemas with vendor extensions. The Mustache overlay generates thin wrappers extending the generic
+base.
 
 ```mustache
 {{! Generics-aware thin wrapper }}
@@ -85,11 +87,13 @@ public class ServiceClientResponse<T> {
     private ClientMeta meta;
 }
 
-public record ClientMeta(Instant serverTime, List<ClientSort> sort) {}
+public record ClientMeta(Instant serverTime, List<ClientSort> sort) {
+}
 
 public record Page<T>(List<T> content, int page, int size,
                       long totalElements, int totalPages,
-                      boolean hasNext, boolean hasPrev) {}
+                      boolean hasNext, boolean hasPrev) {
+}
 ```
 
 **Problem Exception:**
@@ -106,47 +110,49 @@ public class ClientProblemException extends RuntimeException {
 ## ⚙️ Spring Configuration (Production-Ready)
 
 ```java
+
 @Configuration
 public class CustomerApiClientConfig {
 
-  @Bean
-  RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
-    return builder -> builder.defaultStatusHandler(
-      HttpStatusCode::isError,
-      (request, response) -> {
-        ProblemDetail pd = null;
-        try (var is = response.getBody()) {
-          pd = om.readValue(is, ProblemDetail.class);
-        } catch (Exception ignore) {}
-        throw new ClientProblemException(pd, response.getStatusCode().value());
-      });
-  }
+    @Bean
+    RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
+        return builder -> builder.defaultStatusHandler(
+                HttpStatusCode::isError,
+                (request, response) -> {
+                    ProblemDetail pd = null;
+                    try (var is = response.getBody()) {
+                        pd = om.readValue(is, ProblemDetail.class);
+                    } catch (Exception ignore) {
+                    }
+                    throw new ClientProblemException(pd, response.getStatusCode().value());
+                });
+    }
 
-  @Bean(destroyMethod = "close")
-  CloseableHttpClient customerHttpClient(
-      @Value("${customer.api.max-connections-total:64}") int maxTotal,
-      @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute) {
-    var cm = PoolingHttpClientConnectionManagerBuilder.create()
-        .setMaxConnTotal(maxTotal)
-        .setMaxConnPerRoute(maxPerRoute)
-        .build();
-    return HttpClients.custom()
-        .setConnectionManager(cm)
-        .evictExpiredConnections()
-        .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
-        .setUserAgent("customer-service-client")
-        .disableAutomaticRetries()
-        .build();
-  }
+    @Bean(destroyMethod = "close")
+    CloseableHttpClient customerHttpClient(
+            @Value("${customer.api.max-connections-total:64}") int maxTotal,
+            @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute) {
+        var cm = PoolingHttpClientConnectionManagerBuilder.create()
+                .setMaxConnTotal(maxTotal)
+                .setMaxConnPerRoute(maxPerRoute)
+                .build();
+        return HttpClients.custom()
+                .setConnectionManager(cm)
+                .evictExpiredConnections()
+                .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
+                .setUserAgent("customer-service-client")
+                .disableAutomaticRetries()
+                .build();
+    }
 
-  @Bean
-  RestClient customerRestClient(RestClient.Builder builder,
-                                HttpComponentsClientHttpRequestFactory rf,
-                                List<RestClientCustomizer> customizers) {
-    builder.requestFactory(rf);
-    if (customizers != null) customizers.forEach(c -> c.customize(builder));
-    return builder.build();
-  }
+    @Bean
+    RestClient customerRestClient(RestClient.Builder builder,
+                                  HttpComponentsClientHttpRequestFactory rf,
+                                  List<RestClientCustomizer> customizers) {
+        builder.requestFactory(rf);
+        if (customizers != null) customizers.forEach(c -> c.customize(builder));
+        return builder.build();
+    }
 }
 ```
 
@@ -166,23 +172,24 @@ customer.api.read-timeout-seconds=15
 ## 🧩 Adapter Pattern Example
 
 ```java
+
 @Service
 public class CustomerClientAdapterImpl implements CustomerClientAdapter {
-  private final CustomerControllerApi api;
+    private final CustomerControllerApi api;
 
-  public CustomerClientAdapterImpl(CustomerControllerApi api) {
-    this.api = api;
-  }
+    public CustomerClientAdapterImpl(CustomerControllerApi api) {
+        this.api = api;
+    }
 
-  @Override
-  public ServiceClientResponse<Page<CustomerDto>> getCustomers(
-      String name, String email, Integer page, Integer size,
-      SortField sortBy, SortDirection direction) {
-    return api.getCustomers(
-        name, email, page, size,
-        sortBy != null ? sortBy.value() : SortField.CUSTOMER_ID.value(),
-        direction != null ? direction.value() : SortDirection.ASC.value());
-  }
+    @Override
+    public ServiceClientResponse<Page<CustomerDto>> getCustomers(
+            String name, String email, Integer page, Integer size,
+            SortField sortBy, SortDirection direction) {
+        return api.getCustomers(
+                name, email, page, size,
+                sortBy != null ? sortBy.value() : SortField.CUSTOMER_ID.value(),
+                direction != null ? direction.value() : SortDirection.ASC.value());
+    }
 }
 ```
 
@@ -205,11 +212,12 @@ var serverTime = resp.getMeta().serverTime();
 Error handling:
 
 ```java
-try {
-  customerClientAdapter.getCustomer(999);
-} catch (ClientProblemException ex) {
-  var pd = ex.getProblem();
-  // pd.getTitle(), pd.getDetail(), pd.getErrorCode(), etc.
+try{
+        customerClientAdapter.getCustomer(999);
+}catch(
+ClientProblemException ex){
+var pd = ex.getProblem();
+// pd.getTitle(), pd.getDetail(), pd.getErrorCode(), etc.
 }
 ```
 

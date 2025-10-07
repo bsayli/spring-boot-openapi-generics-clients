@@ -8,7 +8,8 @@ nav_order: 1
 
 # Client-Side Build Setup — Maven Plugins & Dependencies
 
-This guide ensures your client module is correctly configured to generate **type‑safe, generics‑aware OpenAPI clients** using custom Mustache templates. It aligns your build pipeline with modern OpenAPI Generator practices.
+This guide ensures your client module is correctly configured to generate **type‑safe, generics‑aware OpenAPI clients**
+using custom Mustache templates. It aligns your build pipeline with modern OpenAPI Generator practices.
 
 ---
 
@@ -17,6 +18,7 @@ This guide ensures your client module is correctly configured to generate **type
 Add these dependencies to your client module:
 
 ```xml
+
 <dependencies>
     <!-- Spring Boot (provided by host application) -->
     <dependency>
@@ -66,6 +68,7 @@ Add these dependencies to your client module:
 Define reusable properties to simplify plugin management and template resolution.
 
 ```xml
+
 <properties>
     <openapi.generator.version>7.16.0</openapi.generator.version>
     <openapi.templates.upstream>${project.build.directory}/openapi-templates-upstream</openapi.templates.upstream>
@@ -80,6 +83,7 @@ Define reusable properties to simplify plugin management and template resolution
 These plugins work in sequence to **unpack, overlay, and compile** OpenAPI templates.
 
 ```xml
+
 <build>
     <plugins>
         <!-- 1️⃣ Unpack upstream OpenAPI templates -->
@@ -227,13 +231,14 @@ These plugins work in sequence to **unpack, overlay, and compile** OpenAPI templ
 ## 🧠 4. Why These Plugins Matter
 
 | Plugin                             | Purpose                                                          |
-| ---------------------------------- | ---------------------------------------------------------------- |
+|------------------------------------|------------------------------------------------------------------|
 | **maven-dependency-plugin**        | Unpacks built-in OpenAPI templates from the generator JAR.       |
 | **maven-resources-plugin**         | Overlays your local Mustache templates on top of upstream ones.  |
 | **openapi-generator-maven-plugin** | Generates type-safe client code using the effective templates.   |
 | **build-helper-maven-plugin**      | Ensures generated sources are included in the compilation phase. |
 
-Together, these guarantee your **generics‑aware response wrappers** (e.g., `ServiceClientResponse<T>`) are generated cleanly and consistently across builds.
+Together, these guarantee your **generics‑aware response wrappers** (e.g., `ServiceClientResponse<T>`) are generated
+cleanly and consistently across builds.
 
 ---
 

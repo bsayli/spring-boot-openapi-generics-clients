@@ -6,7 +6,7 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
-    <version>0.6.8</version>
+    <version>0.7.0</version>
     <name>customer-service-client</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
