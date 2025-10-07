@@ -1,10 +1,9 @@
 ---
-
 layout: default
 title: Client-Side Adoption (Updated for data+meta & ProblemDetail)
 parent: Adoption Guides
 nav_order: 2
-------------
+---
 
 # Client‑Side Integration Guide (Updated)
 

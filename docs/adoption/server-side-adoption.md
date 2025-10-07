@@ -1,10 +1,9 @@
 ---
-
 layout: default
 title: Server-Side Adoption (Simplified)
 parent: Adoption Guides
 nav_order: 1
-------------
+---
 
 # Server-Side Adoption — Spring Boot + Springdoc
 
