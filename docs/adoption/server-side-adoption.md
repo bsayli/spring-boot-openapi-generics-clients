@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Server-Side Adoption (Simplified)
+title: Server-Side Adoption
 parent: Adoption Guides
 nav_order: 1
 ---
@@ -23,9 +23,7 @@ Your service will:
 
 ```json
 {
-  "data": {
-    /* T */
-  },
+  "data": "<T>",
   "meta": {
     "serverTime": "2025-01-01T12:34:56Z",
     "sort": []

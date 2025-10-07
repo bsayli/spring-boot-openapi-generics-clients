@@ -199,7 +199,7 @@ The unified envelope applies to both single and paged responses. Below is a page
 }
 ```
 
-Client usage:
+### Client Usage
 
 ```java
 ServiceClientResponse<Page<CustomerDto>> resp =
@@ -207,15 +207,13 @@ ServiceClientResponse<Page<CustomerDto>> resp =
                 "Jane", null, 0, 5, SortField.CUSTOMER_ID, SortDirection.ASC);
 
 Page<CustomerDto> page = resp.getData();
-for(
-CustomerDto c :page.
-
-content()){
-        // ...
-        }
+for (CustomerDto c : page.content()) {
+    // ...
+}
 ```
 
 ---
+
 
 ## 🧩 Tech Stack
 
