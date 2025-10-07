@@ -57,8 +57,8 @@ new `{ data, meta }` response structure and RFC 7807 `ProblemDetail` error model
 
 3. **Inspect generated output:**
 
-    * `target/generated-sources/openapi/src/gen/java`
-    * Look for classes like `ServiceResponseCustomerDto` extending `ServiceClientResponse<CustomerDto>`
+   * `target/generated-sources/openapi/src/gen/java`
+   * Look for classes like `ServiceResponseCustomerDto` extending `ServiceClientResponse<CustomerDto>`
 
 ---
 
@@ -69,9 +69,7 @@ Copy these into your client module under `openapi/client/common`:
 ### `ServiceClientResponse.java`
 
 ```java
-package
-
-<your.base>.openapi.client.common;
+package <your.base>.openapi.client.common;
 
 import java.util.Objects;
 
@@ -117,13 +115,10 @@ public class ServiceClientResponse<T> {
 ### `ClientMeta.java`
 
 ```java
-package
-
-<your.base>.openapi.client.common;
+package <your.base>.openapi.client.common;
 
 import java.time.Instant;
 import java.util.List;
-
 import <your.base>.openapi.client.common.sort.ClientSort;
 
 public record ClientMeta(Instant serverTime, List<ClientSort> sort) {
@@ -133,9 +128,7 @@ public record ClientMeta(Instant serverTime, List<ClientSort> sort) {
 ### `Page.java`
 
 ```java
-package
-
-<your.base>.openapi.client.common;
+package <your.base>.openapi.client.common;
 
 import java.util.List;
 
@@ -147,9 +140,7 @@ public record Page<T>(List<T> content, int page, int size, long totalElements,
 ### `ClientProblemException.java`
 
 ```java
-package
-
-<your.base>.openapi.client.common.error;
+package <your.base>.openapi.client.common.error;
 
 import io.github.bsayli.openapi.client.generated.dto.ProblemDetail;
 
@@ -215,14 +206,12 @@ This ensures wrappers extend the generic base, including nested containers.
 Encapsulate generated APIs behind your own adapter interface.
 
 ```java
-package
-
-<your.base>.openapi.client.adapter;
+package <your.base>.openapi.client.adapter;
 
 import <your.base>.openapi.client.common.ServiceClientResponse;
 import <your.base>.openapi.client.common.Page;
 import <your.base>.openapi.client.generated.api.YourControllerApi;
-import <your.base>.openapi.client.generated.dto .*;
+import <your.base>.openapi.client.generated.dto.*;
 
 public interface YourClientAdapter {
     ServiceClientResponse<YourDto> getYourEntity(Integer id);
@@ -236,7 +225,6 @@ public interface YourClientAdapter {
 Then implement it using the generated API:
 
 ```java
-
 @Service
 public class YourClientAdapterImpl implements YourClientAdapter {
     private final YourControllerApi api;
@@ -269,7 +257,6 @@ public class YourClientAdapterImpl implements YourClientAdapter {
 Production‑ready configuration using pooled Apache HttpClient5 and `RestClientCustomizer`.
 
 ```java
-
 @Configuration
 public class YourApiClientConfig {
 
@@ -281,8 +268,7 @@ public class YourApiClientConfig {
                     ProblemDetail pd = null;
                     try (var is = res.getBody()) {
                         if (is != null) pd = om.readValue(is, ProblemDetail.class);
-                    } catch (Exception ignore) {
-                    }
+                    } catch (Exception ignore) {}
                     throw new ClientProblemException(pd, res.getStatusCode().value());
                 });
     }
@@ -357,16 +343,11 @@ var serverTime = response.getMeta().serverTime();
 Error handling:
 
 ```java
-try{
+try {
         yourClientAdapter.getYourEntity(999);
-}catch(
-ClientProblemException ex){
+} catch (ClientProblemException ex) {
 var pd = ex.getProblem();
-  System.err.
-
-println(pd.getTitle() +": "+pd.
-
-getDetail());
+    System.err.println(pd.getTitle() + ": " + pd.getDetail());
         }
 ```
 

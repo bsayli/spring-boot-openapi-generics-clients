@@ -9,51 +9,48 @@
 
 ## 🎯 Purpose
 
-`customer-service` provides a **minimal but complete backend** that exposes CRUD endpoints for customers. Its primary
-role in this repository is:
+`customer-service` provides a **minimal yet production-grade backend** exposing CRUD endpoints for customers. Its primary role is to act as the **OpenAPI producer** that defines the canonical contract consumed by the generated client module.
 
-* To **serve as the API producer** that publishes an OpenAPI spec (`/v3/api-docs.yaml`).
-* To **feed the `customer-service-client` module**, where the spec is consumed and turned into a type-safe client with
-  generics-aware wrappers.
-* To demonstrate how **Swagger customizers** can teach OpenAPI about generic and nested wrappers so that the generated
-  client stays clean and DRY.
+**Key responsibilities:**
 
-Think of this module as the **server-side anchor**: without it, the client module would have nothing to generate
-against.
+* Publishes OpenAPI spec (`/v3/api-docs.yaml`) enriched with **vendor extensions** for generics and nested wrappers.
+* Feeds the [`customer-service-client`](../customer-service-client/README.md) module for type-safe, boilerplate-free client generation.
+* Demonstrates **automatic schema registration** and **generic wrapper introspection** via custom Springdoc extensions.
+
+This module serves as the **server-side anchor**: the reference point for generics-aware OpenAPI code generation.
 
 ---
 
 ## 📊 Architecture at a Glance
 
 ```
-[customer-service]  ── publishes ──>  /v3/api-docs.yaml (OpenAPI contract with x-api-wrapper & x-data-container)
+[customer-service]  ── publishes ──>  /v3/api-docs.yaml (OpenAPI 3.1 contract with x-api-wrapper & x-data-container)
         │
-        └─ consumed by OpenAPI Generator (+ generics-aware templates)
+        └─ consumed by OpenAPI Generator (+ custom Mustache overlays)
                  │
                  └─> [customer-service-client]  (type-safe wrappers)
                           │
-                          └─ used by consumer apps (your services)
+                          └─ used by consumer microservices
 ```
 
 ### Explanation
 
-* **customer-service** exposes an **enhanced OpenAPI contract** at `/v3/api-docs.yaml` (and Swagger UI).
-  It auto-registers wrapper schemas (`ServiceResponse<T>`) using `OpenApiCustomizer` and `ResponseTypeIntrospector`,
-  enriching the spec with vendor extensions:
+* **customer-service** auto-registers `ServiceResponse<T>` and `ServiceResponse<Page<T>>` schemas through the `AutoWrapperSchemaCustomizer` and `ResponseTypeIntrospector`.
 
-    * `x-api-wrapper: true`
-    * `x-api-wrapper-datatype: <T>`
-    * `x-data-container: <Container>` (e.g. `Page`)
-    * `x-data-item: <Item>` (e.g. `CustomerDto`)
+* The OpenAPI document is enriched with vendor extensions:
 
-* These allow OpenAPI Generator to produce **nested generic clients** such as:
+  * `x-api-wrapper: true`
+  * `x-api-wrapper-datatype: <T>`
+  * `x-data-container: <Container>` (e.g., `Page`)
+  * `x-data-item: <Item>` (e.g., `CustomerDto`)
+
+* These hints allow the OpenAPI Generator to produce nested generic clients such as:
 
   ```java
   class CustomerListResponse extends ServiceClientResponse<Page<CustomerDto>> {}
   ```
 
-* **customer-service-client** uses custom Mustache templates that recognize these vendor extensions and generate thin,
-  DRY wrappers without repeating boilerplate model definitions.
+* **customer-service-client** uses custom templates to emit **thin wrappers** extending the base `ServiceClientResponse<T>` without repeating model definitions.
 
 ---
 
@@ -62,16 +59,16 @@ against.
 * **Java 21**
 * **Spring Boot 3.4.10**
 
-    * spring-boot-starter-web
-    * spring-boot-starter-validation
-    * spring-boot-starter-test (test scope)
+  * spring-boot-starter-web
+  * spring-boot-starter-validation
+  * spring-boot-starter-test (test scope)
 * **OpenAPI / Swagger**
 
-    * springdoc-openapi-starter-webmvc-ui (2.8.13)
+  * springdoc-openapi-starter-webmvc-ui (2.8.13)
 * **Build & Tools**
 
-    * Maven 3.9+
-    * JaCoCo, Surefire, Failsafe for test & coverage
+  * Maven 3.9+
+  * JaCoCo, Surefire, Failsafe for test & coverage
 
 ---
 
@@ -114,20 +111,14 @@ curl -X POST "http://localhost:8084/customer-service/v1/customers" \
 ## 📙 CRUD Endpoints
 
 | Method | Path                         | Description         | Returns                  |
-|--------|------------------------------|---------------------|--------------------------|
+| ------ | ---------------------------- | ------------------- | ------------------------ |
 | POST   | `/v1/customers`              | Create new customer | `CustomerDto`            |
 | GET    | `/v1/customers/{customerId}` | Get single customer | `CustomerDto`            |
 | GET    | `/v1/customers`              | List all customers  | `Page<CustomerDto>`      |
 | PUT    | `/v1/customers/{customerId}` | Update customer     | `CustomerDto`            |
 | DELETE | `/v1/customers/{customerId}` | Delete customer     | `CustomerDeleteResponse` |
 
-**Base URL Note:** All endpoints are prefixed with `/customer-service` as defined in `application.yml`.
-
-Example full URL for listing customers:
-
-```
-http://localhost:8084/customer-service/v1/customers
-```
+**Base URL:** `/customer-service` (defined in `application.yml`)
 
 ### Example Response: Get Customer
 
@@ -150,16 +141,8 @@ http://localhost:8084/customer-service/v1/customers
 {
   "data": {
     "content": [
-      {
-        "customerId": 1,
-        "name": "Jane Doe",
-        "email": "jane@example.com"
-      },
-      {
-        "customerId": 2,
-        "name": "John Smith",
-        "email": "john@example.com"
-      }
+      { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
+      { "customerId": 2, "name": "John Smith", "email": "john@example.com" }
     ],
     "page": 0,
     "size": 5,
@@ -167,12 +150,7 @@ http://localhost:8084/customer-service/v1/customers
   },
   "meta": {
     "serverTime": "2025-01-01T12:35:00Z",
-    "sort": [
-      {
-        "field": "customerId",
-        "direction": "asc"
-      }
-    ]
+    "sort": [ { "field": "customerId", "direction": "asc" } ]
   }
 }
 ```
@@ -185,17 +163,16 @@ http://localhost:8084/customer-service/v1/customers
 * OpenAPI JSON → `http://localhost:8084/customer-service/v3/api-docs`
 * OpenAPI YAML → `http://localhost:8084/customer-service/v3/api-docs.yaml`
 
-🤙 The YAML/JSON spec above is the **contract** that the client module (`customer-service-client`) consumes when
-generating code.
+🤙 The YAML/JSON spec above is the **canonical contract** consumed by `customer-service-client`.
 
-🔙 For clarity, in this repository it is saved under the client module as: `src/main/resources/customer-api-docs.yaml`
+🔙 In this repository, the spec is also stored under the client module: `src/main/resources/customer-api-docs.yaml`
 
 ---
 
 ### Example Wrapper Snippet
 
 The generated OpenAPI YAML (`/v3/api-docs.yaml`) includes wrapper schemas
-with vendor extensions that mark nested generic response envelopes:
+with vendor extensions marking nested generic response envelopes:
 
 ```yaml
 ServiceResponsePageCustomerDto:
@@ -211,9 +188,11 @@ ServiceResponsePageCustomerDto:
   x-data-item: CustomerDto
 ```
 
-🔙 These `x-api-wrapper`, `x-data-container`, and `x-data-item` fields are added automatically by the
-`AutoWrapperSchemaCustomizer` and `ResponseTypeIntrospector`, allowing the client generator to produce nested generics
-like `ServiceClientResponse<Page<CustomerDto>>`.
+These fields are added automatically by the `AutoWrapperSchemaCustomizer` and `ResponseTypeIntrospector`, allowing the client generator to produce nested generics like:
+
+```java
+ServiceClientResponse<Page<CustomerDto>>
+```
 
 ---
 
@@ -292,17 +271,15 @@ mvn test
 
 ---
 
-## 📖 Notes
+## 🖖 Notes
 
-* Demonstrates **generic `ServiceResponse<T>`** and nested `ServiceResponse<Page<T>>` pattern.
+* Demonstrates **generic `ServiceResponse<T>`** and nested `ServiceResponse<Page<T>>` patterns.
 * Acts as the **API producer** for the generated client.
-* Uses **Swagger customizers** (`AutoWrapperSchemaCustomizer`, `GlobalErrorResponsesCustomizer`) to mark wrappers for
-  OpenAPI.
-* Auto-registers **wrapper schemas** and adds container/item hints via vendor extensions.
-* OpenAPI spec (`/v3/api-docs.yaml`) is the input for client generation.
-* Includes **exception handling** with detailed `ProblemDetail` responses.
-* Provides **unit tests** for controller and error handler layers.
-* Supports **optional annotation injection** on generated wrappers via `app.openapi.wrapper.class-extra-annotation`.
+* Uses **Swagger customizers** (`AutoWrapperSchemaCustomizer`, `GlobalErrorResponsesCustomizer`).
+* Auto-registers wrapper schemas and adds container/item hints via vendor extensions.
+* Implements **RFC 7807-compliant ProblemDetail** responses.
+* Provides **unit and integration tests** for controller and error handler layers.
+* Supports **annotation injection** for generated wrappers via `app.openapi.wrapper.class-extra-annotation`.
 
 ---
 
@@ -310,15 +287,21 @@ mvn test
 
 This service is the API producer for the generated client:
 
-* [customer-service-client](../customer-service-client/README.md) — Java client generated from this service's OpenAPI
-  spec, supporting nested generic wrappers and problem decoding.
+* [customer-service-client](../customer-service-client/README.md) — Java client generated from this service's OpenAPI spec, supporting nested generic wrappers and problem decoding.
+
+---
+
+## 💬 Feedback
+
+If you spot an error or have suggestions, open an issue or join the discussion — contributions are welcome.  
+💭 [Start a discussion →](https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome!
-Feel free to [open an issue](../../issues) or submit a PR.
+Contributions, issues, and feature requests are welcome!  
+Feel free to [open an issue](https://github.com/bsayli/spring-boot-openapi-generics-clients/issues) or submit a PR.
 
 ---
 

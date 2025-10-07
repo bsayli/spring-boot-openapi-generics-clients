@@ -6,12 +6,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 
 Generated Java client for the **customer-service**, showcasing **type‑safe generic responses** and **nested generics**
-with a tiny OpenAPI Generator template overlay. The client maps successful responses to a reusable envelope
-`ServiceClientResponse<T>` and decodes non‑2xx responses into RFC7807 `ProblemDetail` with a custom exception.
+with a minimal OpenAPI Generator Mustache overlay. The client maps successful responses into a reusable envelope
+`ServiceClientResponse<T>` and decodes non‑2xx responses into RFC7807-compliant `ProblemDetail` via a custom exception.
 
 ---
 
-## 🔧 TL;DR — Generate in 1 minute
+## 🔧 TL;DR — Generate in 1 Minute
 
 ```bash
 # 1) Start the customer-service (in another shell)
@@ -28,33 +28,28 @@ mvn -q clean install
 
 *Generated sources → `target/generated-sources/openapi/src/gen/java`*
 
-> ℹ️ **Multi-module builds:** If your project is multi-module, ensure the generated path is compiled (already wired via
-`build-helper-maven-plugin` in this repo).
+> ℹ️ **Multi-module builds:** If your project is multi-module, ensure the generated path is compiled. (Handled via
+> `build-helper-maven-plugin` in this repo.)
 
 ---
 
 ## ✅ What You Get
 
-* Java client using **OpenAPI Generator** (`java` + `restclient` library).
-* A reusable generic base: `io.github.bsayli.openapi.client.common.ServiceClientResponse<T>` with **`data`** and *
-  *`meta`**.
-* **Nested generics awareness**: wrappers can be `ServiceClientResponse<Page<Item>>` when server marks container/item.
-* **Problem decoding**: non‑2xx responses parsed into generated `ProblemDetail` and thrown as `ClientProblemException`.
-* Spring configuration that wires a pooled **HttpClient5** + `RestClientCustomizer` for status handling.
-* An adapter layer that exposes clean, stable methods for your services.
+* Java client using **OpenAPI Generator 7.16.0** with the **Spring `RestClient`** library.
+* A reusable generic base: `io.github.bsayli.openapi.client.common.ServiceClientResponse<T>` containing `data` and `meta`.
+* **Nested generics support**: wrappers such as `ServiceClientResponse<Page<CustomerDto>>`.
+* **RFC 7807 Problem decoding** via `ClientProblemException`.
+* **Spring Boot configuration** for pooled HttpClient5 + `RestClientCustomizer` for error handling.
+* Adapter pattern for clean, type-safe service integration.
 
 ---
 
-## 🧠 How the thin wrappers are produced
+## 🧠 How the Thin Wrappers Are Produced
 
-Server marks wrapper schemas with vendor extensions. The Mustache overlay renders **thin shells** extending the generic
-base.
+Server marks wrapper schemas with vendor extensions. The Mustache overlay generates thin wrappers extending the generic base.
 
 ```mustache
-{{! --- Generics-aware thin wrapper --- }}
-{{! If x-data-container/x-data-item exist, render ServiceClientResponse<Container<Item>> }}
-{{! Otherwise fall back to ServiceClientResponse<x-api-wrapper-datatype> }}
-
+{{! Generics-aware thin wrapper }}
 import {{commonPackage}}.ServiceClientResponse;
 {{#vendorExtensions.x-data-container}}
 import {{commonPackage}}.{{vendorExtensions.x-data-container}};
@@ -63,136 +58,102 @@ import {{commonPackage}}.{{vendorExtensions.x-data-container}};
 {{#vendorExtensions.x-class-extra-annotation}}
 {{{vendorExtensions.x-class-extra-annotation}}}
 {{/vendorExtensions.x-class-extra-annotation}}
-public class {{classname}}
-    extends ServiceClientResponse<
-      {{#vendorExtensions.x-data-container}}
-        {{vendorExtensions.x-data-container}}<{{vendorExtensions.x-data-item}}>
-      {{/vendorExtensions.x-data-container}}
-      {{^vendorExtensions.x-data-container}}
-        {{vendorExtensions.x-api-wrapper-datatype}}
-      {{/vendorExtensions.x-data-container}}
-    > {
-}
+public class {{classname}} extends ServiceClientResponse<
+  {{#vendorExtensions.x-data-container}}
+    {{vendorExtensions.x-data-container}}<{{vendorExtensions.x-data-item}}>
+  {{/vendorExtensions.x-data-container}}
+  {{^vendorExtensions.x-data-container}}
+    {{vendorExtensions.x-api-wrapper-datatype}}
+  {{/vendorExtensions.x-data-container}}
+> {}
 ```
 
-Typical outputs under `generated-sources`:
+**Example outputs:**
 
-* `...ServiceResponseCustomerDto` → `extends ServiceClientResponse<CustomerDto>`
-* `...ServiceResponsePageCustomerDto` → `extends ServiceClientResponse<Page<CustomerDto>>`
+* `ServiceResponseCustomerDto` → `extends ServiceClientResponse<CustomerDto>`
+* `ServiceResponsePageCustomerDto` → `extends ServiceClientResponse<Page<CustomerDto>>`
 
 ---
 
-## 📦 Client Building Blocks (in this module)
+## 📦 Core Components
 
-**Envelope & meta**
+**Envelope and Meta:**
 
 ```java
-// io.github.bsayli.openapi.client.common.ServiceClientResponse
 public class ServiceClientResponse<T> {
     private T data;
-    private ClientMeta meta; // serverTime, sort ...
-    // getters/setters/equals/hashCode/toString
+    private ClientMeta meta;
 }
 
-// io.github.bsayli.openapi.client.common.ClientMeta
-public record ClientMeta(java.time.Instant serverTime,
-                         java.util.List<io.github.bsayli.openapi.client.common.sort.ClientSort> sort) {
-}
+public record ClientMeta(Instant serverTime, List<ClientSort> sort) {}
 
-// io.github.bsayli.openapi.client.common.Page
-public record Page<T>(java.util.List<T> content, int page, int size,
-                      long totalElements, int totalPages, boolean hasNext, boolean hasPrev) {
-}
+public record Page<T>(List<T> content, int page, int size,
+                      long totalElements, int totalPages,
+                      boolean hasNext, boolean hasPrev) {}
 ```
 
-**Problem decoding**
+**Problem Exception:**
 
 ```java
-// io.github.bsayli.openapi.client.common.error.ClientProblemException
 public class ClientProblemException extends RuntimeException {
-    private final transient io.github.bsayli.openapi.client.generated.dto.ProblemDetail problem;
+    private final transient ProblemDetail problem;
     private final int status;
-    // message includes title/detail/errorCode if present
 }
 ```
 
 ---
 
-## ⚙️ Spring Wiring (production-friendly)
-
-The client registers a pooled HttpClient5 and a `RestClientCustomizer` that turns non‑2xx responses into
-`ClientProblemException`.
+## ⚙️ Spring Configuration (Production-Ready)
 
 ```java
-
 @Configuration
 public class CustomerApiClientConfig {
-    @Bean
-    RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
-        return builder -> builder.defaultStatusHandler(
-                HttpStatusCode::isError,
-                (request, response) -> {
-                    io.github.bsayli.openapi.client.generated.dto.ProblemDetail pd = null;
-                    try (var is = response.getBody()) {
-                        pd = om.readValue(is, io.github.bsayli.openapi.client.generated.dto.ProblemDetail.class);
-                    } catch (Exception ignore) {
-                    }
-                    throw new ClientProblemException(pd, response.getStatusCode().value());
-                });
-    }
 
-    @Bean(destroyMethod = "close")
-    CloseableHttpClient customerHttpClient(
-            @Value("${customer.api.max-connections-total:64}") int maxTotal,
-            @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute) {
-        var cm = PoolingHttpClientConnectionManagerBuilder.create()
-                .setMaxConnTotal(maxTotal).setMaxConnPerRoute(maxPerRoute).build();
-        return HttpClients.custom().setConnectionManager(cm)
-                .evictExpiredConnections()
-                .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
-                .setUserAgent("customer-service-client").disableAutomaticRetries().build();
-    }
+  @Bean
+  RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
+    return builder -> builder.defaultStatusHandler(
+      HttpStatusCode::isError,
+      (request, response) -> {
+        ProblemDetail pd = null;
+        try (var is = response.getBody()) {
+          pd = om.readValue(is, ProblemDetail.class);
+        } catch (Exception ignore) {}
+        throw new ClientProblemException(pd, response.getStatusCode().value());
+      });
+  }
 
-    @Bean
-    HttpComponentsClientHttpRequestFactory customerRequestFactory(
-            CloseableHttpClient http,
-            @Value("${customer.api.connect-timeout-seconds:10}") long connect,
-            @Value("${customer.api.connection-request-timeout-seconds:10}") long connReq,
-            @Value("${customer.api.read-timeout-seconds:15}") long read) {
-        var f = new HttpComponentsClientHttpRequestFactory(http);
-        f.setConnectTimeout(Duration.ofSeconds(connect));
-        f.setConnectionRequestTimeout(Duration.ofSeconds(connReq));
-        f.setReadTimeout(Duration.ofSeconds(read));
-        return f;
-    }
+  @Bean(destroyMethod = "close")
+  CloseableHttpClient customerHttpClient(
+      @Value("${customer.api.max-connections-total:64}") int maxTotal,
+      @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute) {
+    var cm = PoolingHttpClientConnectionManagerBuilder.create()
+        .setMaxConnTotal(maxTotal)
+        .setMaxConnPerRoute(maxPerRoute)
+        .build();
+    return HttpClients.custom()
+        .setConnectionManager(cm)
+        .evictExpiredConnections()
+        .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
+        .setUserAgent("customer-service-client")
+        .disableAutomaticRetries()
+        .build();
+  }
 
-    @Bean
-    RestClient customerRestClient(RestClient.Builder b,
-                                  HttpComponentsClientHttpRequestFactory rf,
-                                  java.util.List<RestClientCustomizer> customizers) {
-        b.requestFactory(rf);
-        if (customizers != null) customizers.forEach(c -> c.customize(b));
-        return b.build();
-    }
-
-    @Bean
-    ApiClient customerApiClient(RestClient rest, @Value("${customer.api.base-url}") String baseUrl) {
-        return new ApiClient(rest).setBasePath(baseUrl);
-    }
-
-    @Bean
-    CustomerControllerApi customerControllerApi(ApiClient apiClient) {
-        return new CustomerControllerApi(apiClient);
-    }
+  @Bean
+  RestClient customerRestClient(RestClient.Builder builder,
+                                HttpComponentsClientHttpRequestFactory rf,
+                                List<RestClientCustomizer> customizers) {
+    builder.requestFactory(rf);
+    if (customizers != null) customizers.forEach(c -> c.customize(builder));
+    return builder.build();
+  }
 }
 ```
 
-**application.properties**
+**application.properties:**
 
 ```properties
-# Base URL of customer-service
 customer.api.base-url=http://localhost:8084/customer-service
-# HttpClient5 pool & timeouts
 customer.api.max-connections-total=64
 customer.api.max-connections-per-route=16
 customer.api.connect-timeout-seconds=10
@@ -202,130 +163,87 @@ customer.api.read-timeout-seconds=15
 
 ---
 
-## 🧩 Adapter Pattern (recommended)
-
-Encapsulate the generated API behind your own adapter so the rest of your code does not depend on generated classes.
+## 🧩 Adapter Pattern Example
 
 ```java
-
 @Service
 public class CustomerClientAdapterImpl implements CustomerClientAdapter {
-    private final CustomerControllerApi api;
+  private final CustomerControllerApi api;
 
-    public CustomerClientAdapterImpl(CustomerControllerApi api) {
-        this.api = api;
-    }
+  public CustomerClientAdapterImpl(CustomerControllerApi api) {
+    this.api = api;
+  }
 
-    @Override
-    public ServiceClientResponse<CustomerDto> createCustomer(CustomerCreateRequest req) {
-        return api.createCustomer(req);
-    }
-
-    @Override
-    public ServiceClientResponse<CustomerDto> getCustomer(Integer customerId) {
-        return api.getCustomer(customerId);
-    }
-
-    @Override
-    public ServiceClientResponse<Page<CustomerDto>> getCustomers() {
-        return getCustomers(null, null, 0, 5, SortField.CUSTOMER_ID, SortDirection.ASC);
-    }
-
-    @Override
-    public ServiceClientResponse<Page<CustomerDto>> getCustomers(
-            String name, String email, Integer page, Integer size,
-            SortField sortBy, SortDirection direction) {
-        return api.getCustomers(
-                name, email, page, size,
-                sortBy != null ? sortBy.value() : SortField.CUSTOMER_ID.value(),
-                direction != null ? direction.value() : SortDirection.ASC.value());
-    }
-
-    @Override
-    public ServiceClientResponse<CustomerDto> updateCustomer(Integer id, CustomerUpdateRequest req) {
-        return api.updateCustomer(id, req);
-    }
-
-    @Override
-    public ServiceClientResponse<CustomerDeleteResponse> deleteCustomer(Integer id) {
-        return api.deleteCustomer(id);
-    }
+  @Override
+  public ServiceClientResponse<Page<CustomerDto>> getCustomers(
+      String name, String email, Integer page, Integer size,
+      SortField sortBy, SortDirection direction) {
+    return api.getCustomers(
+        name, email, page, size,
+        sortBy != null ? sortBy.value() : SortField.CUSTOMER_ID.value(),
+        direction != null ? direction.value() : SortDirection.ASC.value());
+  }
 }
 ```
 
-> Returns now follow the simplified server contract: **create/update/get → `CustomerDto`**, list → `Page<CustomerDto>`;
-> delete → `CustomerDeleteResponse`.
+**Benefits:**
+
+* Generated code stays isolated.
+* Business logic depends only on stable interfaces.
+* Client evolution never leaks across services.
 
 ---
 
-## 🚀 Quick usage example
+## 🚀 Quick Usage Example
 
 ```java
-var response = customerClientAdapter.getCustomer(42);
-var dto = response.getData();
-var serverTime = response.getMeta().serverTime();
+var resp = customerClientAdapter.getCustomer(42);
+var dto = resp.getData();
+var serverTime = resp.getMeta().serverTime();
 ```
 
-For listing with paging and sorting:
+Error handling:
 
 ```java
-var list = customerClientAdapter.getCustomers("Jane", null, 0, 5, SortField.CUSTOMER_ID, SortDirection.ASC);
-var page = list.getData(); // Page<CustomerDto>
-for(
-var c :page.
-
-content()){ /* ... */ }
-```
-
-Error handling example:
-
-```java
-try{
-        customerClientAdapter.getCustomer(999);
-}catch(
-ClientProblemException ex){
-var pd = ex.getProblem();
-// pd.getTitle(), pd.getDetail(), pd.getStatus(), pd.getErrorCode(), pd.getExtensions()...
+try {
+  customerClientAdapter.getCustomer(999);
+} catch (ClientProblemException ex) {
+  var pd = ex.getProblem();
+  // pd.getTitle(), pd.getDetail(), pd.getErrorCode(), etc.
 }
 ```
 
 ---
 
-## 📘 Adoption Guide (summary)
+## 📘 Adoption Summary
 
-1. Ensure your server marks wrapper schemas with:
+1. Mark wrapper schemas in the OpenAPI spec:
 
     * `x-api-wrapper: true`
     * `x-api-wrapper-datatype: <T>`
-    * *(optional nested)* `x-data-container: <Container>`, `x-data-item: <Item>`
-2. Keep the Mustache overlay in `src/main/resources/openapi-templates/` (see snippet above).
-3. Run the OpenAPI Generator during build; thin wrappers will extend the generic base accordingly.
+    * Optionally `x-data-container` and `x-data-item`
+2. Keep templates under `src/main/resources/openapi-templates/`.
+3. Run OpenAPI Generator → wrappers extend `ServiceClientResponse<T>` automatically.
 
-For complete, step-by-step guides see [`../docs/adoption`](../docs/adoption).
+For detailed steps, see [`../docs/adoption`](../docs/adoption).
 
 ---
 
 ## 🧰 Troubleshooting
 
-* **No thin wrappers generated?** Check that your spec carries the vendor extensions and your `<templateDirectory>`
-  points to the **effective** templates.
-* **Nested generics not applied?** Verify `x-data-container` and `x-data-item` are present on the composed schema (
-  `ServiceResponsePageCustomerDto`, etc.).
-* **`ProblemDetail` not thrown?** Ensure the `RestClientCustomizer` is registered and not overridden later.
-* **Provided deps**: Generated code uses `jakarta.validation` & Spring types; your host app must provide them if you
-  depend on the generated sources directly.
+* **No thin wrappers?** Check vendor extensions + template directory.
+* **Nested generics missing?** Ensure `x-data-container` and `x-data-item` exist.
+* **ProblemDetail not thrown?** Verify your `RestClientCustomizer`.
+* **Provided deps:** Ensure your host app includes `jakarta.validation` & Spring Web.
 
 ---
 
 ## 📚 Notes
 
-* **Generator & toolchain**
-
-    * Java 21, OpenAPI Generator 7.16.0
-    * Options: `useSpringBoot3=true`, `useJakartaEe=true`, `serializationLibrary=jackson`, `dateLibrary=java8`,
-      `useBeanValidation=true`
-* **OpenAPI spec location**: `src/main/resources/customer-api-docs.yaml`
-* **Optional**: `x-class-extra-annotation` can inject annotations on wrapper classes (advanced).
+* **Toolchain:** Java 21, OpenAPI Generator 7.16.0
+* **Generator options:** `useSpringBoot3=true`, `useJakartaEe=true`, `serializationLibrary=jackson`, `dateLibrary=java8`
+* **OpenAPI spec:** `src/main/resources/customer-api-docs.yaml`
+* Optional `x-class-extra-annotation` adds annotations on generated wrappers.
 
 ---
 
@@ -333,14 +251,21 @@ For complete, step-by-step guides see [`../docs/adoption`](../docs/adoption).
 
 Generated from the OpenAPI spec exposed by:
 
-* [`customer-service`](../customer-service/README.md) — sample Spring Boot microservice (API producer).
+* [customer-service](../customer-service/README.md) — sample Spring Boot microservice (API producer).
+
+---
+
+## 💬 Feedback
+
+If you spot an error or have suggestions, open an issue or join the discussion — contributions are welcome.
+💭 [Start a discussion →](https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions)
 
 ---
 
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome!
-Feel free to [open an issue](../../issues) or submit a PR.
+Feel free to [open an issue](https://github.com/bsayli/spring-boot-openapi-generics-clients/issues) or submit a PR.
 
 ---
 
