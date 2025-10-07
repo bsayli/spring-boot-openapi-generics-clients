@@ -1,19 +1,18 @@
 package io.github.bsayli.customerservice.api.controller;
 
-import static io.github.bsayli.customerservice.common.api.ApiConstants.Response.CREATED;
-import static io.github.bsayli.customerservice.common.api.ApiConstants.Response.DELETED;
-import static io.github.bsayli.customerservice.common.api.ApiConstants.Response.LISTED;
-import static io.github.bsayli.customerservice.common.api.ApiConstants.Response.UPDATED;
-
 import io.github.bsayli.customerservice.api.dto.*;
+import io.github.bsayli.customerservice.common.api.response.Meta;
+import io.github.bsayli.customerservice.common.api.response.Page;
 import io.github.bsayli.customerservice.common.api.response.ServiceResponse;
+import io.github.bsayli.customerservice.common.api.sort.Sort;
+import io.github.bsayli.customerservice.common.api.sort.SortDirection;
+import io.github.bsayli.customerservice.common.api.sort.SortField;
 import io.github.bsayli.customerservice.service.CustomerService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.net.URI;
-import java.time.Instant;
 import java.util.List;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -32,12 +31,10 @@ public class CustomerController {
   }
 
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-  @ResponseStatus(HttpStatus.CREATED)
-  public ResponseEntity<ServiceResponse<CustomerCreateResponse>> createCustomer(
+  public ResponseEntity<ServiceResponse<CustomerDto>> createCustomer(
       @Valid @RequestBody CustomerCreateRequest request) {
 
     CustomerDto created = customerService.createCustomer(request);
-    CustomerCreateResponse body = new CustomerCreateResponse(created, Instant.now());
 
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
@@ -45,8 +42,7 @@ public class CustomerController {
             .buildAndExpand(created.customerId())
             .toUri();
 
-    return ResponseEntity.created(location)
-        .body(ServiceResponse.of(HttpStatus.CREATED, CREATED, body));
+    return ResponseEntity.created(location).body(ServiceResponse.ok(created));
   }
 
   @GetMapping("/{customerId}")
@@ -57,19 +53,23 @@ public class CustomerController {
   }
 
   @GetMapping
-  public ResponseEntity<ServiceResponse<CustomerListResponse>> getCustomers() {
-    List<CustomerDto> all = customerService.getCustomers();
-    CustomerListResponse body = new CustomerListResponse(all);
-    return ResponseEntity.ok(ServiceResponse.of(HttpStatus.OK, LISTED, body));
+  public ResponseEntity<ServiceResponse<Page<CustomerDto>>> getCustomers(
+      @ModelAttribute CustomerSearchCriteria criteria,
+      @RequestParam(defaultValue = "0") @Min(0) int page,
+      @RequestParam(defaultValue = "5") @Min(1) @Max(10) int size,
+      @RequestParam(defaultValue = "customerId") SortField sortBy,
+      @RequestParam(defaultValue = "asc") SortDirection direction) {
+    var paged = customerService.getCustomers(criteria, page, size, sortBy, direction);
+    var meta = Meta.now(List.of(new Sort(sortBy, direction)));
+    return ResponseEntity.ok(ServiceResponse.ok(paged, meta));
   }
 
   @PutMapping(path = "/{customerId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<ServiceResponse<CustomerUpdateResponse>> updateCustomer(
+  public ResponseEntity<ServiceResponse<CustomerDto>> updateCustomer(
       @PathVariable @Min(1) Integer customerId, @Valid @RequestBody CustomerUpdateRequest request) {
 
     CustomerDto updated = customerService.updateCustomer(customerId, request);
-    CustomerUpdateResponse body = new CustomerUpdateResponse(updated, Instant.now());
-    return ResponseEntity.ok(ServiceResponse.of(HttpStatus.OK, UPDATED, body));
+    return ResponseEntity.ok(ServiceResponse.ok(updated));
   }
 
   @DeleteMapping("/{customerId}")
@@ -77,7 +77,7 @@ public class CustomerController {
       @PathVariable @Min(1) Integer customerId) {
 
     customerService.deleteCustomer(customerId);
-    CustomerDeleteResponse body = new CustomerDeleteResponse(customerId, Instant.now());
-    return ResponseEntity.ok(ServiceResponse.of(HttpStatus.OK, DELETED, body));
+    var body = new CustomerDeleteResponse(customerId);
+    return ResponseEntity.ok(ServiceResponse.ok(body));
   }
 }

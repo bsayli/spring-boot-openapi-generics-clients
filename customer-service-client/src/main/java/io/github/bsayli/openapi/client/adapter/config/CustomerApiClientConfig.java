@@ -1,19 +1,40 @@
 package io.github.bsayli.openapi.client.adapter.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.bsayli.openapi.client.common.error.ClientProblemException;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
+import io.github.bsayli.openapi.client.generated.dto.ProblemDetail;
 import io.github.bsayli.openapi.client.generated.invoker.ApiClient;
 import java.time.Duration;
+import java.util.List;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration
 public class CustomerApiClientConfig {
+
+  @Bean
+  RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
+    return builder ->
+        builder.defaultStatusHandler(
+            HttpStatusCode::isError,
+            (request, response) -> {
+              ProblemDetail pd = null;
+              try (var is = response.getBody()) {
+                pd = om.readValue(is, ProblemDetail.class);
+              } catch (Exception ignore) {
+              }
+              throw new ClientProblemException(pd, response.getStatusCode().value());
+            });
+  }
 
   @Bean(destroyMethod = "close")
   CloseableHttpClient customerHttpClient(
@@ -51,8 +72,14 @@ public class CustomerApiClientConfig {
 
   @Bean
   RestClient customerRestClient(
-      RestClient.Builder builder, HttpComponentsClientHttpRequestFactory customerRequestFactory) {
-    return builder.requestFactory(customerRequestFactory).build();
+      RestClient.Builder builder,
+      HttpComponentsClientHttpRequestFactory customerRequestFactory,
+      List<RestClientCustomizer> customizers) {
+    builder.requestFactory(customerRequestFactory);
+    if (customizers != null) {
+      customizers.forEach(c -> c.customize(builder));
+    }
+    return builder.build();
   }
 
   @Bean

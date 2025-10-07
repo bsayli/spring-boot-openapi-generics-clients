@@ -1,8 +1,10 @@
 import {{commonPackage}}.ServiceClientResponse;
+{{#vendorExtensions.x-data-container}}
+import {{commonPackage}}.{{vendorExtensions.x-data-container}};
+{{/vendorExtensions.x-data-container}}
 
 {{#vendorExtensions.x-class-extra-annotation}}
 {{{vendorExtensions.x-class-extra-annotation}}}
 {{/vendorExtensions.x-class-extra-annotation}}
-public class {{classname}}
-    extends ServiceClientResponse<{{vendorExtensions.x-api-wrapper-datatype}}> {
+public class {{classname}} extends ServiceClientResponse<{{#vendorExtensions.x-data-container}}{{vendorExtensions.x-data-container}}<{{vendorExtensions.x-data-item}}>{{/vendorExtensions.x-data-container}}{{^vendorExtensions.x-data-container}}{{vendorExtensions.x-api-wrapper-datatype}}{{/vendorExtensions.x-data-container}}> {
 }
