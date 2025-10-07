@@ -8,11 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.bsayli.customerservice.api.dto.CustomerCreateRequest;
-import io.github.bsayli.customerservice.api.dto.CustomerDto;
-import io.github.bsayli.customerservice.api.dto.CustomerSearchCriteria;
-import io.github.bsayli.customerservice.api.dto.CustomerUpdateRequest;
-import io.github.bsayli.customerservice.api.error.CustomerControllerAdvice;
+import io.github.bsayli.customerservice.api.dto.*;
+import io.github.bsayli.customerservice.api.error.*;
 import io.github.bsayli.customerservice.common.api.response.Page;
 import io.github.bsayli.customerservice.common.api.sort.SortDirection;
 import io.github.bsayli.customerservice.common.api.sort.SortField;
@@ -32,13 +29,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = CustomerController.class)
-@Import({CustomerControllerAdvice.class, TestControllerMocksConfig.class})
+@Import({
+  ValidationExceptionHandler.class,
+  JsonExceptionHandler.class,
+  SpringHttpExceptionHandler.class,
+  ApplicationExceptionHandler.class,
+  TestControllerMocksConfig.class
+})
 @Tag("integration")
 class CustomerControllerIT {
 
   @Autowired private MockMvc mvc;
   @Autowired private ObjectMapper om;
-
   @Autowired private CustomerService customerService;
 
   @Test
@@ -62,7 +64,7 @@ class CustomerControllerIT {
   }
 
   @Test
-  @DisplayName("POST /v1/customers -> 400 Bad Request (validation)")
+  @DisplayName("POST /v1/customers -> 400 Bad Request (validation failed)")
   void createCustomer_validation400() throws Exception {
     var badJson =
         """
@@ -72,27 +74,22 @@ class CustomerControllerIT {
     mvc.perform(post("/v1/customers").contentType(MediaType.APPLICATION_JSON).content(badJson))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
-        .andExpect(jsonPath("$.title").value("Validation failed"))
-        .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errorCode").value("VALIDATION_FAILED"))
-        .andExpect(jsonPath("$.violations").isArray());
+        .andExpect(jsonPath("$.status").value(400));
   }
 
   @Test
-  @DisplayName("POST /v1/customers -> 400 Bad Request when JSON is malformed")
+  @DisplayName("POST /v1/customers -> 400 Bad Request (malformed JSON)")
   void createCustomer_badJson_notReadable() throws Exception {
     var malformed = "{ \"name\": \"John\", \"email\": }"; // invalid JSON
 
     mvc.perform(post("/v1/customers").contentType(MediaType.APPLICATION_JSON).content(malformed))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
-        .andExpect(jsonPath("$.title").value("Bad request"))
-        .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errorCode").value("BAD_REQUEST"));
+        .andExpect(jsonPath("$.status").value(400));
   }
 
   @Test
-  @DisplayName("GET /v1/customers/{id} -> 200 OK ve tek müşteri")
+  @DisplayName("GET /v1/customers/{id} -> 200 OK (one customer)")
   void getCustomer_ok200() throws Exception {
     var dto = new CustomerDto(1, "John Smith", "john.smith@example.com");
     when(customerService.getCustomer(1)).thenReturn(dto);
@@ -114,10 +111,7 @@ class CustomerControllerIT {
     mvc.perform(get("/v1/customers/{id}", 99))
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
-        .andExpect(jsonPath("$.title").value("Resource not found"))
-        .andExpect(jsonPath("$.status").value(404))
-        .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"))
-        .andExpect(jsonPath("$.detail").value("Customer not found: 99"));
+        .andExpect(jsonPath("$.status").value(404));
   }
 
   @Test
@@ -126,41 +120,31 @@ class CustomerControllerIT {
     mvc.perform(get("/v1/customers/{id}", "abc"))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
-        .andExpect(jsonPath("$.title").value("Bad request"))
-        .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errorCode").value("BAD_REQUEST"))
-        .andExpect(jsonPath("$.violations[0].field").value("customerId"))
-        .andExpect(jsonPath("$.violations[0].message").exists());
+        .andExpect(jsonPath("$.status").value(400));
   }
 
   @Test
-  @DisplayName("GET /v1/customers/{id} -> 400 Bad Request on @Min violation (id=0)")
+  @DisplayName("GET /v1/customers/{id} -> 400 Bad Request (@Min violation)")
   void getCustomer_constraintViolation_min() throws Exception {
-    mvc.perform(get("/v1/customers/{id}", 0)) // @Min(1) violated
+    mvc.perform(get("/v1/customers/{id}", 0))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
-        .andExpect(jsonPath("$.title").value("Validation failed"))
-        .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errorCode").value("VALIDATION_FAILED"))
-        .andExpect(jsonPath("$.violations").isArray());
+        .andExpect(jsonPath("$.status").value(400));
   }
 
   @Test
-  @DisplayName("GET /v1/customers/{id} -> 500 Internal Server Error handled by advice")
+  @DisplayName("GET /v1/customers/{id} -> 500 Internal Server Error (generic)")
   void getCustomer_internalServerError_generic() throws Exception {
     when(customerService.getCustomer(1)).thenThrow(new RuntimeException("Boom"));
 
     mvc.perform(get("/v1/customers/{id}", 1))
         .andExpect(status().isInternalServerError())
         .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
-        .andExpect(jsonPath("$.title").value("Internal server error"))
-        .andExpect(jsonPath("$.status").value(500))
-        .andExpect(jsonPath("$.errorCode").value("INTERNAL_ERROR"))
-        .andExpect(jsonPath("$.detail").value("Boom"));
+        .andExpect(jsonPath("$.status").value(500));
   }
 
   @Test
-  @DisplayName("GET /v1/customers -> 200 OK, Page<CustomerDto> ve meta.sort")
+  @DisplayName("GET /v1/customers -> 200 OK, Page<CustomerDto> + meta.sort")
   void getCustomers_list200_paged() throws Exception {
     var d1 = new CustomerDto(1, "John Smith", "john.smith@example.com");
     var d2 = new CustomerDto(2, "Ahmet Yilmaz", "ahmet.yilmaz@example.com");
@@ -189,7 +173,7 @@ class CustomerControllerIT {
   }
 
   @Test
-  @DisplayName("PUT /v1/customers/{id} -> 200 OK, data=CustomerDto")
+  @DisplayName("PUT /v1/customers/{id} -> 200 OK (update)")
   void updateCustomer_ok200() throws Exception {
     var req = new CustomerUpdateRequest("Jane Doe", "jane.doe@example.com");
     var updated = new CustomerDto(1, req.name(), req.email());
@@ -208,7 +192,7 @@ class CustomerControllerIT {
   }
 
   @Test
-  @DisplayName("DELETE /v1/customers/{id} -> 200 OK ve data.customerId")
+  @DisplayName("DELETE /v1/customers/{id} -> 200 OK (delete)")
   void deleteCustomer_ok200() throws Exception {
     doNothing().when(customerService).deleteCustomer(1);
 

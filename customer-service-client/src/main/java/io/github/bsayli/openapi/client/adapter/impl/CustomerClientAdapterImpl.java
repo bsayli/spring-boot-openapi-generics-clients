@@ -1,7 +1,10 @@
 package io.github.bsayli.openapi.client.adapter.impl;
 
 import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
+import io.github.bsayli.openapi.client.common.Page;
 import io.github.bsayli.openapi.client.common.ServiceClientResponse;
+import io.github.bsayli.openapi.client.common.sort.SortDirection;
+import io.github.bsayli.openapi.client.common.sort.SortField;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
 import io.github.bsayli.openapi.client.generated.dto.*;
 import org.springframework.stereotype.Service;
@@ -26,15 +29,26 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
   }
 
   @Override
-  public ServiceClientResponse<PageCustomerDto> getCustomers() {
-    return getCustomers(null, null, 0, 5, "customerId", "asc");
+  public ServiceClientResponse<Page<CustomerDto>> getCustomers() {
+    return getCustomers(null, null, 0, 5, SortField.CUSTOMER_ID, SortDirection.ASC);
   }
 
   @Override
-  public ServiceClientResponse<PageCustomerDto> getCustomers(
-      String name, String email, Integer page, Integer size, String sortBy, String direction) {
+  public ServiceClientResponse<Page<CustomerDto>> getCustomers(
+      String name,
+      String email,
+      Integer page,
+      Integer size,
+      SortField sortBy,
+      SortDirection direction) {
 
-    return api.getCustomers(name, email, page, size, sortBy, direction);
+    return api.getCustomers(
+        name,
+        email,
+        page,
+        size,
+        sortBy != null ? sortBy.value() : SortField.CUSTOMER_ID.value(),
+        direction != null ? direction.value() : SortDirection.ASC.value());
   }
 
   @Override

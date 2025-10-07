@@ -22,5 +22,9 @@ public final class OpenApiSchemas {
   public static final String EXT_API_WRAPPER_DATATYPE = "x-api-wrapper-datatype";
   public static final String EXT_CLASS_EXTRA_ANNOTATION = "x-class-extra-annotation";
 
+  // ---- Vendor extensions (nested/container awareness)
+  public static final String EXT_DATA_CONTAINER = "x-data-container"; // e.g. "Page"
+  public static final String EXT_DATA_ITEM = "x-data-item"; // e.g. "CustomerDto"
+
   private OpenApiSchemas() {}
 }

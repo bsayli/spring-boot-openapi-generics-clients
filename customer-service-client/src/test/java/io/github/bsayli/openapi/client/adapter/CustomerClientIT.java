@@ -2,6 +2,7 @@ package io.github.bsayli.openapi.client.adapter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bsayli.openapi.client.adapter.config.CustomerApiClientConfig;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
 import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
@@ -65,8 +66,8 @@ class CustomerClientIT {
     assertEquals("jane@example.com", resp.getData().getEmail());
 
     assertNotNull(resp.getMeta());
-    assertEquals("req-1", resp.getMeta().getRequestId());
-    assertNotNull(resp.getMeta().getServerTime());
+    assertEquals("req-1", resp.getMeta().requestId());
+    assertNotNull(resp.getMeta().serverTime());
   }
 
   @Test
@@ -94,8 +95,8 @@ class CustomerClientIT {
     assertEquals("Jane Doe", resp.getData().getName());
 
     assertNotNull(resp.getMeta());
-    assertEquals("req-2", resp.getMeta().getRequestId());
-    assertNotNull(resp.getMeta().getServerTime());
+    assertEquals("req-2", resp.getMeta().requestId());
+    assertNotNull(resp.getMeta().serverTime());
   }
 
   @Test
@@ -126,20 +127,26 @@ class CustomerClientIT {
             .addHeader("Content-Type", "application/json")
             .setBody(body));
 
-    // generated signature accepts query params
+    // generated signature accepts query params (sortBy/direction are strings at wire-level)
     var resp = api.getCustomers(null, null, 0, 5, "customerId", "asc");
 
     assertNotNull(resp);
     assertNotNull(resp.getData());
-    assertEquals(0, resp.getData().getPage());
-    assertEquals(5, resp.getData().getSize());
-    assertEquals(2L, resp.getData().getTotalElements());
-    assertEquals(2, resp.getData().getContent().size());
-    assertEquals(1, resp.getData().getContent().get(0).getCustomerId());
+
+    var page = resp.getData(); // this is io.github.bsayli.openapi.client.common.Page<CustomerDto>
+    assertEquals(0, page.page());
+    assertEquals(5, page.size());
+    assertEquals(2L, page.totalElements());
+    assertEquals(1, page.totalPages());
+    assertFalse(page.hasNext());
+    assertFalse(page.hasPrev());
+    assertNotNull(page.content());
+    assertEquals(2, page.content().size());
+    assertEquals(1, page.content().getFirst().getCustomerId());
 
     assertNotNull(resp.getMeta());
-    assertEquals("req-3", resp.getMeta().getRequestId());
-    assertNotNull(resp.getMeta().getServerTime());
+    assertEquals("req-3", resp.getMeta().requestId());
+    assertNotNull(resp.getMeta().serverTime());
   }
 
   @Test
@@ -169,14 +176,13 @@ class CustomerClientIT {
     assertEquals("jane.updated@example.com", resp.getData().getEmail());
 
     assertNotNull(resp.getMeta());
-    assertEquals("req-4", resp.getMeta().getRequestId());
-    assertNotNull(resp.getMeta().getServerTime());
+    assertEquals("req-4", resp.getMeta().requestId());
+    assertNotNull(resp.getMeta().serverTime());
   }
 
   @Test
   @DisplayName("DELETE /v1/customers/{id} -> 200 OK + maps {data, meta}")
   void deleteCustomer_shouldReturn200_andMapBody() {
-    // NOTE: According to the latest schema, CustomerDeleteResponse has only customerId.
     var body =
         """
             {
@@ -198,15 +204,21 @@ class CustomerClientIT {
     assertEquals(1, resp.getData().getCustomerId());
 
     assertNotNull(resp.getMeta());
-    assertEquals("req-5", resp.getMeta().getRequestId());
-    assertNotNull(resp.getMeta().getServerTime());
+    assertEquals("req-5", resp.getMeta().requestId());
+    assertNotNull(resp.getMeta().serverTime());
   }
 
   @Configuration
   static class TestBeans {
+
     @Bean
     RestClient.Builder restClientBuilder() {
       return RestClient.builder();
+    }
+
+    @Bean
+    ObjectMapper objectMapper() {
+      return new ObjectMapper();
     }
   }
 }

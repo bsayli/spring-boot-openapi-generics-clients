@@ -21,14 +21,20 @@ logging:
   level:
     root: INFO
     org.springframework.web: INFO
-    com.example.demo: DEBUG
+    io.github.bsayli: DEBUG
 
 app:
   openapi:
     version: @project.version@
     base-url: "http://localhost:${server.port}${server.servlet.context-path:}"
-    #wrapper:
-    #class-extra-annotation: "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)"
+    wrapper:
+      # Optional: extra annotation for generated client models
+      # class-extra-annotation: "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)"
+      # Generic container types to auto-enrich (supports multiple)
+      generic-containers:
+        - Page
+        # - Slice
+        # - PagedResult
 
 springdoc:
   default-consumes-media-type: application/json

@@ -54,7 +54,7 @@ class AutoWrapperSchemaCustomizerTest {
               };
             });
 
-    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, null);
+    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, null, "Page");
     OpenApiCustomizer customizer = customizerCfg.autoResponseWrappers();
 
     var openAPI = new OpenAPI().components(new Components());
@@ -79,7 +79,7 @@ class AutoWrapperSchemaCustomizerTest {
 
     when(beanFactory.getBeansOfType(RequestMappingHandlerMapping.class)).thenReturn(Map.of());
 
-    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, null);
+    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, null, "Page");
     OpenApiCustomizer customizer = customizerCfg.autoResponseWrappers();
 
     var openAPI = new OpenAPI().components(new Components());
@@ -113,7 +113,8 @@ class AutoWrapperSchemaCustomizerTest {
     String classExtraAnn =
         "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)";
 
-    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, classExtraAnn);
+    var customizerCfg =
+        new AutoWrapperSchemaCustomizer(beanFactory, introspector, classExtraAnn, "Page");
     OpenApiCustomizer customizer = customizerCfg.autoResponseWrappers();
 
     var openAPI = new OpenAPI().components(new Components());
@@ -147,7 +148,7 @@ class AutoWrapperSchemaCustomizerTest {
         .thenReturn(Map.of("rmh", handlerMapping));
     when(introspector.extractDataRefName(any(Method.class))).thenReturn(Optional.of("FooRef"));
 
-    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, "  ");
+    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, "  ", "Page");
     OpenApiCustomizer customizer = customizerCfg.autoResponseWrappers();
 
     var openAPI = new OpenAPI().components(new Components());

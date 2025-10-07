@@ -6,13 +6,15 @@ import static org.mockito.Mockito.when;
 
 import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
 import io.github.bsayli.openapi.client.common.ClientMeta;
+import io.github.bsayli.openapi.client.common.Page;
 import io.github.bsayli.openapi.client.common.ServiceClientResponse;
+import io.github.bsayli.openapi.client.common.sort.SortDirection;
+import io.github.bsayli.openapi.client.common.sort.SortField;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
 import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
 import io.github.bsayli.openapi.client.generated.dto.CustomerDeleteResponse;
 import io.github.bsayli.openapi.client.generated.dto.CustomerDto;
 import io.github.bsayli.openapi.client.generated.dto.CustomerUpdateRequest;
-import io.github.bsayli.openapi.client.generated.dto.PageCustomerDto;
 import io.github.bsayli.openapi.client.generated.dto.ServiceResponseCustomerDeleteResponse;
 import io.github.bsayli.openapi.client.generated.dto.ServiceResponseCustomerDto;
 import io.github.bsayli.openapi.client.generated.dto.ServiceResponsePageCustomerDto;
@@ -44,7 +46,6 @@ class CustomerClientAdapterImplTest {
     var dto = new CustomerDto().customerId(1).name("Jane Doe").email("jane@example.com");
 
     var serverOdt = OffsetDateTime.parse("2025-01-01T12:34:56Z");
-
     var meta = new ClientMeta("req-123", serverOdt.toInstant(), List.of());
 
     var wrapper = new ServiceResponseCustomerDto();
@@ -62,8 +63,8 @@ class CustomerClientAdapterImplTest {
     assertEquals("jane@example.com", res.getData().getEmail());
 
     assertNotNull(res.getMeta());
-    assertEquals("req-123", res.getMeta().getRequestId());
-    assertEquals(serverOdt.toInstant(), res.getMeta().getServerTime());
+    assertEquals("req-123", res.getMeta().requestId());
+    assertEquals(serverOdt.toInstant(), res.getMeta().serverTime());
   }
 
   @Test
@@ -72,7 +73,6 @@ class CustomerClientAdapterImplTest {
     var dto = new CustomerDto().customerId(42).name("John Smith").email("john.smith@example.com");
 
     var serverOdt = OffsetDateTime.parse("2025-02-01T10:00:00Z");
-
     var wrapper = new ServiceResponseCustomerDto();
     wrapper.setData(dto);
     wrapper.setMeta(new ClientMeta("req-42", serverOdt.toInstant(), List.of()));
@@ -88,8 +88,8 @@ class CustomerClientAdapterImplTest {
     assertEquals("john.smith@example.com", res.getData().getEmail());
 
     assertNotNull(res.getMeta());
-    assertEquals("req-42", res.getMeta().getRequestId());
-    assertEquals(serverOdt.toInstant(), res.getMeta().getServerTime());
+    assertEquals("req-42", res.getMeta().requestId());
+    assertEquals(serverOdt.toInstant(), res.getMeta().serverTime());
   }
 
   @Test
@@ -98,39 +98,30 @@ class CustomerClientAdapterImplTest {
     var d1 = new CustomerDto().customerId(1).name("A").email("a@example.com");
     var d2 = new CustomerDto().customerId(2).name("B").email("b@example.com");
 
-    var pageDto =
-        new PageCustomerDto()
-            .content(List.of(d1, d2))
-            .page(0)
-            .size(5)
-            .totalElements(2L)
-            .totalPages(1)
-            .hasNext(false)
-            .hasPrev(false);
+    var page = new Page<>(List.of(d1, d2), 0, 5, 2L, 1, false, false);
 
     var serverOdt = OffsetDateTime.parse("2025-03-01T09:00:00Z");
-
     var wrapper = new ServiceResponsePageCustomerDto();
-    wrapper.setData(pageDto);
+    wrapper.setData(page);
     wrapper.setMeta(new ClientMeta("req-list", serverOdt.toInstant(), List.of()));
 
     when(api.getCustomers(any(), any(), any(), any(), any(), any())).thenReturn(wrapper);
 
-    ServiceClientResponse<PageCustomerDto> res =
-        adapter.getCustomers(null, null, 0, 5, "customerId", "asc");
+    ServiceClientResponse<Page<CustomerDto>> res =
+        adapter.getCustomers(null, null, 0, 5, SortField.CUSTOMER_ID, SortDirection.ASC);
 
     assertNotNull(res);
     assertNotNull(res.getData());
-    assertEquals(0, res.getData().getPage());
-    assertEquals(5, res.getData().getSize());
-    assertEquals(2L, res.getData().getTotalElements());
-    assertNotNull(res.getData().getContent());
-    assertEquals(2, res.getData().getContent().size());
-    assertEquals(1, res.getData().getContent().getFirst().getCustomerId());
+    assertEquals(0, res.getData().page());
+    assertEquals(5, res.getData().size());
+    assertEquals(2L, res.getData().totalElements());
+    assertNotNull(res.getData().content());
+    assertEquals(2, res.getData().content().size());
+    assertEquals(1, res.getData().content().getFirst().getCustomerId());
 
     assertNotNull(res.getMeta());
-    assertEquals("req-list", res.getMeta().getRequestId());
-    assertEquals(serverOdt.toInstant(), res.getMeta().getServerTime());
+    assertEquals("req-list", res.getMeta().requestId());
+    assertEquals(serverOdt.toInstant(), res.getMeta().serverTime());
   }
 
   @Test
@@ -142,7 +133,6 @@ class CustomerClientAdapterImplTest {
         new CustomerDto().customerId(1).name("Jane Updated").email("jane.updated@example.com");
 
     var serverOdt = OffsetDateTime.parse("2025-04-02T12:00:00Z");
-
     var wrapper = new ServiceResponseCustomerDto();
     wrapper.setData(dto);
     wrapper.setMeta(new ClientMeta("req-upd", serverOdt.toInstant(), List.of()));
@@ -157,8 +147,8 @@ class CustomerClientAdapterImplTest {
     assertEquals("jane.updated@example.com", res.getData().getEmail());
 
     assertNotNull(res.getMeta());
-    assertEquals("req-upd", res.getMeta().getRequestId());
-    assertEquals(serverOdt.toInstant(), res.getMeta().getServerTime());
+    assertEquals("req-upd", res.getMeta().requestId());
+    assertEquals(serverOdt.toInstant(), res.getMeta().serverTime());
   }
 
   @Test
@@ -167,7 +157,6 @@ class CustomerClientAdapterImplTest {
     var payload = new CustomerDeleteResponse().customerId(7);
 
     var serverOdt = OffsetDateTime.parse("2025-05-03T08:00:00Z");
-
     var wrapper = new ServiceResponseCustomerDeleteResponse();
     wrapper.setData(payload);
     wrapper.setMeta(new ClientMeta("req-del", serverOdt.toInstant(), List.of()));
@@ -181,8 +170,8 @@ class CustomerClientAdapterImplTest {
     assertEquals(7, res.getData().getCustomerId());
 
     assertNotNull(res.getMeta());
-    assertEquals("req-del", res.getMeta().getRequestId());
-    assertEquals(serverOdt.toInstant(), res.getMeta().getServerTime());
+    assertEquals("req-del", res.getMeta().requestId());
+    assertEquals(serverOdt.toInstant(), res.getMeta().serverTime());
   }
 
   @Test
