@@ -9,13 +9,16 @@ nav_order: 1
 
 Welcome! 👋
 
-This project demonstrates a **modern, generics-aware OpenAPI client generation pattern** for Spring Boot 3.4+, featuring the unified `{ data, meta }` response model and full **nested generic support** — from `ServiceResponse<T>` to `ServiceResponse<Page<T>>`.
+This project demonstrates a **modern, generics-aware OpenAPI client generation pattern** for Spring Boot 3.4+, featuring
+the unified `{ data, meta }` response model and full **nested generic support** — from `ServiceResponse<T>` to
+`ServiceResponse<Page<T>>`.
 
 ---
 
 ## 💡 Overview
 
-Using Springdoc on the backend and OpenAPI Generator 7.16.0 on the client side, this setup enables seamless code generation where all responses are **type-safe**, **clean**, and **boilerplate-free**.
+Using Springdoc on the backend and OpenAPI Generator 7.16.0 on the client side, this setup enables seamless code
+generation where all responses are **type-safe**, **clean**, and **boilerplate-free**.
 
 ```java
 public class ServiceResponseCustomerDto
@@ -35,7 +38,8 @@ ServiceClientResponse<Page<CustomerDto>>
 
 * **Unified response model:** `{ data, meta }` replaces legacy status/message/errors structure.
 * **Nested generics support:** Handles both `ServiceResponse<T>` and `ServiceResponse<Page<T>>`.
-* **RFC 7807 compliant errors:** All non-2xx responses are mapped into `ProblemDetail` and thrown as `ClientProblemException`.
+* **RFC 7807 compliant errors:** All non-2xx responses are mapped into `ProblemDetail` and thrown as
+  `ClientProblemException`.
 * **Generics-aware OpenAPI Generator overlay:** Mustache templates produce thin, type-safe wrappers.
 * **Simple integration:** Works with any Spring Boot service exposing `/v3/api-docs.yaml`.
 
@@ -100,7 +104,7 @@ Instant serverTime = response.getMeta().serverTime();
 ## ⚙️ Toolchain
 
 | Component             | Version | Purpose                          |
-| --------------------- | ------- | -------------------------------- |
+|-----------------------|---------|----------------------------------|
 | **Java**              | 21      | Language baseline                |
 | **Spring Boot**       | 3.4.10  | REST + OpenAPI provider          |
 | **Springdoc**         | 2.8.13  | OpenAPI 3.1 integration          |
@@ -128,4 +132,5 @@ Instant serverTime = response.getMeta().serverTime();
 
 ---
 
-✅ With this setup, you get **end-to-end generics awareness**, clean `{ data, meta }` responses, nested generic wrappers, and unified error handling — all generated automatically.
+✅ With this setup, you get **end-to-end generics awareness**, clean `{ data, meta }` responses, nested generic wrappers,
+and unified error handling — all generated automatically.

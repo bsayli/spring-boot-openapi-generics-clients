@@ -17,7 +17,8 @@
 </p>
 
 **Type-safe client generation with Spring Boot & OpenAPI using generics.**
-This repository demonstrates how to extend OpenAPI Generator to support **nested generics** and the new unified `{ data, meta }` response model — eliminating duplicated wrappers and repetitive boilerplate.
+This repository demonstrates how to extend OpenAPI Generator to support **nested generics** and the new unified
+`{ data, meta }` response model — eliminating duplicated wrappers and repetitive boilerplate.
 
 ---
 
@@ -34,20 +35,24 @@ This repository demonstrates how to extend OpenAPI Generator to support **nested
 * 📘 [Adoption Guides](#-adoption-guides)
 * 🔗 [References & Links](#-references--links)
 
-> *A practical reference for building fully generics-aware OpenAPI clients using Spring Boot 3.4, Java 21, and Mustache overlays.*
+> *A practical reference for building fully generics-aware OpenAPI clients using Spring Boot 3.4, Java 21, and Mustache
+overlays.*
 
 ---
 
 ## 📦 Modules in this Repository
 
 * [**customer-service**](customer-service/README.md) — sample backend exposing `/v3/api-docs.yaml`
-* [**customer-service-client**](customer-service-client/README.md) — generated OpenAPI client with generics-aware wrappers
+* [**customer-service-client**](customer-service-client/README.md) — generated OpenAPI client with generics-aware
+  wrappers
 
 ---
 
 ## 🚀 Problem & Motivation
 
-OpenAPI Generator doesn’t natively understand **generic types**. When backend responses use envelopes like `ServiceResponse<T>`, the generator produces one wrapper per endpoint, duplicating fields (`status`, `message`, `errors`, or now `data`, `meta`).
+OpenAPI Generator doesn’t natively understand **generic types**. When backend responses use envelopes like
+`ServiceResponse<T>`, the generator produces one wrapper per endpoint, duplicating fields (`status`, `message`,
+`errors`, or now `data`, `meta`).
 
 This leads to:
 
@@ -61,12 +66,14 @@ This leads to:
 
 This repository defines a **complete pattern** for Spring Boot + OpenAPI Generator:
 
-* On the **server side**, a `Springdoc` customizer automatically marks generic wrappers (`ServiceResponse<T>`) with vendor extensions:
+* On the **server side**, a `Springdoc` customizer automatically marks generic wrappers (`ServiceResponse<T>`) with
+  vendor extensions:
 
     * `x-api-wrapper`
     * `x-api-wrapper-datatype`
     * `x-data-container` / `x-data-item`
-* On the **client side**, Mustache overlays generate **thin wrappers** extending the reusable generic base class `ServiceClientResponse<T>`.
+* On the **client side**, Mustache overlays generate **thin wrappers** extending the reusable generic base class
+  `ServiceClientResponse<T>`.
 
 Example generated wrapper:
 
@@ -76,14 +83,15 @@ public class ServiceResponseCustomerDto
 }
 ```
 
-This new structure supports **nested generics** like `ServiceClientResponse<Page<CustomerDto>>` and includes both `data` and `meta` sections.
+This new structure supports **nested generics** like `ServiceClientResponse<Page<CustomerDto>>` and includes both `data`
+and `meta` sections.
 
 ---
 
 ## ⚙️ New Architecture Highlights
 
 | Layer                 | Description                                                                                     |
-| --------------------- | ----------------------------------------------------------------------------------------------- |
+|-----------------------|-------------------------------------------------------------------------------------------------|
 | **Server (Producer)** | Publishes `/v3/api-docs.yaml` via Springdoc; marks generic wrappers with vendor extensions      |
 | **Client (Consumer)** | Uses OpenAPI Generator 7.16.0 with custom Mustache templates to produce generics-aware wrappers |
 | **Envelope Model**    | Unified `{ data, meta }` response model; compatible with `ProblemDetail` (RFC 7807) for errors  |
@@ -140,7 +148,7 @@ Instant serverTime = response.getMeta().serverTime();
 ## 🧩 Tech Stack
 
 | Component             | Version | Purpose                        |
-| --------------------- | ------- | ------------------------------ |
+|-----------------------|---------|--------------------------------|
 | **Java**              | 21      | Language baseline              |
 | **Spring Boot**       | 3.4.10  | REST + OpenAPI provider        |
 | **Springdoc**         | 2.8.13  | OpenAPI 3.1 integration        |
@@ -165,7 +173,9 @@ Instant serverTime = response.getMeta().serverTime();
 ```java
 public interface CustomerClientAdapter {
     ServiceClientResponse<CustomerDto> createCustomer(CustomerCreateRequest request);
+
     ServiceClientResponse<CustomerDto> getCustomer(Integer customerId);
+
     ServiceClientResponse<Page<CustomerDto>> getCustomers();
 }
 ```
@@ -186,8 +196,10 @@ See the detailed step-by-step setup under [`docs/adoption`](docs/adoption):
 ## 🔗 References & Links
 
 * 🌐 [GitHub Pages — Adoption Guides](https://bsayli.github.io/spring-boot-openapi-generics-clients/)
-* 📘 [Medium — Type-Safe Generic API Responses](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
-* 💬 [Dev.to — Type-Safe OpenAPI Clients Without Boilerplate](https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f)
+*
+📘 [Medium — Type-Safe Generic API Responses](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+*
+💬 [Dev.to — Type-Safe OpenAPI Clients Without Boilerplate](https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f)
 
 ---
 
