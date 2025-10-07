@@ -2,15 +2,23 @@ package io.github.bsayli.customerservice.service;
 
 import io.github.bsayli.customerservice.api.dto.CustomerCreateRequest;
 import io.github.bsayli.customerservice.api.dto.CustomerDto;
+import io.github.bsayli.customerservice.api.dto.CustomerSearchCriteria;
 import io.github.bsayli.customerservice.api.dto.CustomerUpdateRequest;
-import java.util.List;
+import io.github.bsayli.customerservice.common.api.response.Page;
+import io.github.bsayli.customerservice.common.api.sort.SortDirection;
+import io.github.bsayli.customerservice.common.api.sort.SortField;
 
 public interface CustomerService {
   CustomerDto createCustomer(CustomerCreateRequest request);
 
   CustomerDto getCustomer(Integer customerId);
 
-  List<CustomerDto> getCustomers();
+  Page<CustomerDto> getCustomers(
+      CustomerSearchCriteria criteria,
+      int page,
+      int size,
+      SortField sortBy,
+      SortDirection direction);
 
   CustomerDto updateCustomer(Integer customerId, CustomerUpdateRequest request);
 

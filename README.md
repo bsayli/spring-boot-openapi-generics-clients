@@ -36,7 +36,8 @@ duplicated wrappers, and keep client code clean.
 - 📘 [Adoption Guides](#-adoption-guides)
 - 🔗 [References & Links](#-references--links)
 
-> *A practical reference for type-safe OpenAPI client generation using Spring Boot 3.4, Java 21, and Mustache templates.*
+> *A practical reference for type-safe OpenAPI client generation using Spring Boot 3.4, Java 21, and Mustache
+templates.*
 
 ### 📦 Modules in this Repository
 
@@ -307,6 +308,7 @@ This project may not be the right fit if:
 * You don’t generate client code from OpenAPI specs
 
 ---
+
 ## 📦 Related Modules (Quick View)
 
 | Module                         | Description                                 | Docs                                        |
@@ -329,8 +331,11 @@ See the detailed guides under [`docs/adoption`](docs/adoption):
 ## 📂 References & Links
 
 - 🌐 [GitHub Pages — Adoption Guides](https://bsayli.github.io/spring-boot-openapi-generics-clients/)
-- 📘 [Medium — Why OpenAPI Clients Get Messy — and How to Keep Them Type-Safe](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
-- 💬 [Dev.to — How to Build Type-Safe OpenAPI Clients Without Boilerplate](https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f)
+-
+
+📘 [Medium — Why OpenAPI Clients Get Messy — and How to Keep Them Type-Safe](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+-
+💬 [Dev.to — How to Build Type-Safe OpenAPI Clients Without Boilerplate](https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f)
 
 ---
 
@@ -347,7 +352,8 @@ If parameters include spaces or special characters, wrap them in quotes `"..."`.
 
 ## 💬 Feedback
 
-If you spot any mistakes in this README or have questions about the project, feel free to open an issue or start a discussion. I’m happy to improve the documentation and clarify concepts further!
+If you spot any mistakes in this README or have questions about the project, feel free to open an issue or start a
+discussion. I’m happy to improve the documentation and clarify concepts further!
 
 ---
 

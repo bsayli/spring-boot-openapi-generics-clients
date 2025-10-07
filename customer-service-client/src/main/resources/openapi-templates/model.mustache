@@ -12,6 +12,13 @@ import java.util.Locale;
 {{#imports}}
 import {{import}};
 {{/imports}}
+{{#vendorExtensions.x-additional-imports}}
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.Map;
+import java.util.HashMap;
+{{/vendorExtensions.x-additional-imports}}
+
 {{#serializableModel}}
 import java.io.Serializable;
 {{/serializableModel}}

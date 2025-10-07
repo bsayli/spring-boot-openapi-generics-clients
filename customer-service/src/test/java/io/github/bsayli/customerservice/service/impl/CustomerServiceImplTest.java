@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.bsayli.customerservice.api.dto.CustomerCreateRequest;
 import io.github.bsayli.customerservice.api.dto.CustomerDto;
+import io.github.bsayli.customerservice.api.dto.CustomerSearchCriteria;
 import io.github.bsayli.customerservice.api.dto.CustomerUpdateRequest;
+import io.github.bsayli.customerservice.common.api.response.Page;
+import io.github.bsayli.customerservice.common.api.sort.SortDirection;
+import io.github.bsayli.customerservice.common.api.sort.SortField;
 import io.github.bsayli.customerservice.service.CustomerService;
-import java.util.List;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,11 +28,19 @@ class CustomerServiceImplTest {
   }
 
   @Test
-  @DisplayName("Initial seed should contain 4 customers")
-  void initialSeed_shouldContainFour() {
-    List<CustomerDto> all = service.getCustomers();
-    assertEquals(4, all.size());
-    assertTrue(all.stream().allMatch(c -> c.customerId() != null && c.customerId() > 0));
+  @DisplayName("Initial seed should contain 17 customers")
+  void initialSeed_shouldContainSeventeen() {
+    Page<CustomerDto> page =
+        service.getCustomers(
+            new CustomerSearchCriteria(null, null),
+            0,
+            100,
+            SortField.CUSTOMER_ID,
+            SortDirection.ASC);
+
+    assertEquals(17, page.totalElements());
+    assertEquals(17, page.content().size());
+    assertTrue(page.content().stream().allMatch(c -> c.customerId() != null && c.customerId() > 0));
   }
 
   @Test
@@ -43,15 +54,26 @@ class CustomerServiceImplTest {
     assertEquals("Jane Doe", created.name());
     assertEquals("jane.doe@example.com", created.email());
 
-    List<CustomerDto> all = service.getCustomers();
-    assertEquals(5, all.size());
-    assertTrue(all.stream().anyMatch(c -> c.customerId().equals(created.customerId())));
+    Page<CustomerDto> page =
+        service.getCustomers(
+            new CustomerSearchCriteria(null, null),
+            0,
+            200,
+            SortField.CUSTOMER_ID,
+            SortDirection.ASC);
+
+    assertEquals(18, page.totalElements());
+    assertTrue(page.content().stream().anyMatch(c -> c.customerId().equals(created.customerId())));
   }
 
   @Test
   @DisplayName("getCustomer should return existing customer")
   void getCustomer_shouldReturn() {
-    CustomerDto any = service.getCustomers().getFirst();
+    Page<CustomerDto> page =
+        service.getCustomers(
+            new CustomerSearchCriteria(null, null), 0, 1, SortField.CUSTOMER_ID, SortDirection.ASC);
+
+    CustomerDto any = page.content().getFirst();
     CustomerDto found = service.getCustomer(any.customerId());
     assertEquals(any, found);
   }
@@ -88,12 +110,27 @@ class CustomerServiceImplTest {
   void deleteCustomer_shouldRemove() {
     CustomerDto base =
         service.createCustomer(new CustomerCreateRequest("Mark Lee", "mark.lee@example.com"));
-    int sizeBefore = service.getCustomers().size();
+
+    Page<CustomerDto> before =
+        service.getCustomers(
+            new CustomerSearchCriteria(null, null),
+            0,
+            200,
+            SortField.CUSTOMER_ID,
+            SortDirection.ASC);
+    long sizeBefore = before.totalElements();
 
     service.deleteCustomer(base.customerId());
 
-    List<CustomerDto> after = service.getCustomers();
-    assertEquals(sizeBefore - 1, after.size());
-    assertTrue(after.stream().noneMatch(c -> c.customerId().equals(base.customerId())));
+    Page<CustomerDto> after =
+        service.getCustomers(
+            new CustomerSearchCriteria(null, null),
+            0,
+            200,
+            SortField.CUSTOMER_ID,
+            SortDirection.ASC);
+
+    assertEquals(sizeBefore - 1, after.totalElements());
+    assertTrue(after.content().stream().noneMatch(c -> c.customerId().equals(base.customerId())));
   }
 }

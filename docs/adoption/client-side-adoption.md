@@ -177,7 +177,8 @@ your.api.base-url=http://localhost:8084/your-service
 ```
 
 > **Note:** This setup is for **demos/local development**.  
-> For production, encapsulate `YourControllerApi` behind an **Adapter interface** and use a **pooled HTTP client** (e.g., Apache HttpClient5).
+> For production, encapsulate `YourControllerApi` behind an **Adapter interface** and use a **pooled HTTP client** (
+> e.g., Apache HttpClient5).
 ---
 
 ## 8) Usage Example

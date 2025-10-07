@@ -164,7 +164,8 @@ http://localhost:8084/customer-service/v1/customers
 * OpenAPI JSON → `http://localhost:8084/customer-service/v3/api-docs`
 * OpenAPI YAML → `http://localhost:8084/customer-service/v3/api-docs.yaml`
 
-➡️ The YAML/JSON spec above is the **contract** that the client module (`customer-service-client`) consumes when generating code.
+➡️ The YAML/JSON spec above is the **contract** that the client module (`customer-service-client`) consumes when
+generating code.
 
 ➡️ For clarity, in this repository it is saved under the client module as: `src/main/resources/customer-api-docs.yaml`
 

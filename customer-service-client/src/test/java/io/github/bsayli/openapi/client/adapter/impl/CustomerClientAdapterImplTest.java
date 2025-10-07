@@ -5,20 +5,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
+import io.github.bsayli.openapi.client.common.ClientMeta;
 import io.github.bsayli.openapi.client.common.ServiceClientResponse;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
 import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
-import io.github.bsayli.openapi.client.generated.dto.CustomerCreateResponse;
 import io.github.bsayli.openapi.client.generated.dto.CustomerDeleteResponse;
 import io.github.bsayli.openapi.client.generated.dto.CustomerDto;
-import io.github.bsayli.openapi.client.generated.dto.CustomerListResponse;
 import io.github.bsayli.openapi.client.generated.dto.CustomerUpdateRequest;
-import io.github.bsayli.openapi.client.generated.dto.CustomerUpdateResponse;
-import io.github.bsayli.openapi.client.generated.dto.ServiceResponseCustomerCreateResponse;
+import io.github.bsayli.openapi.client.generated.dto.PageCustomerDto;
 import io.github.bsayli.openapi.client.generated.dto.ServiceResponseCustomerDeleteResponse;
 import io.github.bsayli.openapi.client.generated.dto.ServiceResponseCustomerDto;
-import io.github.bsayli.openapi.client.generated.dto.ServiceResponseCustomerListResponse;
-import io.github.bsayli.openapi.client.generated.dto.ServiceResponseCustomerUpdateResponse;
+import io.github.bsayli.openapi.client.generated.dto.ServiceResponsePageCustomerDto;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Unit Test: CustomerClientAdapterImpl")
+@DisplayName("Unit Test: CustomerClientAdapterImpl (data + meta mapping)")
 class CustomerClientAdapterImplTest {
 
   @Mock CustomerControllerApi api;
@@ -39,144 +36,157 @@ class CustomerClientAdapterImplTest {
   @InjectMocks CustomerClientAdapterImpl adapter;
 
   @Test
-  @DisplayName("createCustomer -> delegates to API and returns 201 + payload passthrough")
-  void createCustomer_delegates_and_passthrough() {
+  @DisplayName(
+      "createCustomer -> delegates to API and returns ServiceClientResponse<CustomerDto> (including meta)")
+  void createCustomer_delegates_and_returns_data_meta() {
     var req = new CustomerCreateRequest().name("Jane Doe").email("jane@example.com");
 
     var dto = new CustomerDto().customerId(1).name("Jane Doe").email("jane@example.com");
 
-    var payload =
-        new CustomerCreateResponse()
-            .customer(dto)
-            .createdAt(OffsetDateTime.parse("2025-01-01T12:34:56Z"));
+    var serverOdt = OffsetDateTime.parse("2025-01-01T12:34:56Z");
 
-    var wrapper = new ServiceResponseCustomerCreateResponse();
-    wrapper.setStatus(201);
-    wrapper.setMessage("CREATED");
-    wrapper.setErrors(List.of());
-    wrapper.setData(payload);
+    var meta = new ClientMeta("req-123", serverOdt.toInstant(), List.of());
+
+    var wrapper = new ServiceResponseCustomerDto();
+    wrapper.setData(dto);
+    wrapper.setMeta(meta);
 
     when(api.createCustomer(any(CustomerCreateRequest.class))).thenReturn(wrapper);
 
-    ServiceClientResponse<CustomerCreateResponse> res = adapter.createCustomer(req);
+    ServiceClientResponse<CustomerDto> res = adapter.createCustomer(req);
 
     assertNotNull(res);
-    assertEquals(201, res.getStatus());
-    assertEquals("CREATED", res.getMessage());
     assertNotNull(res.getData());
-    assertNotNull(res.getData().getCustomer());
-    assertEquals(1, res.getData().getCustomer().getCustomerId());
-    assertEquals(OffsetDateTime.parse("2025-01-01T12:34:56Z"), res.getData().getCreatedAt());
+    assertEquals(1, res.getData().getCustomerId());
+    assertEquals("Jane Doe", res.getData().getName());
+    assertEquals("jane@example.com", res.getData().getEmail());
+
+    assertNotNull(res.getMeta());
+    assertEquals("req-123", res.getMeta().getRequestId());
+    assertEquals(serverOdt.toInstant(), res.getMeta().getServerTime());
   }
 
   @Test
-  @DisplayName("getCustomer -> delegates to API and returns typed DTO")
+  @DisplayName("getCustomer -> returns a single CustomerDto (data + meta)")
   void getCustomer_delegates_and_returnsDto() {
     var dto = new CustomerDto().customerId(42).name("John Smith").email("john.smith@example.com");
 
-    var wrapper = new ServiceResponseCustomerDto();
-    wrapper.setStatus(200);
-    wrapper.setMessage("OK");
-    wrapper.setErrors(List.of());
-    wrapper.setData(dto);
+    var serverOdt = OffsetDateTime.parse("2025-02-01T10:00:00Z");
 
-    when(api.getCustomer(42)).thenReturn(wrapper);
+    var wrapper = new ServiceResponseCustomerDto();
+    wrapper.setData(dto);
+    wrapper.setMeta(new ClientMeta("req-42", serverOdt.toInstant(), List.of()));
+
+    when(api.getCustomer(any())).thenReturn(wrapper);
 
     ServiceClientResponse<CustomerDto> res = adapter.getCustomer(42);
 
     assertNotNull(res);
-    assertEquals(200, res.getStatus());
-    assertEquals("OK", res.getMessage());
     assertNotNull(res.getData());
     assertEquals(42, res.getData().getCustomerId());
     assertEquals("John Smith", res.getData().getName());
+    assertEquals("john.smith@example.com", res.getData().getEmail());
+
+    assertNotNull(res.getMeta());
+    assertEquals("req-42", res.getMeta().getRequestId());
+    assertEquals(serverOdt.toInstant(), res.getMeta().getServerTime());
   }
 
   @Test
-  @DisplayName("getCustomers -> delegates to API and returns list")
-  void getCustomers_delegates_and_returnsList() {
+  @DisplayName("getCustomers -> returns Page<CustomerDto> (data + meta)")
+  void getCustomers_delegates_and_returnsPage() {
     var d1 = new CustomerDto().customerId(1).name("A").email("a@example.com");
     var d2 = new CustomerDto().customerId(2).name("B").email("b@example.com");
-    var listPayload = new CustomerListResponse().customers(List.of(d1, d2));
 
-    var wrapper = new ServiceResponseCustomerListResponse();
-    wrapper.setStatus(200);
-    wrapper.setMessage("LISTED");
-    wrapper.setErrors(List.of());
-    wrapper.setData(listPayload);
+    var pageDto =
+        new PageCustomerDto()
+            .content(List.of(d1, d2))
+            .page(0)
+            .size(5)
+            .totalElements(2L)
+            .totalPages(1)
+            .hasNext(false)
+            .hasPrev(false);
 
-    when(api.getCustomers()).thenReturn(wrapper);
+    var serverOdt = OffsetDateTime.parse("2025-03-01T09:00:00Z");
 
-    ServiceClientResponse<CustomerListResponse> res = adapter.getCustomers();
+    var wrapper = new ServiceResponsePageCustomerDto();
+    wrapper.setData(pageDto);
+    wrapper.setMeta(new ClientMeta("req-list", serverOdt.toInstant(), List.of()));
+
+    when(api.getCustomers(any(), any(), any(), any(), any(), any())).thenReturn(wrapper);
+
+    ServiceClientResponse<PageCustomerDto> res =
+        adapter.getCustomers(null, null, 0, 5, "customerId", "asc");
 
     assertNotNull(res);
-    assertEquals(200, res.getStatus());
-    assertEquals("LISTED", res.getMessage());
     assertNotNull(res.getData());
-    assertNotNull(res.getData().getCustomers());
-    assertEquals(2, res.getData().getCustomers().size());
-    assertEquals(1, res.getData().getCustomers().getFirst().getCustomerId());
+    assertEquals(0, res.getData().getPage());
+    assertEquals(5, res.getData().getSize());
+    assertEquals(2L, res.getData().getTotalElements());
+    assertNotNull(res.getData().getContent());
+    assertEquals(2, res.getData().getContent().size());
+    assertEquals(1, res.getData().getContent().getFirst().getCustomerId());
+
+    assertNotNull(res.getMeta());
+    assertEquals("req-list", res.getMeta().getRequestId());
+    assertEquals(serverOdt.toInstant(), res.getMeta().getServerTime());
   }
 
   @Test
-  @DisplayName("updateCustomer -> delegates to API and returns UPDATED payload")
+  @DisplayName("updateCustomer -> returns updated CustomerDto (data + meta)")
   void updateCustomer_delegates_and_returnsUpdated() {
     var req = new CustomerUpdateRequest().name("Jane Updated").email("jane.updated@example.com");
 
     var dto =
         new CustomerDto().customerId(1).name("Jane Updated").email("jane.updated@example.com");
 
-    var payload =
-        new CustomerUpdateResponse()
-            .customer(dto)
-            .updatedAt(OffsetDateTime.parse("2025-01-02T12:00:00Z"));
+    var serverOdt = OffsetDateTime.parse("2025-04-02T12:00:00Z");
 
-    var wrapper = new ServiceResponseCustomerUpdateResponse();
-    wrapper.setStatus(200);
-    wrapper.setMessage("UPDATED");
-    wrapper.setErrors(List.of());
-    wrapper.setData(payload);
+    var wrapper = new ServiceResponseCustomerDto();
+    wrapper.setData(dto);
+    wrapper.setMeta(new ClientMeta("req-upd", serverOdt.toInstant(), List.of()));
 
-    when(api.updateCustomer(1, req)).thenReturn(wrapper);
+    when(api.updateCustomer(any(), any(CustomerUpdateRequest.class))).thenReturn(wrapper);
 
-    ServiceClientResponse<CustomerUpdateResponse> res = adapter.updateCustomer(1, req);
+    ServiceClientResponse<CustomerDto> res = adapter.updateCustomer(1, req);
 
     assertNotNull(res);
-    assertEquals(200, res.getStatus());
-    assertEquals("UPDATED", res.getMessage());
     assertNotNull(res.getData());
-    assertEquals("Jane Updated", res.getData().getCustomer().getName());
-    assertEquals(OffsetDateTime.parse("2025-01-02T12:00:00Z"), res.getData().getUpdatedAt());
+    assertEquals("Jane Updated", res.getData().getName());
+    assertEquals("jane.updated@example.com", res.getData().getEmail());
+
+    assertNotNull(res.getMeta());
+    assertEquals("req-upd", res.getMeta().getRequestId());
+    assertEquals(serverOdt.toInstant(), res.getMeta().getServerTime());
   }
 
   @Test
-  @DisplayName("deleteCustomer -> delegates to API and returns DELETED payload")
-  void deleteCustomer_delegates_and_passthrough() {
-    var payload =
-        new CustomerDeleteResponse()
-            .customerId(7)
-            .deletedAt(OffsetDateTime.parse("2025-01-03T08:00:00Z"));
+  @DisplayName("deleteCustomer -> returns CustomerDeleteResponse (data + meta)")
+  void deleteCustomer_delegates_and_returnsDeletePayload() {
+    var payload = new CustomerDeleteResponse().customerId(7);
+
+    var serverOdt = OffsetDateTime.parse("2025-05-03T08:00:00Z");
 
     var wrapper = new ServiceResponseCustomerDeleteResponse();
-    wrapper.setStatus(200);
-    wrapper.setMessage("DELETED");
-    wrapper.setErrors(List.of());
     wrapper.setData(payload);
+    wrapper.setMeta(new ClientMeta("req-del", serverOdt.toInstant(), List.of()));
 
-    when(api.deleteCustomer(7)).thenReturn(wrapper);
+    when(api.deleteCustomer(any())).thenReturn(wrapper);
 
     ServiceClientResponse<CustomerDeleteResponse> res = adapter.deleteCustomer(7);
 
     assertNotNull(res);
-    assertEquals(200, res.getStatus());
-    assertEquals("DELETED", res.getMessage());
     assertNotNull(res.getData());
     assertEquals(7, res.getData().getCustomerId());
-    assertEquals(OffsetDateTime.parse("2025-01-03T08:00:00Z"), res.getData().getDeletedAt());
+
+    assertNotNull(res.getMeta());
+    assertEquals("req-del", res.getMeta().getRequestId());
+    assertEquals(serverOdt.toInstant(), res.getMeta().getServerTime());
   }
 
   @Test
-  @DisplayName("Adapter is a CustomerClientAdapter and uses the generated API underneath")
+  @DisplayName("Adapter interface type check")
   void adapter_type_sanity() {
     CustomerClientAdapter asInterface = adapter;
     assertNotNull(asInterface);

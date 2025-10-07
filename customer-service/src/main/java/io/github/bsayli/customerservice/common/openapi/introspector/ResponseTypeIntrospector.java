@@ -18,62 +18,60 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 public final class ResponseTypeIntrospector {
 
   private static final Logger log = LoggerFactory.getLogger(ResponseTypeIntrospector.class);
-
   private static final int MAX_UNWRAP_DEPTH = 8;
-
   private static final Set<String> REACTOR_WRAPPERS =
       Set.of("reactor.core.publisher.Mono", "reactor.core.publisher.Flux");
 
   public Optional<String> extractDataRefName(Method method) {
     if (method == null) return Optional.empty();
 
-    ResolvableType type = ResolvableType.forMethodReturnType(method);
-    type = unwrapToServiceResponse(type);
+    ResolvableType t = ResolvableType.forMethodReturnType(method);
+    t = unwrapToServiceResponse(t);
 
-    Class<?> raw = type.resolve();
+    Class<?> raw = t.resolve();
     if (raw == null || !ServiceResponse.class.isAssignableFrom(raw)) return Optional.empty();
-    if (!type.hasGenerics()) return Optional.empty();
+    if (!t.hasGenerics()) return Optional.empty();
 
-    Class<?> dataClass = type.getGeneric(0).resolve();
-    Optional<String> ref = Optional.ofNullable(dataClass).map(Class::getSimpleName);
+    ResolvableType dataType = t.getGeneric(0);
+    String ref = buildRefName(dataType);
 
     if (log.isDebugEnabled()) {
-      log.debug(
-          "Introspected method [{}]: wrapper [{}], data [{}]",
-          method.toGenericString(),
-          raw.getSimpleName(),
-          ref.orElse("<none>"));
+      log.debug("Introspected method [{}]: dataRef={}", method.toGenericString(), ref);
     }
-
-    return ref;
+    return Optional.of(ref);
   }
 
   private ResolvableType unwrapToServiceResponse(ResolvableType type) {
-    for (int guard = 0; guard < MAX_UNWRAP_DEPTH; guard++) {
+    for (int i = 0; i < MAX_UNWRAP_DEPTH; i++) {
       Class<?> raw = type.resolve();
-      if (raw == null || ServiceResponse.class.isAssignableFrom(raw)) {
-        return type;
-      }
+      if (raw == null || ServiceResponse.class.isAssignableFrom(raw)) return type;
       ResolvableType next = nextLayer(type, raw);
-      if (next == null) {
-        return type;
-      }
+      if (next == null) return type;
       type = next;
     }
     return type;
   }
 
   private ResolvableType nextLayer(ResolvableType current, Class<?> raw) {
-    return switch (raw) {
-      case Class<?> c when ResponseEntity.class.isAssignableFrom(c) -> current.getGeneric(0);
-      case Class<?> c
-          when CompletionStage.class.isAssignableFrom(c) || Future.class.isAssignableFrom(c) ->
-          current.getGeneric(0);
-      case Class<?> c
-          when DeferredResult.class.isAssignableFrom(c) || WebAsyncTask.class.isAssignableFrom(c) ->
-          current.getGeneric(0);
-      case Class<?> c when REACTOR_WRAPPERS.contains(c.getName()) -> current.getGeneric(0);
-      default -> null;
-    };
+    if (ResponseEntity.class.isAssignableFrom(raw)) return current.getGeneric(0);
+    if (CompletionStage.class.isAssignableFrom(raw) || Future.class.isAssignableFrom(raw))
+      return current.getGeneric(0);
+    if (DeferredResult.class.isAssignableFrom(raw) || WebAsyncTask.class.isAssignableFrom(raw))
+      return current.getGeneric(0);
+    if (REACTOR_WRAPPERS.contains(raw.getName())) return current.getGeneric(0);
+    return null;
+  }
+
+  private String buildRefName(ResolvableType type) {
+    Class<?> raw = type.resolve();
+    if (raw == null) return "Object";
+    String base = raw.getSimpleName();
+    if (!type.hasGenerics()) return base;
+
+    StringBuilder sb = new StringBuilder(base);
+    for (ResolvableType g : type.getGenerics()) {
+      sb.append(buildRefName(g));
+    }
+    return sb.toString();
   }
 }

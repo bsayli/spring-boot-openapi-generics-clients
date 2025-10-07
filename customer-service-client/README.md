@@ -244,7 +244,8 @@ customer.api.base-url=http://localhost:8084/customer-service
 
 > **Note — demo only:**  
 > The configuration above wires the generated client beans for quick local demos.  
-> In production, you should encapsulate `CustomerControllerApi` behind your own Adapter (see [✅ Using the Client in Another Microservice](#-using-the-client-in-another-microservice) below).  
+> In production, you should encapsulate `CustomerControllerApi` behind your own Adapter (
+> see [✅ Using the Client in Another Microservice](#-using-the-client-in-another-microservice) below).  
 > This keeps generated code isolated and lets your services depend only on stable adapter interfaces.
 
 ---
@@ -412,7 +413,8 @@ This ensures:
 
 ## 🔗 Using the Client in Another Microservice
 
-When another microservice (e.g., `payment-service`) depends on `customer-service-client`, the recommended approach is to wrap the generated adapter behind a stable interface in your own project.
+When another microservice (e.g., `payment-service`) depends on `customer-service-client`, the recommended approach is to
+wrap the generated adapter behind a stable interface in your own project.
 
 This keeps generated code fully encapsulated and exposes only a clean contract to the rest of your service.
 
@@ -501,7 +503,8 @@ public class CustomerServiceClientImpl implements CustomerServiceClient {
 * **Flexibility**: If client generation changes, your service contract remains intact.
 * **Consistency**: All outbound calls to `customer-service` go through one interface.
 
-✅ With this pattern, you can safely evolve generated clients without leaking implementation details across microservices.
+✅ With this pattern, you can safely evolve generated clients without leaking implementation details across
+microservices.
 
 ---
 

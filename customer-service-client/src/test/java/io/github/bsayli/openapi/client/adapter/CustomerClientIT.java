@@ -39,18 +39,13 @@ class CustomerClientIT {
   }
 
   @Test
-  @DisplayName("POST /v1/customers -> 201 CREATED + CustomerCreateResponse")
-  void createCustomer_shouldReturn201_andMappedBody() {
+  @DisplayName("POST /v1/customers -> 201 Created + maps {data, meta}")
+  void createCustomer_shouldReturn201_andMapBody() {
     var body =
         """
             {
-              "status": 201,
-              "message": "CREATED",
-              "data": {
-                "customer": { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
-                "createdAt": "2025-01-01T12:34:56Z"
-              },
-              "errors": []
+              "data": { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
+              "meta": { "requestId": "req-1", "serverTime": "2025-01-01T12:34:56Z", "sort": [] }
             }
             """;
 
@@ -64,22 +59,24 @@ class CustomerClientIT {
     var resp = api.createCustomer(req);
 
     assertNotNull(resp);
-    assertEquals(201, resp.getStatus());
-    assertEquals("CREATED", resp.getMessage());
-    assertNotNull(resp.getData().getCustomer());
-    assertEquals("Jane Doe", resp.getData().getCustomer().getName());
+    assertNotNull(resp.getData());
+    assertEquals(1, resp.getData().getCustomerId());
+    assertEquals("Jane Doe", resp.getData().getName());
+    assertEquals("jane@example.com", resp.getData().getEmail());
+
+    assertNotNull(resp.getMeta());
+    assertEquals("req-1", resp.getMeta().getRequestId());
+    assertNotNull(resp.getMeta().getServerTime());
   }
 
   @Test
-  @DisplayName("GET /v1/customers/{id} -> 200 OK + CustomerDto")
-  void getCustomer_shouldReturn200_andMappedBody() {
+  @DisplayName("GET /v1/customers/{id} -> 200 OK + maps {data, meta}")
+  void getCustomer_shouldReturn200_andMapBody() {
     var body =
         """
             {
-              "status": 200,
-              "message": "OK",
               "data": { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
-              "errors": []
+              "meta": { "requestId": "req-2", "serverTime": "2025-01-02T09:00:00Z", "sort": [] }
             }
             """;
 
@@ -92,27 +89,34 @@ class CustomerClientIT {
     var resp = api.getCustomer(1);
 
     assertNotNull(resp);
-    assertEquals(200, resp.getStatus());
-    assertEquals("OK", resp.getMessage());
     assertNotNull(resp.getData());
     assertEquals(1, resp.getData().getCustomerId());
+    assertEquals("Jane Doe", resp.getData().getName());
+
+    assertNotNull(resp.getMeta());
+    assertEquals("req-2", resp.getMeta().getRequestId());
+    assertNotNull(resp.getMeta().getServerTime());
   }
 
   @Test
-  @DisplayName("GET /v1/customers -> 200 OK + CustomerListResponse")
-  void getCustomers_shouldReturn200_andMappedBody() {
+  @DisplayName("GET /v1/customers -> 200 OK + maps Page<CustomerDto> in data and meta")
+  void getCustomers_shouldReturn200_andMapPage() {
     var body =
         """
             {
-              "status": 200,
-              "message": "LISTED",
               "data": {
-                "customers": [
+                "content": [
                   { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
                   { "customerId": 2, "name": "John Smith", "email": "john.smith@example.com" }
-                ]
+                ],
+                "page": 0,
+                "size": 5,
+                "totalElements": 2,
+                "totalPages": 1,
+                "hasNext": false,
+                "hasPrev": false
               },
-              "errors": []
+              "meta": { "requestId": "req-3", "serverTime": "2025-01-03T10:00:00Z", "sort": [] }
             }
             """;
 
@@ -122,29 +126,30 @@ class CustomerClientIT {
             .addHeader("Content-Type", "application/json")
             .setBody(body));
 
-    var resp = api.getCustomers();
+    // generated signature accepts query params
+    var resp = api.getCustomers(null, null, 0, 5, "customerId", "asc");
 
     assertNotNull(resp);
-    assertEquals(200, resp.getStatus());
-    assertEquals("LISTED", resp.getMessage());
     assertNotNull(resp.getData());
-    assertNotNull(resp.getData().getCustomers());
-    assertEquals(2, resp.getData().getCustomers().size());
+    assertEquals(0, resp.getData().getPage());
+    assertEquals(5, resp.getData().getSize());
+    assertEquals(2L, resp.getData().getTotalElements());
+    assertEquals(2, resp.getData().getContent().size());
+    assertEquals(1, resp.getData().getContent().get(0).getCustomerId());
+
+    assertNotNull(resp.getMeta());
+    assertEquals("req-3", resp.getMeta().getRequestId());
+    assertNotNull(resp.getMeta().getServerTime());
   }
 
   @Test
-  @DisplayName("PUT /v1/customers/{id} -> 200 OK + CustomerUpdateResponse")
-  void updateCustomer_shouldReturn200_andMappedBody() {
+  @DisplayName("PUT /v1/customers/{id} -> 200 OK + maps {data, meta}")
+  void updateCustomer_shouldReturn200_andMapBody() {
     var body =
         """
             {
-              "status": 200,
-              "message": "UPDATED",
-              "data": {
-                "customer": { "customerId": 1, "name": "Jane Updated", "email": "jane.updated@example.com" },
-                "updatedAt": "2025-01-02T12:00:00Z"
-              },
-              "errors": []
+              "data": { "customerId": 1, "name": "Jane Updated", "email": "jane.updated@example.com" },
+              "meta": { "requestId": "req-4", "serverTime": "2025-01-04T12:00:00Z", "sort": [] }
             }
             """;
 
@@ -158,25 +163,25 @@ class CustomerClientIT {
     var resp = api.updateCustomer(1, req);
 
     assertNotNull(resp);
-    assertEquals(200, resp.getStatus());
-    assertEquals("UPDATED", resp.getMessage());
-    assertNotNull(resp.getData().getCustomer());
-    assertEquals("Jane Updated", resp.getData().getCustomer().getName());
+    assertNotNull(resp.getData());
+    assertEquals(1, resp.getData().getCustomerId());
+    assertEquals("Jane Updated", resp.getData().getName());
+    assertEquals("jane.updated@example.com", resp.getData().getEmail());
+
+    assertNotNull(resp.getMeta());
+    assertEquals("req-4", resp.getMeta().getRequestId());
+    assertNotNull(resp.getMeta().getServerTime());
   }
 
   @Test
-  @DisplayName("DELETE /v1/customers/{id} -> 200 OK + CustomerDeleteResponse")
-  void deleteCustomer_shouldReturn200_andMappedBody() {
+  @DisplayName("DELETE /v1/customers/{id} -> 200 OK + maps {data, meta}")
+  void deleteCustomer_shouldReturn200_andMapBody() {
+    // NOTE: According to the latest schema, CustomerDeleteResponse has only customerId.
     var body =
         """
             {
-              "status": 200,
-              "message": "DELETED",
-              "data": {
-                "customerId": 1,
-                "deletedAt": "2025-01-02T12:00:00Z"
-              },
-              "errors": []
+              "data": { "customerId": 1 },
+              "meta": { "requestId": "req-5", "serverTime": "2025-01-05T08:00:00Z", "sort": [] }
             }
             """;
 
@@ -189,10 +194,12 @@ class CustomerClientIT {
     var resp = api.deleteCustomer(1);
 
     assertNotNull(resp);
-    assertEquals(200, resp.getStatus());
-    assertEquals("DELETED", resp.getMessage());
     assertNotNull(resp.getData());
     assertEquals(1, resp.getData().getCustomerId());
+
+    assertNotNull(resp.getMeta());
+    assertEquals("req-5", resp.getMeta().getRequestId());
+    assertNotNull(resp.getMeta().getServerTime());
   }
 
   @Configuration

@@ -27,6 +27,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseCustomerDto"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
     put:
       tags:
         - customer-controller
@@ -51,7 +69,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ServiceResponseCustomerUpdateResponse"
+                $ref: "#/components/schemas/ServiceResponseCustomerDto"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
     delete:
       tags:
         - customer-controller
@@ -71,18 +107,101 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseCustomerDeleteResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
   /v1/customers:
     get:
       tags:
         - customer-controller
       operationId: getCustomers
+      parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: email
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 5
+            maximum: 10
+            minimum: 1
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+            default: customerId
+            enum:
+              - customerId
+              - name
+              - email
+        - name: direction
+          in: query
+          required: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ServiceResponseCustomerListResponse"
+                $ref: "#/components/schemas/ServiceResponsePageCustomerDto"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
     post:
       tags:
         - customer-controller
@@ -94,12 +213,30 @@ paths:
               $ref: "#/components/schemas/CustomerCreateRequest"
         required: true
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ServiceResponseCustomerCreateResponse"
+                $ref: "#/components/schemas/ServiceResponseCustomerDto"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
 components:
   schemas:
     CustomerUpdateRequest:
@@ -126,30 +263,41 @@ components:
           type: string
         email:
           type: string
-    CustomerUpdateResponse:
+    Meta:
       type: object
       properties:
-        customer:
-          $ref: "#/components/schemas/CustomerDto"
-        updatedAt:
+        requestId:
+          type: string
+        serverTime:
           type: string
           format: date-time
-    ErrorDetail:
-      type: object
-      properties:
-        errorCode:
-          type: string
-        message:
-          type: string
-    ServiceResponseCustomerUpdateResponse:
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/Sort"
+    ServiceResponseCustomerDto:
       allOf:
         - $ref: "#/components/schemas/ServiceResponse"
         - type: object
           properties:
             data:
-              $ref: "#/components/schemas/CustomerUpdateResponse"
+              $ref: "#/components/schemas/CustomerDto"
       x-api-wrapper: true
-      x-api-wrapper-datatype: CustomerUpdateResponse
+      x-api-wrapper-datatype: CustomerDto
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+          enum:
+            - customerId
+            - name
+            - email
+        direction:
+          type: string
+          enum:
+            - asc
+            - desc
     CustomerCreateRequest:
       type: object
       properties:
@@ -164,57 +312,44 @@ components:
       required:
         - email
         - name
-    CustomerCreateResponse:
+    PageCustomerDto:
       type: object
       properties:
-        customer:
-          $ref: "#/components/schemas/CustomerDto"
-        createdAt:
-          type: string
-          format: date-time
-    ServiceResponseCustomerCreateResponse:
-      allOf:
-        - $ref: "#/components/schemas/ServiceResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/CustomerCreateResponse"
-      x-api-wrapper: true
-      x-api-wrapper-datatype: CustomerCreateResponse
-    CustomerListResponse:
-      type: object
-      properties:
-        customers:
+        content:
           type: array
           items:
             $ref: "#/components/schemas/CustomerDto"
-    ServiceResponseCustomerListResponse:
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+    ServiceResponsePageCustomerDto:
       allOf:
         - $ref: "#/components/schemas/ServiceResponse"
         - type: object
           properties:
             data:
-              $ref: "#/components/schemas/CustomerListResponse"
+              $ref: "#/components/schemas/PageCustomerDto"
       x-api-wrapper: true
-      x-api-wrapper-datatype: CustomerListResponse
-    ServiceResponseCustomerDto:
-      allOf:
-        - $ref: "#/components/schemas/ServiceResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/CustomerDto"
-      x-api-wrapper: true
-      x-api-wrapper-datatype: CustomerDto
+      x-api-wrapper-datatype: PageCustomerDto
     CustomerDeleteResponse:
       type: object
       properties:
         customerId:
           type: integer
           format: int32
-        deletedAt:
-          type: string
-          format: date-time
     ServiceResponseCustomerDeleteResponse:
       allOf:
         - $ref: "#/components/schemas/ServiceResponse"
@@ -224,39 +359,41 @@ components:
               $ref: "#/components/schemas/CustomerDeleteResponse"
       x-api-wrapper: true
       x-api-wrapper-datatype: CustomerDeleteResponse
+    ProblemDetail:
+      type: object
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI reference that identifies the problem type.
+        title:
+          type: string
+          description: "A short, human-readable summary of the problem type."
+        status:
+          type: integer
+          format: int32
+          description: The HTTP status code generated by the origin server.
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of
+            the problem.
+        instance:
+          type: string
+          format: uri
+          description: A URI reference that identifies the specific occurrence of
+            the problem.
     ServiceResponse:
       type: object
       properties:
-        status:
-          type: integer
-          format: int32
-        message:
-          type: string
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              errorCode:
-                type: string
-              message:
-                type: string
+        data:
+          type: object
+        meta:
+          $ref: "#/components/schemas/Meta"
     ServiceResponseVoid:
       type: object
       properties:
-        status:
-          type: integer
-          format: int32
-        message:
-          type: string
         data:
           type: object
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              errorCode:
-                type: string
-              message:
-                type: string
+        meta:
+          $ref: "#/components/schemas/Meta"

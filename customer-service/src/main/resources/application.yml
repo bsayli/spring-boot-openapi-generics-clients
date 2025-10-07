@@ -9,6 +9,9 @@ server:
     include-exception: false
 
 spring:
+  mvc:
+    problemdetails:
+      enabled: true
   application:
     name: customer-service
   profiles:

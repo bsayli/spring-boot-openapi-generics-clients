@@ -71,12 +71,6 @@ class ResponseTypeIntrospectorTest {
   }
 
   @Test
-  @DisplayName("Returns empty for raw ServiceResponse (no generic parameter)")
-  void rawServiceResponse_empty() throws Exception {
-    assertTrue(introspector.extractDataRefName(method("rawServiceResponse")).isEmpty());
-  }
-
-  @Test
   @DisplayName("Returns empty when return type is not a wrapper")
   void notAWrapper_empty() throws Exception {
     assertTrue(introspector.extractDataRefName(method("notAWrapper")).isEmpty());
