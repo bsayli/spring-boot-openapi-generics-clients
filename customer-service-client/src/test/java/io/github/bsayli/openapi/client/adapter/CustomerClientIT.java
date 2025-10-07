@@ -46,7 +46,7 @@ class CustomerClientIT {
         """
             {
               "data": { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
-              "meta": { "requestId": "req-1", "serverTime": "2025-01-01T12:34:56Z", "sort": [] }
+              "meta": { "serverTime": "2025-01-01T12:34:56Z", "sort": [] }
             }
             """;
 
@@ -66,7 +66,6 @@ class CustomerClientIT {
     assertEquals("jane@example.com", resp.getData().getEmail());
 
     assertNotNull(resp.getMeta());
-    assertEquals("req-1", resp.getMeta().requestId());
     assertNotNull(resp.getMeta().serverTime());
   }
 
@@ -95,7 +94,6 @@ class CustomerClientIT {
     assertEquals("Jane Doe", resp.getData().getName());
 
     assertNotNull(resp.getMeta());
-    assertEquals("req-2", resp.getMeta().requestId());
     assertNotNull(resp.getMeta().serverTime());
   }
 
@@ -117,7 +115,7 @@ class CustomerClientIT {
                 "hasNext": false,
                 "hasPrev": false
               },
-              "meta": { "requestId": "req-3", "serverTime": "2025-01-03T10:00:00Z", "sort": [] }
+              "meta": { "serverTime": "2025-01-03T10:00:00Z", "sort": [] }
             }
             """;
 
@@ -145,7 +143,6 @@ class CustomerClientIT {
     assertEquals(1, page.content().getFirst().getCustomerId());
 
     assertNotNull(resp.getMeta());
-    assertEquals("req-3", resp.getMeta().requestId());
     assertNotNull(resp.getMeta().serverTime());
   }
 
@@ -156,7 +153,7 @@ class CustomerClientIT {
         """
             {
               "data": { "customerId": 1, "name": "Jane Updated", "email": "jane.updated@example.com" },
-              "meta": { "requestId": "req-4", "serverTime": "2025-01-04T12:00:00Z", "sort": [] }
+              "meta": { "serverTime": "2025-01-04T12:00:00Z", "sort": [] }
             }
             """;
 
@@ -176,7 +173,6 @@ class CustomerClientIT {
     assertEquals("jane.updated@example.com", resp.getData().getEmail());
 
     assertNotNull(resp.getMeta());
-    assertEquals("req-4", resp.getMeta().requestId());
     assertNotNull(resp.getMeta().serverTime());
   }
 
@@ -187,7 +183,7 @@ class CustomerClientIT {
         """
             {
               "data": { "customerId": 1 },
-              "meta": { "requestId": "req-5", "serverTime": "2025-01-05T08:00:00Z", "sort": [] }
+              "meta": { "serverTime": "2025-01-05T08:00:00Z", "sort": [] }
             }
             """;
 
@@ -204,7 +200,6 @@ class CustomerClientIT {
     assertEquals(1, resp.getData().getCustomerId());
 
     assertNotNull(resp.getMeta());
-    assertEquals("req-5", resp.getMeta().requestId());
     assertNotNull(resp.getMeta().serverTime());
   }
 

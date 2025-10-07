@@ -1,7 +1,7 @@
 # Spring Boot + OpenAPI Generator — Type-Safe Generics for Clean API Clients
 
 [![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml)
-[![Release](https://img.shields.io/github/v/release/bsayli/spring-boot-openapi-generics-clients?logo=github&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
+[![Release](https://img.shields.io/github/v/release/bsayli/spring-boot-openapi-generics-clients?logo=github\&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
 [![codecov](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients/branch/main/graph/badge.svg)](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients)
 [![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.10-green?logo=springboot)](https://spring.io/projects/spring-boot)
@@ -13,329 +13,181 @@
 <p align="center">
   <img src="docs/images/openapi-generics-cover.png" alt="OpenAPI Generics Cover" width="720"/>
   <br/>
-  <em>Type-safe API responses without boilerplate — powered by Spring Boot & OpenAPI Generator</em>
+  <em>End-to-end generics-aware OpenAPI clients — unified `{ data, meta }` responses without boilerplate.</em>
 </p>
 
 **Type-safe client generation with Spring Boot & OpenAPI using generics.**
-This repository demonstrates how to extend OpenAPI Generator to work with generics in order to avoid boilerplate, reduce
-duplicated wrappers, and keep client code clean.
+This repository demonstrates how to extend OpenAPI Generator to support **nested generics** and the new unified `{ data, meta }` response model — eliminating duplicated wrappers and repetitive boilerplate.
 
 ---
 
 ## 📑 Table of Contents
 
-- 📦 [Modules](#-modules-in-this-repository)
-- 🛠 [Compatibility Matrix](#-compatibility-matrix)
-- 🚀 [Problem Statement](#-problem-statement)
-- 💡 [Solution](#-solution)
-- ⚡ [Quick Start](#-quick-start)
-- 🧩 [Tech Stack & Features](#-tech-stack--features)
-- ✅ [Key Features](#-key-features)
-- ✨ [Usage Example (Adapter Interface)](#-usage-example-adapter-interface)
-- 📦 [Related Modules (Quick View)](#-related-modules-quick-view)
-- 📘 [Adoption Guides](#-adoption-guides)
-- 🔗 [References & Links](#-references--links)
+* 📦 [Modules](#-modules-in-this-repository)
+* 🚀 [Problem & Motivation](#-problem--motivation)
+* 💡 [Solution Overview](#-solution-overview)
+* ⚙️ [New Architecture Highlights](#-new-architecture-highlights)
+* ⚡ [Quick Start](#-quick-start)
+* 🧩 [Tech Stack](#-tech-stack)
+* ✅ [Key Features](#-key-features)
+* ✨ [Usage Example](#-usage-example)
+* 📘 [Adoption Guides](#-adoption-guides)
+* 🔗 [References & Links](#-references--links)
 
-> *A practical reference for type-safe OpenAPI client generation using Spring Boot 3.4, Java 21, and Mustache
-templates.*
-
-### 📦 Modules in this Repository
-
-This repository consists of two main modules:
-
-- [**customer-service**](customer-service/README.md) — Sample API producer (Spring Boot microservice + OpenAPI spec)
-- [**customer-service-client**](customer-service-client/README.md) — Generated Java client (generics support via custom
-  templates)
+> *A practical reference for building fully generics-aware OpenAPI clients using Spring Boot 3.4, Java 21, and Mustache overlays.*
 
 ---
 
-### 🔧 Compatibility Matrix
+## 📦 Modules in this Repository
 
-| Component               | Version |
-|-------------------------|---------|
-| **Java**                | 21      |
-| **Spring Boot**         | 3.4.10  |
-| **Springdoc OpenAPI**   | 2.8.13  |
-| **OpenAPI Generator**   | 7.16.0  |
-| **Apache HttpClient 5** | 5.5     |
+* [**customer-service**](customer-service/README.md) — sample backend exposing `/v3/api-docs.yaml`
+* [**customer-service-client**](customer-service-client/README.md) — generated OpenAPI client with generics-aware wrappers
 
 ---
 
-## 🚀 Problem Statement
+## 🚀 Problem & Motivation
 
-Most backend teams standardize responses with a generic wrapper like `ServiceResponse<T>`.
-However, **OpenAPI Generator does not natively support generics** — instead, it generates one wrapper per endpoint (
-duplicating fields like `status`, `message`, and `errors`).
+OpenAPI Generator doesn’t natively understand **generic types**. When backend responses use envelopes like `ServiceResponse<T>`, the generator produces one wrapper per endpoint, duplicating fields (`status`, `message`, `errors`, or now `data`, `meta`).
 
-This creates:
+This leads to:
 
-* ❌ Dozens of almost-identical classes
-* ❌ High maintenance overhead
-* ❌ No single place to evolve the response envelope
+* ❌ Dozens of nearly identical classes
+* ❌ High maintenance cost
+* ❌ Hard-to-evolve contracts
 
 ---
 
-## 💡 Solution
+## 💡 Solution Overview
 
-This project shows how to:
+This repository defines a **complete pattern** for Spring Boot + OpenAPI Generator:
 
-* Customize **Springdoc** to mark wrapper schemas in OpenAPI
-* Add a **tiny Mustache partial** so the generator emits thin shells extending a reusable generic base
-* Keep **compile-time type safety** without repetitive mappers
+* On the **server side**, a `Springdoc` customizer automatically marks generic wrappers (`ServiceResponse<T>`) with vendor extensions:
 
----
+    * `x-api-wrapper`
+    * `x-api-wrapper-datatype`
+    * `x-data-container` / `x-data-item`
+* On the **client side**, Mustache overlays generate **thin wrappers** extending the reusable generic base class `ServiceClientResponse<T>`.
 
-## 🧠 How It Works (Under the Hood)
-
-At generation time, the reference service **auto-registers** wrapper schemas in the OpenAPI doc:
-
-* A Spring `OpenApiCustomizer` scans controller return types and unwraps `ResponseEntity`, `CompletionStage`, Reactor (
-  `Mono`/`Flux`), etc. until it reaches `ServiceResponse<T>`.
-* For every discovered `T`, it adds a `ServiceResponse{T}` schema that composes the base envelope + the concrete `data`
-  type, and marks it with vendor extensions:
-
-    * `x-api-wrapper: true`
-    * `x-api-wrapper-datatype: <T>`
-
-The Java client then uses a tiny Mustache override to render **thin shells** for those marked schemas:
-
-```mustache
-// api_wrapper.mustache
-import {{commonPackage}}.ServiceClientResponse;
-
-public class {{classname}}
-    extends ServiceClientResponse<{{vendorExtensions.x-api-wrapper-datatype}}> {
-}
-```
-
-This is what turns e.g. `ServiceResponseCustomerCreateResponse` into:
+Example generated wrapper:
 
 ```java
-public class ServiceResponseCustomerCreateResponse
-        extends ServiceClientResponse<CustomerCreateResponse> {
+public class ServiceResponseCustomerDto
+        extends ServiceClientResponse<CustomerDto> {
 }
 ```
+
+This new structure supports **nested generics** like `ServiceClientResponse<Page<CustomerDto>>` and includes both `data` and `meta` sections.
+
+---
+
+## ⚙️ New Architecture Highlights
+
+| Layer                 | Description                                                                                     |
+| --------------------- | ----------------------------------------------------------------------------------------------- |
+| **Server (Producer)** | Publishes `/v3/api-docs.yaml` via Springdoc; marks generic wrappers with vendor extensions      |
+| **Client (Consumer)** | Uses OpenAPI Generator 7.16.0 with custom Mustache templates to produce generics-aware wrappers |
+| **Envelope Model**    | Unified `{ data, meta }` response model; compatible with `ProblemDetail` (RFC 7807) for errors  |
+| **Nested Generics**   | Full support for `ServiceResponse<Page<T>>` structures                                          |
 
 ---
 
 ## ⚡ Quick Start
 
-Run the reference service:
-
 ```bash
-cd customer-service
-mvn spring-boot:run
+# Run the backend service
+cd customer-service && mvn spring-boot:run
+
+# Generate and build the OpenAPI client
+cd ../customer-service-client && mvn clean install
 ```
 
-Generate and build the client:
+Generated wrappers are located under:
 
-```bash
-cd customer-service-client
-mvn clean install
+```
+target/generated-sources/openapi/src/gen/java
 ```
 
-Use the generated API:
-
-```java
-ServiceClientResponse<CustomerCreateResponse> response =
-        customerControllerApi.createCustomer(request);
-```
-
-### 🖼 Swagger Screenshot
-
-Here’s what the `create customer` endpoint looks like in Swagger UI after running the service:
-
-![Customer create example](docs/images/swagger-customer-create.png)
-
-### 🖼 Generated Client Wrapper
-
-Comparison of how OpenAPI Generator outputs looked **before** vs **after** adding the generics-aware wrapper:
-
-**Before (duplicated full model):**
-
-![Generated client (before)](docs/images/generated-client-wrapper-before.png)
-
-**After (thin generic wrapper):**
-
-![Generated client (after)](docs/images/generated-client-wrapper-after.png)
+Each wrapper extends `ServiceClientResponse<T>` and is aligned with the new `{ data, meta }` envelope.
 
 ---
 
-## ✅ Verify in 60 Seconds
+## 🧱 Example Response
 
-1. Clone this repo
-2. Run `mvn clean install -q`
-3. Open `customer-service-client/target/generated-sources/...`
-4. See the generated wrappers → they now extend a **generic base class** instead of duplicating fields.
-
-You don’t need to write a single line of code — the generator does the work.
-
----
-
-## 🛠 Tech Stack & Features
-
-* 🚀 **Java 21** — modern language features
-* 🍃 **Spring Boot 3.4.10** — microservice foundation
-* 📖 **Springdoc OpenAPI** — API documentation
-* 🔧 **OpenAPI Generator 7.x** — client code generation
-* 🧩 **Custom Mustache templates** — generics-aware wrappers
-* 🧪 **JUnit 5 + MockWebServer** — integration testing
-* 🌐 **Apache HttpClient 5** — connection pooling & timeouts
-
----
-
-## 📦 Next Steps — Dependency-Based Adoption
-
-This pattern is evolving toward a plug-and-play module approach, so teams can adopt it without manual template setup.
-
-The long-term goal is to publish the core pieces as standalone modules, so that any project using
-a generic response type like `ServiceResponse<T>` can enable the same behavior with **just one dependency**:
-
-- `io.github.bsayli:openapi-generics-autoreg` → **server-side**: automatically registers wrapper schemas in the OpenAPI
-  spec.
-- `io.github.bsayli:openapi-generics-templates` → **client-side**: plugs into OpenAPI Generator for thin, type-safe
-  wrappers.
-
-This will let teams adopt **generics-aware OpenAPI support** without copying customizers or Mustache templates —
-just by adding a Maven/Gradle dependency.
-
----
-
-## 📂 Project Structure
-
-```text
-spring-boot-openapi-generics-clients/
- ├── customer-service/          # Sample Spring Boot microservice (API producer)
- ├── customer-service-client/   # Generated client using custom templates
- └── README.md                  # Root documentation
-```
-
----
-
-## 🧩 Key Features
-
-* ✅ **Generic base model**: `ServiceClientResponse<T>`
-* ✅ **Thin wrappers**: endpoint-specific shells extending the base
-* ✅ **Strong typing preserved**: `getData()` returns the exact payload type
-* ✅ **No duplicated fields** across wrappers
-* ✅ Easy to maintain and evolve
-
----
-
-### ✨ Usage Example: Adapter Interface
-
-Sometimes you don’t want to expose all the thin wrappers directly.
-A simple adapter interface can consolidate them into clean, type-safe methods:
-
-```java
-public interface CustomerClientAdapter {
-    ServiceClientResponse<CustomerCreateResponse> createCustomer(CustomerCreateRequest request);
-
-    ServiceClientResponse<CustomerDto> getCustomer(Integer customerId);
-
-    ServiceClientResponse<CustomerListResponse> getCustomers();
-
-    ServiceClientResponse<CustomerUpdateResponse> updateCustomer(
-            Integer customerId, CustomerUpdateRequest request);
-
-    ServiceClientResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId);
+```json
+{
+  "data": {
+    "customerId": 1,
+    "name": "Jane Doe",
+    "email": "jane@example.com"
+  },
+  "meta": {
+    "serverTime": "2025-01-01T12:34:56Z",
+    "sort": []
+  }
 }
 ```
 
----
+Client usage:
 
-## 🔍 Why This Matters
-
-Without generics support, OpenAPI client generation creates bloated and repetitive code.
-By applying this approach:
-
-* Development teams **save time** maintaining response models
-* Client libraries become **cleaner and smaller**
-* Easier for **new developers** to understand the contract
-* Code stays **future-proof** when envelope fields evolve
+```java
+ServiceClientResponse<CustomerDto> response = api.getCustomer(1);
+CustomerDto dto = response.getData();
+Instant serverTime = response.getMeta().serverTime();
+```
 
 ---
 
-## 💼 Use Cases
+## 🧩 Tech Stack
 
-This pattern is useful when:
-
-* You have **multiple microservices** with a shared response structure
-* You need to **evolve response envelopes** without breaking dozens of generated classes
-* You want **type safety** in generated clients but without boilerplate
-
----
-
-## 🔧 How to Run
-
-1. **Start the reference service**
-
-   ```bash
-   cd customer-service
-   mvn spring-boot:run
-   ```
-
-2. **Generate the client**
-
-   ```bash
-   cd customer-service-client
-   mvn clean install
-   ```
-
-3. **Use the generated API**
-
-   ```java
-   ServiceClientResponse<CustomerCreateResponse> response =
-       customerControllerApi.createCustomer(request);
-   ```
+| Component             | Version | Purpose                        |
+| --------------------- | ------- | ------------------------------ |
+| **Java**              | 21      | Language baseline              |
+| **Spring Boot**       | 3.4.10  | REST + OpenAPI provider        |
+| **Springdoc**         | 2.8.13  | OpenAPI 3.1 integration        |
+| **OpenAPI Generator** | 7.16.0  | Generics-aware code generation |
+| **HttpClient5**       | 5.5     | Production-grade HTTP backend  |
 
 ---
 
-## 👤 Who Should Use This?
+## ✅ Key Features
 
-* Backend developers maintaining multiple microservices
-* API platform teams standardizing response envelopes
-* Teams already invested in OpenAPI Generator looking to reduce boilerplate
-
----
-
-## ⚠️ Why Not Use It?
-
-This project may not be the right fit if:
-
-* Your APIs do **not** use a common response wrapper
-* You are fine with duplicated wrapper models
-* You don’t generate client code from OpenAPI specs
+* **Unified `{ data, meta }` response model**
+* **Nested generic support** — `ServiceResponse<Page<T>>`
+* **RFC 7807-compliant error mapping** via `ClientProblemException`
+* **Mustache template overlay** for type-safe wrapper generation
+* **End-to-end compatibility** between backend & client
+* **No duplicated models or boilerplate**
 
 ---
 
-## 📦 Related Modules (Quick View)
+## ✨ Usage Example
 
-| Module                         | Description                                 | Docs                                        |
-|--------------------------------|---------------------------------------------|---------------------------------------------|
-| 🟢 **customer-service**        | Spring Boot sample API (producer)           | [README](customer-service/README.md)        |
-| 🔵 **customer-service-client** | Generated Java client with generics support | [README](customer-service-client/README.md) |
+```java
+public interface CustomerClientAdapter {
+    ServiceClientResponse<CustomerDto> createCustomer(CustomerCreateRequest request);
+    ServiceClientResponse<CustomerDto> getCustomer(Integer customerId);
+    ServiceClientResponse<Page<CustomerDto>> getCustomers();
+}
+```
+
+This interface provides a clean boundary for your business logic to consume the generated API in a type-safe manner.
 
 ---
 
 ## 📘 Adoption Guides
 
-Looking to integrate this approach into your own project?  
-See the detailed guides under [`docs/adoption`](docs/adoption):
+See the detailed step-by-step setup under [`docs/adoption`](docs/adoption):
 
-- [Server-Side Adoption](docs/adoption/server-side-adoption.md)
-- [Client-Side Adoption](docs/adoption/client-side-adoption.md)
+* [Server-Side Adoption](docs/adoption/server-side-adoption.md)
+* [Client-Side Adoption](docs/adoption/client-side-adoption.md)
 
 ---
 
-## 📂 References & Links
+## 🔗 References & Links
 
-- 🌐 [GitHub Pages — Adoption Guides](https://bsayli.github.io/spring-boot-openapi-generics-clients/)
--
-
-📘 [Medium — Why OpenAPI Clients Get Messy — and How to Keep Them Type-Safe](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
--
-💬 [Dev.to — How to Build Type-Safe OpenAPI Clients Without Boilerplate](https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f)
+* 🌐 [GitHub Pages — Adoption Guides](https://bsayli.github.io/spring-boot-openapi-generics-clients/)
+* 📘 [Medium — Type-Safe Generic API Responses](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+* 💬 [Dev.to — Type-Safe OpenAPI Clients Without Boilerplate](https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f)
 
 ---
 

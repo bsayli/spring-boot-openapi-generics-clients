@@ -19,21 +19,23 @@ import org.springframework.web.client.RestClient;
 @DisplayName("Unit: CustomerApiClientConfig.problemDetailStatusHandler")
 class CustomerApiClientConfigStatusHandlerTest {
 
-    @Test
-    @DisplayName("400 with application/problem+json -> throws ClientProblemException with parsed ProblemDetail")
-    void handler_parses_problem_detail_on_4xx() {
-        // Arrange
-        var om = new ObjectMapper();
-        RestClient.Builder builder = RestClient.builder().baseUrl("http://localhost");
+  @Test
+  @DisplayName(
+      "400 with application/problem+json -> throws ClientProblemException with parsed ProblemDetail")
+  void handler_parses_problem_detail_on_4xx() {
+    // Arrange
+    var om = new ObjectMapper();
+    RestClient.Builder builder = RestClient.builder().baseUrl("http://localhost");
 
-        // apply the status handler customizer
-        RestClientCustomizer customizer = new CustomerApiClientConfig().problemDetailStatusHandler(om);
-        customizer.customize(builder);
+    // apply the status handler customizer
+    RestClientCustomizer customizer = new CustomerApiClientConfig().problemDetailStatusHandler(om);
+    customizer.customize(builder);
 
-        // bind mock server to this builder
-        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+    // bind mock server to this builder
+    MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
 
-        String body = """
+    String body =
+        """
       {
         "type":"https://example.org/problem/bad-request",
         "title":"Bad Request",
@@ -45,53 +47,58 @@ class CustomerApiClientConfigStatusHandlerTest {
       }
       """;
 
-        server.expect(once(), requestTo("http://localhost/err400"))
-                .andRespond(withStatus(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.valueOf("application/problem+json"))
-                        .body(body));
+    server
+        .expect(once(), requestTo("http://localhost/err400"))
+        .andRespond(
+            withStatus(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.valueOf("application/problem+json"))
+                .body(body));
 
-        RestClient client = builder.build();
+    RestClient client = builder.build();
 
-        // Act + Assert
-        ClientProblemException ex =
-                assertThrows(ClientProblemException.class,
-                        () -> client.get().uri("/err400").retrieve().body(String.class));
+    // Act + Assert
+    ClientProblemException ex =
+        assertThrows(
+            ClientProblemException.class,
+            () -> client.get().uri("/err400").retrieve().body(String.class));
 
-        assertEquals(400, ex.getStatus());
-        ProblemDetail pd = ex.getProblem();
-        assertNotNull(pd);
-        assertEquals("Bad Request", pd.getTitle());
-        assertEquals("Validation failed", pd.getDetail());
-        assertEquals("VAL_001", pd.getErrorCode());
+    assertEquals(400, ex.getStatus());
+    ProblemDetail pd = ex.getProblem();
+    assertNotNull(pd);
+    assertEquals("Bad Request", pd.getTitle());
+    assertEquals("Validation failed", pd.getDetail());
+    assertEquals("VAL_001", pd.getErrorCode());
 
-        server.verify();
-    }
+    server.verify();
+  }
 
-    @Test
-    @DisplayName("500 with empty body -> throws ClientProblemException with null ProblemDetail")
-    void handler_handles_empty_body_on_5xx() {
-        // Arrange
-        var om = new ObjectMapper();
-        RestClient.Builder builder = RestClient.builder().baseUrl("http://localhost");
+  @Test
+  @DisplayName("500 with empty body -> throws ClientProblemException with null ProblemDetail")
+  void handler_handles_empty_body_on_5xx() {
+    // Arrange
+    var om = new ObjectMapper();
+    RestClient.Builder builder = RestClient.builder().baseUrl("http://localhost");
 
-        RestClientCustomizer customizer = new CustomerApiClientConfig().problemDetailStatusHandler(om);
-        customizer.customize(builder);
+    RestClientCustomizer customizer = new CustomerApiClientConfig().problemDetailStatusHandler(om);
+    customizer.customize(builder);
 
-        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+    MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
 
-        server.expect(once(), requestTo("http://localhost/err500"))
-                .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR)); // no body, no content-type
+    server
+        .expect(once(), requestTo("http://localhost/err500"))
+        .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR)); // no body, no content-type
 
-        RestClient client = builder.build();
+    RestClient client = builder.build();
 
-        // Act + Assert
-        ClientProblemException ex =
-                assertThrows(ClientProblemException.class,
-                        () -> client.get().uri("/err500").retrieve().body(String.class));
+    // Act + Assert
+    ClientProblemException ex =
+        assertThrows(
+            ClientProblemException.class,
+            () -> client.get().uri("/err500").retrieve().body(String.class));
 
-        assertEquals(500, ex.getStatus());
-        assertNull(ex.getProblem()); // no problem body parsed
+    assertEquals(500, ex.getStatus());
+    assertNull(ex.getProblem()); // no problem body parsed
 
-        server.verify();
-    }
+    server.verify();
+  }
 }

@@ -9,13 +9,13 @@ import java.util.List;
  * context such as identifiers, timestamps, and sorting details. Future-proof can be extended with
  * fields like traceId, locale, or tenantId if needed.
  */
-public record Meta(String requestId, Instant serverTime, List<Sort> sort) {
+public record Meta(Instant serverTime, List<Sort> sort) {
 
   public static Meta now() {
-    return new Meta(null, Instant.now(), List.of());
+    return new Meta(Instant.now(), List.of());
   }
 
   public static Meta now(List<Sort> sort) {
-    return new Meta(null, Instant.now(), sort == null ? List.of() : List.copyOf(sort));
+    return new Meta(Instant.now(), sort == null ? List.of() : List.copyOf(sort));
   }
 }

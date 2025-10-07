@@ -34,7 +34,6 @@ public class SwaggerResponseCustomizer {
         schemas.put(
             SCHEMA_META,
             new ObjectSchema()
-                .addProperty("requestId", new StringSchema())
                 .addProperty("serverTime", new StringSchema().format("date-time"))
                 .addProperty(
                     "sort",

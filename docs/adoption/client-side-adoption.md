@@ -1,256 +1,352 @@
 ---
+
 layout: default
-title: Client-Side Adoption
+title: Client-Side Adoption (Updated for data+meta & ProblemDetail)
 parent: Adoption Guides
 nav_order: 2
----
+------------
 
-# Client-Side Integration Guide
+# Client‑Side Integration Guide (Updated)
 
-This document describes how to integrate the **generics-aware OpenAPI client** into your own microservice project, based
-on the patterns demonstrated in the `customer-service-client` module.
-
-The purpose is to generate **type-safe clients** that extend a reusable generic base (`ServiceClientResponse<T>`)
-instead of duplicating response envelopes.
+This guide describes how to integrate the **generics‑aware OpenAPI client** into your own project, aligned with the
+new `{ data, meta }` response structure and RFC 7807 `ProblemDetail` error model introduced in the updated
+`customer-service` / `customer-service-client` architecture.
 
 ---
 
-## 1) What You Get
+## 🎯 Goals
 
-* Thin wrappers per endpoint (`ServiceResponseYourDto`), each extending `ServiceClientResponse<T>`.
-* Strong typing for `getData()` without boilerplate or casting.
-* A reusable adapter interface to keep generated code isolated.
-* Optional Spring Boot configuration to auto-wire the client beans.
-
----
-
-## 2) Prerequisites
-
-* Java 21+
-* Maven 3.9+ (or Gradle 8+ if adapted)
-* Running service exposing `/v3/api-docs.yaml`
+* Generate thin, **type‑safe wrappers** extending `ServiceClientResponse<T>` instead of duplicating envelopes.
+* Support **nested generics** such as `ServiceClientResponse<Page<CustomerDto>>`.
+* Decode non‑2xx responses into **RFC 7807 ProblemDetail** and raise `ClientProblemException`.
+* Allow seamless injection into Spring Boot apps using a pooled `RestClient`.
 
 ---
 
-## 3) Steps to Generate
+## ⚙️ What You Get
 
-1. **Pull the OpenAPI spec** from your service:
+* **Generated wrappers** per endpoint (e.g., `ServiceResponseCustomerDto`) extending `ServiceClientResponse<T>`.
+* **Strong typing** for `.getData()` and `.getMeta()`.
+* **Problem‑aware exception** decoding (`ClientProblemException`).
+* **Spring configuration** using `RestClientCustomizer` + Apache HttpClient5.
+
+---
+
+## 🧱 Prerequisites
+
+* Java 21+
+* Maven 3.9+
+* A running OpenAPI provider exposing `/v3/api-docs.yaml` (from your server‑side service)
+
+---
+
+## 🚀 Generate the Client
+
+1. **Download the OpenAPI spec:**
 
    ```bash
-   curl -s http://localhost:8084/your-service/v3/api-docs.yaml \
-     -o src/main/resources/your-api-docs.yaml
+   curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
+     -o src/main/resources/customer-api-docs.yaml
    ```
 
-2. **Run Maven build** in the client module:
+2. **Build the client:**
 
    ```bash
    mvn clean install
    ```
 
-3. **Inspect generated code**:
+3. **Inspect generated output:**
 
     * `target/generated-sources/openapi/src/gen/java`
-    * Look for classes like `ServiceResponseYourDto` extending `ServiceClientResponse<YourDto>`
+    * Look for classes like `ServiceResponseCustomerDto` extending `ServiceClientResponse<CustomerDto>`
 
 ---
 
-## 4) Core Classes to Copy
+## 🧩 Core Classes (Shared Base)
 
-Ensure you copy the following **shared classes** into your client project:
+Copy these into your client module under `openapi/client/common`:
 
-**`common/ServiceClientResponse.java`**
-
-```java
-package
-
-<your.base>.openapi.client.common;
-
-import java.util.List;
-import java.util.Objects;
-
-public class ServiceClientResponse<T> {
-    private Integer status;
-    private String message;
-    private List<ClientErrorDetail> errors;
-    private T data;
-    // getters, setters, equals, hashCode, toString
-}
-```
-
-**`common/ClientErrorDetail.java`**
+### `ServiceClientResponse.java`
 
 ```java
 package <your.base>.openapi.client.common;
 
-public record ClientErrorDetail(String errorCode, String message) {
+import java.util.Objects;
+
+public class ServiceClientResponse<T> {
+  private T data;
+  private ClientMeta meta;
+
+  public T getData() { return data; }
+  public void setData(T data) { this.data = data; }
+
+  public ClientMeta getMeta() { return meta; }
+  public void setMeta(ClientMeta meta) { this.meta = meta; }
+
+  @Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof ServiceClientResponse<?> that)) return false;
+    return Objects.equals(data, that.data) && Objects.equals(meta, that.meta);
+  }
+  @Override public int hashCode() { return Objects.hash(data, meta); }
+  @Override public String toString() { return "ServiceClientResponse{" + "data=" + data + ", meta=" + meta + '}'; }
 }
 ```
 
-These are referenced by the Mustache templates and must exist in your client project.
+### `ClientMeta.java`
+
+```java
+package <your.base>.openapi.client.common;
+
+import java.time.Instant;
+import java.util.List;
+import <your.base>.openapi.client.common.sort.ClientSort;
+
+public record ClientMeta(Instant serverTime, List<ClientSort> sort) {}
+```
+
+### `Page.java`
+
+```java
+package <your.base>.openapi.client.common;
+
+import java.util.List;
+
+public record Page<T>(List<T> content, int page, int size, long totalElements,
+                      int totalPages, boolean hasNext, boolean hasPrev) {}
+```
+
+### `ClientProblemException.java`
+
+```java
+package <your.base>.openapi.client.common.error;
+
+import io.github.bsayli.openapi.client.generated.dto.ProblemDetail;
+
+public class ClientProblemException extends RuntimeException {
+  private final transient ProblemDetail problem;
+  private final int status;
+
+  public ClientProblemException(ProblemDetail problem, int status) {
+    super(problem != null ? problem.getTitle() + ": " + problem.getDetail() : "HTTP " + status);
+    this.problem = problem;
+    this.status = status;
+  }
+
+  public ProblemDetail getProblem() { return problem; }
+  public int getStatus() { return status; }
+}
+```
 
 ---
 
-## 5) Mustache Templates
+## 🧰 Mustache Template Overlay
 
-Place the following templates under:
+Place templates under `src/main/resources/openapi-templates/`.
 
-```
-src/main/resources/openapi-templates/
-```
-
-**`api_wrapper.mustache`**
+### `api_wrapper.mustache`
 
 {% raw %}
 
 ```mustache
 import {{commonPackage}}.ServiceClientResponse;
+{{#vendorExtensions.x-data-container}}
+import {{commonPackage}}.{{vendorExtensions.x-data-container}};
+{{/vendorExtensions.x-data-container}}
 
 {{#vendorExtensions.x-class-extra-annotation}}
 {{{vendorExtensions.x-class-extra-annotation}}}
 {{/vendorExtensions.x-class-extra-annotation}}
 public class {{classname}}
-    extends ServiceClientResponse<{{vendorExtensions.x-api-wrapper-datatype}}> {
+    extends ServiceClientResponse<
+      {{#vendorExtensions.x-data-container}}
+        {{vendorExtensions.x-data-container}}<{{vendorExtensions.x-data-item}}>
+      {{/vendorExtensions.x-data-container}}
+      {{^vendorExtensions.x-data-container}}
+        {{vendorExtensions.x-api-wrapper-datatype}}
+      {{/vendorExtensions.x-data-container}}
+    > {
 }
 ```
 
 {% endraw %}
 
-**`model.mustache`** (partial overlay to delegate wrapper classes to `api_wrapper.mustache`).
-
-These ensure generated wrappers extend the generic base instead of duplicating fields.
+This ensures wrappers extend the generic base, including nested containers.
 
 ---
 
-## 6) Adapter Pattern
+## 🧩 Adapter Pattern (Recommended)
 
-Encapsulate generated APIs in an adapter interface:
+Encapsulate generated APIs behind your own adapter interface.
 
 ```java
-package
-
-<your.base>.openapi.client.adapter;
+package <your.base>.openapi.client.adapter;
 
 import <your.base>.openapi.client.common.ServiceClientResponse;
+import <your.base>.openapi.client.common.Page;
+import <your.base>.openapi.client.generated.api.YourControllerApi;
 import <your.base>.openapi.client.generated.dto.*;
 
 public interface YourClientAdapter {
-    ServiceClientResponse<YourDto> getYourEntity(Integer id);
-
-    ServiceClientResponse<YourCreateResponse> createYourEntity(YourCreateRequest request);
+  ServiceClientResponse<YourDto> getYourEntity(Integer id);
+  ServiceClientResponse<Page<YourDto>> listEntities();
+  ServiceClientResponse<YourDto> createEntity(YourCreateRequest req);
 }
 ```
 
-This shields your business code from generated artifacts and provides a stable contract.
+Then implement it using the generated API:
+
+```java
+@Service
+public class YourClientAdapterImpl implements YourClientAdapter {
+  private final YourControllerApi api;
+  public YourClientAdapterImpl(YourControllerApi api) { this.api = api; }
+
+  @Override
+  public ServiceClientResponse<YourDto> getYourEntity(Integer id) {
+    return api.getYourEntity(id);
+  }
+
+  @Override
+  public ServiceClientResponse<Page<YourDto>> listEntities() {
+    return api.getEntities();
+  }
+
+  @Override
+  public ServiceClientResponse<YourDto> createEntity(YourCreateRequest req) {
+    return api.createEntity(req);
+  }
+}
+```
 
 ---
 
-## 7) Spring Boot Configuration — Quick Start (for demos/dev)
+## 🧠 Spring Boot Configuration
 
-For quick experiments or local development, you can wire the generated client with a simple RestClient:
+Production‑ready configuration using pooled Apache HttpClient5 and `RestClientCustomizer`.
 
 ```java
 @Configuration
 public class YourApiClientConfig {
 
-    @Bean
-    RestClient yourRestClient(RestClient.Builder builder) {
-        return builder.build();
-    }
+  @Bean
+  RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
+    return builder -> builder.defaultStatusHandler(
+      HttpStatusCode::isError,
+      (req, res) -> {
+        ProblemDetail pd = null;
+        try (var is = res.getBody()) {
+          if (is != null) pd = om.readValue(is, ProblemDetail.class);
+        } catch (Exception ignore) {}
+        throw new ClientProblemException(pd, res.getStatusCode().value());
+      });
+  }
 
-    @Bean
-    ApiClient yourApiClient(RestClient yourRestClient,
-                            @Value("${your.api.base-url}") String baseUrl) {
-        return new ApiClient(yourRestClient).setBasePath(baseUrl);
-    }
+  @Bean(destroyMethod = "close")
+  CloseableHttpClient httpClient(@Value("${your.api.max-connections-total:64}") int total,
+                                 @Value("${your.api.max-connections-per-route:16}") int perRoute) {
+    var cm = PoolingHttpClientConnectionManagerBuilder.create()
+      .setMaxConnTotal(total).setMaxConnPerRoute(perRoute).build();
+    return HttpClients.custom()
+      .setConnectionManager(cm)
+      .evictExpiredConnections()
+      .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
+      .disableAutomaticRetries()
+      .setUserAgent("your-service-client")
+      .build();
+  }
 
-    @Bean
-    YourControllerApi yourControllerApi(ApiClient yourApiClient) {
-        return new YourControllerApi(yourApiClient);
-    }
+  @Bean
+  HttpComponentsClientHttpRequestFactory requestFactory(CloseableHttpClient http,
+                                                        @Value("${your.api.connect-timeout-seconds:10}") long c,
+                                                        @Value("${your.api.connection-request-timeout-seconds:10}") long r,
+                                                        @Value("${your.api.read-timeout-seconds:15}") long t) {
+    var f = new HttpComponentsClientHttpRequestFactory(http);
+    f.setConnectTimeout(Duration.ofSeconds(c));
+    f.setConnectionRequestTimeout(Duration.ofSeconds(r));
+    f.setReadTimeout(Duration.ofSeconds(t));
+    return f;
+  }
+
+  @Bean
+  RestClient yourRestClient(RestClient.Builder builder, HttpComponentsClientHttpRequestFactory rf,
+                            List<RestClientCustomizer> customizers) {
+    builder.requestFactory(rf);
+    if (customizers != null) customizers.forEach(c -> c.customize(builder));
+    return builder.build();
+  }
+
+  @Bean
+  ApiClient yourApiClient(RestClient rest, @Value("${your.api.base-url}") String baseUrl) {
+    return new ApiClient(rest).setBasePath(baseUrl);
+  }
+
+  @Bean
+  YourControllerApi yourControllerApi(ApiClient apiClient) {
+    return new YourControllerApi(apiClient);
+  }
 }
 ```
 
-**application.properties:**
+**application.properties**
 
 ```properties
 your.api.base-url=http://localhost:8084/your-service
+your.api.max-connections-total=64
+your.api.max-connections-per-route=16
+your.api.connect-timeout-seconds=10
+your.api.connection-request-timeout-seconds=10
+your.api.read-timeout-seconds=15
 ```
 
-> **Note:** This setup is for **demos/local development**.  
-> For production, encapsulate `YourControllerApi` behind an **Adapter interface** and use a **pooled HTTP client** (
-> e.g., Apache HttpClient5).
 ---
 
-## 8) Usage Example
+## 🧪 Example Usage
 
 ```java
-package <your.base>.openapi.client.usecase;
+var response = yourClientAdapter.getYourEntity(42);
+var dto = response.getData();
+var serverTime = response.getMeta().serverTime();
+```
 
-import <your.base>.openapi.client.adapter.YourClientAdapter;
-import <your.base>.openapi.client.common.ServiceClientResponse;
-import <your.base>.openapi.client.generated.dto.YourCreateRequest;
-import <your.base>.openapi.client.generated.dto.YourCreateResponse;
-import org.springframework.stereotype.Component;
+Error handling:
 
-@Component
-public class DemoUseCase {
-
-    private final YourClientAdapter yourClient;
-
-    public DemoUseCase(YourClientAdapter yourClient) {
-        this.yourClient = yourClient;
-    }
-
-    public void run() {
-        YourCreateRequest req = new YourCreateRequest();
-        req.setName("Alice");
-
-        ServiceClientResponse<YourCreateResponse> resp = yourClient.createYourEntity(req);
-
-        var payload = resp.getData();
-        var response = yourClient.createYourEntity(req);
-        var data = response.getData();
-        log.info("Created entity id={} name={}", data.getId(), data.getName());
-    }
+```java
+try {
+  yourClientAdapter.getYourEntity(999);
+} catch (ClientProblemException ex) {
+  var pd = ex.getProblem();
+  System.err.println(pd.getTitle() + ": " + pd.getDetail());
 }
 ```
 
 ---
 
-## 9) Notes
-
-* Dependencies like `spring-web`, `jakarta.*` are often marked **provided** — your host app must supply them.
-* Re-run `curl` + `mvn clean install` whenever your service’s OpenAPI spec changes.
-* Optional vendor extension `x-class-extra-annotation` can add annotations (e.g., Jackson or Lombok) on generated
-  wrappers.
-
----
-
-## 10) Folder Structure (Suggested)
+## 🧭 Folder Structure (Suggested)
 
 ```
 your-service-client/
  ├─ src/main/java/<your/base>/openapi/client/common/
  │   ├─ ServiceClientResponse.java
- │   └─ ClientErrorDetail.java
+ │   ├─ ClientMeta.java
+ │   ├─ Page.java
+ │   └─ error/ClientProblemException.java
  ├─ src/main/java/<your/base>/openapi/client/adapter/
- │   └─ YourClientAdapter.java
+ │   ├─ YourClientAdapter.java
+ │   └─ YourClientAdapterImpl.java
  ├─ src/main/resources/openapi-templates/
- │   ├─ api_wrapper.mustache
- │   └─ model.mustache
- ├─ src/main/resources/your-api-docs.yaml
+ │   └─ api_wrapper.mustache
+ ├─ src/main/resources/customer-api-docs.yaml
  └─ pom.xml
 ```
 
 ---
 
-## 11) Maven Setup
+## ✅ Key Points
 
-See [Client-Side Adoption (POM Setup)](client-side-adoption-pom.md) for the full `pom.xml` configuration, including
-required plugins (`maven-dependency-plugin`, `maven-resources-plugin`, `openapi-generator-maven-plugin`, etc.)
-and dependency declarations.
+* Mirrors `{ data, meta }` structure from the server side.
+* Fully supports nested generics and vendor extensions (`x-data-container`, `x-data-item`).
+* Decodes non‑2xx responses into `ProblemDetail` and throws `ClientProblemException`.
+* Modular design: adapters hide generated artifacts from your domain logic.
 
----
-
-✅ With this setup, your client project generates **type-safe wrappers** that align with `ServiceResponse<T>` from the
-server side, without any boilerplate duplication.
+Your client is now **fully aligned** with the new generics‑aware and ProblemDetail‑compatible architecture.

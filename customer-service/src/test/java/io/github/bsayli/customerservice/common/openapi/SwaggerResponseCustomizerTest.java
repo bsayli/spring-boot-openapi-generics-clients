@@ -36,7 +36,7 @@ class SwaggerResponseCustomizerTest {
   }
 
   @Test
-  @DisplayName("Meta schema has requestId, serverTime, and sort[] referencing Sort")
+  @DisplayName("Meta schema has serverTime, and sort[] referencing Sort")
   void metaSchema_structure_isCorrect() {
     OpenApiCustomizer customizer = new SwaggerResponseCustomizer().responseEnvelopeSchemas();
 
@@ -46,7 +46,6 @@ class SwaggerResponseCustomizerTest {
     var meta = openAPI.getComponents().getSchemas().get(OpenApiSchemas.SCHEMA_META);
     assertNotNull(meta);
     assertNotNull(meta.getProperties());
-    assertTrue(meta.getProperties().containsKey("requestId"));
     assertTrue(meta.getProperties().containsKey("serverTime"));
     assertTrue(meta.getProperties().containsKey("sort"));
 

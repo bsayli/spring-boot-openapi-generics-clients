@@ -46,7 +46,7 @@ class CustomerClientAdapterImplTest {
     var dto = new CustomerDto().customerId(1).name("Jane Doe").email("jane@example.com");
 
     var serverOdt = OffsetDateTime.parse("2025-01-01T12:34:56Z");
-    var meta = new ClientMeta("req-123", serverOdt.toInstant(), List.of());
+    var meta = new ClientMeta(serverOdt.toInstant(), List.of());
 
     var wrapper = new ServiceResponseCustomerDto();
     wrapper.setData(dto);
@@ -63,7 +63,6 @@ class CustomerClientAdapterImplTest {
     assertEquals("jane@example.com", res.getData().getEmail());
 
     assertNotNull(res.getMeta());
-    assertEquals("req-123", res.getMeta().requestId());
     assertEquals(serverOdt.toInstant(), res.getMeta().serverTime());
   }
 
@@ -75,7 +74,7 @@ class CustomerClientAdapterImplTest {
     var serverOdt = OffsetDateTime.parse("2025-02-01T10:00:00Z");
     var wrapper = new ServiceResponseCustomerDto();
     wrapper.setData(dto);
-    wrapper.setMeta(new ClientMeta("req-42", serverOdt.toInstant(), List.of()));
+    wrapper.setMeta(new ClientMeta(serverOdt.toInstant(), List.of()));
 
     when(api.getCustomer(any())).thenReturn(wrapper);
 
@@ -88,7 +87,6 @@ class CustomerClientAdapterImplTest {
     assertEquals("john.smith@example.com", res.getData().getEmail());
 
     assertNotNull(res.getMeta());
-    assertEquals("req-42", res.getMeta().requestId());
     assertEquals(serverOdt.toInstant(), res.getMeta().serverTime());
   }
 
@@ -103,7 +101,7 @@ class CustomerClientAdapterImplTest {
     var serverOdt = OffsetDateTime.parse("2025-03-01T09:00:00Z");
     var wrapper = new ServiceResponsePageCustomerDto();
     wrapper.setData(page);
-    wrapper.setMeta(new ClientMeta("req-list", serverOdt.toInstant(), List.of()));
+    wrapper.setMeta(new ClientMeta(serverOdt.toInstant(), List.of()));
 
     when(api.getCustomers(any(), any(), any(), any(), any(), any())).thenReturn(wrapper);
 
@@ -120,7 +118,6 @@ class CustomerClientAdapterImplTest {
     assertEquals(1, res.getData().content().getFirst().getCustomerId());
 
     assertNotNull(res.getMeta());
-    assertEquals("req-list", res.getMeta().requestId());
     assertEquals(serverOdt.toInstant(), res.getMeta().serverTime());
   }
 
@@ -135,7 +132,7 @@ class CustomerClientAdapterImplTest {
     var serverOdt = OffsetDateTime.parse("2025-04-02T12:00:00Z");
     var wrapper = new ServiceResponseCustomerDto();
     wrapper.setData(dto);
-    wrapper.setMeta(new ClientMeta("req-upd", serverOdt.toInstant(), List.of()));
+    wrapper.setMeta(new ClientMeta(serverOdt.toInstant(), List.of()));
 
     when(api.updateCustomer(any(), any(CustomerUpdateRequest.class))).thenReturn(wrapper);
 
@@ -147,7 +144,6 @@ class CustomerClientAdapterImplTest {
     assertEquals("jane.updated@example.com", res.getData().getEmail());
 
     assertNotNull(res.getMeta());
-    assertEquals("req-upd", res.getMeta().requestId());
     assertEquals(serverOdt.toInstant(), res.getMeta().serverTime());
   }
 
@@ -159,7 +155,7 @@ class CustomerClientAdapterImplTest {
     var serverOdt = OffsetDateTime.parse("2025-05-03T08:00:00Z");
     var wrapper = new ServiceResponseCustomerDeleteResponse();
     wrapper.setData(payload);
-    wrapper.setMeta(new ClientMeta("req-del", serverOdt.toInstant(), List.of()));
+    wrapper.setMeta(new ClientMeta(serverOdt.toInstant(), List.of()));
 
     when(api.deleteCustomer(any())).thenReturn(wrapper);
 
@@ -170,7 +166,6 @@ class CustomerClientAdapterImplTest {
     assertEquals(7, res.getData().getCustomerId());
 
     assertNotNull(res.getMeta());
-    assertEquals("req-del", res.getMeta().requestId());
     assertEquals(serverOdt.toInstant(), res.getMeta().serverTime());
   }
 

@@ -24,44 +24,44 @@ public class CustomerApiClientConfig {
   @Bean
   RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
     return builder ->
-            builder.defaultStatusHandler(
-                    HttpStatusCode::isError,
-                    (request, response) -> {
-                      ProblemDetail pd = null;
-                      try (var is = response.getBody()) {
-                          pd = om.readValue(is, ProblemDetail.class);
-                      } catch (Exception ignore) {
-                      }
-                      throw new ClientProblemException(pd, response.getStatusCode().value());
-                    });
+        builder.defaultStatusHandler(
+            HttpStatusCode::isError,
+            (request, response) -> {
+              ProblemDetail pd = null;
+              try (var is = response.getBody()) {
+                pd = om.readValue(is, ProblemDetail.class);
+              } catch (Exception ignore) {
+              }
+              throw new ClientProblemException(pd, response.getStatusCode().value());
+            });
   }
 
   @Bean(destroyMethod = "close")
   CloseableHttpClient customerHttpClient(
-          @Value("${customer.api.max-connections-total:64}") int maxTotal,
-          @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute) {
+      @Value("${customer.api.max-connections-total:64}") int maxTotal,
+      @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute) {
 
     var cm =
-            PoolingHttpClientConnectionManagerBuilder.create()
-                    .setMaxConnTotal(maxTotal)
-                    .setMaxConnPerRoute(maxPerRoute)
-                    .build();
+        PoolingHttpClientConnectionManagerBuilder.create()
+            .setMaxConnTotal(maxTotal)
+            .setMaxConnPerRoute(maxPerRoute)
+            .build();
 
     return HttpClients.custom()
-            .setConnectionManager(cm)
-            .evictExpiredConnections()
-            .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
-            .setUserAgent("customer-service-client")
-            .disableAutomaticRetries()
-            .build();
+        .setConnectionManager(cm)
+        .evictExpiredConnections()
+        .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
+        .setUserAgent("customer-service-client")
+        .disableAutomaticRetries()
+        .build();
   }
 
   @Bean
   HttpComponentsClientHttpRequestFactory customerRequestFactory(
-          CloseableHttpClient customerHttpClient,
-          @Value("${customer.api.connect-timeout-seconds:10}") long connect,
-          @Value("${customer.api.connection-request-timeout-seconds:10}") long connReq,
-          @Value("${customer.api.read-timeout-seconds:15}") long read) {
+      CloseableHttpClient customerHttpClient,
+      @Value("${customer.api.connect-timeout-seconds:10}") long connect,
+      @Value("${customer.api.connection-request-timeout-seconds:10}") long connReq,
+      @Value("${customer.api.read-timeout-seconds:15}") long read) {
 
     var f = new HttpComponentsClientHttpRequestFactory(customerHttpClient);
     f.setConnectTimeout(Duration.ofSeconds(connect));
@@ -72,10 +72,9 @@ public class CustomerApiClientConfig {
 
   @Bean
   RestClient customerRestClient(
-          RestClient.Builder builder,
-          HttpComponentsClientHttpRequestFactory customerRequestFactory,
-          List<RestClientCustomizer> customizers
-  ) {
+      RestClient.Builder builder,
+      HttpComponentsClientHttpRequestFactory customerRequestFactory,
+      List<RestClientCustomizer> customizers) {
     builder.requestFactory(customerRequestFactory);
     if (customizers != null) {
       customizers.forEach(c -> c.customize(builder));
@@ -85,7 +84,7 @@ public class CustomerApiClientConfig {
 
   @Bean
   ApiClient customerApiClient(
-          RestClient customerRestClient, @Value("${customer.api.base-url}") String baseUrl) {
+      RestClient customerRestClient, @Value("${customer.api.base-url}") String baseUrl) {
     return new ApiClient(customerRestClient).setBasePath(baseUrl);
   }
 
