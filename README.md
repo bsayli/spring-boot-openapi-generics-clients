@@ -16,11 +16,8 @@
   <em>End-to-end generics-aware OpenAPI clients — unified <code>{ data, meta }</code> responses without boilerplate.</em>
 </p>
 
-**Modern, type-safe OpenAPI client generation** — powered by **Spring Boot 3.4**, **Java 21**, and **OpenAPI Generator
-7.16.0**.
-This repository demonstrates a production-grade architecture where backend and client are fully aligned through
-generics, enabling nested generic envelopes (ServiceResponse<Page<T>>) and RFC 7807 ProblemDetail (Problem Details for
-HTTP APIs)–based error handling.
+**Modern, type-safe OpenAPI client generation** — powered by **Spring Boot 3.4**, **Java 21**, and **OpenAPI Generator 7.16.0**.
+This repository demonstrates a production-grade architecture where backend and client are fully aligned through generics, enabling nested generic envelopes (`ServiceResponse<Page<T>>`) and [**RFC 7807 — Problem Details for HTTP APIs**](https://datatracker.ietf.org/doc/html/rfc7807)-based error handling.
 
 ---
 
