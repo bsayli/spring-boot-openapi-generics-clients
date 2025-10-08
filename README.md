@@ -28,7 +28,7 @@ This repository demonstrates a production-grade architecture where backend and c
 * 💡 [Solution Overview](#-solution-overview)
 * ⚙️ [New Architecture Highlights](#-new-architecture-highlights)
 * ⚡ [Quick Start](#-quick-start)
-* 🖼 [Generated Client Wrapper — Before & After](#-generated-client-wrapper--before--after)
+* 🖼 [Generated Wrappers — Before & After](#-generated-wrapper--before--after)
 * 🧱 [Example Responses](#-example-responses)
 * 🧩 [Tech Stack](#-tech-stack)
 * ✅ [Key Features](#-key-features)
@@ -51,7 +51,8 @@ boilerplate-free.*
 
 ## 🚀 Problem & Motivation
 
-OpenAPI Generator, by default, does not handle **generic response types**.  
+OpenAPI Generator, by default, does not handle **generic response types**.
+
 When backend APIs wrap payloads in `ServiceResponse<T>` (e.g., the unified `{ data, meta }` envelope),
 the generator produces **duplicated models per endpoint** instead of a single reusable generic base.
 
@@ -65,34 +66,56 @@ This results in:
 
 ## 💡 Solution Overview
 
-This project provides a **full-stack pattern** to align Spring Boot services and OpenAPI clients:
+This project provides a **full-stack pattern** to align Spring Boot services and OpenAPI clients.
 
 ### Server-Side (Producer)
 
-A `Springdoc` customizer automatically scans controller return types and marks generic wrappers (`ServiceResponse<T>`)
-using vendor extensions:
+A `Springdoc` customizer automatically inspects controller return types like:
+
+```java
+ResponseEntity<ServiceResponse<CustomerDto>>
+ResponseEntity<ServiceResponse<Page<CustomerDto>>>
+```
+
+and enriches the generated OpenAPI schema with vendor extensions:
+
+**For single type (`ServiceResponse<T>`):**
+
+```yaml
+# For simple generic responses
+x-api-wrapper: true
+x-api-wrapper-datatype: CustomerDto
+```
+
+**For nested generics (`ServiceResponse<Page<T>>`):**
 
 ```yaml
 x-api-wrapper: true
-x-api-wrapper-datatype: CustomerDto
 x-data-container: Page
 x-data-item: CustomerDto
 ```
 
+These hints make the OpenAPI spec fully aware of generic and nested structures — no manual annotations required.
+
+---
+
 ### Client-Side (Consumer)
 
-Mustache overlays redefine OpenAPI templates to generate **thin, type-safe wrappers** extending a reusable base class
-`ServiceClientResponse<T>`.
+Mustache overlays redefine OpenAPI templates to generate **thin, type-safe wrappers** extending a reusable base class `ServiceClientResponse<T>`.
 
 **Example generated output:**
 
 ```java
-public class ServiceResponseCustomerDto extends ServiceClientResponse<CustomerDto> {
-}
+// Single
+public class ServiceResponseCustomerDto
+    extends ServiceClientResponse<CustomerDto> {}
+
+// Paged
+public class ServiceResponsePageCustomerDto
+    extends ServiceClientResponse<Page<CustomerDto>> {}
 ```
 
-This pattern supports **nested generics** like `ServiceClientResponse<Page<CustomerDto>>` and maps all error responses
-into **ProblemDetail** objects.
+This pattern supports **nested generics** like `ServiceClientResponse<Page<CustomerDto>>` and automatically maps all error responses into **ProblemDetail** objects.
 
 ---
 
@@ -132,9 +155,11 @@ target/generated-sources/openapi/src/gen/java
 
 Each wrapper extends `ServiceClientResponse<T>` and aligns perfectly with the `{ data, meta }` envelope model.
 
+You can now test end-to-end type-safe responses through the generated client — verifying both single and paged envelopes in action.
+
 ---
 
-## 🖼 Generated Client Wrapper — Before & After
+## 🖼 Generated Wrapper — Before & After
 
 Comparison of how OpenAPI Generator outputs looked **before** vs **after** enabling the generics-aware wrapper support.
 
@@ -158,9 +183,25 @@ Comparison of how OpenAPI Generator outputs looked **before** vs **after** enabl
 
 ## 🧱 Example Responses
 
-The unified envelope applies to both single and paged responses. Below is a paged example:
+The unified envelope applies to both single and paged responses.
 
-### Paged Example (`ServiceClientResponse<Page<CustomerDto>>`)
+### 🧩 Single Item Example (`ServiceClientResponse<CustomerDto>`)
+
+```json
+{
+  "data": {
+    "customerId": 1,
+    "name": "Jane Doe",
+    "email": "jane@example.com"
+  },
+  "meta": {
+    "serverTime": "2025-01-01T12:34:56Z",
+    "sort": []
+  }
+}
+```
+
+### 📄 Paged Example (`ServiceClientResponse<Page<CustomerDto>>`)
 
 ```json
 {
@@ -195,6 +236,8 @@ The unified envelope applies to both single and paged responses. Below is a page
   }
 }
 ```
+Both examples demonstrate the unified `{ data, meta }` structure —
+the same envelope applies seamlessly to single and paged results.
 
 ### Client Usage
 
@@ -210,7 +253,6 @@ for (CustomerDto c : page.content()) {
 ```
 
 ---
-
 
 ## 🧩 Tech Stack
 
@@ -253,7 +295,7 @@ This adapter defines a stable contract that hides generated artifacts and provid
 
 ## 📘 Adoption Guides
 
-See the detailed integration steps under [`docs/adoption`](docs/adoption):
+Explore integration steps under [`docs/adoption`](docs/adoption):
 
 * [Server-Side Adoption](docs/adoption/server-side-adoption.md)
 * [Client-Side Adoption](docs/adoption/client-side-adoption.md)
