@@ -119,7 +119,7 @@ This pattern supports **nested generics** like `ServiceClientResponse<Page<Custo
 
 ---
 
-## ⚙️ New Architecture Highlights
+## ⚙️ Architecture Overview
 
 <p align="center">
   <img src="docs/images/architectural-diagram.png" alt="OpenAPI Generics Architecture" width="900"/>
