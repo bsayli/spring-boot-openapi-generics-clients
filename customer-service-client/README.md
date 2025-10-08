@@ -7,7 +7,7 @@
 
 Generated Java client for the **customer-service**, showcasing **type‑safe generic responses** and **nested generics**
 with a minimal OpenAPI Generator Mustache overlay. The client maps successful responses into a reusable envelope
-`ServiceClientResponse<T>` and decodes non‑2xx responses into RFC7807-compliant `ProblemDetail` via a custom exception.
+`ServiceClientResponse<T>` and decodes non‑2xx responses into RFC 7807-compliant `ProblemDetail` via a custom exception.
 
 ---
 
@@ -259,7 +259,7 @@ For detailed steps, see [`../docs/adoption`](../docs/adoption).
 
 Generated from the OpenAPI spec exposed by:
 
-* [customer-service](../customer-service/README.md) — sample Spring Boot microservice (API producer).
+* [customer-service](../customer-service/README.md) — Spring Boot microservice acting as the API producer for this generated client.
 
 ---
 

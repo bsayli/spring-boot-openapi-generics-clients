@@ -2,8 +2,8 @@
 
 [![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.10-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 [![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 
 ---
 
@@ -51,7 +51,7 @@ This module serves as the **server-side anchor**: the reference point for generi
 * These hints allow the OpenAPI Generator to produce nested generic clients such as:
 
   ```java
-  class CustomerListResponse extends ServiceClientResponse<Page<CustomerDto>> {}
+  public class ServiceResponsePageCustomerDto extends ServiceClientResponse<Page<CustomerDto>> {}
   ```
 
 * **customer-service-client** uses custom templates to emit **thin wrappers** extending the base
@@ -115,15 +115,15 @@ curl -X POST "http://localhost:8084/customer-service/v1/customers" \
 
 ## 📙 CRUD Endpoints
 
-| Method | Path                         | Description         | Returns                  |
-|--------|------------------------------|---------------------|--------------------------|
-| POST   | `/v1/customers`              | Create new customer | `CustomerDto`            |
-| GET    | `/v1/customers/{customerId}` | Get single customer | `CustomerDto`            |
-| GET    | `/v1/customers`              | List all customers  | `Page<CustomerDto>`      |
-| PUT    | `/v1/customers/{customerId}` | Update customer     | `CustomerDto`            |
-| DELETE | `/v1/customers/{customerId}` | Delete customer     | `CustomerDeleteResponse` |
+| Method | Path                         | Description              | Returns                  |
+|--------|------------------------------|--------------------------|--------------------------|
+| POST   | `/v1/customers`              | Create new customer      | `CustomerDto`            |
+| GET    | `/v1/customers/{customerId}` | Get single customer      | `CustomerDto`            |
+| GET    | `/v1/customers`              | List customers (paged)   | `Page<CustomerDto>`      |
+| PUT    | `/v1/customers/{customerId}` | Update existing customer | `CustomerDto`            |
+| DELETE | `/v1/customers/{customerId}` | Delete customer          | `CustomerDeleteResponse` |
 
-**Base URL:** `/customer-service` (defined in `application.yml`)
+**Base URL:** `/customer-service` (configured in `application.yml`)
 
 ### Example Response: Get Customer
 
@@ -140,7 +140,7 @@ curl -X POST "http://localhost:8084/customer-service/v1/customers" \
 }
 ```
 
-### Example Response: List Customers (Page-aware)
+### Example Response: List Customers (Paged)
 
 ```json
 {
@@ -201,7 +201,6 @@ ServiceResponsePageCustomerDto:
         data:
           $ref: "#/components/schemas/PageCustomerDto"
   x-api-wrapper: true
-  x-api-wrapper-datatype: PageCustomerDto
   x-data-container: Page
   x-data-item: CustomerDto
 ```
