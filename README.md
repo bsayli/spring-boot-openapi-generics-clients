@@ -34,7 +34,7 @@ This repository demonstrates a production-grade architecture where backend and c
 * ✅ [Key Features](#-key-features)
 * ✨ [Usage Example](#-usage-example)
 * 📘 [Adoption Guides](#-adoption-guides)
-* 🔗 [References & Links](#-references--links)
+* 🔗 [References & External Links](#-references--external-links)
 
 > *A clean architecture pattern for building generics-aware OpenAPI clients that stay fully type-safe, consistent, and
 boilerplate-free.*
