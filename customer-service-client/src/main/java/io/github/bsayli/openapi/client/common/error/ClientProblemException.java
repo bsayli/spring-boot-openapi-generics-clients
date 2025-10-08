@@ -5,10 +5,11 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * Wraps non-2xx HTTP responses decoded into RFC7807-style {@link ProblemDetail}. Thrown by
- * RestClient defaultStatusHandler in client config.
+ * Wraps non-2xx HTTP responses decoded into RFC 9457 (“Problem Details for HTTP APIs”)
+ * {@link ProblemDetail}. Thrown by the RestClient defaultStatusHandler in client config.
+ * See: <a href="https://www.rfc-editor.org/rfc/rfc9457">...</a>
  */
-public class ClientProblemException extends RuntimeException implements Serializable {
+public final class ClientProblemException extends RuntimeException implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
 
@@ -28,20 +29,24 @@ public class ClientProblemException extends RuntimeException implements Serializ
   }
 
   private static String buildMessage(ProblemDetail pd, int status) {
-    if (pd == null) {
-      return "HTTP " + status + " (no problem body)";
-    }
-    StringBuilder sb = new StringBuilder("HTTP ").append(status);
-    if (pd.getTitle() != null && !pd.getTitle().isBlank()) {
-      sb.append(" - ").append(pd.getTitle());
-    }
-    if (pd.getDetail() != null && !pd.getDetail().isBlank()) {
-      sb.append(" | ").append(pd.getDetail());
-    }
-    if (pd.getErrorCode() != null && !pd.getErrorCode().isBlank()) {
-      sb.append(" [code=").append(pd.getErrorCode()).append(']');
-    }
+    if (pd == null) return "HTTP %d (no problem body)".formatted(status);
+
+    var sb = new StringBuilder("HTTP %d".formatted(status));
+    appendIfNotBlank(sb, " - ", pd.getTitle());
+    appendIfNotBlank(sb, " | ", pd.getDetail());
+
+    tag(sb, "code", pd.getErrorCode());
+    tag(sb, "type",  pd.getType() != null ? pd.getType().toString() : null);
+    tag(sb, "instance", pd.getInstance() != null ? pd.getInstance().toString() : null);
     return sb.toString();
+  }
+
+  private static void appendIfNotBlank(StringBuilder sb, String sep, String v) {
+    if (v != null && !v.isBlank()) sb.append(sep).append(v);
+  }
+
+  private static void tag(StringBuilder sb, String key, String value) {
+    if (value != null && !value.isBlank()) sb.append(" [").append(key).append('=').append(value).append(']');
   }
 
   public ProblemDetail getProblem() {

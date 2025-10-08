@@ -60,7 +60,7 @@ public class CustomerController {
       @RequestParam(defaultValue = "customerId") SortField sortBy,
       @RequestParam(defaultValue = "asc") SortDirection direction) {
     var paged = customerService.getCustomers(criteria, page, size, sortBy, direction);
-    var meta = Meta.now(List.of(new Sort(sortBy, direction)));
+    var meta = Meta.now(sortBy, direction);
     return ResponseEntity.ok(ServiceResponse.ok(paged, meta));
   }
 

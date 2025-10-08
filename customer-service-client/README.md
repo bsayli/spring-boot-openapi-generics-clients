@@ -5,9 +5,8 @@
 [![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.16.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 
-Generated Java client for the **customer-service**, showcasing **type‑safe generic responses** and **nested generics**
-with a minimal OpenAPI Generator Mustache overlay. The client maps successful responses into a reusable envelope
-`ServiceClientResponse<T>` and decodes non‑2xx responses into RFC 7807-compliant `ProblemDetail` via a custom exception.
+Generated Java client for the **customer-service**, showcasing **type‑safe generic responses** and **nested generics** with a minimal OpenAPI Generator Mustache overlay.
+Successful responses are wrapped in a reusable envelope `ServiceClientResponse<T>`, while non‑2xx responses are decoded into **RFC 9457** (the successor to RFC 7807) `ProblemDetail` objects via a custom exception.
 
 ---
 
@@ -27,39 +26,38 @@ mvn -q clean install
 ```
 
 *Generated sources → `target/generated-sources/openapi/src/gen/java`*
-
-> ℹ️ **Multi-module builds:** If your project is multi-module, ensure the generated path is compiled. (Handled via
-> `build-helper-maven-plugin` in this repo.)
+ℹ️ **Multi-module builds:** Generated code path is automatically compiled via `build-helper-maven-plugin`.
 
 ---
 
 ## ✅ What You Get
 
-* Java client using **OpenAPI Generator 7.16.0** with the **Spring `RestClient`** library.
-* A reusable generic base: `io.github.bsayli.openapi.client.common.ServiceClientResponse<T>` containing `data` and
-  `meta`.
-* **Nested generics support**: wrappers such as `ServiceClientResponse<Page<CustomerDto>>`.
-* **RFC 7807 Problem decoding** via `ClientProblemException`.
-* **Spring Boot configuration** for pooled HttpClient5 + `RestClientCustomizer` for error handling.
+* **OpenAPI Generator 7.16.0** + **Spring `RestClient`**-based Java client.
+* Reusable generic base: `ServiceClientResponse<T>` containing `{ data, meta }`.
+* **Nested generics** support: `ServiceClientResponse<Page<CustomerDto>>`.
+* **RFC 9457 Problem decoding** via `ClientProblemException`.
+* **Production-ready HTTP config:** pooled HttpClient5 + `RestClientCustomizer`.
 * Adapter pattern for clean, type-safe service integration.
 
 ---
 
-## 🧠 How the Thin Wrappers Are Produced
+## 🧩 How the Thin Wrappers Are Produced
 
-Server marks wrapper schemas with vendor extensions. The Mustache overlay generates thin wrappers extending the generic
-base.
+Vendor extensions mark wrappers in the OpenAPI spec; the Mustache overlay generates **thin wrappers** extending the shared generic base.
+
+**Vendor extensions used:**
+
+```
+- x-api-wrapper: true
+- x-api-wrapper-datatype: CustomerDto
+- x-data-container: Page
+- x-data-item: CustomerDto
+- x-class-extra-annotation: (optional)
+```
+
+**Template snippet:**
 
 ```mustache
-{{! Generics-aware thin wrapper }}
-import {{commonPackage}}.ServiceClientResponse;
-{{#vendorExtensions.x-data-container}}
-import {{commonPackage}}.{{vendorExtensions.x-data-container}};
-{{/vendorExtensions.x-data-container}}
-
-{{#vendorExtensions.x-class-extra-annotation}}
-{{{vendorExtensions.x-class-extra-annotation}}}
-{{/vendorExtensions.x-class-extra-annotation}}
 public class {{classname}} extends ServiceClientResponse<
   {{#vendorExtensions.x-data-container}}
     {{vendorExtensions.x-data-container}}<{{vendorExtensions.x-data-item}}>
@@ -70,7 +68,7 @@ public class {{classname}} extends ServiceClientResponse<
 > {}
 ```
 
-**Example outputs:**
+**Generated examples:**
 
 * `ServiceResponseCustomerDto` → `extends ServiceClientResponse<CustomerDto>`
 * `ServiceResponsePageCustomerDto` → `extends ServiceClientResponse<Page<CustomerDto>>`
@@ -79,24 +77,20 @@ public class {{classname}} extends ServiceClientResponse<
 
 ## 📦 Core Components
 
-**Envelope and Meta:**
-
 ```java
 public class ServiceClientResponse<T> {
     private T data;
     private ClientMeta meta;
 }
 
-public record ClientMeta(Instant serverTime, List<ClientSort> sort) {
-}
+public record ClientMeta(Instant serverTime, List<ClientSort> sort) {}
 
 public record Page<T>(List<T> content, int page, int size,
                       long totalElements, int totalPages,
-                      boolean hasNext, boolean hasPrev) {
-}
+                      boolean hasNext, boolean hasPrev) {}
 ```
 
-**Problem Exception:**
+**Problem Exception (RFC 9457):**
 
 ```java
 public class ClientProblemException extends RuntimeException {
@@ -110,23 +104,18 @@ public class ClientProblemException extends RuntimeException {
 ## ⚙️ Spring Configuration (Production-Ready)
 
 ```java
-
 @Configuration
 public class CustomerApiClientConfig {
 
-    @Bean
-    RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
-        return builder -> builder.defaultStatusHandler(
-                HttpStatusCode::isError,
-                (request, response) -> {
-                    ProblemDetail pd = null;
-                    try (var is = response.getBody()) {
-                        pd = om.readValue(is, ProblemDetail.class);
-                    } catch (Exception ignore) {
-                    }
-                    throw new ClientProblemException(pd, response.getStatusCode().value());
-                });
-    }
+   @Bean
+   RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
+      return builder -> builder.defaultStatusHandler(
+              HttpStatusCode::isError,
+              (request, response) -> {
+                 ProblemDetail pd = ProblemDetailSupport.extract(om, response, log);
+                 throw new ClientProblemException(pd, response.getStatusCode().value());
+              });
+   }
 
     @Bean(destroyMethod = "close")
     CloseableHttpClient customerHttpClient(
@@ -167,12 +156,17 @@ customer.api.connection-request-timeout-seconds=10
 customer.api.read-timeout-seconds=15
 ```
 
+**Defaults:**
+
+* Pool size → total: 64, per-route: 16
+* Timeouts → connect: 10s, read: 15s, connection-request: 10s
+* Retries → disabled (safe default for non-idempotent ops)
+
 ---
 
-## 🧩 Adapter Pattern Example
+## 🧠 Adapter Pattern Example
 
 ```java
-
 @Service
 public class CustomerClientAdapterImpl implements CustomerClientAdapter {
     private final CustomerControllerApi api;
@@ -195,8 +189,8 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
 
 **Benefits:**
 
-* Generated code stays isolated.
-* Business logic depends only on stable interfaces.
+* Generated code remains isolated.
+* Business logic depends on stable interfaces only.
 * Client evolution never leaks across services.
 
 ---
@@ -209,15 +203,18 @@ var dto = resp.getData();
 var serverTime = resp.getMeta().serverTime();
 ```
 
-Error handling:
+Error handling (RFC 9457):
 
 ```java
-try{
-        customerClientAdapter.getCustomer(999);
-}catch(
-ClientProblemException ex){
-var pd = ex.getProblem();
-// pd.getTitle(), pd.getDetail(), pd.getErrorCode(), etc.
+try {
+    customerClientAdapter.getCustomer(999);
+} catch (ClientProblemException ex) {
+    var pd = ex.getProblem();
+    System.err.println("type   = " + pd.getType());
+    System.err.println("title  = " + pd.getTitle());
+    System.err.println("detail = " + pd.getDetail());
+    System.err.println("status = " + ex.getStatus());
+    System.err.println("code   = " + pd.getErrorCode());
 }
 ```
 
@@ -229,29 +226,38 @@ var pd = ex.getProblem();
 
     * `x-api-wrapper: true`
     * `x-api-wrapper-datatype: <T>`
-    * Optionally `x-data-container` and `x-data-item`
+    * (optional) `x-data-container` / `x-data-item`
 2. Keep templates under `src/main/resources/openapi-templates/`.
 3. Run OpenAPI Generator → wrappers extend `ServiceClientResponse<T>` automatically.
 
-For detailed steps, see [`../docs/adoption`](../docs/adoption).
+**Example Maven setup (coming soon):**
+
+```xml
+<dependency>
+  <groupId>io.github.bsayli</groupId>
+  <artifactId>openapi-generics-templates</artifactId>
+  <version>0.7.0</version>
+</dependency>
+```
 
 ---
 
 ## 🧰 Troubleshooting
 
 * **No thin wrappers?** Check vendor extensions + template directory.
-* **Nested generics missing?** Ensure `x-data-container` and `x-data-item` exist.
+* **Nested generics missing?** Ensure `x-data-container` & `x-data-item` exist in spec.
 * **ProblemDetail not thrown?** Verify your `RestClientCustomizer`.
-* **Provided deps:** Ensure your host app includes `jakarta.validation` & Spring Web.
+* **Page schema missing?** Confirm `components/schemas/Page` defines `content.items.$ref`.
+* **Missing deps?** Ensure host app includes `jakarta.validation` & Spring Web.
 
 ---
 
 ## 📚 Notes
 
-* **Toolchain:** Java 21, OpenAPI Generator 7.16.0
-* **Generator options:** `useSpringBoot3=true`, `useJakartaEe=true`, `serializationLibrary=jackson`, `dateLibrary=java8`
-* **OpenAPI spec:** `src/main/resources/customer-api-docs.yaml`
-* Optional `x-class-extra-annotation` adds annotations on generated wrappers.
+* **Toolchain:** Java 21, Spring Boot 3.4.10, OpenAPI Generator 7.16.0
+* **Options:** `useSpringBoot3=true`, `useJakartaEe=true`, `serializationLibrary=jackson`, `dateLibrary=java8`
+* **Spec file:** `src/main/resources/customer-api-docs.yaml`
+* Optional: `x-class-extra-annotation` injects annotations on wrappers.
 
 ---
 
@@ -259,24 +265,25 @@ For detailed steps, see [`../docs/adoption`](../docs/adoption).
 
 Generated from the OpenAPI spec exposed by:
 
-* [customer-service](../customer-service/README.md) — Spring Boot microservice acting as the API producer for this generated client.
+* [customer-service](../customer-service/README.md) — Spring Boot microservice acting as the API producer for this client.
 
 ---
 
 ## 💬 Feedback
 
-If you spot an error or have suggestions, open an issue or join the discussion — contributions are welcome.
+Found a bug or have a suggestion? Contributions are welcome — open an issue or join the discussion:
 💭 [Start a discussion →](https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome!
+Contributions, issues, and feature requests are welcome!  
 Feel free to [open an issue](https://github.com/bsayli/spring-boot-openapi-generics-clients/issues) or submit a PR.
 
 ---
 
 ## 🛡 License
 
-This repository is licensed under **MIT** (root `LICENSE`). Submodules inherit the license.
+Licensed under the **MIT License** (see root `LICENSE`).
+All submodules inherit this license.

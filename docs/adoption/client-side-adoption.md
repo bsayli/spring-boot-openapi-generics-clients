@@ -272,19 +272,15 @@ Production‑ready configuration using pooled Apache HttpClient5 and `RestClient
 @Configuration
 public class YourApiClientConfig {
 
-    @Bean
-    RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
-        return builder -> builder.defaultStatusHandler(
-                HttpStatusCode::isError,
-                (req, res) -> {
-                    ProblemDetail pd = null;
-                    try (var is = res.getBody()) {
-                        if (is != null) pd = om.readValue(is, ProblemDetail.class);
-                    } catch (Exception ignore) {
-                    }
-                    throw new ClientProblemException(pd, res.getStatusCode().value());
-                });
-    }
+   @Bean
+   RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
+      return builder -> builder.defaultStatusHandler(
+              HttpStatusCode::isError,
+              (request, response) -> {
+                 ProblemDetail pd = ProblemDetailSupport.extract(om, response, log);
+                 throw new ClientProblemException(pd, response.getStatusCode().value());
+              });
+   }
 
     @Bean(destroyMethod = "close")
     CloseableHttpClient httpClient(@Value("${your.api.max-connections-total:64}") int total,
