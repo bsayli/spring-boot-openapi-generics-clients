@@ -21,7 +21,7 @@ class CustomerApiClientConfigStatusHandlerTest {
 
   @Test
   @DisplayName(
-          "400 with application/problem+json -> throws ClientProblemException with parsed ProblemDetail")
+      "400 with application/problem+json -> throws ClientProblemException with parsed ProblemDetail")
   void handler_parses_problem_detail_on_4xx() {
     // Arrange
     var om = new ObjectMapper();
@@ -33,7 +33,7 @@ class CustomerApiClientConfigStatusHandlerTest {
     MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
 
     String body =
-            """
+        """
             {
               "type":"https://example.org/problem/bad-request",
               "title":"Bad Request",
@@ -46,19 +46,19 @@ class CustomerApiClientConfigStatusHandlerTest {
             """;
 
     server
-            .expect(once(), requestTo("http://localhost/err400"))
-            .andRespond(
-                    withStatus(HttpStatus.BAD_REQUEST)
-                            .contentType(MediaType.valueOf("application/problem+json"))
-                            .body(body));
+        .expect(once(), requestTo("http://localhost/err400"))
+        .andRespond(
+            withStatus(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.valueOf("application/problem+json"))
+                .body(body));
 
     RestClient client = builder.build();
 
     // Act + Assert
     ClientProblemException ex =
-            assertThrows(
-                    ClientProblemException.class,
-                    () -> client.get().uri("/err400").retrieve().body(String.class));
+        assertThrows(
+            ClientProblemException.class,
+            () -> client.get().uri("/err400").retrieve().body(String.class));
 
     assertEquals(400, ex.getStatus());
     ProblemDetail pd = ex.getProblem();
@@ -83,24 +83,24 @@ class CustomerApiClientConfigStatusHandlerTest {
     MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
 
     server
-            .expect(once(), requestTo("http://localhost/err500"))
-            .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR)); // no body, no content-type
+        .expect(once(), requestTo("http://localhost/err500"))
+        .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR)); // no body, no content-type
 
     RestClient client = builder.build();
 
     // Act + Assert
     ClientProblemException ex =
-            assertThrows(
-                    ClientProblemException.class,
-                    () -> client.get().uri("/err500").retrieve().body(String.class));
+        assertThrows(
+            ClientProblemException.class,
+            () -> client.get().uri("/err500").retrieve().body(String.class));
 
     assertEquals(500, ex.getStatus());
 
     // Yeni davranış: fallback ProblemDetail DOLU geliyor
     ProblemDetail pd = ex.getProblem();
     assertNotNull(pd);
-    assertEquals(500, pd.getStatus());                 // fallback status
-    assertEquals("HTTP error", pd.getTitle());         // fallback title
+    assertEquals(500, pd.getStatus()); // fallback status
+    assertEquals("HTTP error", pd.getTitle()); // fallback title
     assertEquals("Empty problem response body", pd.getDetail()); // fallback detail
 
     server.verify();

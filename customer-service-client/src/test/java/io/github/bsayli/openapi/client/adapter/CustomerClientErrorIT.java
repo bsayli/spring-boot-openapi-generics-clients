@@ -100,12 +100,12 @@ class CustomerClientErrorIT {
 
   @Test
   @DisplayName(
-          "DELETE /v1/customers/{id} -> 500 (no body) => throws ClientProblemException with fallback ProblemDetail")
+      "DELETE /v1/customers/{id} -> 500 (no body) => throws ClientProblemException with fallback ProblemDetail")
   void deleteCustomer_500_no_body() {
     server.enqueue(
-            new MockResponse()
-                    .setResponseCode(500)
-                    .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+        new MockResponse()
+            .setResponseCode(500)
+            .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE));
 
     var ex = assertThrows(ClientProblemException.class, () -> api.deleteCustomer(1));
 

@@ -29,4 +29,3 @@ public record Meta(Instant serverTime, List<Sort> sort) {
     return new Meta(Instant.now(), List.of(new Sort(field, direction)));
   }
 }
-

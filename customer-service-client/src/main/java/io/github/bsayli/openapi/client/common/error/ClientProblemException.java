@@ -5,9 +5,9 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * Wraps non-2xx HTTP responses decoded into RFC 9457 (“Problem Details for HTTP APIs”)
- * {@link ProblemDetail}. Thrown by the RestClient defaultStatusHandler in client config.
- * See: <a href="https://www.rfc-editor.org/rfc/rfc9457">...</a>
+ * Wraps non-2xx HTTP responses decoded into RFC 9457 (“Problem Details for HTTP APIs”) {@link
+ * ProblemDetail}. Thrown by the RestClient defaultStatusHandler in client config. See: <a
+ * href="https://www.rfc-editor.org/rfc/rfc9457">...</a>
  */
 public final class ClientProblemException extends RuntimeException implements Serializable {
 
@@ -36,7 +36,7 @@ public final class ClientProblemException extends RuntimeException implements Se
     appendIfNotBlank(sb, " | ", pd.getDetail());
 
     tag(sb, "code", pd.getErrorCode());
-    tag(sb, "type",  pd.getType() != null ? pd.getType().toString() : null);
+    tag(sb, "type", pd.getType() != null ? pd.getType().toString() : null);
     tag(sb, "instance", pd.getInstance() != null ? pd.getInstance().toString() : null);
     return sb.toString();
   }
@@ -46,7 +46,8 @@ public final class ClientProblemException extends RuntimeException implements Se
   }
 
   private static void tag(StringBuilder sb, String key, String value) {
-    if (value != null && !value.isBlank()) sb.append(" [").append(key).append('=').append(value).append(']');
+    if (value != null && !value.isBlank())
+      sb.append(" [").append(key).append('=').append(value).append(']');
   }
 
   public ProblemDetail getProblem() {
