@@ -6,6 +6,8 @@ nav_order: 1
 
 # Spring Boot OpenAPI Generics Clients
 
+> A production-grade blueprint for generics-aware API clients built with Spring Boot and OpenAPI Generator.
+
 Welcome! 👋
 
 This project demonstrates a **modern, generics-aware OpenAPI client generation pattern** for Spring Boot 3.4+, featuring
@@ -119,13 +121,13 @@ Instant serverTime = response.getMeta().serverTime();
 
 ---
 
-## 🔗 References
+## 🔗 References & External Links
 
 <div class="callout learn-more">
   <ul>
     <li>🌐 <a href="https://github.com/bsayli/spring-boot-openapi-generics-clients" target="_blank" rel="noopener">GitHub Repository</a></li>
-    <li>📘 <a href="https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04" target="_blank" rel="noopener">Medium — Type-Safe Generic API Responses</a></li>
-    <li>💬 <a href="https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f" target="_blank" rel="noopener">Dev.to — Type-Safe OpenAPI Clients Without Boilerplate</a></li>
+    <li>📘 <a href="https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04" target="_blank" rel="noopener">Medium — We Made OpenAPI Generator Think in Generics</a></li>
+    <li>💬 <a href="https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f" target="_blank" rel="noopener">Dev.to — We Made OpenAPI Generator Think in Generics</a></li>
   </ul>
 </div>
 

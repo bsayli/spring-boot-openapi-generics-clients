@@ -5,7 +5,7 @@ parent: Adoption Guides
 nav_order: 2
 ---
 
-# Client‑Side Integration Guide (Updated)
+# Client‑Side Integration Guide
 
 This guide describes how to integrate the **generics‑aware OpenAPI client** into your own project, aligned with the
 new `{ data, meta }` response structure and RFC 7807 `ProblemDetail` error model introduced in the updated
