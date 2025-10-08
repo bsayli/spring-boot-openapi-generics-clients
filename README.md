@@ -26,9 +26,9 @@ This repository demonstrates a production-grade architecture where backend and c
 * 📦 [Modules](#-modules)
 * 🚀 [Problem & Motivation](#-problem--motivation)
 * 💡 [Solution Overview](#-solution-overview)
-* ⚙️ [New Architecture Highlights](#-new-architecture-highlights)
+* ⚙️ [Architecture Overview](#-architecture-overview)
 * ⚡ [Quick Start](#-quick-start)
-* 🖼 [Generated Wrappers — Before & After](#-generated-wrapper--before--after)
+* 🖼 [Generated Wrappers — Before & After](#-generated-wrappers--before--after)
 * 🧱 [Example Responses](#-example-responses)
 * 🧩 [Tech Stack](#-tech-stack)
 * ✅ [Key Features](#-key-features)
@@ -159,7 +159,7 @@ You can now test end-to-end type-safe responses through the generated client —
 
 ---
 
-## 🖼 Generated Wrapper — Before & After
+## 🖼 Generated Wrappers — Before & After
 
 Comparison of how OpenAPI Generator outputs looked **before** vs **after** enabling the generics-aware wrapper support.
 
@@ -236,8 +236,8 @@ The unified envelope applies to both single and paged responses.
   }
 }
 ```
-Both examples demonstrate the unified `{ data, meta }` structure —
-the same envelope applies seamlessly to single and paged results.
+Both examples demonstrate the unified { data, meta } structure —
+the same envelope applies seamlessly across single and paged results.
 
 ### Client Usage
 
@@ -336,5 +336,5 @@ If you found this project helpful, please give it a ⭐ on GitHub — it helps o
 
 ---
 
-**Barış Saylı**
-[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli)
+**Barış Saylı**  
+[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)
