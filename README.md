@@ -28,7 +28,7 @@ This repository demonstrates a production-grade architecture where backend and c
 * 💡 [Solution Overview](#-solution-overview)
 * ⚙️ [Architecture Overview](#-architecture-overview)
 * ⚡ [Quick Start](#-quick-start)
-* 🖼 [Generated Wrappers — Before & After](#-generated-wrappers--before--after)
+* 🔄 [Generated Wrappers — Before & After](#-generated-wrappers--before--after)
 * 🧱 [Example Responses](#-example-responses)
 * 🧩 [Tech Stack](#-tech-stack)
 * ✅ [Key Features](#-key-features)
@@ -119,7 +119,7 @@ This pattern supports **nested generics** like `ServiceClientResponse<Page<Custo
 
 ---
 
-## ⚙️ Architecture Overview
+## &#9881; Architecture Overview
 
 <p align="center">
   <img src="docs/images/architectural-diagram.png" alt="OpenAPI Generics Architecture" width="900"/>
@@ -129,8 +129,8 @@ This pattern supports **nested generics** like `ServiceClientResponse<Page<Custo
 
 | Layer                 | Description                                                               |
 |-----------------------|---------------------------------------------------------------------------|
-| **Server (Producer)** | Publishes OpenAPI 3.1 spec with auto-registered wrapper schemas           |
-| **Client (Consumer)** | Uses OpenAPI Generator 7.16.0 + Mustache overlays for generics support    |
+| **Server (Producer)** | Publishes an **OpenAPI 3.1-compliant** specification via Springdoc 2.8.13 with auto-registered wrapper schemas |
+| **Client (Consumer)** | Uses **OpenAPI Generator 7.16.0** with custom Mustache overlays for generics support |
 | **Envelope Model**    | Unified `{ data, meta }` response structure                               |
 | **Error Handling**    | RFC 7807-compliant `ProblemDetail` decoding into `ClientProblemException` |
 | **Nested Generics**   | Full support for `ServiceResponse<Page<T>>`                               |
@@ -159,7 +159,7 @@ You can now test end-to-end type-safe responses through the generated client —
 
 ---
 
-## 🖼 Generated Wrappers — Before & After
+## 🔄 Generated Wrappers — Before & After
 
 Comparison of how OpenAPI Generator outputs looked **before** vs **after** enabling the generics-aware wrapper support.
 
