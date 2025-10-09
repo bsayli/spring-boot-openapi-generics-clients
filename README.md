@@ -309,7 +309,6 @@ See integration details under [`docs/adoption`](docs/adoption):
 
 * 🌐 [GitHub Repository](https://github.com/bsayli/spring-boot-openapi-generics-clients)
 * 📰 [Medium — We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
-* 💬 [Dev.to — We Made OpenAPI Generator Think in Generics](https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f)
 * 📘 [RFC 9457 — Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457)
 
 ---
@@ -350,3 +349,9 @@ If you found this project helpful, please give it a ⭐ on GitHub — it helps o
 
 **Barış Saylı**
 [GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)
+
+---
+
+> 📖 This repository accompanies the article  
+> [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)  
+> published on **Medium**, which serves as the canonical write-up for this implementation.
