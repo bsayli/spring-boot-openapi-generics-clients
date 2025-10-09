@@ -40,7 +40,7 @@ ServiceClientResponse<Page<CustomerDto>>
 
 * **Unified response model:** `{ data, meta }` replaces legacy status/message/errors structure.
 * **Nested generics support:** Handles both `ServiceResponse<T>` and `ServiceResponse<Page<T>>`.
-* **RFC 7807 compliant errors:** All non-2xx responses are mapped into `ProblemDetail` and thrown as
+* **RFC 9457 compliant errors:** All non-2xx responses are mapped into `ProblemDetail` and thrown as
   `ClientProblemException`.
 * **Generics-aware OpenAPI Generator overlay:** Mustache templates produce thin, type-safe wrappers.
 * **Simple integration:** Works with any Spring Boot service exposing `/v3/api-docs.yaml`.
@@ -128,7 +128,6 @@ Instant serverTime = response.getMeta().serverTime();
   <ul>
     <li>🌐 <a href="https://github.com/bsayli/spring-boot-openapi-generics-clients" target="_blank" rel="noopener">GitHub Repository</a></li>
     <li>📘 <a href="https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04" target="_blank" rel="noopener">Medium — We Made OpenAPI Generator Think in Generics</a></li>
-    <li>💬 <a href="https://dev.to/barissayli/spring-boot-openapi-generator-type-safe-generic-api-clients-without-boilerplate-3a8f" target="_blank" rel="noopener">Dev.to — We Made OpenAPI Generator Think in Generics</a></li>
   </ul>
 </div>
 

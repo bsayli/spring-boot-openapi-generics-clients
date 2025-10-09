@@ -245,4 +245,4 @@ cleanly and consistently across builds.
 
 * Resolve templates dynamically from the current OpenAPI Generator version.
 * Apply your overlay Mustache templates automatically.
-* Generate **RFC 7807‑aware**, `data + meta` aligned clients ready for production use.
+* Generate **RFC 9457‑aware**, `data + meta` aligned clients ready for production use.

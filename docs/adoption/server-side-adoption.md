@@ -270,7 +270,7 @@ public class AutoWrapperSchemaCustomizer {
 
 ---
 
-## 6️⃣ Global Problem Responses (RFC 7807)
+## 6️⃣ Global Problem Responses (RFC 9457)
 
 Add automatic `ProblemDetail` registration and standard error responses for all operations.
 
@@ -304,7 +304,7 @@ public class GlobalErrorResponsesCustomizer {
 
 ---
 
-### Optional: Problem extensions (RFC7807)
+### Optional: Problem extensions (RFC 9457)
 
 Some projects enrich `ProblemDetail` with structured error data inside `extensions.errors`.
 These simple records provide a reusable base for that purpose.

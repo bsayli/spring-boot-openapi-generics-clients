@@ -8,7 +8,7 @@ nav_order: 2
 # Client‑Side Integration Guide
 
 This guide describes how to integrate the **generics‑aware OpenAPI client** into your own project, aligned with the
-new `{ data, meta }` response structure and RFC 7807 `ProblemDetail` error model introduced in the updated
+new `{ data, meta }` response structure and RFC 9457 `ProblemDetail` error model introduced in the updated
 `customer-service` / `customer-service-client` architecture.
 
 ---
@@ -17,7 +17,7 @@ new `{ data, meta }` response structure and RFC 7807 `ProblemDetail` error model
 
 * Generate thin, **type‑safe wrappers** extending `ServiceClientResponse<T>` instead of duplicating envelopes.
 * Support **nested generics** such as `ServiceClientResponse<Page<CustomerDto>>`.
-* Decode non‑2xx responses into **RFC 7807 ProblemDetail** and raise `ClientProblemException`.
+* Decode non‑2xx responses into **RFC 9457 ProblemDetail** and raise `ClientProblemException`.
 * Allow seamless injection into Spring Boot apps using a pooled `RestClient`.
 
 ---
