@@ -327,6 +327,14 @@ If you spot an error or have suggestions, open an issue or join the discussion �
 
 ---
 
+## 🗣️ Community & Discussions
+
+**Using this pattern in your project?**  
+Share your experience or ideas in [GitHub Discussions](https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions) — even short notes help others learn and improve the pattern.
+
+> 💡 Real-world usage feedback helps evolve the templates and guides faster.
+---
+
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome!
