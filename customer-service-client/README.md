@@ -112,7 +112,7 @@ public class CustomerApiClientConfig {
       return builder -> builder.defaultStatusHandler(
               HttpStatusCode::isError,
               (request, response) -> {
-                 ProblemDetail pd = ProblemDetailSupport.extract(om, response, log);
+                 ProblemDetail pd = ProblemDetailSupport.extract(om, response);
                  throw new ClientProblemException(pd, response.getStatusCode().value());
               });
    }

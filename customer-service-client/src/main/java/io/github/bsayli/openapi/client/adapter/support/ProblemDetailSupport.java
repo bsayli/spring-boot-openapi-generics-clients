@@ -6,18 +6,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 
 public final class ProblemDetailSupport {
 
+  private static final Logger log = LoggerFactory.getLogger(ProblemDetailSupport.class);
+
   private ProblemDetailSupport() {}
 
-  public static ProblemDetail extract(ObjectMapper om, ClientHttpResponse response, Logger log) {
+  public static ProblemDetail extract(ObjectMapper om, ClientHttpResponse response) {
     ProblemDetail pd;
     MediaType contentType =
-        Optional.ofNullable(response.getHeaders().getContentType()).orElse(MediaType.ALL);
+            Optional.ofNullable(response.getHeaders().getContentType()).orElse(MediaType.ALL);
     HttpStatusCode status;
 
     try {
@@ -36,10 +39,10 @@ public final class ProblemDetailSupport {
       }
     } catch (IOException e) {
       log.warn(
-          "Unable to deserialize ProblemDetail (status={}, contentType={}); using generic fallback",
-          status,
-          contentType,
-          e);
+              "Unable to deserialize ProblemDetail (status={}, contentType={}); using generic fallback",
+              status,
+              contentType,
+              e);
       pd = fallback(status, "Unparseable problem response");
     } catch (Exception e) {
       log.warn("Unexpected error while parsing ProblemDetail", e);

@@ -11,8 +11,6 @@ import java.util.List;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -23,8 +21,7 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 public class CustomerApiClientConfig {
-
-  private static final Logger log = LoggerFactory.getLogger(CustomerApiClientConfig.class);
+  
 
   @Bean
   RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
@@ -32,7 +29,7 @@ public class CustomerApiClientConfig {
         builder.defaultStatusHandler(
             HttpStatusCode::isError,
             (request, response) -> {
-              ProblemDetail pd = ProblemDetailSupport.extract(om, response, log);
+              ProblemDetail pd = ProblemDetailSupport.extract(om, response);
               throw new ClientProblemException(pd, response.getStatusCode().value());
             });
   }
