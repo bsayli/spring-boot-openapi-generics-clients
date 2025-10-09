@@ -3,6 +3,7 @@ description: Type-safe OpenAPI clients with generics (Spring Boot + OpenAPI Gene
 
 just_the_docs:
   custom_css: assets/css/custom.css
+  ga_measurement_id: G-9Z9V8KDZVW
 
 remote_theme: just-the-docs/just-the-docs
 
@@ -16,5 +17,3 @@ aux_links:
 search_enabled: true
 
 baseurl: "/spring-boot-openapi-generics-clients"
-
-ga_tracking: G-9Z9V8KDZVW
