@@ -2,6 +2,7 @@
 layout: default
 title: Home
 nav_order: 1
+canonical_url: https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04
 ---
 
 # Spring Boot OpenAPI Generics Clients
