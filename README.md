@@ -16,12 +16,12 @@
   <em><strong>End-to-end generics-aware OpenAPI clients</strong> — unified <code>{ data, meta }</code> responses without boilerplate.</em>
 </p>
 
-**Modern, type-safe OpenAPI client generation** — powered by **Spring Boot 3.4**, **Java 21**, and **OpenAPI Generator 7.16.0**.
-This repository demonstrates a production-grade architecture where backend and client are fully aligned through generics, enabling nested generic envelopes (`ServiceResponse<Page<T>>`) and [**RFC 9457 — Problem Details for HTTP APIs**](https://www.rfc-editor.org/rfc/rfc9457)-based error handling.
+**Modern, type-safe OpenAPI client generation** — powered by **Spring Boot 3.4**, **Java 21**, and **OpenAPI Generator 7.16.0**.  
+This repository demonstrates a production-grade setup where backend and client remain fully aligned through generics, supporting nested envelopes like `ServiceResponse<Page<T>>` and standardized [**RFC 9457 — Problem Details for HTTP APIs**](https://www.rfc-editor.org/rfc/rfc9457) error handling.
 
-> 🧠 **RFC 9457 vs RFC 7807**
-> RFC 9457 supersedes 7807 and standardizes `application/problem+json` / `application/problem+xml` for HTTP APIs.
-> Spring Framework 6+ implements this via the built-in `ProblemDetail` class, enabling consistent error serialization across server and client.
+> 🧠 **RFC 9457 vs RFC 7807**  
+> RFC 9457 supersedes 7807 and formalizes `application/problem+json` / `application/problem+xml` for HTTP APIs.  
+> Spring Framework 6+ natively supports this via the built-in `ProblemDetail` class, ensuring consistent error serialization between server and client.
 
 ---
 
@@ -57,7 +57,7 @@ OpenAPI Generator, by default, does not handle **generic response types**.
 
 When backend APIs wrap payloads in `ServiceResponse<T>` (e.g., the unified `{ data, meta }` envelope), the generator produces **duplicated models per endpoint** instead of a single reusable generic base.
 
-This results in:
+This leads to:
 
 * ❌ Dozens of almost-identical response classes
 * ❌ Higher maintenance overhead
@@ -65,10 +65,24 @@ This results in:
 
 ```java
 // Default OpenAPI output (before)
-class CreateCustomerResponse { CustomerDto data; Meta meta; }
-class UpdateCustomerResponse { CustomerDto data; Meta meta; }
+public class ServiceResponseCustomerDto {
+  private CustomerDto data;
+  private Meta meta;
+}
+
+public class ServiceResponsePageCustomerDto {
+  private PageCustomerDto data; // instead of Page<CustomerDto>
+  private Meta meta;
+}
+
+public class ServiceResponseCustomerDeleteResponse {
+  private CustomerDeleteResponse data;
+  private Meta meta;
+}
 // ... dozens of duplicates
 ```
+
+By applying a **Mustache overlay**, these are replaced by thin wrappers extending a single generic base (`ServiceClientResponse<T>`), preserving `Page<T>` and ensuring consistent, type-safe API clients.
 
 ---
 
