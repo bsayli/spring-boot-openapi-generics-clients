@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Redirecting…</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4NH21XZLBN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-4NH21XZLBN');
+    </script>
+</head>
+<body>
+<p>Redirecting to GitHub repo…</p>
+<script>
+    const params = new URLSearchParams(location.search);
+    const src = params.get('src') || 'unknown';
+    const campaign = params.get('cmp') || 'repo';
+    const content = params.get('c') || '';
+
+    gtag('event', 'outbound_to_github', {
+        destination: 'github_repo',
+        source_label: src,
+        campaign,
+        content
+    });
+    setTimeout(() => {
+        const utm = `?utm_source=${encodeURIComponent(src)}&utm_medium=referral&utm_campaign=${encodeURIComponent(campaign)}${content ? `&utm_content=${encodeURIComponent(content)}` : ''}`;
+        location.href = 'https://github.com/bsayli/spring-boot-openapi-generics-clients' + utm;
+    }, 250);
+</script>
+</body>
+</html>
