@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>Redirecting…</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4NH21XZLBN"></script>
@@ -9,8 +9,10 @@
         window.dataLayer = window.dataLayer || [];
         function gtag(){ dataLayer.push(arguments); }
         gtag('js', new Date());
-        gtag('config', 'G-4NH21XZLBN');
+        gtag('config', 'G-4NH21XZLBN', { transport_type: 'beacon' });
     </script>
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+    <link rel="dns-prefetch" href="//github.com">
 </head>
 <body>
 <p>Redirecting to GitHub repo…</p>
@@ -20,16 +22,24 @@
     const campaign = params.get('cmp') || 'repo';
     const content = params.get('c') || '';
 
+    const target = 'https://github.com/bsayli/spring-boot-openapi-generics-clients';
+    const utm = `?utm_source=${encodeURIComponent(src)}&utm_medium=referral&utm_campaign=${encodeURIComponent(campaign)}${content ? `&utm_content=${encodeURIComponent(content)}` : ''}`;
+    const go = () => location.href = target + utm;
+
+    let redirected = false;
+    const safeGo = () => { if (!redirected) { redirected = true; go(); } };
+
     gtag('event', 'outbound_to_github', {
         destination: 'github_repo',
         source_label: src,
         campaign,
-        content
+        content,
+        transport_type: 'beacon',
+        event_callback: safeGo,
+        event_timeout: 500
     });
-    setTimeout(() => {
-        const utm = `?utm_source=${encodeURIComponent(src)}&utm_medium=referral&utm_campaign=${encodeURIComponent(campaign)}${content ? `&utm_content=${encodeURIComponent(content)}` : ''}`;
-        location.href = 'https://github.com/bsayli/spring-boot-openapi-generics-clients' + utm;
-    }, 250);
+
+    setTimeout(safeGo, 550);
 </script>
 </body>
 </html>
