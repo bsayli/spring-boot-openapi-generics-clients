@@ -20,7 +20,7 @@ public final class ProblemDetailSupport {
   public static ProblemDetail extract(ObjectMapper om, ClientHttpResponse response) {
     ProblemDetail pd;
     MediaType contentType =
-            Optional.ofNullable(response.getHeaders().getContentType()).orElse(MediaType.ALL);
+        Optional.ofNullable(response.getHeaders().getContentType()).orElse(MediaType.ALL);
     HttpStatusCode status;
 
     try {
@@ -39,10 +39,10 @@ public final class ProblemDetailSupport {
       }
     } catch (IOException e) {
       log.warn(
-              "Unable to deserialize ProblemDetail (status={}, contentType={}); using generic fallback",
-              status,
-              contentType,
-              e);
+          "Unable to deserialize ProblemDetail (status={}, contentType={}); using generic fallback",
+          status,
+          contentType,
+          e);
       pd = fallback(status, "Unparseable problem response");
     } catch (Exception e) {
       log.warn("Unexpected error while parsing ProblemDetail", e);

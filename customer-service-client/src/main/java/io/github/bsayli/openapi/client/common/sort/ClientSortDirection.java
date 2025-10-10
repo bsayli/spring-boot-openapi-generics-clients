@@ -1,12 +1,12 @@
 package io.github.bsayli.openapi.client.common.sort;
 
-public enum SortDirection {
+public enum ClientSortDirection {
   ASC("asc"),
   DESC("desc");
 
   private final String value;
 
-  SortDirection(String value) {
+  ClientSortDirection(String value) {
     this.value = value;
   }
 

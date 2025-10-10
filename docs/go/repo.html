@@ -1,18 +1,22 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>Redirecting…</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4NH21XZLBN"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){ dataLayer.push(arguments); }
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
         gtag('js', new Date());
-        gtag('config', 'G-4NH21XZLBN', { transport_type: 'beacon' });
+        gtag('config', 'G-4NH21XZLBN', {transport_type: 'beacon'});
     </script>
-    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-    <link rel="dns-prefetch" href="//github.com">
+    <link crossorigin href="https://www.googletagmanager.com" rel="preconnect">
+    <link href="//github.com" rel="dns-prefetch">
 </head>
 <body>
 <p>Redirecting to GitHub repo…</p>
@@ -27,7 +31,12 @@
     const go = () => location.href = target + utm;
 
     let redirected = false;
-    const safeGo = () => { if (!redirected) { redirected = true; go(); } };
+    const safeGo = () => {
+        if (!redirected) {
+            redirected = true;
+            go();
+        }
+    };
 
     gtag('event', 'outbound_to_github', {
         destination: 'github_repo',

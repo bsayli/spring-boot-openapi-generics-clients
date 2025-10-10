@@ -178,11 +178,11 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
     @Override
     public ServiceClientResponse<Page<CustomerDto>> getCustomers(
             String name, String email, Integer page, Integer size,
-            SortField sortBy, SortDirection direction) {
+            ClientSortField sortBy, ClientSortDirection direction) {
         return api.getCustomers(
                 name, email, page, size,
-                sortBy != null ? sortBy.value() : SortField.CUSTOMER_ID.value(),
-                direction != null ? direction.value() : SortDirection.ASC.value());
+                sortBy != null ? sortBy.value() : ClientSortField.CUSTOMER_ID.value(),
+                direction != null ? direction.value() : ClientSortDirection.ASC.value());
     }
 }
 ```
