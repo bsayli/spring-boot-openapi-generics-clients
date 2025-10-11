@@ -61,6 +61,34 @@ new `{ data, meta }` response structure and RFC 9457 `ProblemDetail` error model
 
 ---
 
+### 🧹 Ignoring Redundant Generated DTOs
+
+To prevent OpenAPI Generator from re-creating DTOs that already exist in the shared `common` package,
+add the following patterns to your `.openapi-generator-ignore` file.
+This avoids redundant model generation (e.g., `Page`, `Meta`, `Sort`, `ServiceResponse`) and keeps diffs minimal.
+
+```bash
+# --- Custom additions for generated DTO cleanup ---
+**/src/gen/java/**/generated/dto/Page*.java
+**/src/gen/java/**/generated/dto/ServiceResponse.java
+**/src/gen/java/**/generated/dto/ServiceResponseVoid.java
+**/src/gen/java/**/generated/dto/Meta.java
+**/src/gen/java/**/generated/dto/Sort.java
+```
+
+> **Note:**
+> The paths above assume your `openapi-generator-maven-plugin` uses
+> `sourceFolder=src/gen/java`.
+> If your configuration differs, adjust the directory prefix accordingly.
+>
+> Also make sure your POM specifies the file override:
+>
+> ```xml
+> <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>
+> ```
+
+---
+
 ## 🧩 Core Classes (Shared Base)
 
 Copy these into your client module under `openapi/client/common`:

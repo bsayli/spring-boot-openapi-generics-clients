@@ -252,6 +252,22 @@ try {
 
 ---
 
+### 🧹 Ignoring Redundant Generated DTOs
+
+The following patterns in [`.openapi-generator-ignore`](.openapi-generator-ignore) prevent redundant DTOs from being regenerated.
+These classes already exist in the shared `common` package and are excluded from code generation.
+
+```bash
+# --- Custom additions for generated DTO cleanup ---
+**/src/gen/java/**/generated/dto/Page*.java
+**/src/gen/java/**/generated/dto/ServiceResponse.java
+**/src/gen/java/**/generated/dto/ServiceResponseVoid.java
+**/src/gen/java/**/generated/dto/Meta.java
+**/src/gen/java/**/generated/dto/Sort.java
+```
+
+---
+
 ## 📚 Notes
 
 * **Toolchain:** Java 21, Spring Boot 3.4.10, OpenAPI Generator 7.16.0
