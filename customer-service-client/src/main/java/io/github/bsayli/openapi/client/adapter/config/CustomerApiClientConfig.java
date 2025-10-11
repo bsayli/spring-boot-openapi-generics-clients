@@ -21,7 +21,6 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 public class CustomerApiClientConfig {
-  
 
   @Bean
   RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {

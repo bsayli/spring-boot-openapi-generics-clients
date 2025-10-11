@@ -72,6 +72,10 @@ Define reusable properties to simplify plugin management and template resolution
     <openapi.generator.version>7.16.0</openapi.generator.version>
     <openapi.templates.upstream>${project.build.directory}/openapi-templates-upstream</openapi.templates.upstream>
     <openapi.templates.effective>${project.build.directory}/openapi-templates-effective</openapi.templates.effective>
+    <build.helper.plugin.version>3.6.0</build.helper.plugin.version>
+    <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
+    <maven.dependency.plugin.version>3.8.1</maven.dependency.plugin.version>
+    <spotless-maven-plugin.version>3.0.0</spotless-maven-plugin.version>
 </properties>
 ```
 
@@ -195,8 +199,9 @@ These plugins work in sequence to **unpack, overlay, and compile** OpenAPI templ
                         </configOptions>
 
                         <additionalProperties>
-                            <commonPackage>commonPackage=your.base.openapi.client.common</commonPackage>
+                            <additionalProperty>commonPackage=your.base.openapi.client.common</additionalProperty>
                         </additionalProperties>
+                        <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>
                     </configuration>
                 </execution>
             </executions>
@@ -221,6 +226,35 @@ These plugins work in sequence to **unpack, overlay, and compile** OpenAPI templ
                 </execution>
             </executions>
         </plugin>
+
+        <!-- 5️⃣ Clean up generated imports (Spotless) -->
+        
+        <plugin>
+            <groupId>com.diffplug.spotless</groupId>
+            <artifactId>spotless-maven-plugin</artifactId>
+            <version>${spotless-maven-plugin.version}</version>
+
+            <configuration>
+                <java>
+                    <includes>
+                        <include>target/generated-sources/openapi/src/gen/java/**/*.java</include>
+                    </includes>
+                    <removeUnusedImports>
+                        <engine>cleanthat-javaparser-unnecessaryimport</engine>
+                    </removeUnusedImports>
+                </java>
+            </configuration>
+            <executions>
+                <execution>
+                    <id>spotless-apply-generated</id>
+                    <phase>process-sources</phase>
+                    <goals>
+                        <goal>apply</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        
     </plugins>
 </build>
 ```
@@ -235,6 +269,7 @@ These plugins work in sequence to **unpack, overlay, and compile** OpenAPI templ
 | **maven-resources-plugin**         | Overlays your local Mustache templates on top of upstream ones.  |
 | **openapi-generator-maven-plugin** | Generates type-safe client code using the effective templates.   |
 | **build-helper-maven-plugin**      | Ensures generated sources are included in the compilation phase. |
+| **spotless-maven-plugin**          | Automatically removes unused imports and keeps generated sources clean. |
 
 Together, these guarantee your **generics‑aware response wrappers** (e.g., `ServiceClientResponse<T>`) are generated
 cleanly and consistently across builds.

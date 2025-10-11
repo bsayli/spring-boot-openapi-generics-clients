@@ -178,11 +178,11 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
     @Override
     public ServiceClientResponse<Page<CustomerDto>> getCustomers(
             String name, String email, Integer page, Integer size,
-            SortField sortBy, SortDirection direction) {
+            ClientSortField sortBy, ClientSortDirection direction) {
         return api.getCustomers(
                 name, email, page, size,
-                sortBy != null ? sortBy.value() : SortField.CUSTOMER_ID.value(),
-                direction != null ? direction.value() : SortDirection.ASC.value());
+                sortBy != null ? sortBy.value() : ClientSortField.CUSTOMER_ID.value(),
+                direction != null ? direction.value() : ClientSortDirection.ASC.value());
     }
 }
 ```
@@ -249,6 +249,22 @@ try {
 * **ProblemDetail not thrown?** Verify your `RestClientCustomizer`.
 * **Page schema missing?** Confirm `components/schemas/Page` defines `content.items.$ref`.
 * **Missing deps?** Ensure host app includes `jakarta.validation` & Spring Web.
+
+---
+
+### 🧹 Ignoring Redundant Generated DTOs
+
+The following patterns in [`.openapi-generator-ignore`](.openapi-generator-ignore) prevent redundant DTOs from being regenerated.
+These classes already exist in the shared `common` package and are excluded from code generation.
+
+```bash
+# --- Custom additions for generated DTO cleanup ---
+**/src/gen/java/**/generated/dto/Page*.java
+**/src/gen/java/**/generated/dto/ServiceResponse.java
+**/src/gen/java/**/generated/dto/ServiceResponseVoid.java
+**/src/gen/java/**/generated/dto/Meta.java
+**/src/gen/java/**/generated/dto/Sort.java
+```
 
 ---
 

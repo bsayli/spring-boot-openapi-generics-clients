@@ -8,16 +8,10 @@ import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
 import io.github.bsayli.openapi.client.common.ClientMeta;
 import io.github.bsayli.openapi.client.common.Page;
 import io.github.bsayli.openapi.client.common.ServiceClientResponse;
-import io.github.bsayli.openapi.client.common.sort.SortDirection;
-import io.github.bsayli.openapi.client.common.sort.SortField;
+import io.github.bsayli.openapi.client.common.sort.ClientSortDirection;
+import io.github.bsayli.openapi.client.common.sort.ClientSortField;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
-import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
-import io.github.bsayli.openapi.client.generated.dto.CustomerDeleteResponse;
-import io.github.bsayli.openapi.client.generated.dto.CustomerDto;
-import io.github.bsayli.openapi.client.generated.dto.CustomerUpdateRequest;
-import io.github.bsayli.openapi.client.generated.dto.ServiceResponseCustomerDeleteResponse;
-import io.github.bsayli.openapi.client.generated.dto.ServiceResponseCustomerDto;
-import io.github.bsayli.openapi.client.generated.dto.ServiceResponsePageCustomerDto;
+import io.github.bsayli.openapi.client.generated.dto.*;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -106,7 +100,7 @@ class CustomerClientAdapterImplTest {
     when(api.getCustomers(any(), any(), any(), any(), any(), any())).thenReturn(wrapper);
 
     ServiceClientResponse<Page<CustomerDto>> res =
-        adapter.getCustomers(null, null, 0, 5, SortField.CUSTOMER_ID, SortDirection.ASC);
+        adapter.getCustomers(null, null, 0, 5, ClientSortField.CUSTOMER_ID, ClientSortDirection.ASC);
 
     assertNotNull(res);
     assertNotNull(res.getData());

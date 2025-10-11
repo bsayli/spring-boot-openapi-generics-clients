@@ -2,8 +2,8 @@ package io.github.bsayli.openapi.client.adapter;
 
 import io.github.bsayli.openapi.client.common.Page;
 import io.github.bsayli.openapi.client.common.ServiceClientResponse;
-import io.github.bsayli.openapi.client.common.sort.SortDirection;
-import io.github.bsayli.openapi.client.common.sort.SortField;
+import io.github.bsayli.openapi.client.common.sort.ClientSortDirection;
+import io.github.bsayli.openapi.client.common.sort.ClientSortField;
 import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
 import io.github.bsayli.openapi.client.generated.dto.CustomerDeleteResponse;
 import io.github.bsayli.openapi.client.generated.dto.CustomerDto;
@@ -22,8 +22,8 @@ public interface CustomerClientAdapter {
       String email,
       Integer page,
       Integer size,
-      SortField sortBy,
-      SortDirection direction);
+      ClientSortField sortBy,
+      ClientSortDirection direction);
 
   ServiceClientResponse<CustomerDto> updateCustomer(
       Integer customerId, CustomerUpdateRequest request);

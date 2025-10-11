@@ -1,3 +1,4 @@
+# existing patterns
 **/.github/**
 **/gradle/**
 **/.gradle/**
@@ -15,4 +16,12 @@
 **/git_push.sh
 **/README.md
 **/.openapi-generator/**
-!src/gen/java/main/**
+!src/gen/java/**
+
+# --- Custom additions for generated DTO cleanup ---
+# ignore these generated models regardless of location
+**/src/gen/java/**/generated/dto/Page*.java
+**/src/gen/java/**/generated/dto/ServiceResponse.java
+**/src/gen/java/**/generated/dto/ServiceResponseVoid.java
+**/src/gen/java/**/generated/dto/Meta.java
+**/src/gen/java/**/generated/dto/Sort.java
