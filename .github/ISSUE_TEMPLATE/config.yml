@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Start a discussion
+    url: https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions
+    about: For questions, design feedback, or sharing ideas

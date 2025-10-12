@@ -1,0 +1,50 @@
+name: "🐞 Bug report"
+description: "Report a bug or unexpected behavior in generated clients or schema registration"
+title: "bugfix: <short summary>"
+labels: ["bug"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to improve **spring-boot-openapi-generics-clients**!  
+        Please provide details so we can reproduce and fix the issue quickly.
+  - type: textarea
+    id: description
+    attributes:
+      label: "Describe the bug"
+      description: "A clear and concise description of what the bug is and how it affects the output."
+      placeholder: "Example: Generated client omits x-data-item when using nested Page<T> response."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "Steps to reproduce"
+      description: "List the minimal steps to reproduce the issue."
+      placeholder: |
+        1. Run `mvn clean install` on customer-service-client
+        2. Inspect generated model under src/gen/java
+        3. Observe missing type or mismatch
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected behavior"
+      description: "What did you expect instead?"
+      placeholder: "The generator should create ServiceResponsePageCustomerDto extending ServiceClientResponse<Page<CustomerDto>>."
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environment"
+      description: "Tool versions or environment details."
+      placeholder: |
+        - Java: 21
+        - OpenAPI Generator: 7.16.0
+        - Spring Boot: 3.4.x
+        - OS: macOS / Windows / Linux
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional context"
+      description: "Any logs, screenshots, or related discussions."
+      placeholder: "Link to related discussion or stack trace."
