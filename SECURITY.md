@@ -40,14 +40,14 @@ Please include:
 
 ## Our Process & Timelines
 
-We aim to respond quickly and keep you informed throughout.
+We aim to respond in a timely and transparent way, keeping you informed throughout key stages.
 
-- **Acknowledgement:** within **72 hours**.
-- **Triage & Reproduction:** within **5 business days**.
-- **Fix Plan:** within **10 business days** for High/Critical; otherwise as scheduled.
-- **Release:** a patched version will be published; we may coordinate an embargoed release for impactful issues.
+- **Acknowledgement:** typically within a few days after receiving a report.
+- **Triage & Reproduction:** investigated as soon as practical based on severity.
+- **Fix Planning:** prioritized according to impact and complexity.
+- **Release:** patches are published once validated; coordinated disclosure may be used for sensitive issues.
 
-We’ll keep you updated at major milestones (triage result, fix readiness, release timing).
+We’ll keep reporters informed at major milestones such as triage results, fix readiness, and release timing.
 
 ---
 
