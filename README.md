@@ -126,12 +126,12 @@ Custom Mustache overlays redefine OpenAPI templates to generate **thin, type-saf
 
 ```java
 // Single
-data class ServiceResponseCustomerDto
-    extends ServiceClientResponse<CustomerDto> {}
+public class ServiceResponseCustomerDto
+        extends ServiceClientResponse<CustomerDto> {}
 
 // Paged
-data class ServiceResponsePageCustomerDto
-    extends ServiceClientResponse<Page<CustomerDto>> {}
+public class ServiceResponsePageCustomerDto
+        extends ServiceClientResponse<Page<CustomerDto>> {}
 ```
 
 ✅ Supports **nested generics** like `ServiceClientResponse<Page<CustomerDto>>`
