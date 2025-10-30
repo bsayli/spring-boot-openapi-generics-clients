@@ -7,13 +7,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.10</version>
+        <version>3.4.11</version>
         <relativePath/>
     </parent>
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service</artifactId>
-    <version>0.7.2</version>
+    <version>0.7.3</version>
     <name>customer-service</name>
     <description>Spring Boot 3.4 + Springdoc (OpenAPI) for generics-aware client generation</description>
 
@@ -23,7 +23,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <springdoc-openapi-starter.version>2.8.13</springdoc-openapi-starter.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
-        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <commons-lang3.version>3.19.0</commons-lang3.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>

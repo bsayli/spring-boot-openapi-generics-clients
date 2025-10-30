@@ -1,7 +1,7 @@
 # customer-service
 
 [![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.10-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.11-green?logo=springboot)](https://spring.io/projects/spring-boot)
 [![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 
@@ -60,7 +60,7 @@ This module serves as the **server-side anchor**: the reference point for generi
 ## 🛠 Tech Stack
 
 * **Java 21**
-* **Spring Boot 3.4.10**
+* **Spring Boot 3.4.11**
 
   * spring-boot-starter-web
   * spring-boot-starter-validation

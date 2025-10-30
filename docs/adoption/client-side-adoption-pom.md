@@ -69,7 +69,7 @@ Define reusable properties to simplify plugin management and template resolution
 ```xml
 
 <properties>
-    <openapi.generator.version>7.16.0</openapi.generator.version>
+    <openapi.generator.version>7.17.0</openapi.generator.version>
     <openapi.templates.upstream>${project.build.directory}/openapi-templates-upstream</openapi.templates.upstream>
     <openapi.templates.effective>${project.build.directory}/openapi-templates-effective</openapi.templates.effective>
     <build.helper.plugin.version>3.6.0</build.helper.plugin.version>
