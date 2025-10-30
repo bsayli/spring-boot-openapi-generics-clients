@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
+  private static final int MAX_PAGE_SIZE = 10;
   private final AtomicInteger idSeq = new AtomicInteger(0);
   private final NavigableMap<Integer, CustomerDto> store = new ConcurrentSkipListMap<>();
 
@@ -115,10 +116,17 @@ public class CustomerServiceImpl implements CustomerService {
   }
 
   private Page<CustomerDto> paginate(List<CustomerDto> items, int page, int size) {
+    int p = Math.clamp(page, 0, Integer.MAX_VALUE);
+    int s = Math.clamp(size, 1, MAX_PAGE_SIZE);
+
     long total = items.size();
-    int from = Math.min(page * size, items.size());
-    int to = Math.min(from + size, items.size());
+    long fromL = Math.min((long) p * s, total);
+    long toL = Math.min(fromL + s, total);
+
+    int from = (int) fromL;
+    int to = (int) toL;
+
     var slice = items.subList(from, to);
-    return Page.of(slice, page, size, total);
+    return Page.of(slice, p, s, total);
   }
 }

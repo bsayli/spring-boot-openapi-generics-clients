@@ -28,9 +28,9 @@ class CustomerServiceImplTest {
   }
 
   @Test
-  @DisplayName("Initial seed should contain 17 customers")
-  void initialSeed_shouldContainSeventeen() {
-    Page<CustomerDto> page =
+  @DisplayName("Initial seed pagination: total=17, page0 size=10, page1 size=7")
+  void initialSeed_paginationShouldBeCorrect() {
+    Page<CustomerDto> p0 =
         service.getCustomers(
             new CustomerSearchCriteria(null, null),
             0,
@@ -38,9 +38,25 @@ class CustomerServiceImplTest {
             SortField.CUSTOMER_ID,
             SortDirection.ASC);
 
-    assertEquals(17, page.totalElements());
-    assertEquals(17, page.content().size());
-    assertTrue(page.content().stream().allMatch(c -> c.customerId() != null && c.customerId() > 0));
+    assertEquals(17, p0.totalElements());
+    assertEquals(2, p0.totalPages());
+    assertEquals(10, p0.content().size());
+    assertTrue(p0.hasNext());
+    assertFalse(p0.hasPrev());
+
+    Page<CustomerDto> p1 =
+        service.getCustomers(
+            new CustomerSearchCriteria(null, null),
+            1,
+            100,
+            SortField.CUSTOMER_ID,
+            SortDirection.ASC);
+
+    assertEquals(17, p1.totalElements());
+    assertEquals(2, p1.totalPages());
+    assertEquals(7, p1.content().size());
+    assertFalse(p1.hasNext());
+    assertTrue(p1.hasPrev());
   }
 
   @Test
@@ -54,26 +70,27 @@ class CustomerServiceImplTest {
     assertEquals("Jane Doe", created.name());
     assertEquals("jane.doe@example.com", created.email());
 
-    Page<CustomerDto> page =
+    Page<CustomerDto> anyPage =
         service.getCustomers(
             new CustomerSearchCriteria(null, null),
             0,
-            200,
+            10,
             SortField.CUSTOMER_ID,
             SortDirection.ASC);
 
-    assertEquals(18, page.totalElements());
-    assertTrue(page.content().stream().anyMatch(c -> c.customerId().equals(created.customerId())));
+    assertEquals(18, anyPage.totalElements());
+    CustomerDto fetched = service.getCustomer(created.customerId());
+    assertEquals(created, fetched);
   }
 
   @Test
   @DisplayName("getCustomer should return existing customer")
   void getCustomer_shouldReturn() {
-    Page<CustomerDto> page =
+    Page<CustomerDto> p0 =
         service.getCustomers(
             new CustomerSearchCriteria(null, null), 0, 1, SortField.CUSTOMER_ID, SortDirection.ASC);
 
-    CustomerDto any = page.content().getFirst();
+    CustomerDto any = p0.content().getFirst();
     CustomerDto found = service.getCustomer(any.customerId());
     assertEquals(any, found);
   }
@@ -106,7 +123,7 @@ class CustomerServiceImplTest {
   }
 
   @Test
-  @DisplayName("deleteCustomer should remove the record")
+  @DisplayName("deleteCustomer should remove the record and decrease total")
   void deleteCustomer_shouldRemove() {
     CustomerDto base =
         service.createCustomer(new CustomerCreateRequest("Mark Lee", "mark.lee@example.com"));
@@ -115,10 +132,10 @@ class CustomerServiceImplTest {
         service.getCustomers(
             new CustomerSearchCriteria(null, null),
             0,
-            200,
+            10,
             SortField.CUSTOMER_ID,
             SortDirection.ASC);
-    long sizeBefore = before.totalElements();
+    long totalBefore = before.totalElements();
 
     service.deleteCustomer(base.customerId());
 
@@ -126,11 +143,10 @@ class CustomerServiceImplTest {
         service.getCustomers(
             new CustomerSearchCriteria(null, null),
             0,
-            200,
+            10,
             SortField.CUSTOMER_ID,
             SortDirection.ASC);
-
-    assertEquals(sizeBefore - 1, after.totalElements());
-    assertTrue(after.content().stream().noneMatch(c -> c.customerId().equals(base.customerId())));
+    assertEquals(totalBefore - 1, after.totalElements());
+    assertThrows(NoSuchElementException.class, () -> service.getCustomer(base.customerId()));
   }
 }
