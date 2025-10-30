@@ -30,7 +30,7 @@ This repository demonstrates a production-grade setup where backend and client r
 * 📦 [Modules](#-modules)
 * 🚀 [Problem & Motivation](#-problem--motivation)
 * 💡 [Solution Overview](#-solution-overview)
-* ⚙️ [Architecture Overview](#-architecture-overview)
+* 🏗 [Architecture Overview](#-architecture-overview)
 * ⚡ [Quick Start](#-quick-start)
 * 🔄 [Generated Wrappers — Before & After](#-generated-wrappers--before--after)
 * 🧱 [Example Responses](#-example-responses)
@@ -139,8 +139,7 @@ public class ServiceResponsePageCustomerDto
 
 ---
 
-<a id="architecture-overview"></a>
-## ⚙️ Architecture Overview
+## 🏗 Architecture Overview
 
 <p align="center">
   <img src="docs/images/architectural-diagram.png" alt="OpenAPI Generics Architecture" width="900"/>
@@ -263,12 +262,12 @@ for (CustomerDto c : page.content()) {
 ## 🧩 Tech Stack
 
 | Component             | Version | Purpose                               |
-| --------------------- |---------| ------------------------------------- |
-| **Java**              | 21      | Language baseline                     |
-| **Spring Boot**       | 3.4.11  | REST + OpenAPI provider               |
-| **Springdoc**         | 2.8.13  | OpenAPI 3.1 integration               |
-| **OpenAPI Generator** | 7.17.0  | Generics-aware code generation        |
-| **HttpClient5**       | 5.5     | Pooled, production-ready HTTP backend |
+| --------------------- |--------| ------------------------------------- |
+| **Java**              | 21     | Language baseline                     |
+| **Spring Boot**       | 3.4.11 | REST + OpenAPI provider               |
+| **Springdoc**         | 2.8.13 | OpenAPI 3.1 integration               |
+| **OpenAPI Generator** | 7.17.0 | Generics-aware code generation        |
+| **HttpClient5**       | 5.5    | Pooled, production-ready HTTP backend |
 
 ---
 
