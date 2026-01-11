@@ -414,7 +414,7 @@ components:
         - message
     ProblemDetail:
       type: object
-      additionalProperties: true
+      additionalProperties: false
       properties:
         type:
           type: string

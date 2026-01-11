@@ -126,7 +126,7 @@ public class GlobalErrorResponsesCustomizer {
 
     pd.addProperty("extensions", extensions);
 
-    pd.setAdditionalProperties(Boolean.TRUE);
+    pd.setAdditionalProperties(Boolean.FALSE);
 
     schemas.put(SCHEMA_PROBLEM_DETAIL, pd);
   }

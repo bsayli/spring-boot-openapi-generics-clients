@@ -10,6 +10,30 @@
     <name>customer-service-client</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
+    <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
+        <connection>scm:git:https://github.com/bsayli/spring-boot-openapi-generics-clients.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:bsayli/spring-boot-openapi-generics-clients.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>bsayli</id>
+            <name>Baris Sayli</name>
+            <url>https://github.com/bsayli</url>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -123,6 +147,11 @@
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
+                    </execution>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

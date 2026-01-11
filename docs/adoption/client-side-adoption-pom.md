@@ -159,6 +159,11 @@ These plugins work in sequence to **unpack, overlay, and compile** OpenAPI templ
                         </artifactItems>
                     </configuration>
                 </execution>
+                <execution>
+                    <goals>
+                        <goal>properties</goal>
+                    </goals>
+                </execution>
             </executions>
         </plugin>
 
