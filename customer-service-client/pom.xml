@@ -59,10 +59,18 @@
 
         <openapi.templates.upstream>${project.build.directory}/upstream-templates</openapi.templates.upstream>
         <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
+        <api-contract.version>0.7.4</api-contract.version>
         <argLine/>
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>io.github.bsayli</groupId>
+            <artifactId>api-contract</artifactId>
+            <version>${api-contract.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -244,7 +252,8 @@
                                 <sourceFolder>src/gen/java</sourceFolder>
                             </configOptions>
                             <additionalProperties>
-                                <additionalProperty>commonPackage=io.github.bsayli.openapi.client.common</additionalProperty>
+                                <additionalProperty>apiContractEnvelope=io.github.bsayli.apicontract.envelope</additionalProperty>
+                                <additionalProperty>apiContractPage=io.github.bsayli.apicontract.paging</additionalProperty>
                             </additionalProperties>
                             <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>
                         </configuration>

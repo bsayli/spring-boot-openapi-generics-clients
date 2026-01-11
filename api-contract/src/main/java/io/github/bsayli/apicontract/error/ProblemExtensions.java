@@ -1,4 +1,4 @@
-package io.github.bsayli.customerservice.common.api.response.error;
+package io.github.bsayli.apicontract.error;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;

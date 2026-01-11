@@ -1,8 +1,7 @@
-package io.github.bsayli.customerservice.common.api.response;
+package io.github.bsayli.apicontract.envelope;
 
-import io.github.bsayli.customerservice.common.api.sort.Sort;
-import io.github.bsayli.customerservice.common.api.sort.SortDirection;
-import io.github.bsayli.customerservice.common.api.sort.SortField;
+import io.github.bsayli.apicontract.paging.Sort;
+import io.github.bsayli.apicontract.paging.SortDirection;
 import java.time.Instant;
 import java.util.List;
 
@@ -25,7 +24,10 @@ public record Meta(Instant serverTime, List<Sort> sort) {
     return new Meta(Instant.now(), sort == null ? List.of() : List.of(sort));
   }
 
-  public static Meta now(SortField field, SortDirection direction) {
+  public static Meta now(String field, SortDirection direction) {
+    if (field == null || field.isBlank()) {
+      return new Meta(Instant.now(), List.of());
+    }
     return new Meta(Instant.now(), List.of(new Sort(field, direction)));
   }
 }

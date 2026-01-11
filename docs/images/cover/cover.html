@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Single-Contract OpenAPI Clients — Type-Safe by Design</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0b1220;
+      --fg:#e8ecf1;
+      --muted:#b7c0cc;
+      --accent:#63b3ed;           /* blue */
+      --accent-2:#7dd3fc;         /* cyan */
+      --pill-bg:#10182b;
+      --badge-text:#0b1220;
+      --green:#22c55e;
+      --blue:#3b82f6;
+      --yellow:#facc15;
+      --shadow: 0 10px 35px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.15);
+      --stroke: rgba(255,255,255,.08);
+      --code-bg:#0f1a30;
+      --code-border:#1e2a44;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+      color:var(--fg);
+      background:
+              radial-gradient(1200px 600px at 10% -20%, rgba(99,179,237,.20), transparent 60%),
+              radial-gradient(900px 500px at 110% 0%, rgba(125,211,252,.18), transparent 60%),
+              linear-gradient(180deg,#0a0f1c 0%, #0b1220 60%, #0a0f1c 100%);
+      display:flex; align-items:center; justify-content:center;
+      padding:40px;
+    }
+    .frame{
+      width:1200px; height:630px; /* Social share aspect */
+      max-width:100%; aspect-ratio: 1200 / 630;
+      border-radius:28px; position:relative; overflow:hidden;
+      box-shadow: var(--shadow);
+      background: linear-gradient(180deg, #0d1426 0%, #0b1220 60%);
+      display:flex; align-items:center; justify-content:center;
+      isolation:isolate;
+    }
+    .glow{
+      position:absolute; inset:-20%;
+      background:
+              radial-gradient(650px 320px at 18% 12%, rgba(99,179,237,.22), transparent 60%),
+              radial-gradient(760px 360px at 82% 0%, rgba(125,211,252,.18), transparent 60%);
+      filter:saturate(120%);
+      z-index:0;
+    }
+    .grid{
+      position:absolute; inset:0; z-index:0; pointer-events:none;
+      background:
+              linear-gradient(to right, rgba(255,255,255,.035) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(60% 55% at 50% 35%, rgba(0,0,0,.9), transparent 80%);
+      opacity:.35;
+    }
+    .content{
+      position:relative; z-index:1;
+      display:flex; flex-direction:column; align-items:center; text-align:center;
+      gap:22px; padding:44px 64px; width:100%;
+    }
+    .eyebrow{
+      display:inline-flex; gap:10px; align-items:center;
+      padding:9px 14px; border-radius:999px;
+      background:rgba(16,24,43,.92);
+      border:1px solid var(--stroke);
+      color:var(--muted);
+      font-size:14px; letter-spacing:.02em;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .title{
+      line-height:1.04;
+      font-weight:850;
+      letter-spacing:-.02em;
+      font-size:62px;
+      max-width:1040px;
+      margin:0;
+    }
+    .title .accent{
+      background: linear-gradient(90deg,var(--accent),var(--accent-2));
+      -webkit-background-clip:text; background-clip:text; color:transparent
+    }
+    .subtitle{
+      max-width:1020px; margin:0; line-height:1.35;
+      color:var(--muted);
+      font-size:26px; font-weight:520;
+    }
+    .subtitle code{
+      background:var(--code-bg);
+      color:#dbeafe;
+      border:1px solid var(--code-border);
+      padding:6px 10px; border-radius:10px; font-size:.92em;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+      white-space:nowrap;
+    }
+    .badges{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:6px}
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:999px; font-weight:750; font-size:16px;
+      background:#e5f6ff; color:var(--badge-text);
+      box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 6px 16px rgba(0,0,0,.18);
+    }
+    .badge.green{background:#dcfce7}
+    .badge.blue{background:#dbeafe}
+    .badge.yellow{background:#fef9c3}
+    .badge svg{width:18px; height:18px; opacity:.9}
+    .pills{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:6px}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px; border-radius:999px;
+      background:rgba(16,24,43,.82);
+      border:1px solid var(--stroke);
+      color:#c7d0dc;
+      font-size:14px; font-weight:650;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .pill .dot{
+      width:8px; height:8px; border-radius:999px; background:rgba(99,179,237,.9);
+      box-shadow: 0 0 0 3px rgba(99,179,237,.18);
+    }
+    .footer{
+      position:absolute; bottom:22px; left:0; right:0;
+      display:flex; justify-content:center; gap:18px;
+      color:#aeb7c4; font-size:16px;
+      z-index:1;
+    }
+    .sep{opacity:.5}
+    @media (max-width:900px){
+      .title{font-size:44px}
+      .subtitle{font-size:20px}
+      .frame{height:auto}
+    }
+  </style>
+</head>
+<body>
+<section class="frame" role="img" aria-label="Single-Contract OpenAPI Clients — Type-Safe by Design">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="grid" aria-hidden="true"></div>
+
+  <div class="content">
+    <span class="eyebrow">Contract-driven · OpenAPI 3.1 · Page-only nested generics · RFC 9457</span>
+
+    <h1 class="title">
+      <span class="accent">Single-Contract</span> OpenAPI Clients<br />
+      Type-Safe by Design
+    </h1>
+
+    <p class="subtitle">
+      Share one canonical envelope
+      <code>ServiceResponse&lt;T&gt;</code>
+      across server + client — generate thin wrappers like
+      <code>ServiceResponse&lt;Page&lt;FooDto&gt;&gt;</code>
+      with <strong>zero duplication</strong>.
+    </p>
+
+    <div class="pills" aria-label="Guarantees">
+      <span class="pill"><span class="dot"></span>One contract: <code style="padding:0;border:none;background:none;color:inherit">api-contract</code></span>
+      <span class="pill"><span class="dot"></span>Deterministic schema names</span>
+      <span class="pill"><span class="dot"></span>Generator-safe evolution</span>
+    </div>
+
+    <div class="badges" aria-label="Tech badges">
+        <span class="badge green" title="Spring Boot 3.5.x">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l9 5v8l-9 5-9-5V8l9-5z" fill="#16a34a"/></svg>
+          Spring Boot&nbsp;3.5.x
+        </span>
+      <span class="badge blue" title="OpenAPI Generator 7.x">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#2563eb"/></svg>
+          OpenAPI Generator&nbsp;7.x
+        </span>
+      <span class="badge yellow" title="Java 21">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 18h16M6 14h12M8 10h8M10 6h4" stroke="#a16207" stroke-width="2" stroke-linecap="round"/></svg>
+          Java&nbsp;21
+        </span>
+    </div>
+  </div>
+
+  <div class="footer" aria-label="Links">
+    <span>Architecture as a Contract</span>
+    <span class="sep">•</span>
+    <span>github.com/bsayli</span>
+  </div>
+</section>
+</body>
+</html>

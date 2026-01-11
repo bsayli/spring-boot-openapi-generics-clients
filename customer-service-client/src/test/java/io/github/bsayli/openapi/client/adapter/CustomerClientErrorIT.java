@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bsayli.openapi.client.adapter.config.CustomerApiClientConfig;
-import io.github.bsayli.openapi.client.common.error.ClientProblemException;
+import io.github.bsayli.openapi.client.common.problem.ApiProblemException;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
 import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
 import okhttp3.mockwebserver.MockResponse;
@@ -57,7 +57,7 @@ class CustomerClientErrorIT {
             .addHeader("Content-Type", "application/problem+json")
             .setBody(problem));
 
-    var ex = assertThrows(ClientProblemException.class, () -> api.getCustomer(999));
+    var ex = assertThrows(ApiProblemException.class, () -> api.getCustomer(999));
 
     assertEquals(404, ex.getStatus());
     assertNotNull(ex.getProblem());
@@ -90,7 +90,7 @@ class CustomerClientErrorIT {
 
     var req = new CustomerCreateRequest().name("Bad Email").email("not-an-email");
 
-    var ex = assertThrows(ClientProblemException.class, () -> api.createCustomer(req));
+    var ex = assertThrows(ApiProblemException.class, () -> api.createCustomer(req));
 
     assertEquals(400, ex.getStatus());
     assertNotNull(ex.getProblem());
@@ -107,7 +107,7 @@ class CustomerClientErrorIT {
             .setResponseCode(500)
             .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE));
 
-    var ex = assertThrows(ClientProblemException.class, () -> api.deleteCustomer(1));
+    var ex = assertThrows(ApiProblemException.class, () -> api.deleteCustomer(1));
 
     assertEquals(500, ex.getStatus());
 

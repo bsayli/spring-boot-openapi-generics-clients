@@ -1,4 +1,4 @@
-package io.github.bsayli.customerservice.common.api.sort;
+package io.github.bsayli.apicontract.paging;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

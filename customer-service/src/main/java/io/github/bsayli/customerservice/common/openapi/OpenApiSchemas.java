@@ -1,6 +1,6 @@
 package io.github.bsayli.customerservice.common.openapi;
 
-import io.github.bsayli.customerservice.common.api.response.ServiceResponse;
+import io.github.bsayli.apicontract.envelope.ServiceResponse;
 
 public final class OpenApiSchemas {
 

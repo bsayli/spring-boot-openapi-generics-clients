@@ -317,10 +317,6 @@ components:
       properties:
         field:
           type: string
-          enum:
-            - customerId
-            - name
-            - email
         direction:
           type: string
           enum:

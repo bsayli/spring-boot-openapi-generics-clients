@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import io.github.bsayli.apicontract.envelope.Meta;
+import io.github.bsayli.apicontract.envelope.ServiceResponse;
+import io.github.bsayli.apicontract.paging.Page;
+import io.github.bsayli.apicontract.paging.SortDirection;
 import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
-import io.github.bsayli.openapi.client.common.ClientMeta;
-import io.github.bsayli.openapi.client.common.Page;
-import io.github.bsayli.openapi.client.common.ServiceClientResponse;
-import io.github.bsayli.openapi.client.common.sort.ClientSortDirection;
-import io.github.bsayli.openapi.client.common.sort.ClientSortField;
+import io.github.bsayli.openapi.client.customer.CustomerSortField;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
 import io.github.bsayli.openapi.client.generated.dto.*;
 import java.time.OffsetDateTime;
@@ -40,7 +40,7 @@ class CustomerClientAdapterImplTest {
     var dto = new CustomerDto().customerId(1).name("Jane Doe").email("jane@example.com");
 
     var serverOdt = OffsetDateTime.parse("2025-01-01T12:34:56Z");
-    var meta = new ClientMeta(serverOdt.toInstant(), List.of());
+    var meta = new Meta(serverOdt.toInstant(), List.of());
 
     var wrapper = new ServiceResponseCustomerDto();
     wrapper.setData(dto);
@@ -48,7 +48,7 @@ class CustomerClientAdapterImplTest {
 
     when(api.createCustomer(any(CustomerCreateRequest.class))).thenReturn(wrapper);
 
-    ServiceClientResponse<CustomerDto> res = adapter.createCustomer(req);
+    ServiceResponse<CustomerDto> res = adapter.createCustomer(req);
 
     assertNotNull(res);
     assertNotNull(res.getData());
@@ -68,11 +68,11 @@ class CustomerClientAdapterImplTest {
     var serverOdt = OffsetDateTime.parse("2025-02-01T10:00:00Z");
     var wrapper = new ServiceResponseCustomerDto();
     wrapper.setData(dto);
-    wrapper.setMeta(new ClientMeta(serverOdt.toInstant(), List.of()));
+    wrapper.setMeta(new Meta(serverOdt.toInstant(), List.of()));
 
     when(api.getCustomer(any())).thenReturn(wrapper);
 
-    ServiceClientResponse<CustomerDto> res = adapter.getCustomer(42);
+    ServiceResponse<CustomerDto> res = adapter.getCustomer(42);
 
     assertNotNull(res);
     assertNotNull(res.getData());
@@ -95,12 +95,12 @@ class CustomerClientAdapterImplTest {
     var serverOdt = OffsetDateTime.parse("2025-03-01T09:00:00Z");
     var wrapper = new ServiceResponsePageCustomerDto();
     wrapper.setData(page);
-    wrapper.setMeta(new ClientMeta(serverOdt.toInstant(), List.of()));
+    wrapper.setMeta(new Meta(serverOdt.toInstant(), List.of()));
 
     when(api.getCustomers(any(), any(), any(), any(), any(), any())).thenReturn(wrapper);
 
-    ServiceClientResponse<Page<CustomerDto>> res =
-        adapter.getCustomers(null, null, 0, 5, ClientSortField.CUSTOMER_ID, ClientSortDirection.ASC);
+    ServiceResponse<Page<CustomerDto>> res =
+        adapter.getCustomers(null, null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC);
 
     assertNotNull(res);
     assertNotNull(res.getData());
@@ -126,11 +126,11 @@ class CustomerClientAdapterImplTest {
     var serverOdt = OffsetDateTime.parse("2025-04-02T12:00:00Z");
     var wrapper = new ServiceResponseCustomerDto();
     wrapper.setData(dto);
-    wrapper.setMeta(new ClientMeta(serverOdt.toInstant(), List.of()));
+    wrapper.setMeta(new Meta(serverOdt.toInstant(), List.of()));
 
     when(api.updateCustomer(any(), any(CustomerUpdateRequest.class))).thenReturn(wrapper);
 
-    ServiceClientResponse<CustomerDto> res = adapter.updateCustomer(1, req);
+    ServiceResponse<CustomerDto> res = adapter.updateCustomer(1, req);
 
     assertNotNull(res);
     assertNotNull(res.getData());
@@ -149,11 +149,11 @@ class CustomerClientAdapterImplTest {
     var serverOdt = OffsetDateTime.parse("2025-05-03T08:00:00Z");
     var wrapper = new ServiceResponseCustomerDeleteResponse();
     wrapper.setData(payload);
-    wrapper.setMeta(new ClientMeta(serverOdt.toInstant(), List.of()));
+    wrapper.setMeta(new Meta(serverOdt.toInstant(), List.of()));
 
     when(api.deleteCustomer(any())).thenReturn(wrapper);
 
-    ServiceClientResponse<CustomerDeleteResponse> res = adapter.deleteCustomer(7);
+    ServiceResponse<CustomerDeleteResponse> res = adapter.deleteCustomer(7);
 
     assertNotNull(res);
     assertNotNull(res.getData());

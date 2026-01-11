@@ -4,9 +4,12 @@ on:
   push:
     branches: [ main ]
     paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
+      - "**/*.md"
+      - "docs/**"
   pull_request:
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
 
 permissions:
   contents: read
@@ -19,23 +22,28 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: "21"
+          distribution: "temurin"
           cache: maven
+
+      # 0) Install api-contract into local Maven repo (required for downstream builds)
+      - name: Build api-contract (install)
+        run: mvn -B -q -ntp -DskipTests clean install
+        working-directory: api-contract
 
       - name: Build customer-service (tests + coverage)
         run: mvn -B -q -ntp clean verify
         working-directory: customer-service
 
-
       - name: Build customer-service-client (tests + coverage)
         run: mvn -B -q -ntp clean verify
         working-directory: customer-service-client
-
 
       - name: Upload generated client sources
         uses: actions/upload-artifact@v4
@@ -58,8 +66,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: |
-            customer-service/target/site/jacoco/jacoco.xml
-            customer-service/target/site/jacoco-it/jacoco.xml
+            customer-service/target/site/jacoco*/jacoco.xml
           flags: customer-service
           name: customer-service
           fail_ci_if_error: false
@@ -69,8 +76,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: |
-            customer-service-client/target/site/jacoco/jacoco.xml
-            customer-service-client/target/site/jacoco-it/jacoco.xml
+            customer-service-client/target/site/jacoco*/jacoco.xml
           flags: customer-service-client
           name: customer-service-client
           fail_ci_if_error: false

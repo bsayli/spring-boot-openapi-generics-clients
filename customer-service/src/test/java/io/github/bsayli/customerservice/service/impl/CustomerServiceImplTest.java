@@ -2,12 +2,12 @@ package io.github.bsayli.customerservice.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.github.bsayli.apicontract.paging.Page;
+import io.github.bsayli.apicontract.paging.SortDirection;
 import io.github.bsayli.customerservice.api.dto.CustomerCreateRequest;
 import io.github.bsayli.customerservice.api.dto.CustomerDto;
 import io.github.bsayli.customerservice.api.dto.CustomerSearchCriteria;
 import io.github.bsayli.customerservice.api.dto.CustomerUpdateRequest;
-import io.github.bsayli.customerservice.common.api.response.Page;
-import io.github.bsayli.customerservice.common.api.sort.SortDirection;
 import io.github.bsayli.customerservice.common.api.sort.SortField;
 import io.github.bsayli.customerservice.service.CustomerService;
 import java.util.NoSuchElementException;

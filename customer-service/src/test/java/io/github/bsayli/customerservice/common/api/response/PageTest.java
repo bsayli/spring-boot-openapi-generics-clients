@@ -2,6 +2,7 @@ package io.github.bsayli.customerservice.common.api.response;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.github.bsayli.apicontract.paging.Page;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

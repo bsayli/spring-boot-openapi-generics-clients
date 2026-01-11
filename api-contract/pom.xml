@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.bsayli</groupId>
+    <artifactId>api-contract</artifactId>
+    <version>0.7.4</version>
+
+    <name>api-contract</name>
+    <description>Shared API contract for the unified {data, meta} response model and pagination primitives.</description>
+    <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
+        <connection>scm:git:https://github.com/bsayli/spring-boot-openapi-generics-clients.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:bsayli/spring-boot-openapi-generics-clients.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>bsayli</id>
+            <name>Baris Sayli</name>
+            <url>https://github.com/bsayli</url>
+        </developer>
+    </developers>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jackson-annotations.version>2.19.4</jackson-annotations.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-annotations.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>

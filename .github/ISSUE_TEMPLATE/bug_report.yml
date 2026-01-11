@@ -39,8 +39,8 @@ body:
       description: "Tool versions or environment details."
       placeholder: |
         - Java: 21
-        - OpenAPI Generator: 7.17.0
-        - Spring Boot: 3.4.x
+        - OpenAPI Generator: 7.18.0
+        - Spring Boot: 3.5.x
         - OS: macOS / Windows / Linux
   - type: textarea
     id: additional

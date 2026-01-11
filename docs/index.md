@@ -4,121 +4,203 @@ title: Home
 nav_order: 1
 canonical_url: https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04
 ---
+# Spring Boot OpenAPI Generics — Adoption Hub
 
-# Spring Boot OpenAPI Generics Clients
+> A production‑grade blueprint for **contract‑driven, generics‑aware API boundaries** built with Spring Boot, Springdoc, and OpenAPI Generator.
 
-> A production-grade blueprint for generics-aware API clients built with Spring Boot and OpenAPI Generator.
-
-Welcome! 👋
-
-This project demonstrates a **modern, generics-aware OpenAPI client generation pattern** for Spring Boot 3.4+, featuring
-the unified `{ data, meta }` response model and full **nested generic support** — from `ServiceResponse<T>` to
-`ServiceResponse<Page<T>>`.
-
----
-
-## 💡 Overview
-
-Using Springdoc on the backend and OpenAPI Generator 7.18.0 on the client side, this setup enables seamless code
-generation where all responses are **type-safe**, **clean**, and **boilerplate-free**.
+Welcome 👋
+This documentation describes a **domain‑agnostic, single‑contract architecture** where **both server and client** share the same canonical success envelope:
 
 ```java
-public class ServiceResponseCustomerDto
-        extends ServiceClientResponse<CustomerDto> {
-}
+ServiceResponse<T>
 ```
 
-Each generated client wrapper now automatically supports nested generic envelopes such as:
+No duplicated envelopes.
+No parallel client contracts.
+No schema drift.
+
+The result is an **end‑to‑end type‑safe API boundary** with deterministic OpenAPI output, explicit generic rules, and RFC 9457‑compliant error handling.
+
+---
+
+## 💡 What This Blueprint Solves
+
+Modern HTTP APIs almost always wrap responses:
+
+* metadata (pagination, sorting, timestamps)
+* data payloads
+* standardized error structures
+
+Yet most OpenAPI‑based workflows still suffer from fundamental issues:
+
+* generics are flattened or erased
+* envelopes are duplicated on the client
+* nested containers produce unstable or ambiguous schemas
+* client contracts silently diverge from server contracts
+
+This blueprint solves these problems by enforcing **one shared contract** and making OpenAPI generation **generics‑aware by design**, not by convention.
+
+---
+
+## 🧱 Canonical Contract (Single Source of Truth)
+
+All **successful responses** — on **both server and client** — use:
 
 ```java
-ServiceClientResponse<Page<CustomerDto>>
+ServiceResponse<T>
 ```
+
+Provided by the shared module:
+
+```
+io.github.bsayli:api-contract
+```
+
+This module defines the **only** envelope, paging, and metadata types used across the system.
+
+### Supported Shapes (Intentional Constraints)
+
+| Shape                       | Supported | Notes                                  |
+| --------------------------- | --------- | -------------------------------------- |
+| `ServiceResponse<T>`        | ✅         | Canonical success envelope             |
+| `ServiceResponse<Page<T>>`  | ✅         | **Only allowed nested generic**        |
+| `ServiceResponse<List<T>>`  | ❌         | Treated as raw type (generics ignored) |
+| `ServiceResponse<Map<K,V>>` | ❌         | Not supported                          |
+| Arbitrary nested generics   | ❌         | Explicitly rejected                    |
+
+These constraints are **deliberate**.
+They guarantee deterministic schema names and stable client generation across versions.
 
 ---
 
-## ✅ Key Features
+## 🧩 High‑Level Architecture
 
-* **Unified response model:** `{ data, meta }` replaces legacy status/message/errors structure.
-* **Nested generics support:** Handles both `ServiceResponse<T>` and `ServiceResponse<Page<T>>`.
-* **RFC 9457 compliant errors:** All non-2xx responses are mapped into `ProblemDetail` and thrown as
-  `ClientProblemException`.
-* **Generics-aware OpenAPI Generator overlay:** Mustache templates produce thin, type-safe wrappers.
-* **Simple integration:** Works with any Spring Boot service exposing `/v3/api-docs.yaml`.
+```
+[any-service]
+   └─ publishes OpenAPI 3.1 spec
+        └─ enriched with wrapper semantics
+              │
+              ▼
+[generated-client]
+   └─ thin wrapper models
+        └─ extend ServiceResponse<T>
+              │
+              ▼
+[consumer applications]
+   └─ depend only on adapters
+```
+
+### Core Principle
+
+> **The OpenAPI specification describes contracts — not implementations.**
+
+Wrapper semantics are expressed via vendor extensions, but **all concrete Java types** come from the shared `api-contract` module.
 
 ---
 
-## 🧩 Architecture
+## 🧠 Thin Wrapper Generation (Conceptual)
+
+The server publishes OpenAPI schemas enriched with semantic hints such as:
 
 ```
-[customer-service]  →  publishes OpenAPI spec (/v3/api-docs.yaml)
-         │
-         └──►  [customer-service-client]  →  generates thin wrappers extending ServiceClientResponse<T>
-                       │
-                       └──►  used by consumer microservices via adapters
+x-api-wrapper: true
+x-api-wrapper-datatype: <DomainDto>
+x-data-container: Page        # only for Page<T>
+x-data-item: <DomainDto>      # only for Page<T>
 ```
 
----
-
-## 🚀 Quick Start
-
-```bash
-# Run the backend
-cd customer-service && mvn spring-boot:run
-
-# Generate the OpenAPI client
-cd ../customer-service-client && mvn clean install
-```
-
-Generated wrappers appear under:
-
-`target/generated-sources/openapi/src/gen/java`
-
-Each class extends `ServiceClientResponse<T>` and is compatible with the `{ data, meta }` response structure.
-
----
-
-## 🧱 Example Response
-
-```json
-{
-  "data": {
-    "customerId": 1,
-    "name": "Jane Doe",
-    "email": "jane@example.com"
-  },
-  "meta": {
-    "serverTime": "2025-01-01T12:34:56Z",
-    "sort": []
-  }
-}
-```
-
-Client usage:
+The client build uses a minimal Mustache overlay to generate **thin wrapper classes** like:
 
 ```java
-ServiceClientResponse<CustomerDto> response = api.getCustomer(1);
-CustomerDto dto = response.getData();
-Instant serverTime = response.getMeta().serverTime();
+public class ServiceResponseFooDto
+    extends ServiceResponse<FooDto> {}
 ```
 
----
+```java
+public class ServiceResponsePageFooDto
+    extends ServiceResponse<Page<FooDto>> {}
+```
 
-## ⚙️ Toolchain
-
-| Component             | Version | Purpose                          |
-|-----------------------|---------|----------------------------------|
-| **Java**              | 21      | Language baseline                |
-| **Spring Boot**       | 3.5.9   | REST + OpenAPI provider          |
-| **Springdoc**         | 2.8.15  | OpenAPI 3.1 integration          |
-| **OpenAPI Generator** | 7.18.0  | Generics-aware client generation |
-| **HttpClient5**       | 5.5.2   | Production-grade HTTP backend    |
+* No envelope logic is duplicated
+* No runtime reflection or adapters are required
+* All behavior comes from the shared contract
 
 ---
 
-## 📚 Learn More
+## ⚠️ Error Handling (RFC 9457‑First)
 
-* [Server-Side Adoption](adoption/server-side-adoption.md)
-* [Client-Side Adoption](adoption/client-side-adoption.md)
+All non‑2xx responses are modeled as **RFC 9457 Problem Details** and surfaced to the client as a single exception type:
+
+```java
+ApiProblemException
+```
+
+This exception:
+
+* wraps the decoded `ProblemDetail`
+* preserves the HTTP status
+* carries full error context for logging and diagnostics
+
+Client‑side error handling therefore mirrors Spring’s server‑side semantics.
+
+---
+
+## 🚀 Getting Started (Conceptual Flow)
+
+1. **Server‑side** publishes a generics‑aware OpenAPI 3.1 contract
+2. **Client‑side build** consumes that spec using template overlays
+3. **Generated wrappers** extend `ServiceResponse<T>` from `api-contract`
+4. **Consumers** interact only with stable adapters
+
+Concrete setup steps are covered in the adoption guides below.
+
+---
+
+## 📦 Toolchain (Reference)
+
+| Component         | Role                    |
+| ----------------- | ----------------------- |
+| Java 21           | Language baseline       |
+| Spring Boot 3.x   | REST runtime            |
+| Springdoc         | OpenAPI 3.1 producer    |
+| OpenAPI Generator | Client code generation  |
+| HttpClient5       | Production HTTP backend |
+
+Exact versions are pinned in the respective adoption guides to ensure reproducibility.
+
+---
+
+## 📚 Adoption Guides
+
+Use these guides to integrate the blueprint step‑by‑step:
+
+* **Server‑Side Adoption**
+  How to expose `ServiceResponse<T>` and publish a deterministic, generics‑aware OpenAPI contract.
+
+* **Client‑Side Adoption — Build Setup**
+  How to configure Maven, generator plugins, and Mustache overlays.
+
+* **Client‑Side Adoption — Integration**
+  How to consume the generated client safely using adapters and RFC 9457 handling.
+
+Each guide is **domain‑agnostic** and focuses on architectural rules rather than examples.
+
+---
+
+## 🎯 Design Guarantees
+
+This blueprint guarantees:
+
+* **One response contract** across server and client
+* **Zero duplicated envelopes**
+* **Deterministic schema names**
+* **Explicit generic rules (Page‑only nesting)**
+* **RFC 9457‑first error handling**
+* **Generator‑safe evolution over time**
+
+This is not a tutorial demo.
+
+It is a **reference architecture** for teams who care about API correctness, long‑term maintainability, and zero contract drift.
 
 ---
 
@@ -133,5 +215,4 @@ Instant serverTime = response.getMeta().serverTime();
 
 ---
 
-✅ With this setup, you get **end-to-end generics awareness**, clean `{ data, meta }` responses, nested generic wrappers,
-and unified error handling — all generated automatically.
+🛡 Licensed under **MIT**. All modules inherit the same license.

@@ -1,10 +1,10 @@
 package io.github.bsayli.customerservice.api.controller;
 
+import io.github.bsayli.apicontract.envelope.Meta;
+import io.github.bsayli.apicontract.envelope.ServiceResponse;
+import io.github.bsayli.apicontract.paging.Page;
+import io.github.bsayli.apicontract.paging.SortDirection;
 import io.github.bsayli.customerservice.api.dto.*;
-import io.github.bsayli.customerservice.common.api.response.Meta;
-import io.github.bsayli.customerservice.common.api.response.Page;
-import io.github.bsayli.customerservice.common.api.response.ServiceResponse;
-import io.github.bsayli.customerservice.common.api.sort.SortDirection;
 import io.github.bsayli.customerservice.common.api.sort.SortField;
 import io.github.bsayli.customerservice.service.CustomerService;
 import jakarta.validation.Valid;
@@ -40,14 +40,14 @@ public class CustomerController {
             .buildAndExpand(created.customerId())
             .toUri();
 
-    return ResponseEntity.created(location).body(ServiceResponse.ok(created));
+    return ResponseEntity.created(location).body(ServiceResponse.of(created));
   }
 
   @GetMapping("/{customerId}")
   public ResponseEntity<ServiceResponse<CustomerDto>> getCustomer(
       @PathVariable @Min(1) Integer customerId) {
     CustomerDto dto = customerService.getCustomer(customerId);
-    return ResponseEntity.ok(ServiceResponse.ok(dto));
+    return ResponseEntity.ok(ServiceResponse.of(dto));
   }
 
   @GetMapping
@@ -58,8 +58,8 @@ public class CustomerController {
       @RequestParam(defaultValue = "customerId") SortField sortBy,
       @RequestParam(defaultValue = "asc") SortDirection direction) {
     var paged = customerService.getCustomers(criteria, page, size, sortBy, direction);
-    var meta = Meta.now(sortBy, direction);
-    return ResponseEntity.ok(ServiceResponse.ok(paged, meta));
+    var meta = Meta.now(sortBy.value(), direction);
+    return ResponseEntity.ok(ServiceResponse.of(paged, meta));
   }
 
   @PutMapping(path = "/{customerId}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -67,7 +67,7 @@ public class CustomerController {
       @PathVariable @Min(1) Integer customerId, @Valid @RequestBody CustomerUpdateRequest request) {
 
     CustomerDto updated = customerService.updateCustomer(customerId, request);
-    return ResponseEntity.ok(ServiceResponse.ok(updated));
+    return ResponseEntity.ok(ServiceResponse.of(updated));
   }
 
   @DeleteMapping("/{customerId}")
@@ -76,6 +76,6 @@ public class CustomerController {
 
     customerService.deleteCustomer(customerId);
     var body = new CustomerDeleteResponse(customerId);
-    return ResponseEntity.ok(ServiceResponse.ok(body));
+    return ResponseEntity.ok(ServiceResponse.of(body));
   }
 }

@@ -1,101 +1,154 @@
 # Security Policy
 
-We take security seriously and appreciate responsible disclosures.  
+We take security seriously and appreciate responsible disclosures.
 If you believe you’ve found a vulnerability, **please follow the process below**.
 
 ---
 
+## 📑 Table of Contents
+
+- [Supported Versions](#supported-versions)
+- [Reporting a Vulnerability](#reporting-a-vulnerability)
+- [Our Process & Timelines](#our-process--timelines)
+- [Severity Guidance](#severity-guidance)
+- [Coordinated Disclosure](#coordinated-disclosure)
+- [Scope](#scope)
+   - [In scope](#in-scope)
+   - [Out of scope](#out-of-scope)
+- [Non-qualifying Reports](#nonqualifying-reports)
+- [Questions](#questions)
+
+---
 ## Supported Versions
 
-We currently provide security fixes for the latest minor release and the `main` branch.
+We currently provide security fixes for the latest minor release line and the `main` branch.
 
-| Version    | Status              |
-|-----------:|---------------------|
-| `main`     | ✅ Supported        |
-| `0.7.x`    | ✅ Supported        |
-| `< 0.7.0`  | ❌ Not supported    |
+| Version   | Status          |
+| --------- | --------------- |
+| `main`    | ✅ Supported     |
+| `0.7.x`   | ✅ Supported     |
+| `< 0.7.0` | ❌ Not supported |
 
-> Note: This project is pre-1.0; interfaces may evolve quickly. Please upgrade to the latest release before reporting issues when possible.
+> **Note**
+> This project is **pre‑1.0**. Public APIs and contracts may evolve quickly.
+> Please upgrade to the latest release before reporting issues whenever possible.
 
 ---
 
 ## Reporting a Vulnerability
 
-**Do not open a public issue.**  
-Instead, choose one of the following private channels:
+**Do not open a public issue.**
 
-1. **GitHub Security Advisory (preferred):**  
-   Create a private report via **Security → Advisories → Report a vulnerability** in this repo.
-2. **Email:**  
-   Send details to **baris.sayli@gmail.com** with the subject `SECURITY: <short summary>`.
+Use one of the following **private disclosure channels**:
+
+1. **GitHub Security Advisory (preferred)**
+   Use **Security → Advisories → Report a vulnerability** in this repository.
+
+2. **Email**
+   Send details to **[baris.sayli@gmail.com](mailto:baris.sayli@gmail.com)** with subject:
+
+   ```text
+   SECURITY: <short summary>
+   ```
 
 Please include:
 
-- A clear description of the issue and potential impact.
-- A minimal proof-of-concept (PoC) or steps to reproduce.
-- Affected version(s) (commit hash or tag) and environment details.
-- Any suggested remediation ideas if you have them.
+* A clear description of the issue and its potential impact
+* A minimal proof‑of‑concept (PoC) or reproduction steps
+* Affected version(s) (tag or commit hash)
+* Environment details if relevant
+* Suggested remediation ideas (optional but welcome)
 
 ---
 
 ## Our Process & Timelines
 
-We aim to respond in a timely and transparent way, keeping you informed throughout key stages.
+We aim to handle reports responsibly, transparently, and without unnecessary delay.
 
-- **Acknowledgement:** typically within a few days after receiving a report.
-- **Triage & Reproduction:** investigated as soon as practical based on severity.
-- **Fix Planning:** prioritized according to impact and complexity.
-- **Release:** patches are published once validated; coordinated disclosure may be used for sensitive issues.
+* **Acknowledgement:** typically within a few days
+* **Triage & Reproduction:** prioritized based on severity and scope
+* **Fix Planning:** aligned with impact, determinism, and contract stability
+* **Release:** fixes are published once validated
 
-We’ll keep reporters informed at major milestones such as triage results, fix readiness, and release timing.
+For sensitive issues, **coordinated disclosure** may be used.
+Reporters are kept informed at key milestones.
 
 ---
 
 ## Severity Guidance
 
-We use a pragmatic CVSS-like approach:
+We follow a pragmatic, CVSS‑inspired classification:
 
-- **Critical/High:** RCE, auth bypass, or issues enabling widespread compromise.
-- **Medium:** Information disclosure, privilege/DoS limited to a single service.
-- **Low:** Hardening gaps, misconfigurations, limited-edge misuse.
+* **Critical / High**
+  Remote code execution, authentication bypass, or vulnerabilities enabling broad compromise
 
-Severity influences prioritization and disclosure timing.
+* **Medium**
+  Information disclosure, privilege escalation, or DoS limited to a single service or boundary
+
+* **Low**
+  Hardening gaps, misconfigurations, or limited edge‑case misuse
+
+Severity directly influences prioritization and release timing.
 
 ---
 
 ## Coordinated Disclosure
 
-- We prefer **coordinated disclosure**. Please do not share details publicly until a fix is available.
-- With your consent, we’re happy to credit reporters in release notes (name/handle).
+* We prefer **coordinated disclosure**. Please do not share details publicly before a fix is released.
+* With your consent, reporters may be credited in release notes or acknowledgements.
 
 ---
 
 ## Scope
 
-**In scope**
-- `customer-service` (server / OpenAPI producer)
-- `customer-service-client` (generated client & overlays)
-- Templates, schema customizers, and build instructions contained in this repo
+### In scope
 
-**Out of scope**
-- Vulnerabilities exclusively within third-party dependencies (report upstream first)
-- Demo/test-only code that is not used in production contexts
-- Deployment-specific misconfigurations outside the repo
+* **`api-contract`**
+  Shared response, paging, and error contracts (`ServiceResponse<T>`, `Meta`, `Page`, RFC 9457 extensions)
+
+* **`customer-service`**
+  Spring Boot server / OpenAPI producer
+
+* **`customer-service-client`**
+  Generated client, template overlays, and client‑side adapters
+
+* OpenAPI templates, schema customizers, and build instructions contained in this repository
+
+### Out of scope
+
+* Vulnerabilities exclusively caused by **third‑party dependencies** (report upstream first)
+* Demo or test‑only code not used in production contexts
+* Deployment‑specific misconfigurations outside this repository
 
 ---
 
-## Non-qualifying Reports
+## Non‑qualifying Reports
 
-To focus on impactful issues, we generally exclude:
-- Best-practice suggestions without a practical exploit scenario
-- Rate limiting / generic DoS without a novel exploit
-- Missing security headers in dev/demo endpoints
-- Social engineering or physical attacks
+To keep focus on impactful issues, we generally exclude:
+
+* Best‑practice recommendations without a realistic exploit scenario
+* Generic rate‑limiting or DoS reports without novel attack vectors
+* Missing security headers in demo or development endpoints
+* Social engineering or physical attack scenarios
+* Issues that require modifying **generated code directly** instead of templates or shared contracts
+
+> **Important**
+> Generated code is treated as **disposable output**.
+> Security fixes must target **contracts, templates, or generators**, not generated artifacts.
 
 ---
 
 ## Questions
 
-If you’re unsure whether something qualifies, email **baris.sayli@gmail.com** and we’ll help triage.
+If you’re unsure whether something qualifies as a security issue, contact:
 
-Thank you for helping keep the community safe! 🙏
+**[baris.sayli@gmail.com](mailto:baris.sayli@gmail.com)**
+
+We’re happy to help triage before a formal report.
+
+---
+
+Thank you for helping keep the community safe 🙏
+
+This policy reflects the project’s core principle:
+**security, like architecture, is enforced at the contract boundary — not patched downstream.**

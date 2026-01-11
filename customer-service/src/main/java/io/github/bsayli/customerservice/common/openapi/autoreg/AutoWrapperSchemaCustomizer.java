@@ -1,8 +1,10 @@
 package io.github.bsayli.customerservice.common.openapi.autoreg;
 
+import io.github.bsayli.apicontract.paging.Page;
 import io.github.bsayli.customerservice.common.openapi.ApiResponseSchemaFactory;
 import io.github.bsayli.customerservice.common.openapi.OpenApiSchemas;
 import io.github.bsayli.customerservice.common.openapi.introspector.ResponseTypeIntrospector;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -32,8 +34,7 @@ public class AutoWrapperSchemaCustomizer {
   public AutoWrapperSchemaCustomizer(
       ListableBeanFactory beanFactory,
       ResponseTypeIntrospector introspector,
-      @Value("${app.openapi.wrapper.class-extra-annotation:}") String classExtraAnnotation,
-      @Value("${app.openapi.wrapper.generic-containers:Page}") String genericContainersProp) {
+      @Value("${app.openapi.wrapper.class-extra-annotation:}") String classExtraAnnotation) {
 
     this.dataRefs =
         beanFactory.getBeansOfType(RequestMappingHandlerMapping.class).values().stream()
@@ -48,26 +49,30 @@ public class AutoWrapperSchemaCustomizer {
             ? null
             : classExtraAnnotation;
 
-    this.genericContainers =
-        Arrays.stream(genericContainersProp.split(","))
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
-            .collect(Collectors.toUnmodifiableSet());
+    this.genericContainers = Set.of(Page.class.getSimpleName());
   }
 
   @Bean
   public OpenApiCustomizer autoResponseWrappers() {
-    return openApi ->
-        dataRefs.forEach(
-            ref -> {
-              String wrapperName = OpenApiSchemas.SCHEMA_SERVICE_RESPONSE + ref;
-              openApi
-                  .getComponents()
-                  .addSchemas(
-                      wrapperName,
-                      ApiResponseSchemaFactory.createComposedWrapper(ref, classExtraAnnotation));
-              enrichWrapperExtensions(openApi, wrapperName, ref);
-            });
+    return openApi -> {
+      if (openApi.getComponents() == null) {
+        openApi.setComponents(new Components());
+      }
+      if (openApi.getComponents().getSchemas() == null) {
+        openApi.getComponents().setSchemas(new LinkedHashMap<>());
+      }
+
+      dataRefs.forEach(
+          ref -> {
+            String wrapperName = OpenApiSchemas.SCHEMA_SERVICE_RESPONSE + ref;
+            openApi
+                .getComponents()
+                .addSchemas(
+                    wrapperName,
+                    ApiResponseSchemaFactory.createComposedWrapper(ref, classExtraAnnotation));
+            enrichWrapperExtensions(openApi, wrapperName, ref);
+          });
+    };
   }
 
   private void enrichWrapperExtensions(OpenAPI openApi, String wrapperName, String dataRefName) {

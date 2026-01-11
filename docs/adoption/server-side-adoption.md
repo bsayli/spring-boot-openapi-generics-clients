@@ -4,22 +4,90 @@ title: Server-Side Adoption
 parent: Adoption Guides
 nav_order: 1
 ---
+# Server-Side Adoption — Spring MVC + Springdoc
 
-# Server-Side Adoption — Spring Boot + Springdoc
+**Goal:** integrate a contract-driven setup into your Spring MVC service so it:
 
-**Goal:** Integrate a minimal, production-ready setup into your Spring MVC service so it returns unified`{ data, meta }`
-envelopes, automatically registers generic wrappers in OpenAPI, and enables thin client generation via
-`ServiceClientResponse<T>`.
+* returns a unified `{ data, meta }` envelope via **`ServiceResponse<T>`**
+* publishes a deterministic, generics-aware **OpenAPI 3.1** contract
+* enables **thin, type-safe client generation** without duplicating response models
 
-> Scope: Spring MVC (WebMVC) + Springdoc (no WebFlux).
+> Scope: Spring MVC (WebMVC) + Springdoc.
+> Out of scope: WebFlux, reactive servers.
 
 ---
 
-## 1️⃣ Overview
+## Table of Contents
 
-Your service will:
+* [Core Principle](#core-principle)
+  * [Contract Rules](#contract-rules)
+* [What Your Service Will Do](#what-your-service-will-do)
+* [Dependencies](#dependencies)
+* [Response Envelope](#response-envelope)
+* [OpenAPI Schema Infrastructure](#openapi-schema-infrastructure)
+  * [OpenApiSchemas](#openapischemas)
+  * [SwaggerResponseCustomizer](#swaggerresponsecustomizer)
+  * [ApiResponseSchemaFactory](#apiresponseschemafactory)
+* [Automatic Wrapper Registration](#automatic-wrapper-registration)
+  * [ResponseTypeIntrospector](#responsetypeintrospector)
+  * [AutoWrapperSchemaCustomizer](#autowrapperschemacustomizer)
+* [Global Error Responses (RFC 9457)](#global-error-responses-rfc-9457)
+  * [GlobalErrorResponsesCustomizer](#globalerrorresponsescustomizer)
+  * [Optional: Problem Extensions](#optional-problem-extensions)
+* [Example Controller](#example-controller)
+* [Verification Checklist](#verification-checklist)
+* [Minimal Folder Layout](#minimal-folder-layout)
+* [Outcome](#outcome)
 
-* Return success bodies like:
+---
+
+<a id="core-principle"></a>
+
+## Core Principle
+
+This setup is **contract-first and non-negotiable**.
+
+* **`api-contract` is the single source of truth** for:
+
+  * `ServiceResponse`
+  * `Meta`
+  * `Page`
+  * `Sort`
+* Both **server** and **client** depend on the same artifact.
+* No local copies, forks, or redefinitions.
+
+<a id="contract-rules"></a>
+
+### Contract Rules
+
+* The canonical success envelope is **`ServiceResponse<T>`**.
+* Nested generics are supported **only** for:
+
+```text
+ServiceResponse<Page<T>>
+```
+
+* For any other generic type:
+
+```text
+ServiceResponse<List<T>>
+ServiceResponse<Map<K,V>>
+ServiceResponse<Foo<Bar>>
+```
+
+➡️ **Generics are ignored** in schema naming and wrapper typing. Only the **raw type** name is used.
+
+This rule is enforced at **OpenAPI generation time** and is intentional (determinism + generator safety).
+
+---
+
+<a id="what-your-service-will-do"></a>
+
+## What Your Service Will Do
+
+After adoption, your service will:
+
+* Return success responses like:
 
 ```json
 {
@@ -31,386 +99,288 @@ Your service will:
 }
 ```
 
-* Expose Swagger UI and `/v3/api-docs(.yaml)` including:
+* Publish `/v3/api-docs(.yaml)` that includes:
 
-    * Base `ServiceResponse`
-    * Composed wrappers for each DTO (`ServiceResponseCustomerDto`, etc.)
-    * Vendor extensions: `x-api-wrapper`, `x-api-wrapper-datatype`, *(optionally)* `x-data-container`, `x-data-item`
+  * base schemas (`ServiceResponse`, `Meta`, `Page`, `Sort`)
+  * one composed wrapper per discovered `T`
+  * vendor extensions required for client-side wrapper typing
 
 ---
 
-## 2️⃣ Dependencies (pom.xml)
+<a id="dependencies"></a>
+
+## Dependencies
+
+Maven example:
 
 ```xml
+<properties>
+  <!-- Pin only what the Spring Boot parent/BOM does NOT manage -->
+  <springdoc-openapi-starter.version>2.8.15</springdoc-openapi-starter.version>
+
+  <!-- Shared contract version (single source of truth) -->
+  <api-contract.version>0.7.4</api-contract.version>
+</properties>
 
 <dependencies>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-validation</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.springdoc</groupId>
-        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-        <version>2.8.15</version>
-    </dependency>
+<!-- Spring Boot web stack (version managed by Spring Boot parent/BOM) -->
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+
+<!-- OpenAPI producer (NOT managed by Spring Boot parent/BOM) -->
+<dependency>
+  <groupId>org.springdoc</groupId>
+  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+  <version>${springdoc-openapi-starter.version}</version>
+</dependency>
+
+<!-- Shared response + paging contract (single source of truth) -->
+<dependency>
+  <groupId>io.github.bsayli</groupId>
+  <artifactId>api-contract</artifactId>
+  <version>${api-contract.version}</version>
+</dependency>
 </dependencies>
 ```
 
-> ✅ Ensure `common.openapi` packages are inside your application's scan base package.
+> Make sure your OpenAPI customization packages are included in your application’s component scan.
 
 ---
 
-## 3️⃣ Core Response Envelope
+<a id="response-envelope"></a>
 
-Include your unified response primitives under `common/api/response/`.
+## Response Envelope
 
-**`ServiceResponse.java`**
+You **do not implement** the envelope classes locally.
 
-```java
-package <your.base>.common.api.response;
+They come from:
 
-public record ServiceResponse<T>(T data, Meta meta) {
-
-    public static <T> ServiceResponse<T> ok(T data) {
-        return new ServiceResponse<>(data, Meta.now());
-    }
-
-    public static <T> ServiceResponse<T> ok(T data, Meta meta) {
-        return new ServiceResponse<>(data, meta != null ? meta : Meta.now());
-    }
-}
+```text
+io.github.bsayli:api-contract
 ```
 
-**`Meta.java`**
+Used types include:
 
-```java
-package
+* `ServiceResponse<T>`
+* `Meta`
+* `Page<T>`
+* `Sort`
 
-<your.base>.common.api.response;
-
-import java.time.Instant;
-import java.util.List;
-
-public record Meta(Instant serverTime, List<Sort> sort) {
-
-    public static Meta now() {
-        return new Meta(Instant.now(), List.of());
-    }
-
-    public static Meta now(List<Sort> sort) {
-        return new Meta(Instant.now(), sort == null ? List.of() : List.copyOf(sort));
-    }
-}
-```
-
-These define the `{ data, meta }` envelope shared across all controllers.
+Your controllers should return `ServiceResponse<T>` (optionally wrapped in `ResponseEntity`).
 
 ---
 
-## 4️⃣ OpenAPI Schema Setup
+<a id="openapi-schema-infrastructure"></a>
 
-Define and register your reusable OpenAPI schema components directly in your service. Below are the key files and
-minimal inline examples — each followed by a link to its full source.
+## OpenAPI Schema Infrastructure
 
-**`OpenApiSchemas.java`** — centralizes all schema names and vendor extension keys.
+This adoption expects a small OpenAPI “schema layer” in your service. The names below are **reference names** (you can rename them), but the responsibilities should remain.
 
-```java
-package <your.base>.common.openapi;
+<a id="openapischemas"></a>
 
-public final class OpenApiSchemas {
+### `OpenApiSchemas`
 
-    public static final String PROP_DATA = "data";
-    public static final String PROP_META = "meta";
+Centralizes schema names and vendor-extension keys.
 
-    public static final String SCHEMA_SERVICE_RESPONSE = "ServiceResponse";
-    public static final String SCHEMA_SERVICE_RESPONSE_VOID = "ServiceResponseVoid";
-    public static final String SCHEMA_META = "Meta";
+Vendor extensions:
 
-    public static final String EXT_API_WRAPPER = "x-api-wrapper";
-    public static final String EXT_API_WRAPPER_DATATYPE = "x-api-wrapper-datatype";
-    public static final String EXT_DATA_CONTAINER = "x-data-container";
-    public static final String EXT_DATA_ITEM = "x-data-item";
+| Key                      | Purpose                           |
+| ------------------------ | --------------------------------- |
+| `x-api-wrapper`          | Marks a composed response wrapper |
+| `x-api-wrapper-datatype` | Raw `T` schema name               |
+| `x-data-container`       | Present **only** for `Page<T>`    |
+| `x-data-item`            | Inner item type for `Page<T>`     |
 
-    private OpenApiSchemas() {
-    }
-}
+<a id="swaggerresponsecustomizer"></a>
+
+### `SwaggerResponseCustomizer`
+
+Registers base, reusable schemas:
+
+* `ServiceResponse`
+* `Meta`
+
+This ensures composed wrappers can safely reference them.
+
+<a id="apiresponseschemafactory"></a>
+
+### `ApiResponseSchemaFactory`
+
+Creates a composed schema per discovered `T`, for example:
+
+```text
+ServiceResponseEntityDto
+ServiceResponsePageEntityDto
 ```
 
-➡️ [View full source →](snippets/OpenApiSchemas.java)
+Each composed schema typically:
+
+* uses `allOf` with the base `ServiceResponse`
+* rebinds the `data` property to the discovered `T` (or `Page<T>`)
+* adds `x-api-wrapper` metadata
 
 ---
 
-**`SwaggerResponseCustomizer.java`** — registers base envelope schemas (`ServiceResponse`, `Meta`, etc.).
+<a id="automatic-wrapper-registration"></a>
 
-```java
+## Automatic Wrapper Registration
 
-@Configuration
-public class SwaggerResponseCustomizer {
+<a id="responsetypeintrospector"></a>
 
-    @Bean
-    public OpenApiCustomizer responseEnvelopeSchemas() {
-        return openApi -> {
-            var schemas = openApi.getComponents().getSchemas();
+### `ResponseTypeIntrospector`
 
-            schemas.computeIfAbsent("ServiceResponse", k -> new ObjectSchema()
-                    .addProperty("data", new Schema<>())
-                    .addProperty("meta", new Schema<>().$ref("#/components/schemas/Meta")));
+* scans controller return types
+* unwraps `ResponseEntity`, async wrappers, etc.
+* detects `ServiceResponse<T>`
+* enforces the **Page-only nested generics** rule
 
-            schemas.computeIfAbsent("Meta", k -> new ObjectSchema()
-                    .addProperty("serverTime", new StringSchema().format("date-time"))
-                    .addProperty("sort", new ArraySchema().items(new ObjectSchema())));
-        };
-    }
-}
-```
+Behavior summary:
 
-➡️ [View full source →](snippets/SwaggerResponseCustomizer.java)
+| Return type                        | Resulting data schema name |
+| ---------------------------------- | -------------------------- |
+| `ServiceResponse<EntityDto>`       | `EntityDto`                |
+| `ServiceResponse<Page<EntityDto>>` | `PageEntityDto`            |
+| `ServiceResponse<List<EntityDto>>` | `List` (raw)               |
 
----
+<a id="autowrapperschemacustomizer"></a>
 
-**`ApiResponseSchemaFactory.java`** — composes a new wrapper schema per DTO and enriches it with vendor extensions.
+### `AutoWrapperSchemaCustomizer`
 
-```java
-public final class ApiResponseSchemaFactory {
+* runs at OpenAPI generation time
+* discovers all `T` values from your controllers
+* registers composed wrapper schemas automatically
+* adds:
 
-    public static Schema<?> createComposedWrapper(String dataRef) {
-        var schema = new ComposedSchema();
-        schema.setAllOf(List.of(
-                new Schema<>().$ref("#/components/schemas/ServiceResponse"),
-                new ObjectSchema().addProperty("data", new Schema<>().$ref("#/components/schemas/" + dataRef))
-        ));
-        schema.addExtension("x-api-wrapper", true);
-        schema.addExtension("x-api-wrapper-datatype", dataRef);
-        return schema;
-    }
-}
-```
+  * `x-data-container`
+  * `x-data-item`
 
-➡️ [View full source →](snippets/ApiResponseSchemaFactory.java)
+➡️ only when `T` is `Page<…>`.
 
 ---
 
-## 5️⃣ Auto‑Registration Logic
+<a id="global-error-responses-rfc-9457"></a>
 
-Add dynamic schema registration so OpenAPI automatically composes wrappers for all controllers returning
-`ServiceResponse<T>`.
+## Global Error Responses (RFC 9457)
 
-**`ResponseTypeIntrospector.java`** — unwraps controller return types to detect `ServiceResponse<T>`.
+<a id="globalerrorresponsescustomizer"></a>
 
-```java
-package
+### `GlobalErrorResponsesCustomizer`
 
-<your.base>.common.openapi.introspector;
+Automatically:
 
-import <your.base>.common.api.response.ServiceResponse;
-import java.lang.reflect.Method;
-import java.util.Optional;
+* registers a `ProblemDetail` schema
+* attaches standard error responses (example set):
 
-import org.springframework.core.ResolvableType;
-import org.springframework.stereotype.Component;
+  * 400
+  * 404
+  * 405
+  * 500
 
-@Component
-public final class ResponseTypeIntrospector {
+All with:
 
-    public Optional<String> extractDataRefName(Method method) {
-        if (method == null) return Optional.empty();
-        ResolvableType type = ResolvableType.forMethodReturnType(method);
+```text
+Content-Type: application/problem+json
+```
 
-        if (!ServiceResponse.class.isAssignableFrom(type.resolve())) return Optional.empty();
-        if (!type.hasGenerics()) return Optional.empty();
+Fully compliant with **RFC 9457**.
 
-        Class<?> dataClass = type.getGeneric(0).resolve();
-        return Optional.ofNullable(dataClass).map(Class::getSimpleName);
-    }
+<a id="optional-problem-extensions"></a>
+
+### Optional: Problem Extensions
+
+If you already have structured domain errors, you may enrich:
+
+```json
+{
+  "extensions": {
+    "errors": [
+      { "code": "...", "message": "...", "field": "..." }
+    ]
+  }
 }
 ```
 
-➡️ [View full source →](snippets/ResponseTypeIntrospector.java)
+This is optional and additive.
 
 ---
 
-**`AutoWrapperSchemaCustomizer.java`** — scans controllers and dynamically registers composed wrapper schemas for each
-detected DTO.
+<a id="example-controller"></a>
+
+## Example Controller
+
+Generic example (replace names with your domain):
 
 ```java
-
-@Configuration
-public class AutoWrapperSchemaCustomizer {
-
-    private final Set<String> dataRefs;
-    private final ResponseTypeIntrospector introspector;
-
-    public AutoWrapperSchemaCustomizer(ListableBeanFactory beans, ResponseTypeIntrospector introspector) {
-        this.introspector = introspector;
-        this.dataRefs = beans.getBeansOfType(RequestMappingHandlerMapping.class).values().stream()
-                .flatMap(rmh -> rmh.getHandlerMethods().values().stream())
-                .map(HandlerMethod::getMethod)
-                .map(introspector::extractDataRefName)
-                .flatMap(Optional::stream)
-                .collect(Collectors.toSet());
-    }
-
-    @Bean
-    public OpenApiCustomizer autoResponseWrappers() {
-        return openApi -> dataRefs.forEach(ref -> {
-            openApi.getComponents().addSchemas(
-                    "ServiceResponse" + ref,
-                    ApiResponseSchemaFactory.createComposedWrapper(ref)
-            );
-        });
-    }
-}
-```
-
-➡️ [View full source →](snippets/AutoWrapperSchemaCustomizer.java)
-
----
-
-## 6️⃣ Global Problem Responses (RFC 9457)
-
-Add automatic `ProblemDetail` registration and standard error responses for all operations.
-
-**`GlobalErrorResponsesCustomizer.java`** — auto-registers `ProblemDetail` schema and attaches default responses (400,
-404, 405, 500).
-
-```java
-
-@Configuration
-public class GlobalErrorResponsesCustomizer {
-
-    @Bean
-    OpenApiCustomizer addDefaultProblemResponses() {
-        return openApi -> openApi.getPaths().forEach((path, item) ->
-                item.readOperations().forEach(op -> {
-                    var problem = new Schema<>().$ref("#/components/schemas/ProblemDetail");
-                    var content = new Content().addMediaType("application/problem+json", new MediaType().schema(problem));
-                    op.getResponses().addApiResponse("400", new ApiResponse().description("Bad Request").content(content));
-                    op.getResponses().addApiResponse("404", new ApiResponse().description("Not Found").content(content));
-                    op.getResponses().addApiResponse("405", new ApiResponse().description("Method Not Allowed").content(content));
-                    op.getResponses().addApiResponse("500", new ApiResponse().description("Internal Server Error").content(content));
-                })
-        );
-    }
-}
-```
-
-➡️ [View full source →](snippets/GlobalErrorResponsesCustomizer.java)
-
-> Ensures your API spec always includes standardized problem responses without extra boilerplate.
-
----
-
-### Optional: Problem extensions (RFC 9457)
-
-Some projects enrich `ProblemDetail` with structured error data inside `extensions.errors`.
-These simple records provide a reusable base for that purpose.
-
-**`ErrorItem.java`**
-
-```java
-package
-
-<your.base>.common.api.response.error;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public record ErrorItem(String code, String message, String field, String resource, String id) {
-}
-```
-
-**`ProblemExtensions.java`**
-
-```java
-package
-
-<your.base>.common.api.response.error;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-import java.util.List;
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public record ProblemExtensions(List<ErrorItem> errors) {
-    public static ProblemExtensions ofErrors(List<ErrorItem> errors) {
-        return new ProblemExtensions(errors);
-    }
-}
-```
-
-> Usage example: in a `@RestControllerAdvice`,
-> `pd.setProperty("extensions", ProblemExtensions.ofErrors(List.of(...)))`
-> and optionally `pd.setProperty("errorCode", "VALIDATION_FAILED")`.
-
----
-
-## 7️⃣ Example Controller
-
-```java
-
 @RestController
-@RequestMapping("/v1/customers")
-class CustomerController {
-    private final CustomerService service;
+@RequestMapping("/v1/entities")
+class EntityController {
 
-    @GetMapping("/{id}")
-    ResponseEntity<ServiceResponse<CustomerDto>> get(@PathVariable int id) {
-        return ResponseEntity.ok(ServiceResponse.ok(service.getCustomer(id)));
-    }
+  @GetMapping("/{id}")
+  ResponseEntity<ServiceResponse<EntityDto>> get(@PathVariable long id) {
+    EntityDto dto = service.get(id);
+    return ResponseEntity.ok(ServiceResponse.of(dto, null));
+  }
 }
 ```
 
 ---
 
-## 8️⃣ Verification
+<a id="verification-checklist"></a>
 
-Run your service and verify:
+## Verification Checklist
 
-1. Swagger UI → `http://localhost:8084/your-service/swagger-ui/index.html`
-2. OpenAPI JSON → `http://localhost:8084/your-service/v3/api-docs`
+After startup:
 
-Confirm these:
+1. Swagger UI opens
+2. `/v3/api-docs` contains:
 
-* `ServiceResponse` base schema exists.
-* Composed schemas appear: `ServiceResponseCustomerDto`, etc.
-* Vendor extensions (`x-api-wrapper`, `x-api-wrapper-datatype`, ...) are present.
-
----
-
-## 9️⃣ Troubleshooting
-
-| Problem              | Likely Cause                                   |
-|----------------------|------------------------------------------------|
-| No composed wrappers | Controller doesn’t return `ServiceResponse<T>` |
-| Missing Meta         | Schema not registered or excluded from scan    |
-| `$ref` mismatch      | DTO class name differs from schema reference   |
+  * `ServiceResponse`
+  * `ServiceResponse<YourDto>` wrappers (composed schemas)
+  * `ServiceResponse<Page<YourDto>>` wrappers (composed schemas)
+3. Vendor extensions exist where expected
+4. No duplicated response envelope DTOs appear in the published contract
 
 ---
 
-## 📁 Folder Map (Minimal)
+<a id="minimal-folder-layout"></a>
 
-```
-src/main/java/<your/base>/
-  common/api/response/
-    Meta.java
-    ServiceResponse.java
+## Minimal Folder Layout
+
+```text
+src/main/java/<your.base>/
   common/openapi/
     OpenApiSchemas.java
     SwaggerResponseCustomizer.java
     ApiResponseSchemaFactory.java
-    ResponseTypeIntrospector.java
     GlobalErrorResponsesCustomizer.java
+    introspector/
+      ResponseTypeIntrospector.java
     autoreg/
       AutoWrapperSchemaCustomizer.java
+
   api/controller/
-    YourControllers...
+    ...
 ```
 
 ---
 
-✅ Your service now exposes a **generics‑aware**, `ProblemDetail`‑compliant OpenAPI 3.1 spec — ready for thin, type‑safe
-client generation.
+<a id="outcome"></a>
+
+## Outcome
+
+Your service now:
+
+* is **fully contract-aligned** with `api-contract`
+* publishes a **deterministic OpenAPI 3.1** spec
+* supports **Page-only nested generics**
+* produces zero duplicated response envelope models
+* is ready for thin, type-safe client generation
+
+This is not a pattern — it is a **contractual architecture decision**.

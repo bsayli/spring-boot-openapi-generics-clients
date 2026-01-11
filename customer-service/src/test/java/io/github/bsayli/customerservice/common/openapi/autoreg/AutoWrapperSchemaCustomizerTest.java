@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import io.github.bsayli.customerservice.common.openapi.OpenApiSchemas;
 import io.github.bsayli.customerservice.common.openapi.introspector.ResponseTypeIntrospector;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
@@ -44,7 +43,7 @@ class AutoWrapperSchemaCustomizerTest {
         .thenReturn(Map.of("rmh", handlerMapping));
 
     when(introspector.extractDataRefName(any(Method.class)))
-        .then(
+        .thenAnswer(
             inv -> {
               Method m = inv.getArgument(0);
               return switch (m.getName()) {
@@ -54,15 +53,18 @@ class AutoWrapperSchemaCustomizerTest {
               };
             });
 
-    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, null, "Page");
+    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, null);
     OpenApiCustomizer customizer = customizerCfg.autoResponseWrappers();
 
-    var openAPI = new OpenAPI().components(new Components());
+    // deliberately start without components/schemas to verify initializer behavior
+    var openAPI = new OpenAPI();
 
     customizer.customise(openAPI);
 
+    assertNotNull(openAPI.getComponents(), "components should be initialized");
+    assertNotNull(openAPI.getComponents().getSchemas(), "schemas should be initialized");
+
     var schemas = openAPI.getComponents().getSchemas();
-    assertNotNull(schemas, "schemas should be initialized");
     assertTrue(
         schemas.containsKey(OpenApiSchemas.SCHEMA_SERVICE_RESPONSE + "FooRef"),
         "Should contain composed schema for FooRef");
@@ -72,23 +74,24 @@ class AutoWrapperSchemaCustomizerTest {
   }
 
   @Test
-  @DisplayName("Does nothing when no data refs are discovered")
+  @DisplayName("Does nothing when no data refs are discovered (but initializes components/schemas)")
   void noRefs_noSchemasAdded() {
     var beanFactory = mock(ListableBeanFactory.class);
     var introspector = mock(ResponseTypeIntrospector.class);
 
     when(beanFactory.getBeansOfType(RequestMappingHandlerMapping.class)).thenReturn(Map.of());
 
-    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, null, "Page");
+    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, null);
     OpenApiCustomizer customizer = customizerCfg.autoResponseWrappers();
 
-    var openAPI = new OpenAPI().components(new Components());
+    var openAPI = new OpenAPI(); // no components
 
     customizer.customise(openAPI);
 
+    assertNotNull(openAPI.getComponents(), "components should be initialized even when no refs");
+    assertNotNull(openAPI.getComponents().getSchemas(), "schemas should be initialized");
     assertTrue(
-        openAPI.getComponents().getSchemas() == null
-            || openAPI.getComponents().getSchemas().isEmpty(),
+        openAPI.getComponents().getSchemas().isEmpty(),
         "No schemas should be added when no refs exist");
   }
 
@@ -113,11 +116,10 @@ class AutoWrapperSchemaCustomizerTest {
     String classExtraAnn =
         "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)";
 
-    var customizerCfg =
-        new AutoWrapperSchemaCustomizer(beanFactory, introspector, classExtraAnn, "Page");
+    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, classExtraAnn);
     OpenApiCustomizer customizer = customizerCfg.autoResponseWrappers();
 
-    var openAPI = new OpenAPI().components(new Components());
+    var openAPI = new OpenAPI(); // no components
     customizer.customise(openAPI);
 
     var schemaName = OpenApiSchemas.SCHEMA_SERVICE_RESPONSE + "FooRef";
@@ -148,10 +150,10 @@ class AutoWrapperSchemaCustomizerTest {
         .thenReturn(Map.of("rmh", handlerMapping));
     when(introspector.extractDataRefName(any(Method.class))).thenReturn(Optional.of("FooRef"));
 
-    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, "  ", "Page");
+    var customizerCfg = new AutoWrapperSchemaCustomizer(beanFactory, introspector, "  ");
     OpenApiCustomizer customizer = customizerCfg.autoResponseWrappers();
 
-    var openAPI = new OpenAPI().components(new Components());
+    var openAPI = new OpenAPI();
     customizer.customise(openAPI);
 
     var schemaName = OpenApiSchemas.SCHEMA_SERVICE_RESPONSE + "FooRef";

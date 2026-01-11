@@ -1,7 +1,7 @@
 # Contributing Guide
 
 Thanks for your interest in improving **spring-boot-openapi-generics-clients**!
-This project showcases **type-safe, generics-aware OpenAPI clients** (Java 21, Spring Boot 3.5.x, OpenAPI Generator 7.x) with a `{ data, meta }` envelope and RFC 9457 Problem Details.
+This repository demonstrates a **contract‑driven, generics‑aware OpenAPI client architecture** built on **Java 21**, **Spring Boot 3.5.x**, and **OpenAPI Generator 7.x**, centered around a *single canonical response contract* and **RFC 9457 Problem Details**.
 
 > Be kind. Be constructive. See our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
@@ -25,61 +25,85 @@ This project showcases **type-safe, generics-aware OpenAPI clients** (Java 21, S
 
 ## Questions & support
 
-* Have a question or idea?
+* Have a question, design idea, or architectural concern?
 
-    * Use **GitHub Discussions → *Ideas*** for design/roadmap talk (e.g., envelopes, nested containers).
-    * Use **Discussions → *Q&A*** for “how do I…?” support.
-* Found a bug? Open an **Issue** with a minimal repro.
+    * Use **GitHub Discussions → Ideas** for architecture‑level topics (contracts, envelopes, nested generics rules).
+    * Use **GitHub Discussions → Q&A** for usage or integration questions.
 
-Please search existing issues/discussions before opening a new one.
+* Found a bug or regression?
+
+    * Open an **Issue** with a minimal reproduction and clear expected vs actual behavior.
+
+Please search existing issues and discussions before opening a new one.
 
 ---
 
 ## How to contribute
 
-1. **Fork** the repo and create a feature branch:
+1. **Fork** the repository and create a feature branch:
 
    ```bash
    git checkout -b feature/scope-short-title
    ```
-2. Make small, focused changes.
-3. Add/adjust tests and docs where it makes sense.
-4. Run the full build locally (see below).
-5. Open a PR to `main` with a clear description and checklist.
 
-> Tip: Small PRs with a tight scope are reviewed faster.
+2. Make **small, focused changes** aligned with the project’s contract‑first philosophy.
+
+3. Add or update **tests and documentation** where behavior or guarantees change.
+
+4. Run the full build locally (see below).
+
+5. Open a PR against `main` with a clear description and checklist.
+
+> 💡 Small, well‑scoped PRs are reviewed faster and are easier to reason about.
 
 ---
 
 ## Development setup
 
-**Prereqs**
+### Prerequisites
 
-* Java 21 (Temurin recommended)
-* Maven 3.9+
-* Docker (optional; for running the service in a container)
+* **Java 21** (Temurin recommended)
+* **Maven 3.9+**
+* **Docker** (optional; only if you want to containerize/run the server)
 
-**Build everything**
+### Repository build model (important)
+
+This repository is a **multi‑module Maven aggregator**.
+At the repository root you have a parent `pom.xml` (`packaging=pom`) that defines the module order:
+
+* `api-contract`
+* `customer-service`
+* `customer-service-client`
+
+**Use the root build by default.** It guarantees the correct build order and ensures the shared contract is available to downstream modules.
+
+### Build everything (recommended)
 
 ```bash
-# From repo root
+# From repository root
 mvn -q -ntp clean verify
 ```
 
-**Run server locally**
+### Build a single module (when you need it)
+
+From repository root:
+
+```bash
+# Only build and test the server module (and any required dependencies)
+mvn -q -ntp -pl customer-service -am clean verify
+
+# Only build and test the client module (and any required dependencies)
+mvn -q -ntp -pl customer-service-client -am clean verify
+```
+
+> `-am` (**also-make**) ensures Maven builds `api-contract` first when required.
+
+### Run the server locally
 
 ```bash
 cd customer-service
-mvn spring-boot:run
+mvn -q -ntp spring-boot:run
 # http://localhost:8084/customer-service
-```
-
-**Generate & build client locally**
-
-```bash
-cd customer-service-client
-# Make sure the server is running so the spec is reachable (or place your spec under src/main/resources)
-mvn -q clean install
 ```
 
 ---
@@ -87,121 +111,194 @@ mvn -q clean install
 ## Project layout
 
 ```
-/customer-service            # Spring Boot API producer (exposes OpenAPI 3.1)
-/customer-service-client     # Generated Java client (RestClient + overlays)
-/docs                        # Adoption guides & GitHub Pages sources
-/.github/workflows           # CI (build, tests, Codecov)
-/CODE_OF_CONDUCT.md          # Community standards
-/README.md                   # Root docs (start here)
+/api-contract               # Shared contract: ServiceResponse<T>, Page<T>, Meta, Sort, RFC 9457 helpers
+/customer-service           # Spring Boot API producer (publishes OpenAPI 3.1 spec)
+/customer-service-client    # OpenAPI-generated Java client (RestClient + Mustache overlays)
+/docs                       # Adoption guides & GitHub Pages sources
+/.github/workflows          # CI pipelines (build, tests, artifacts, Codecov)
+/CODE_OF_CONDUCT.md         # Community standards
+/README.md                  # Entry point documentation
 ```
 
 ---
 
 ## Coding style & commits
 
-* **Java style**: keep it idiomatic and consistent with **Google Java Format**.  
-  Run your formatter locally if you touch code outside generated folders.
+### Java style
 
-* **Commit convention**:  
-  Use clear, descriptive prefixes for consistency and readability.  
-  Recommended prefixes:
+* Keep code **idiomatic and minimal**.
+* Favor **small, reviewable changes**.
+* Do **not** manually edit generated sources under `target/generated-sources/...`.
+  If the generated output must change, change **templates**, **schema customizers**, or **contract types**.
 
-    * `feature:` — for new features or enhancements
-    * `bugfix:` — for bug fixes
-    * `docs:` — for documentation changes
-    * `chore:` — for maintenance or configuration updates
-    * `refactor:` — for internal code restructuring
-    * `test:` — for adding or updating tests
-    * `ci:` — for continuous integration or workflow changes
+### Commit convention
 
-  **Examples:**
+Use clear, descriptive prefixes to communicate intent:
 
-    * `feature(client): support configurable container allow-list`
-    * `bugfix(server): avoid NPE in schema enrichment for composed types`
+* `feature:` — new capability or extension
+* `bugfix:` — defect or regression fix
+* `docs:` — documentation‑only changes
+* `chore:` — build, dependency, or tooling updates
+* `refactor:` — internal restructuring without behavior change
+* `test:` — test additions or corrections
+* `ci:` — CI or workflow changes
 
-* Favor clear naming, small classes, and cohesive tests that verify a single behavior.
+**Examples:**
+
+* `feature(client): support Page-only nested generics`
+* `bugfix(server): guard null composed schemas during introspection`
+* `docs(adoption): clarify api-contract ownership`
+
+Favor **clarity over cleverness**; commits should be easy to review in isolation.
+
 ---
 
 ## Testing & coverage
 
-Run unit + integration tests:
+### Run the full test suite
 
 ```bash
-# Module tests
-cd customer-service && mvn -q clean verify
-cd ../customer-service-client && mvn -q clean verify
+# From repository root
+mvn -q -ntp clean verify
 ```
 
-* Coverage is uploaded by CI via **Codecov** (see action config).
-* Client tests often use **MockWebServer** to verify Problem Details handling and envelope parsing.
+### Typical focused runs
+
+```bash
+# Server only
+mvn -q -ntp -pl customer-service -am clean verify
+
+# Client only
+mvn -q -ntp -pl customer-service-client -am clean verify
+```
+
+Notes:
+
+* CI uploads coverage via **Codecov**.
+* Client tests commonly use **MockWebServer** to verify:
+
+    * `{ data, meta }` envelope parsing
+    * RFC 9457 `ProblemDetail` decoding
+    * HTTP status propagation
 
 ---
 
 ## OpenAPI spec & client generation
 
-There are two common flows:
+### The key assumption
 
-### 1) Use the live spec from the local server
+The client module compiles against the shared contract:
 
-1. Run `customer-service`.
+* `ServiceResponse<T>` comes from `io.github.bsayli:api-contract`
+* Nested generics are supported **only** for `ServiceResponse<Page<T>>`
+
+This means: **client generation is not standalone.**
+If you run the client build in isolation, you must ensure `api-contract` is built first.
+
+### Preferred flow: use the live server‑generated spec
+
+1. Run the server:
+
+   ```bash
+   cd customer-service
+   mvn -q -ntp spring-boot:run
+   ```
+
 2. Pull the spec into the client module:
 
    ```bash
-   cd customer-service-client
+   cd ../customer-service-client
    curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
      -o src/main/resources/customer-api-docs.yaml
    ```
-3. Generate & compile:
+
+3. Build the client **from repository root** (recommended):
 
    ```bash
-   mvn -q clean install
+   cd ..
+   mvn -q -ntp -pl customer-service-client -am clean verify
    ```
 
-### 2) Work against a committed spec
+### Alternate flow: work against the committed spec
 
 * Edit or replace `customer-service-client/src/main/resources/customer-api-docs.yaml`.
-* Build as usual; the **Mustache overlays** generate thin wrappers:
+* Build as usual using the aggregator or `-pl ... -am`.
 
-    * `x-api-wrapper`, `x-api-wrapper-datatype`
-    * When present, `x-data-container` + `x-data-item` enable nested generics like `Page<T>`.
-* `.openapi-generator-ignore` prevents duplicate DTOs (e.g., `Page`, `Meta`) if provided by the shared `common` package.
+> ⚠️ The canonical OpenAPI spec is produced dynamically by the server (Springdoc + schema introspection).
+> Working against a committed spec is allowed, but contributors should be aware of **contract drift risk** if server changes are not reflected.
+
+### Contract rules enforced by templates
+
+* All success wrappers extend `ServiceResponse<T>` from the shared **`api-contract`** artifact.
+* Nested generics are supported only for:
+
+  ```java
+  ServiceResponse<Page<T>>
+  ```
+
+This constraint is **intentional** and guarantees deterministic schema names and stable client generation.
+
+### Ignoring redundant generated models
+
+The `.openapi-generator-ignore` file prevents regenerating models already provided by:
+
+```
+io.github.bsayli:api-contract
+```
+
+Examples include:
+
+* `ServiceResponse`
+* `Meta`
+* `Page`
+* `Sort`, `SortDirection`
+
+This enforces the core rule:
+
+> **One contract, one source of truth — shared by server and client.**
 
 ---
 
 ## Pull Request checklist
 
-Before hitting “Create pull request”:
+Before opening a PR:
 
-* [ ] Scope is minimal and focused.
-* [ ] Build passes locally: `mvn -q -ntp clean verify`.
-* [ ] Tests added/updated where it makes sense (esp. for envelope/generics or error handling).
-* [ ] Docs updated if behavior changes (`README.md`, `docs/adoption/*`, or Discussions).
-* [ ] No accidental changes to generated code outside intended overlays.
-* [ ] Title uses a helpful prefix (e.g., `feature:`, `bugfix:`, `docs:`).
+* [ ] Scope is minimal and focused
+* [ ] `mvn -q -ntp clean verify` passes locally
+* [ ] Tests added or updated where behavior changes
+* [ ] Documentation updated if guarantees or usage change
+* [ ] No accidental edits to generated code outside intended overlays
+* [ ] Title uses a clear prefix (`feature:`, `bugfix:`, `docs:` …)
 
 ---
 
 ## Labels we use
 
-* **`enhancement`** – new capability, refactor that adds value, developer-experience.
-* **`bug`** – incorrect behavior, failing test, broken generation edge case.
-* **`documentation`** – README / Guides / GitHub Pages / examples.
-* **`good first issue`** – small, well-scoped tasks for first-time contributors.
-* **`help wanted`** – we’d love community input or PRs here.
-* **`discussion needed`** – needs design consensus before implementation.
-
-> Maintainers triage new issues with one or more of the above to guide contributors.
+* **`enhancement`** — new capability or meaningful DX improvement
+* **`bug`** — incorrect behavior or broken generation edge case
+* **`documentation`** — README, guides, or examples
+* **`good first issue`** — small, well‑scoped starter tasks
+* **`help wanted`** — community contributions welcome
+* **`discussion needed`** — requires design consensus before implementation
 
 ---
 
 ## Security
 
-If you discover a **security issue**, **do not** open a public issue.
-Email the maintainer at **[baris.sayli@gmail.com](mailto:baris.sayli@gmail.com)** with details. We’ll respond promptly.
+If you discover a **security vulnerability**, **do not** open a public issue.
+
+* Preferred: **GitHub Security Advisory** (Security → Advisories → Report a vulnerability)
+* Or email **[baris.sayli@gmail.com](mailto:baris.sayli@gmail.com)** with subject:
+
+  ```text
+  SECURITY: <short summary>
+  ```
+
+See [SECURITY.md](./SECURITY.md) for the full policy.
 
 ---
 
 ## License
 
-This project is licensed under **MIT** (see [LICENSE](./LICENSE)).
-By contributing, you agree your contributions are licensed under the same terms.
+This project is licensed under the **MIT License** (see [LICENSE](./LICENSE)).
+By contributing, you agree that your contributions are licensed under the same terms.

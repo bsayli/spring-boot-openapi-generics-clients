@@ -2,7 +2,7 @@ package io.github.bsayli.openapi.client.adapter.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bsayli.openapi.client.adapter.support.ProblemDetailSupport;
-import io.github.bsayli.openapi.client.common.error.ClientProblemException;
+import io.github.bsayli.openapi.client.common.problem.ApiProblemException;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
 import io.github.bsayli.openapi.client.generated.dto.ProblemDetail;
 import io.github.bsayli.openapi.client.generated.invoker.ApiClient;
@@ -29,7 +29,7 @@ public class CustomerApiClientConfig {
             HttpStatusCode::isError,
             (request, response) -> {
               ProblemDetail pd = ProblemDetailSupport.extract(om, response);
-              throw new ClientProblemException(pd, response.getStatusCode().value());
+              throw new ApiProblemException(pd, response.getStatusCode().value());
             });
   }
 

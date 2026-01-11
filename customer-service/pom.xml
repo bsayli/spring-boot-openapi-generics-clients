@@ -48,10 +48,18 @@
         <springdoc-openapi-starter.version>2.8.15</springdoc-openapi-starter.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <api-contract.version>0.7.4</api-contract.version>
         <argLine/>
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>io.github.bsayli</groupId>
+            <artifactId>api-contract</artifactId>
+            <version>${api-contract.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

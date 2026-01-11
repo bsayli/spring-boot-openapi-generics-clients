@@ -5,7 +5,7 @@ import static io.github.bsayli.customerservice.common.api.ApiConstants.ErrorCode
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import io.github.bsayli.customerservice.common.api.response.error.ErrorItem;
+import io.github.bsayli.apicontract.error.ErrorItem;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;

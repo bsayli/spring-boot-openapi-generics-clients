@@ -1,13 +1,13 @@
-package io.github.bsayli.openapi.client.common.sort;
+package io.github.bsayli.openapi.client.customer;
 
-public enum ClientSortField {
+public enum CustomerSortField {
   CUSTOMER_ID("customerId"),
   NAME("name"),
   EMAIL("email");
 
   private final String value;
 
-  ClientSortField(String value) {
+  CustomerSortField(String value) {
     this.value = value;
   }
 
