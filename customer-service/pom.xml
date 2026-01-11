@@ -7,26 +7,24 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.11</version>
+        <version>3.5.9</version>
         <relativePath/>
     </parent>
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service</artifactId>
-    <version>0.7.3</version>
+    <version>0.7.4</version>
     <name>customer-service</name>
-    <description>Spring Boot 3.4 + Springdoc (OpenAPI) for generics-aware client generation</description>
+    <description>Spring Boot 3.5 + Springdoc (OpenAPI) for generics-aware client generation</description>
 
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <springdoc-openapi-starter.version>2.8.13</springdoc-openapi-starter.version>
-        <maven.compiler.release>${java.version}</maven.compiler.release>
-        <commons-lang3.version>3.19.0</commons-lang3.version>
-        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
-        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+        <springdoc-openapi-starter.version>2.8.15</springdoc-openapi-starter.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <argLine/>
     </properties>
 
     <dependencies>
@@ -60,15 +58,6 @@
 
     <build>
         <plugins>
-            <!-- Compiler -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <release>${maven.compiler.release}</release>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
 
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -80,28 +69,51 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <useModulePath>false</useModulePath>
+                    <release>${java.version}</release>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
                 </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${maven-failsafe-plugin.version}</version>
                 <executions>
                     <execution>
+                        <id>default</id>
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>
                         </goals>
                         <configuration>
+                            <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
                             <includes>
                                 <include>**/*IT.java</include>
                             </includes>
-                            <useModulePath>false</useModulePath>
                         </configuration>
                     </execution>
                 </executions>
@@ -133,6 +145,7 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
+
                     <execution>
                         <id>report-integration</id>
                         <phase>verify</phase>

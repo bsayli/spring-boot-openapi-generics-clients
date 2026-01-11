@@ -19,7 +19,7 @@ the unified `{ data, meta }` response model and full **nested generic support** 
 
 ## 💡 Overview
 
-Using Springdoc on the backend and OpenAPI Generator 7.17.0 on the client side, this setup enables seamless code
+Using Springdoc on the backend and OpenAPI Generator 7.18.0 on the client side, this setup enables seamless code
 generation where all responses are **type-safe**, **clean**, and **boilerplate-free**.
 
 ```java
@@ -108,10 +108,10 @@ Instant serverTime = response.getMeta().serverTime();
 | Component             | Version | Purpose                          |
 |-----------------------|---------|----------------------------------|
 | **Java**              | 21      | Language baseline                |
-| **Spring Boot**       | 3.4.11  | REST + OpenAPI provider          |
-| **Springdoc**         | 2.8.13  | OpenAPI 3.1 integration          |
-| **OpenAPI Generator** | 7.17.0  | Generics-aware client generation |
-| **HttpClient5**       | 5.5     | Production-grade HTTP backend    |
+| **Spring Boot**       | 3.5.9   | REST + OpenAPI provider          |
+| **Springdoc**         | 2.8.15  | OpenAPI 3.1 integration          |
+| **OpenAPI Generator** | 7.18.0  | Generics-aware client generation |
+| **HttpClient5**       | 5.5.2   | Production-grade HTTP backend    |
 
 ---
 

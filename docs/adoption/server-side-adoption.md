@@ -55,7 +55,7 @@ Your service will:
     <dependency>
         <groupId>org.springdoc</groupId>
         <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-        <version>2.8.13</version>
+        <version>2.8.15</version>
     </dependency>
 </dependencies>
 ```

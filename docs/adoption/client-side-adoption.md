@@ -380,17 +380,21 @@ var serverTime = response.getMeta().serverTime();
 Error handling:
 
 ```java
-try{
-        yourClientAdapter.getYourEntity(999);
-}catch(
-ClientProblemException ex){
-var pd = ex.getProblem();
-    System.err.
+private static final Logger log = LoggerFactory.getLogger(CustomerClientAdapter.class);
 
-println(pd.getTitle() +": "+pd.
+try {
+    customerClientAdapter.getCustomer(999);
+} catch (ClientProblemException ex) {
+    var pd = ex.getProblem();
 
-getDetail());
-        }
+    log.warn(
+        "Customer API error [status={}, code={}, title={}, detail={}]",
+        ex.getStatus(),
+        pd.getErrorCode(),
+        pd.getTitle(),
+        pd.getDetail()
+    );
+}
 ```
 
 ---

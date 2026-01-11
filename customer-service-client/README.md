@@ -1,8 +1,8 @@
 # customer-service-client
 
 [![Java 21](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.11-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.17.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.9-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.18.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 
 Generated Java client for the **customer-service**, showcasing **type‑safe generic responses** and **nested generics** with a minimal OpenAPI Generator Mustache overlay.
@@ -32,7 +32,7 @@ mvn -q clean install
 
 ## ✅ What You Get
 
-* **OpenAPI Generator 7.17.0** + **Spring `RestClient`**-based Java client.
+* **OpenAPI Generator 7.18.0** + **Spring `RestClient`**-based Java client.
 * Reusable generic base: `ServiceClientResponse<T>` containing `{ data, meta }`.
 * **Nested generics** support: `ServiceClientResponse<Page<CustomerDto>>`.
 * **RFC 9457 Problem decoding** via `ClientProblemException`.
@@ -206,15 +206,20 @@ var serverTime = resp.getMeta().serverTime();
 Error handling (RFC 9457):
 
 ```java
+private static final Logger log = LoggerFactory.getLogger(CustomerClientAdapter.class);
+
 try {
     customerClientAdapter.getCustomer(999);
 } catch (ClientProblemException ex) {
     var pd = ex.getProblem();
-    System.err.println("type   = " + pd.getType());
-    System.err.println("title  = " + pd.getTitle());
-    System.err.println("detail = " + pd.getDetail());
-    System.err.println("status = " + ex.getStatus());
-    System.err.println("code   = " + pd.getErrorCode());
+
+    log.warn(
+        "Customer API error [status={}, code={}, title={}, detail={}]",
+        ex.getStatus(),
+        pd.getErrorCode(),
+        pd.getTitle(),
+        pd.getDetail()
+    );
 }
 ```
 
@@ -236,7 +241,7 @@ try {
 <dependency>
   <groupId>io.github.bsayli</groupId>
   <artifactId>openapi-generics-templates</artifactId>
-  <version>0.7.0</version>
+  <version>0.8.x</version>
 </dependency>
 ```
 
@@ -270,7 +275,7 @@ These classes already exist in the shared `common` package and are excluded from
 
 ## 📚 Notes
 
-* **Toolchain:** Java 21, Spring Boot 3.4.11, OpenAPI Generator 7.17.0
+* **Toolchain:** Java 21, Spring Boot 3.5.9, OpenAPI Generator 7.18.0
 * **Options:** `useSpringBoot3=true`, `useJakartaEe=true`, `serializationLibrary=jackson`, `dateLibrary=java8`
 * **Spec file:** `src/main/resources/customer-api-docs.yaml`
 * Optional: `x-class-extra-annotation` injects annotations on wrappers.

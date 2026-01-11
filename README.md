@@ -4,7 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/bsayli/spring-boot-openapi-generics-clients?logo=github\&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
 [![codecov](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients/branch/main/graph/badge.svg)](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients)
 [![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.11-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.9-green?logo=springboot)](https://spring.io/projects/spring-boot)
 [![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.17.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -16,7 +16,7 @@
   <em><strong>End-to-end generics-aware OpenAPI clients</strong> — unified <code>{ data, meta }</code> responses without boilerplate.</em>
 </p>
 
-**Modern, type-safe OpenAPI client generation** — powered by **Spring Boot 3.4**, **Java 21**, and **OpenAPI Generator 7.17.0**.  
+**Modern, type-safe OpenAPI client generation** — powered by **Spring Boot 3.5.9**, **Java 21**, and **OpenAPI Generator 7.18.0**.  
 This repository demonstrates a production-grade setup where backend and client remain fully aligned through generics, supporting nested envelopes like `ServiceResponse<Page<T>>` and standardized [**RFC 9457 — Problem Details for HTTP APIs**](https://www.rfc-editor.org/rfc/rfc9457) error handling.
 
 > 🧠 **RFC 9457 vs RFC 7807**  
@@ -262,12 +262,12 @@ for (CustomerDto c : page.content()) {
 ## 🧩 Tech Stack
 
 | Component             | Version | Purpose                               |
-| --------------------- |--------| ------------------------------------- |
-| **Java**              | 21     | Language baseline                     |
-| **Spring Boot**       | 3.4.11 | REST + OpenAPI provider               |
-| **Springdoc**         | 2.8.13 | OpenAPI 3.1 integration               |
-| **OpenAPI Generator** | 7.17.0 | Generics-aware code generation        |
-| **HttpClient5**       | 5.5    | Pooled, production-ready HTTP backend |
+| --------------------- |---------| ------------------------------------- |
+| **Java**              | 21      | Language baseline                     |
+| **Spring Boot**       | 3.5.9   | REST + OpenAPI provider               |
+| **Springdoc**         | 2.8.15  | OpenAPI 3.1 integration               |
+| **OpenAPI Generator** | 7.18.0  | Generics-aware code generation        |
+| **HttpClient5**       | 5.5.2   | Pooled, production-ready HTTP backend |
 
 ---
 

@@ -1,7 +1,7 @@
 # Contributing Guide
 
 Thanks for your interest in improving **spring-boot-openapi-generics-clients**!
-This project showcases **type-safe, generics-aware OpenAPI clients** (Java 21, Spring Boot 3.4.x, OpenAPI Generator 7.x) with a `{ data, meta }` envelope and RFC 9457 Problem Details.
+This project showcases **type-safe, generics-aware OpenAPI clients** (Java 21, Spring Boot 3.5.x, OpenAPI Generator 7.x) with a `{ data, meta }` envelope and RFC 9457 Problem Details.
 
 > Be kind. Be constructive. See our [Code of Conduct](./CODE_OF_CONDUCT.md).
 

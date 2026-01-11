@@ -133,14 +133,19 @@ class CustomerControllerIT {
   }
 
   @Test
-  @DisplayName("GET /v1/customers/{id} -> 500 Internal Server Error (generic)")
+  @DisplayName("GET /v1/customers/{id} -> 500 Internal Server Error (RFC 9457 ProblemDetail)")
   void getCustomer_internalServerError_generic() throws Exception {
-    when(customerService.getCustomer(1)).thenThrow(new RuntimeException("Boom"));
+    when(customerService.getCustomer(1))
+            .thenThrow(new RuntimeException("Unexpected failure"));
 
     mvc.perform(get("/v1/customers/{id}", 1))
-        .andExpect(status().isInternalServerError())
-        .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
-        .andExpect(jsonPath("$.status").value(500));
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.status").value(500))
+            .andExpect(jsonPath("$.title").value("Internal server error"))
+            .andExpect(jsonPath("$.detail").value("Unexpected error occurred."))
+            .andExpect(jsonPath("$.errorCode").value("INTERNAL_ERROR"))
+            .andExpect(jsonPath("$.extensions.errors[0].code").value("INTERNAL_ERROR"));
   }
 
   @Test

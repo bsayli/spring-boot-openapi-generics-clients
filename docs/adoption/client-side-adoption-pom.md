@@ -23,18 +23,29 @@ Add these dependencies to your client module:
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
+        <version>${spring-boot.version}</version>
+        <scope>provided</scope>
+    </dependency>
+
+    <!-- Optional but explicit (spring-boot-starter-web already brings this transitively) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter</artifactId>
+        <version>${spring-boot.version}</version>
         <scope>provided</scope>
     </dependency>
 
     <dependency>
         <groupId>jakarta.validation</groupId>
         <artifactId>jakarta.validation-api</artifactId>
+        <version>${jakarta.validation.version}</version>
         <scope>provided</scope>
     </dependency>
 
     <dependency>
         <groupId>jakarta.annotation</groupId>
         <artifactId>jakarta.annotation-api</artifactId>
+        <version>${jakarta.annotation-api.version}</version>
         <scope>provided</scope>
     </dependency>
 
@@ -42,19 +53,21 @@ Add these dependencies to your client module:
     <dependency>
         <groupId>org.apache.httpcomponents.client5</groupId>
         <artifactId>httpclient5</artifactId>
-        <version>5.5</version>
+        <version>${httpclient5.version}</version>
     </dependency>
 
     <!-- Test dependencies -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-test</artifactId>
+        <version>${spring-boot.version}</version>
         <scope>test</scope>
     </dependency>
+
     <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>mockwebserver</artifactId>
-        <version>5.1.0</version>
+        <version>${mockwebserver.version}</version>
         <scope>test</scope>
     </dependency>
 </dependencies>
@@ -69,13 +82,37 @@ Define reusable properties to simplify plugin management and template resolution
 ```xml
 
 <properties>
-    <openapi.generator.version>7.17.0</openapi.generator.version>
-    <openapi.templates.upstream>${project.build.directory}/openapi-templates-upstream</openapi.templates.upstream>
-    <openapi.templates.effective>${project.build.directory}/openapi-templates-effective</openapi.templates.effective>
-    <build.helper.plugin.version>3.6.0</build.helper.plugin.version>
-    <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
-    <maven.dependency.plugin.version>3.8.1</maven.dependency.plugin.version>
-    <spotless-maven-plugin.version>3.0.0</spotless-maven-plugin.version>
+    <!-- Build basics -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>21</java.version>
+
+    <!-- OpenAPI generation -->
+    <openapi.generator.version>7.18.0</openapi.generator.version>
+    <openapi.templates.upstream>${project.build.directory}/upstream-templates</openapi.templates.upstream>
+    <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
+
+    <!-- Client/runtime deps (example baseline used in this repo) -->
+    <spring-boot.version>3.5.9</spring-boot.version>
+    <jakarta.validation.version>3.1.1</jakarta.validation.version>
+    <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
+    <httpclient5.version>5.5.2</httpclient5.version>
+
+    <!-- Test deps -->
+    <mockwebserver.version>5.3.2</mockwebserver.version>
+
+    <!-- Plugins (pinned for deterministic builds) -->
+    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+    <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
+    <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
+    <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
+    <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
+    <spotless-maven-plugin.version>3.1.0</spotless-maven-plugin.version>
+    <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+    <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
+
+    <!-- Used by surefire/failsafe; keep defined even if empty -->
+    <argLine/>
 </properties>
 ```
 
@@ -88,11 +125,20 @@ These plugins work in sequence to **unpack, overlay, and compile** OpenAPI templ
 ```xml
 
 <build>
+    <resources>
+        <resource>
+            <directory>src/main/resources</directory>
+            <excludes>
+                <exclude>openapi-templates/**</exclude>
+            </excludes>
+        </resource>
+    </resources>
     <plugins>
         <!-- 1️⃣ Unpack upstream OpenAPI templates -->
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
+            <version>${maven.dependency.plugin.version}</version>
             <executions>
                 <execution>
                     <id>unpack-openapi-upstream-templates</id>
@@ -120,6 +166,7 @@ These plugins work in sequence to **unpack, overlay, and compile** OpenAPI templ
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-resources-plugin</artifactId>
+            <version>${maven.resources.plugin.version}</version>
             <executions>
                 <execution>
                     <id>copy-upstream-to-effective</id>
@@ -211,6 +258,7 @@ These plugins work in sequence to **unpack, overlay, and compile** OpenAPI templ
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
+            <version>${build.helper.plugin.version}</version>
             <executions>
                 <execution>
                     <id>add-generated-sources</id>
