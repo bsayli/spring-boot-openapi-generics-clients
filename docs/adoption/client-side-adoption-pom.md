@@ -328,7 +328,12 @@ Pin versions for deterministic generation and reproducible builds.
       </executions>
     </plugin>
 
-    <!-- 5) Keep generated sources tidy (optional but recommended) -->
+    <!--
+      5) Keep generated sources deterministic and clean.
+         This step removes unused imports left behind when certain DTOs
+         are intentionally ignored in .openapi-generator-ignore
+         (e.g. Meta, Page, ServiceResponse).
+    -->
     <plugin>
       <groupId>com.diffplug.spotless</groupId>
       <artifactId>spotless-maven-plugin</artifactId>
@@ -362,13 +367,13 @@ Pin versions for deterministic generation and reproducible builds.
 
 ## 4) Why These Plugins Exist (and Why This Order Matters)
 
-| Step | Plugin                           | Why it exists                                                                |
-| ---- | -------------------------------- | ---------------------------------------------------------------------------- |
-| 1    | `maven-dependency-plugin`        | Extract upstream templates from the generator JAR (baseline).                |
-| 2    | `maven-resources-plugin`         | Copy upstream → overlay local Mustache templates (your delta stays minimal). |
-| 3    | `openapi-generator-maven-plugin` | Generate client sources with your overlays applied.                          |
-| 4    | `build-helper-maven-plugin`      | Compile generated sources without IDE hacks.                                 |
-| 5    | `spotless-maven-plugin`          | Optional hygiene: remove unused imports in generated code.                   |
+| Step | Plugin                           | Purpose                                                                   |
+| ---- | -------------------------------- |---------------------------------------------------------------------------|
+| 1    | `maven-dependency-plugin`        | Extract upstream generator templates as a stable baseline.                |
+| 2    | `maven-resources-plugin`         | Overlay local Mustache templates on top of upstream ones.                 |
+| 3    | `openapi-generator-maven-plugin` | Generate client sources using the effective (merged) templates.           |
+| 4    | `build-helper-maven-plugin`      | Add generated sources to the build without IDE-specific hacks.            |
+| 5    | `spotless-maven-plugin`          | Remove unused imports from excluded DTOs to keep output clean and stable. |
 
 ---
 

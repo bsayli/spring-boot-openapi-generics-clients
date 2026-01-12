@@ -38,7 +38,7 @@ The result is a **deterministic, type‑safe API boundary** with **Page‑aware 
 * 💡 [The Core Idea](#-the-core-idea)
 * 🧱 [Canonical Contract](#-canonical-contract)
 * 🏗 [Architecture Overview](#-architecture-overview)
-* 🔎 [Executable Proof: Generated Clients](#-executable-proof-generated-clients)
+* 🔎 [Proof: Generated Client Models (Before/After)](#-proof-generated-client-models-beforeafter)
 * 🧩 [Example Responses](#-example-responses)
 * 🧠 [Design Guarantees](#-design-guarantees)
 * 📘 [Adoption Guides](#-adoption-guides)
@@ -272,7 +272,7 @@ This restriction is **intentional** — it guarantees deterministic schema names
 
 ---
 
-## 🔎 Executable Proof: Generated Clients
+## 🔎 Proof: Generated Client Models (Before/After)
 
 **Before (duplicated models):**
 
@@ -327,7 +327,7 @@ No duplicated envelope. No lost generics.
 
 ## 🧠 Design Guarantees
 
-This blueprint guarantees:
+This architecture guarantees:
 
 * **One response contract** across server and client
 * **No duplicated envelopes**
@@ -346,20 +346,20 @@ It is a **reference architecture**.
 
 Step-by-step integration guides live under [`docs/adoption`](docs/adoption):
 
-* **[Server-Side Adoption](docs/adoption/server-side-adoption.md)** — publishing a deterministic, generics-aware OpenAPI 3.1 contract
-* **[Client-Side Adoption](docs/adoption/client-side-adoption.md)** — Maven, OpenAPI Generator, and Mustache template wiring (build-time setup only)
-
+- **[Server-Side Adoption](docs/adoption/server-side-adoption.md)** — Publish a deterministic, generics-aware OpenAPI 3.1 contract.
+- **[Client-Side Adoption](docs/adoption/client-side-adoption.md)** — Configure Maven, OpenAPI Generator, and Mustache templates (build-time setup only).
 ---
 
 ## 🔗 References & External Links
 
-<div class="callout learn-more">
-  <ul>
-    <li>🌐 <a href="https://github.com/bsayli/spring-boot-openapi-generics-clients" target="_blank" rel="noopener">GitHub Repository</a></li>
-    <li>📘 <a href="https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04" target="_blank" rel="noopener">Medium — We Made OpenAPI Generator Think in Generics</a></li>
-    <li>📄 <a href="https://www.rfc-editor.org/rfc/rfc9457" target="_blank" rel="noopener">RFC 9457 — Problem Details for HTTP APIs</a></li>
-  </ul>
-</div>
+- 📘 **Adoption Guide (GitHub Pages)**  
+  [Spring Boot OpenAPI Generics — Adoption Guide](https://bsayli.github.io/spring-boot-openapi-generics-clients/)
+
+- ✍️ **Medium Article**  
+  [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+
+- 📄 **RFC 9457**  
+  [Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457)
 
 ---
 

@@ -7,20 +7,16 @@ canonical_url: https://medium.com/@baris.sayli/type-safe-generic-api-responses-w
 
 # Spring Boot OpenAPI Generics — Adoption Hub
 
-> A production‑grade blueprint for **contract‑driven, generics‑aware API boundaries** built with Spring Boot, Springdoc, and OpenAPI Generator.
+> A production-grade **reference architecture** for **contract-driven, generics-aware API boundaries** built with Spring Boot, Springdoc, and OpenAPI Generator.
 
 Welcome 👋
 This documentation describes a **domain‑agnostic, single‑contract architecture** where **both server and client** share the same canonical success envelope:
 
 > **Canonical success envelope:** `ServiceResponse<T>`
 
-<div class="callout">
-
-- **No duplicated envelopes**
-- **No parallel client contracts**
-- **No schema drift**
-
-</div>
+* No duplicated envelopes
+* No parallel client contracts
+* No schema drift
 
 The result is an **end‑to‑end type‑safe API boundary** with deterministic OpenAPI output, explicit generic rules, and **RFC 9457‑compliant error handling**.
 
@@ -28,13 +24,12 @@ The result is an **end‑to‑end type‑safe API boundary** with deterministic 
 
 ## 📑 Table of Contents
 
-- [What This Blueprint Solves](#-what-this-blueprint-solves)
+- [What This Pattern Solves](#-what-this-pattern-solves)
 - [Canonical Contract (Single Source of Truth)](#-canonical-contract-single-source-of-truth)
 - [High-Level Architecture](#-highlevel-architecture)
 - [Thin Wrapper Generation](#-thin-wrapper-generation-conceptual)
 - [Error Handling (RFC 9457)](#-error-handling-rfc-9457-first)
 - [Getting Started](#-getting-started-conceptual-flow)
-- [Learn More](#-learn-more)
 - [Toolchain](#-toolchain-reference)
 - [Adoption Guides](#-adoption-guides)
 - [Design Guarantees](#-design-guarantees)
@@ -43,7 +38,7 @@ The result is an **end‑to‑end type‑safe API boundary** with deterministic 
 ---
 
 
-## 💡 What This Blueprint Solves
+## 💡 What This Pattern Solves
 
 Modern HTTP APIs almost always wrap responses:
 
@@ -58,7 +53,7 @@ Yet most OpenAPI‑based workflows still suffer from fundamental issues:
 * nested containers produce unstable or ambiguous schemas
 * client contracts silently diverge from server contracts
 
-This blueprint solves these problems by enforcing **one shared contract** and making OpenAPI generation **generics‑aware by design**, not by convention.
+This pattern solves these problems by enforcing **one shared contract** and making OpenAPI generation **generics‑aware by design**, not by convention.
 
 ---
 
@@ -170,13 +165,6 @@ Concrete setup steps are covered in the adoption guides below.
 
 ---
 
-## 📚 Learn More
-
-* [Server-Side Adoption](adoption/server-side-adoption.md)
-* [Client-Side Adoption](adoption/client-side-adoption.md)
-
----
-
 ## 📦 Toolchain (Reference)
 
 | Component         | Role                    |
@@ -193,7 +181,10 @@ Exact versions are pinned in the respective adoption guides to ensure reproducib
 
 ## 📚 Adoption Guides
 
-Use these guides to integrate the blueprint step‑by‑step:
+- **[Server-Side Adoption](adoption/server-side-adoption.md)** — Publish a deterministic, generics-aware OpenAPI 3.1 contract.
+- **[Client-Side Adoption](adoption/client-side-adoption.md)** — Configure Maven + OpenAPI Generator + Mustache overlays.
+
+Use these guides to integrate the pattern step‑by‑step:
 
 * **Server‑Side Adoption**
   How to expose `ServiceResponse<T>` and publish a deterministic, generics‑aware OpenAPI contract.
@@ -210,7 +201,7 @@ Each guide is **domain‑agnostic** and focuses on architectural rules rather th
 
 ## 🎯 Design Guarantees
 
-This blueprint guarantees:
+This pattern guarantees:
 
 * **One response contract** across server and client
 * **Zero duplicated envelopes**
@@ -227,12 +218,8 @@ It is a **reference architecture** for teams who care about API correctness, lon
 
 ## 🔗 References & External Links
 
-<div class="callout learn-more">
-  <ul>
-    <li>🌐 <a href="https://github.com/bsayli/spring-boot-openapi-generics-clients" target="_blank" rel="noopener">GitHub Repository</a></li>
-    <li>📘 <a href="https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04" target="_blank" rel="noopener">Medium — We Made OpenAPI Generator Think in Generics</a></li>
-  </ul>
-</div>
+- 🌐 **GitHub Repository** — [spring-boot-openapi-generics-clients](https://github.com/bsayli/spring-boot-openapi-generics-clients)
+- 📘 **Medium** — [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
 
 ---
 

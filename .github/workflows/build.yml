@@ -3,38 +3,21 @@ name: Build & Test
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
   pull_request:
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
 
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
-  changes:
-    name: Detect code changes
-    runs-on: ubuntu-latest
-    outputs:
-      code: ${{ steps.filter.outputs.code }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Filter paths
-        uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            code:
-              - '**'
-              - '!**/*.md'
-              - '!docs/**'
-
   build:
     name: Build & Test
-    needs: changes
-    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -50,18 +33,8 @@ jobs:
           distribution: "temurin"
           cache: maven
 
-      # 0) Install api-contract into local Maven repo (required for downstream builds)
-      - name: Build api-contract (install)
-        run: mvn -B -q -ntp -DskipTests clean install
-        working-directory: api-contract
-
-      - name: Build customer-service (tests + coverage)
+      - name: Build all modules (tests + coverage)
         run: mvn -B -q -ntp clean verify
-        working-directory: customer-service
-
-      - name: Build customer-service-client (tests + coverage)
-        run: mvn -B -q -ntp clean verify
-        working-directory: customer-service-client
 
       - name: Upload generated client sources
         uses: actions/upload-artifact@v4
