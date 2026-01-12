@@ -80,7 +80,7 @@ This module defines the **only** envelope, paging, and metadata types used acros
 | Arbitrary nested generics   | ❌        | Outside the canonical contract                              |
 
 This architecture **does not restrict or modify** OpenAPI Generator’s default handling
-of standard Java collection types such as [index.md](index.md)`List<T>` or `Map<K,V>`.
+of standard Java collection types such as `List<T>` or `Map<K,V>`.
 
 It defines **explicit guarantees only** for:
 - `ServiceResponse<T>`
