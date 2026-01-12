@@ -7,362 +7,236 @@ nav_order: 1
 
 # Server-Side Adoption — Spring MVC + Springdoc
 
-**Goal:** integrate a contract-driven setup into your Spring MVC service so it:
+This guide shows how to adopt a **shared success envelope** in a Spring MVC service and publish an **OpenAPI 3.1** contract that enables **thin, type‑safe client generation** — without duplicating response models.
 
-* returns a unified `{ data, meta }` envelope via **`ServiceResponse<T>`**
-* publishes a deterministic, generics-aware **OpenAPI 3.1** contract
-* enables **thin, type-safe client generation** without duplicating response models
+The intent is not to dump all implementation details here. It’s to make the adoption **mentally executable**: what you add, why it matters, and what to verify.
 
-> Scope: Spring MVC (WebMVC) + Springdoc.
-> Out of scope: WebFlux, reactive servers.
+> **Scope**: Spring MVC (WebMVC) + Springdoc
+> **Out of scope**: WebFlux, reactive servers
 
 ---
 
-## Table of Contents
+## 📑 Table of Contents
 
-* [Core Principle](#core-principle)
-  * [Contract Rules](#contract-rules)
-* [What Your Service Will Do](#what-your-service-will-do)
-* [Dependencies](#dependencies)
-* [Response Envelope](#response-envelope)
-* [OpenAPI Schema Infrastructure](#openapi-schema-infrastructure)
-  * [OpenApiSchemas](#openapischemas)
-  * [SwaggerResponseCustomizer](#swaggerresponsecustomizer)
-  * [ApiResponseSchemaFactory](#apiresponseschemafactory)
-* [Automatic Wrapper Registration](#automatic-wrapper-registration)
-  * [ResponseTypeIntrospector](#responsetypeintrospector)
-  * [AutoWrapperSchemaCustomizer](#autowrapperschemacustomizer)
-* [Global Error Responses (RFC 9457)](#global-error-responses-rfc-9457)
-  * [GlobalErrorResponsesCustomizer](#globalerrorresponsescustomizer)
-  * [Optional: Problem Extensions](#optional-problem-extensions)
-* [Example Controller](#example-controller)
-* [Verification Checklist](#verification-checklist)
-* [Minimal Folder Layout](#minimal-folder-layout)
-* [Outcome](#outcome)
+* [🎯 Goals](#-goals)
+* [✅ Prerequisites](#-prerequisites)
+* [🧱 Shared Response Contract](#-shared-response-contract)
+* [📦 Dependencies](#-dependencies)
+* [🧩 OpenAPI Schema Enrichment](#-openapi-schema-enrichment)
+
+  * [Deterministic Naming Rule](#deterministic-naming-rule)
+  * [Response Type Detection](#response-type-detection)
+  * [Wrapper Schema Registration](#wrapper-schema-registration)
+* [⚠️ Error Handling (RFC 9457)](#-error-handling-rfc-9457)
+* [🧪 Example Controller](#-example-controller)
+* [🧭 Suggested Package Layout](#-suggested-package-layout)
+* [✅ Verification Checklist](#-verification-checklist)
+* [🎯 Outcome](#-outcome)
 
 ---
 
-<a id="core-principle"></a>
+## 🎯 Goals
 
-## Core Principle
+After completing this guide, your Spring MVC service will:
 
-This setup is **contract-first and non-negotiable**.
+* return all successful responses using **one shared envelope**
+* publish a **deterministic OpenAPI 3.1** contract that clients can consume safely
+* enable **thin wrapper generation** on the client side (no duplicated envelope fields)
 
-* **`api-contract` is the single source of truth** for:
+The server does **not** generate clients. It publishes **what it guarantees** in the contract.
 
-  * `ServiceResponse`
-  * `Meta`
-  * `Page`
-  * `Sort`
-* Both **server** and **client** depend on the same artifact.
-* No local copies, forks, or redefinitions.
+---
 
-<a id="contract-rules"></a>
+## ✅ Prerequisites
 
-### Contract Rules
+You should already have:
 
-* The canonical success envelope is **`ServiceResponse<T>`**.
-* Nested generics are **explicitly guaranteed only** for:
+* a Spring Boot 3.x app using **Spring MVC**
+* Springdoc configured for `/v3/api-docs` (JSON/YAML)
+* controllers returning DTOs
 
-```text
-ServiceResponse<Page<T>>
+This guide uses Maven snippets, but the idea is build-tool agnostic.
+
+---
+
+## 🧱 Shared Response Contract
+
+All successful responses are wrapped using a **shared contract module**:
+
+```
+io.github.bsayli:api-contract
 ```
 
-* For any other generic composition:
+Your service imports and uses:
 
-```text
-ServiceResponse<List<T>>
-ServiceResponse<Map<K,V>>
-ServiceResponse<Foo<Bar>>
-```
+* `ServiceResponse<T>` — success envelope
+* `Meta` — response metadata
+* `Page<T>` — paging container
+* `Sort` — sorting metadata
 
-➡️ **Generic structure is not part of the contract guarantee**.
-OpenAPI Generator falls back to its **default behavior**, where generics may be
-flattened and schema names are derived from the **raw container type only**.
+These types are **not implemented locally**. Your code reuses them directly.
 
-This architecture:
+### Supported Response Shapes
 
-* does **not** restrict OpenAPI Generator defaults
-* does **not** introduce custom handling for arbitrary generics
-* provides **hard guarantees only** for `ServiceResponse<T>` and `ServiceResponse<Page<T>>`
+Only the following shapes are treated as **contract-aware** for client generation:
 
-These rules are enforced at **OpenAPI schema enrichment time** to ensure:
+| Shape                      | Contract-aware | Notes                           |
+| -------------------------- | -------------- | ------------------------------- |
+| `ServiceResponse<T>`       | ✅              | supported and enriched          |
+| `ServiceResponse<Page<T>>` | ✅              | supported and enriched          |
+| `ServiceResponse<List<T>>` | ❌              | published as-is (defaults)      |
+| other nested generics      | ❌              | published as-is (no guarantees) |
 
-* deterministic schema names
-* stable client generation across versions
-* generator-safe long-term evolution
+This keeps the contract small, deterministic, and generator-friendly.
 
 ---
 
-<a id="what-your-service-will-do"></a>
+## 📦 Dependencies
 
-## What Your Service Will Do
-
-After adoption, your service will:
-
-* Return success responses like:
-
-```json
-{
-  "data": "<T>",
-  "meta": {
-    "serverTime": "2025-01-01T12:34:56Z",
-    "sort": []
-  }
-}
-```
-
-* Publish `/v3/api-docs(.yaml)` that includes:
-
-  * base schemas (`ServiceResponse`, `Meta`, `Page`, `Sort`)
-  * one composed wrapper per discovered `T`
-  * vendor extensions required for client-side wrapper typing
-
----
-
-<a id="dependencies"></a>
-
-## Dependencies
-
-Maven example:
+Minimal Maven setup:
 
 ```xml
 <properties>
-  <!-- Pin only what the Spring Boot parent/BOM does NOT manage -->
   <springdoc-openapi-starter.version>2.8.15</springdoc-openapi-starter.version>
-
-  <!-- Shared contract version (single source of truth) -->
   <api-contract.version>0.7.4</api-contract.version>
 </properties>
 
 <dependencies>
-<!-- Spring Boot web stack (version managed by Spring Boot parent/BOM) -->
-<dependency>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-starter-web</artifactId>
-</dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+  </dependency>
 
-<dependency>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-starter-validation</artifactId>
-</dependency>
+  <dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <version>${springdoc-openapi-starter.version}</version>
+  </dependency>
 
-<!-- OpenAPI producer (NOT managed by Spring Boot parent/BOM) -->
-<dependency>
-  <groupId>org.springdoc</groupId>
-  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-  <version>${springdoc-openapi-starter.version}</version>
-</dependency>
-
-<!-- Shared response + paging contract (single source of truth) -->
-<dependency>
-  <groupId>io.github.bsayli</groupId>
-  <artifactId>api-contract</artifactId>
-  <version>${api-contract.version}</version>
-</dependency>
+  <dependency>
+    <groupId>io.github.bsayli</groupId>
+    <artifactId>api-contract</artifactId>
+    <version>${api-contract.version}</version>
+  </dependency>
 </dependencies>
 ```
 
-> Make sure your OpenAPI customization packages are included in your application’s component scan.
+Ensure your OpenAPI customizers are inside component scanning.
 
 ---
 
-<a id="response-envelope"></a>
+## 🧩 OpenAPI Schema Enrichment
 
-## Response Envelope
+To enable thin wrappers on the client side, the server enriches the OpenAPI spec **at generation time**.
 
-You **do not implement** the envelope classes locally.
+What gets added:
 
-They come from:
+* detection of `ServiceResponse<T>` return types
+* optional detection of `Page<T>` as the only supported nested generic
+* registration of wrapper schemas for guaranteed shapes
+* vendor extensions that guide client templates
 
-```text
-io.github.bsayli:api-contract
-```
+### Deterministic Naming Rule
 
-Used types include:
+Keep naming predictable and easy to debug.
 
-* `ServiceResponse<T>`
-* `Meta`
-* `Page<T>`
-* `Sort`
+**Data schema ref name** (used for `data` binding):
 
-Your controllers should return `ServiceResponse<T>` (optionally wrapped in `ResponseEntity`).
+* `T` → `T`
+* `Page<T>` → `Page` + `T`
 
----
+Examples:
 
-<a id="openapi-schema-infrastructure"></a>
+* `ServiceResponse<CustomerDto>` → data ref: `CustomerDto`
+* `ServiceResponse<Page<CustomerDto>>` → data ref: `PageCustomerDto`
 
-## OpenAPI Schema Infrastructure
+**Wrapper schema name** (the composed `ServiceResponse<…>` wrapper):
 
-This adoption expects a small OpenAPI “schema layer” in your service. The names below are **reference names** (you can rename them), but the responsibilities should remain.
+* `ServiceResponse` + `<dataRef>`
 
-<a id="openapischemas"></a>
+Examples:
 
-### `OpenApiSchemas`
+* wrapper: `ServiceResponseCustomerDto`
+* wrapper: `ServiceResponsePageCustomerDto`
 
-Centralizes schema names and vendor-extension keys.
-
-Vendor extensions:
-
-| Key                      | Purpose                           |
-| ------------------------ | --------------------------------- |
-| `x-api-wrapper`          | Marks a composed response wrapper |
-| `x-api-wrapper-datatype` | Raw `T` schema name               |
-| `x-data-container`       | Present **only** for `Page<T>`    |
-| `x-data-item`            | Inner item type for `Page<T>`     |
-
-<a id="swaggerresponsecustomizer"></a>
-
-### `SwaggerResponseCustomizer`
-
-Registers base, reusable schemas:
-
-* `ServiceResponse`
-* `Meta`
-
-This ensures composed wrappers can safely reference them.
-
-<a id="apiresponseschemafactory"></a>
-
-### `ApiResponseSchemaFactory`
-
-Creates a composed schema per discovered `T`, for example:
-
-```text
-ServiceResponseEntityDto
-ServiceResponsePageEntityDto
-```
-
-Each composed schema typically:
-
-* uses `allOf` with the base `ServiceResponse`
-* rebinds the `data` property to the discovered `T` (or `Page<T>`)
-* adds `x-api-wrapper` metadata
+This is the only naming rule you need in your head while adopting and verifying.
 
 ---
 
-<a id="automatic-wrapper-registration"></a>
+### Response Type Detection
 
-## Automatic Wrapper Registration
+A small reflection-based component inspects controller return types:
 
-This section describes how wrapper schemas are **automatically registered** for API responses, and—just as importantly—what is **explicitly not guaranteed** by the contract.
-
-<a id="responsetypeintrospector"></a>
-
-### `ResponseTypeIntrospector`
-
-Responsibilities:
-
-* scans controller return types
 * unwraps `ResponseEntity`, async wrappers, etc.
-* detects `ServiceResponse<T>`
-* **identifies only guaranteed shapes** for wrapper registration
+* stops at `ServiceResponse<T>`
+* extracts the **contract-aware** data shape:
 
-Guaranteed behavior:
+| Controller return type           | Contract-aware? | Extracted data ref |
+| -------------------------------- | --------------- | ------------------ |
+| `ServiceResponse<UserDto>`       | ✅               | `UserDto`          |
+| `ServiceResponse<Page<UserDto>>` | ✅               | `PageUserDto`      |
+| `ServiceResponse<List<UserDto>>` | ❌               | *(none)*           |
 
-| Return type                        | Resulting data schema name |
-| ---------------------------------- | -------------------------- |
-| `ServiceResponse<EntityDto>`       | `EntityDto`                |
-| `ServiceResponse<Page<EntityDto>>` | `PageEntityDto`            |
-
-Non‑guaranteed (default generator behavior):
-
-| Return type                        | Handling                               |
-| ---------------------------------- | -------------------------------------- |
-| `ServiceResponse<List<EntityDto>>` | Left to OpenAPI Generator (raw `List`) |
-| Any other nested generics          | Not part of the contract               |
-
-➡️ The introspector **does not modify or override** OpenAPI Generator’s default handling for collections like `List<T>` or `Map<K,V>`.
-
-<a id="autowrapperschemacustomizer"></a>
-
-### `AutoWrapperSchemaCustomizer`
-
-Responsibilities:
-
-* runs at OpenAPI generation time
-* collects **only guaranteed data refs** discovered by `ResponseTypeIntrospector`
-* automatically registers composed wrapper schemas
-* enriches wrappers with metadata extensions:
-
-  * `x-data-container`
-  * `x-data-item`
-
-➡️ These extensions are added **only** when the data type is `Page<T>`.
-
-### Key Principle
-
-This architecture **adds no new semantics** for OpenAPI shapes.
-
-It defines **explicit guarantees only** for:
-
-* `ServiceResponse<T>`
-* `ServiceResponse<Page<T>>`
-
-All other response shapes intentionally remain **outside the canonical contract** and follow the OpenAPI Generator’s default behavior, ensuring deterministic schema naming and safe evolution over time.
+No behavior is overridden for collections like `List<T>` or `Map<K,V>`.
 
 ---
 
-<a id="global-error-responses-rfc-9457"></a>
+### Wrapper Schema Registration
 
-## Global Error Responses (RFC 9457)
+For contract-aware shapes only, register a **composed wrapper schema** and add vendor extensions.
 
-<a id="globalerrorresponsescustomizer"></a>
+Vendor extensions used by client templates:
 
-### `GlobalErrorResponsesCustomizer`
+```
+x-api-wrapper: true
+x-api-wrapper-datatype: UserDto
+x-data-container: Page      # only for Page<T>
+x-data-item: UserDto        # only for Page<T>
+```
 
-Automatically:
+Important boundaries:
+
+* these extensions do **not** change the JSON payload
+* they do **not** affect runtime behavior
+* they exist solely to guide client generation
+
+#### Base envelope schema
+
+Keep the base envelope schema minimal and stable.
+
+Recommended approach:
+
+* define `ServiceResponse` and `Meta` once
+* keep `data` binding **in the composed wrapper** (where the type is explicit)
+
+This avoids the “data is free-form object” ambiguity in the base schema.
+
+---
+
+## ⚠️ Error Handling (RFC 9457)
+
+Error responses are published using **RFC 9457 Problem Details**.
+
+At OpenAPI generation time, the service:
 
 * registers a `ProblemDetail` schema
-* attaches standard error responses (example set):
+* declares standard error responses (400, 404, 500, …)
+* uses `application/problem+json`
 
-  * 400
-  * 404
-  * 405
-  * 500
-
-All with:
-
-```text
-Content-Type: application/problem+json
-```
-
-Fully compliant with **RFC 9457**.
-
-<a id="optional-problem-extensions"></a>
-
-### Optional: Problem Extensions
-
-If you already have structured domain errors, you may enrich:
-
-```json
-{
-  "extensions": {
-    "errors": [
-      { "code": "...", "message": "...", "field": "..." }
-    ]
-  }
-}
-```
-
-This is optional and additive.
+If you include domain error details, prefer adding them as extension members (for example `errors`) without forcing a special “extensions” envelope.
 
 ---
 
-<a id="example-controller"></a>
-
-## Example Controller
-
-Generic example (replace names with your domain):
+## 🧪 Example Controller
 
 ```java
 @RestController
-@RequestMapping("/v1/entities")
-class EntityController {
+@RequestMapping("/v1/users")
+class UserController {
 
   @GetMapping("/{id}")
-  ResponseEntity<ServiceResponse<EntityDto>> get(@PathVariable long id) {
-    EntityDto dto = service.get(id);
+  ResponseEntity<ServiceResponse<UserDto>> get(@PathVariable long id) {
+    UserDto dto = service.get(id);
     return ResponseEntity.ok(ServiceResponse.of(dto, null));
   }
 }
@@ -370,55 +244,46 @@ class EntityController {
 
 ---
 
-<a id="verification-checklist"></a>
+## 🧭 Suggested Package Layout
 
-## Verification Checklist
+```text
+src/main/java/<base.package>/
+  openapi/
+    ResponseTypeIntrospector.java
+    WrapperSchemaCustomizer.java
+    GlobalErrorResponsesCustomizer.java
+
+  controller/
+    UserController.java
+```
+
+Names are flexible; responsibilities are not.
+
+---
+
+## ✅ Verification Checklist
 
 After startup:
 
-1. Swagger UI opens
-2. `/v3/api-docs` contains:
+* Swagger UI loads
+* `/v3/api-docs` contains:
 
-  * `ServiceResponse`
-  * `ServiceResponse<YourDto>` wrappers (composed schemas)
-  * `ServiceResponse<Page<YourDto>>` wrappers (composed schemas)
-3. Vendor extensions exist where expected
-4. No duplicated response envelope DTOs appear in the published contract
+  * base schemas (`ServiceResponse`, `Meta`, `Page`, …)
+  * wrapper schemas for contract-aware responses (e.g. `ServiceResponseUserDto`, `ServiceResponsePageUserDto`)
+* vendor extensions appear only on wrapper schemas
+* no duplicated envelope models exist in the published contract
 
----
-
-<a id="minimal-folder-layout"></a>
-
-## Minimal Folder Layout
-
-```text
-src/main/java/<your.base>/
-  common/openapi/
-    OpenApiSchemas.java
-    SwaggerResponseCustomizer.java
-    ApiResponseSchemaFactory.java
-    GlobalErrorResponsesCustomizer.java
-    introspector/
-      ResponseTypeIntrospector.java
-    autoreg/
-      AutoWrapperSchemaCustomizer.java
-
-  api/controller/
-    ...
-```
+If something fails, start by checking the naming rule and whether the introspector extracted the expected data ref.
 
 ---
 
-<a id="outcome"></a>
-
-## Outcome
+## 🎯 Outcome
 
 Your service now:
 
-* is **fully contract-aligned** with `api-contract`
-* publishes a **deterministic OpenAPI 3.1** spec
-* supports **Page-only nested generics**
-* produces zero duplicated response envelope models
-* is ready for thin, type-safe client generation
+* publishes a **stable OpenAPI 3.1 contract**
+* uses **one shared success envelope** from `api-contract`
+* provides explicit support for **Page-only nested generics**
+* enables thin, type-safe client generation without duplicated wrappers
 
-This is not a pattern — it is a **contractual architecture decision**.
+The server publishes **what it guarantees** — and nothing more.

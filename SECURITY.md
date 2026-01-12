@@ -151,4 +151,5 @@ We’re happy to help triage before a formal report.
 Thank you for helping keep the community safe 🙏
 
 This policy reflects the project’s core principle:
-**security, like architecture, is enforced at the contract boundary — not patched downstream.**
+
+**Security, like API contracts, should be addressed at clear boundaries — not patched as an afterthought.**

@@ -33,15 +33,17 @@ Avoid implementation noise — reviewers will read the diff.
 
 ## 🧠 Outcome / Impact
 
-Describe the **effect**, not just the change:
+Describe the **practical impact** of this change:
 
-* Improves contract clarity or determinism
-* Reduces generated code duplication
-* Strengthens server–client alignment
-* Preserves or clarifies architecture guarantees
-* Improves CI stability or test coverage
+- Improves API contract consistency or clarity
+- Reduces duplicated or unstable generated code
+- Improves server–client alignment
+- Preserves or clarifies existing guarantees (e.g. generics handling, paging rules)
+- Improves CI reliability, tests, or build determinism
 
-> If this PR changes observable behavior (generated code shape, schema output, error handling), **call it out explicitly**.
+> If this PR changes any observable behavior  
+> (generated code shape, OpenAPI schema output, or client behavior),  
+> **call it out explicitly**.
 
 ---
 

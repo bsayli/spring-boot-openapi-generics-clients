@@ -1,7 +1,7 @@
 # Contributing Guide
 
 Thanks for your interest in improving **spring-boot-openapi-generics-clients**!
-This repository demonstrates a **contract‑driven, generics‑aware OpenAPI client architecture** built on **Java 21**, **Spring Boot 3.5.x**, and **OpenAPI Generator 7.x**, centered around a *single canonical response contract* and **RFC 9457 Problem Details**.
+This repository demonstrates a **contract-driven, generics-aware approach to OpenAPI client generation**, built on **Java 21**, **Spring Boot 3.5.x**, and **OpenAPI Generator 7.x**, centered around a *single canonical response contract* and **RFC 9457 Problem Details**.
 
 > Be kind. Be constructive. See our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
@@ -23,12 +23,19 @@ This repository demonstrates a **contract‑driven, generics‑aware OpenAPI cli
 
 ---
 
-## Questions & support
+## Questions & Support
 
-* Have a question, design idea, or architectural concern?
+Have a question, design idea, or usage concern?
 
-    * Use **GitHub Discussions → Ideas** for architecture‑level topics (contracts, envelopes, nested generics rules).
-    * Use **GitHub Discussions → Q&A** for usage or integration questions.
+- Use **GitHub Discussions → Ideas** for:
+    - API contract design
+    - response envelope patterns
+    - generics handling (e.g. `ServiceResponse<T>`, `ServiceResponse<Page<T>>`)
+
+- Use **GitHub Discussions → Q&A** for:
+    - setup and configuration questions
+    - client generation issues
+    - integration or usage problems
 
 * Found a bug or regression?
 

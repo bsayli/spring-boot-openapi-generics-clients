@@ -21,6 +21,42 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+/**
+ * Registers composed OpenAPI wrapper schemas for contract-aware responses and enriches them with
+ * vendor extensions used by client-side templates.
+ *
+ * <p>This customizer runs during OpenAPI generation (Springdoc). It does not change runtime
+ * behavior and does not affect the JSON payload. Its sole responsibility is to make the published
+ * specification explicit and deterministic for a small, explicitly supported set of response
+ * shapes.
+ *
+ * <h2>How it works</h2>
+ *
+ * <ol>
+ *   <li>Collects data schema references from controller methods via {@link
+ *       ResponseTypeIntrospector}.
+ *   <li>For each detected reference (e.g. {@code CustomerDto} or {@code PageCustomerDto}),
+ *       registers a composed schema named {@code ServiceResponse{RefName}} (for example, {@code
+ *       ServiceResponseCustomerDto}).
+ *   <li>Adds vendor extensions that allow client-side templates to emit thin wrapper classes
+ *       instead of duplicating response envelope fields.
+ * </ol>
+ *
+ * <h2>Vendor extensions</h2>
+ *
+ * <ul>
+ *   <li>{@code x-api-wrapper: true} marks the schema as a <em>contract-aware wrapper</em> intended
+ *       for client-side template selection.
+ *   <li>{@code x-api-wrapper-datatype: &lt;T&gt;} points to the underlying data schema name.
+ *   <li>{@code x-data-container} and {@code x-data-item} are added <b>only</b> for {@code
+ *       Page&lt;T&gt;} to preserve pagination semantics.
+ * </ul>
+ *
+ * <p>Collection types such as {@code List&lt;T&gt;} or {@code Map&lt;K,V&gt;} are intentionally not
+ * overridden here and remain on Springdoc / OpenAPI Generator defaults. Only {@code
+ * ServiceResponse&lt;T&gt;} and {@code ServiceResponse&lt;Page&lt;T&gt;&gt;} are treated as
+ * contract-aware for wrapper schema registration.
+ */
 @Configuration
 public class AutoWrapperSchemaCustomizer {
 
@@ -66,7 +102,9 @@ public class AutoWrapperSchemaCustomizer {
 
       dataRefs.forEach(
           ref -> {
-            // Guard: only wrap if the data schema actually exists in components
+            // Guard: only wrap schemas that are already materialized by Springdoc.
+            // We never invent component schemas here — this keeps the OpenAPI output deterministic
+            // and prevents accidental drift between Java types and published contracts.
             if (!schemas.containsKey(ref)) {
               return; // skip
             }

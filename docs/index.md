@@ -7,18 +7,27 @@ canonical_url: https://medium.com/@baris.sayli/type-safe-generic-api-responses-w
 
 # Spring Boot OpenAPI Generics — Adoption Hub
 
-> A production-grade **reference architecture** for **contract-driven, generics-aware API boundaries** built with Spring Boot, Springdoc, and OpenAPI Generator.
+> A **reference implementation** for **contract-driven, generics-aware OpenAPI client generation**
+> built with Spring Boot, Springdoc, and OpenAPI Generator.
 
-Welcome 👋
-This documentation describes a **domain‑agnostic, single‑contract architecture** where **both server and client** share the same canonical success envelope:
+---
+
+## Welcome 👋
+
+This documentation describes a **domain-agnostic, single-contract approach** where
+**both server and client** share the same canonical success envelope:
 
 > **Canonical success envelope:** `ServiceResponse<T>`
 
 * No duplicated envelopes
-* No parallel client contracts
-* No schema drift
+* No parallel client models
+* No schema drift between server and client
 
-The result is an **end‑to‑end type‑safe API boundary** with deterministic OpenAPI output, explicit generic rules, and **RFC 9457‑compliant error handling**.
+The result is an **end-to-end, type-safe API boundary** with:
+
+* deterministic OpenAPI output
+* explicit, limited generic support
+* **RFC 9457-compliant error handling**
 
 ---
 
@@ -79,7 +88,7 @@ This module defines the **only** envelope, paging, and metadata types used acros
 | `ServiceResponse<Map<K,V>>` | ⚠️        | Uses OpenAPI Generator default behavior                     |
 | Arbitrary nested generics   | ❌        | Outside the canonical contract                              |
 
-This architecture **does not restrict or modify** OpenAPI Generator’s default handling
+This approach **does not restrict or modify** OpenAPI Generator’s default handling
 of standard Java collection types such as `List<T>` or `Map<K,V>`.
 
 It defines **explicit guarantees only** for:
@@ -219,7 +228,8 @@ This pattern guarantees:
 
 This is not a tutorial demo.
 
-It is a **reference architecture** for teams who care about API correctness, long‑term maintainability, and zero contract drift.
+It is a **reference implementation** for teams who care about API correctness,
+long-term maintainability, and zero contract drift.
 
 ---
 

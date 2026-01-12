@@ -7,21 +7,35 @@ nav_order: 1
 
 # Client-Side Build Setup — Maven Plugins & Dependencies
 
-This guide describes how to configure a **client module build** to generate **type‑safe OpenAPI clients** with **deterministic wrapper typing** and **zero contract duplication**.
+This guide describes how to configure a **client module build** to generate
+**type-safe OpenAPI clients** with **deterministic wrapper typing** and
+**without duplicating shared response contracts**.
 
-**Contract rule (non‑negotiable):**
+### Contract usage
 
-* All success responses **must** use the shared contract from **`io.github.bsayli:api-contract`**, specifically **`ServiceResponse<T>`**.
-* Nested generics are supported **only** for **`ServiceResponse<Page<T>>`**. No other generic nesting is allowed or interpreted.
+Client generation assumes the following conventions:
 
-The build pipeline presented in this document is intentionally explicit and reproducible. At a high level, it:
+* Successful responses use the shared contract provided by  
+  **`io.github.bsayli:api-contract`**, specifically **`ServiceResponse<T>`**.
+* Nested generics are supported for **`ServiceResponse<Page<T>>`** only.
+  Other generic nesting patterns are treated using the generator’s default behavior.
+
+These conventions allow the client build to remain predictable while avoiding
+endpoint-specific wrapper models.
+
+---
+
+The build pipeline presented in this document is intentionally explicit and reproducible.
+At a high level, it:
 
 1. extracts the upstream OpenAPI Generator templates as a stable baseline,
-2. overlays your project‑specific Mustache customizations,
+2. overlays project-specific Mustache customizations,
 3. generates client sources using the effective template set,
 4. compiles the generated sources as part of the normal Maven build.
 
-This setup ensures that client generation is **contract‑driven**, **deterministic**, and fully aligned with the server‑side OpenAPI contract.
+With this setup, client generation stays **deterministic**, **template-safe**,
+and aligned with the published OpenAPI specification — without introducing
+parallel or duplicated response models.
 
 ---
 
@@ -501,10 +515,11 @@ If any of the following appear, the setup is **incorrect**:
 
 ✅ With this setup, your client build becomes:
 
-* **Contract‑driven** — a single, shared `api-contract` artifact
-* **Deterministic** — pinned versions and reproducible generation
-* **Template‑safe** — overlays apply minimal, intentional deltas
-* **Generics‑aware** — with explicit support for `ServiceResponse<Page<T>>`
+* **Contract-driven** — all success responses rely on the shared `api-contract` artifact
+* **Deterministic** — pinned versions and reproducible client generation
+* **Template-safe** — Mustache overlays apply minimal, intentional changes only
+* **Generics-aware** — explicit and predictable support for `ServiceResponse<Page<T>>`
 
-This section defines **rules**, not examples.
-If your templates violate them, the architecture contract is broken — even if the code compiles.
+This section defines **binding rules for client generation**, not illustrative examples.
+
+If your generated client code or templates violate these rules, the build is no longer aligned with the published OpenAPI contract — even if it still compiles.

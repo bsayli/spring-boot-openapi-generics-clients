@@ -3,6 +3,8 @@ package io.github.bsayli.customerservice.common.openapi;
 import static io.github.bsayli.customerservice.common.openapi.OpenApiSchemas.*;
 
 import io.swagger.v3.oas.models.media.*;
+import java.util.LinkedHashMap;
+import java.util.List;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +19,7 @@ public class SwaggerResponseCustomizer {
     return openApi -> {
       var schemas = openApi.getComponents().getSchemas();
       if (schemas == null) {
-        openApi.getComponents().setSchemas(new java.util.LinkedHashMap<>());
+        openApi.getComponents().setSchemas(new LinkedHashMap<>());
         schemas = openApi.getComponents().getSchemas();
       }
 
@@ -26,8 +28,7 @@ public class SwaggerResponseCustomizer {
             SCHEMA_SORT,
             new ObjectSchema()
                 .addProperty("field", new StringSchema())
-                .addProperty(
-                    "direction", new StringSchema()._enum(java.util.List.of("asc", "desc"))));
+                .addProperty("direction", new StringSchema()._enum(List.of("asc", "desc"))));
       }
 
       if (!schemas.containsKey(SCHEMA_META)) {

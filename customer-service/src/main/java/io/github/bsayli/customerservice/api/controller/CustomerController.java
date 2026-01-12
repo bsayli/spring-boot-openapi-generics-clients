@@ -61,7 +61,7 @@ public class CustomerController {
     var meta = Meta.now(sortBy.value(), direction);
     return ResponseEntity.ok(ServiceResponse.of(paged, meta));
   }
-  
+
   @PutMapping(path = "/{customerId}", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<ServiceResponse<CustomerDto>> updateCustomer(
       @PathVariable @Min(1) Integer customerId, @Valid @RequestBody CustomerUpdateRequest request) {

@@ -11,7 +11,7 @@ It intentionally contains **no framework dependencies** (no Spring, no HTTP, no 
 * generator‑friendly
 * language‑agnostic
 
-This module is the **foundation** of the entire architecture.
+This module is the **single authoritative contract** that both server and client are built against.
 
 ---
 
@@ -28,7 +28,7 @@ This module is the **foundation** of the entire architecture.
   * [ProblemExtensions](#problemextensions)
   * [ErrorItem](#erroritem)
 * 🚫 [What This Module Does Not Do](#-what-this-module-does-not-do)
-* 🧠 [Architectural Rules](#-architectural-rules)
+* 📜 [Contract Guarantees](#-contract-guarantees)
 * 📦 [Dependency Usage](#-dependency-usage)
 * 🔐 [Versioning & Stability](#-versioning--stability)
 * 📄 [License](#-license)
@@ -193,16 +193,17 @@ Those concerns belong to **other modules**.
 
 ---
 
-## 🧠 Architectural Rules
+## 📜 Contract Guarantees
 
-These rules are **non‑negotiable**:
+These rules define the **scope and guarantees of the API contract**:
 
-1. **One envelope** — `ServiceResponse<T>`
-2. **No duplication** — clients extend, never re‑define
-3. **Page‑only nested generics** — nothing else
-4. **Contracts evolve carefully** — breaking changes are explicit
+1. **Single success envelope** — `ServiceResponse<T>`
+2. **No envelope duplication** — clients extend the contract, they do not redefine it
+3. **Page-only nested generics** — deeper nesting is intentionally out of scope
+4. **Explicit contract evolution** — breaking changes are deliberate and visible
 
-If any module violates these rules, the architecture is broken.
+These rules describe what the contract **guarantees** —
+not how those guarantees are enforced.
 
 ---
 

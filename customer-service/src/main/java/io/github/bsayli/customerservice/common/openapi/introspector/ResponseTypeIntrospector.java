@@ -15,6 +15,40 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
+/**
+ * Detects contract-aware response shapes from Spring MVC controller return types.
+ *
+ * <p>This component exists to keep the published OpenAPI specification deterministic for a small,
+ * explicitly supported set of generic shapes. It does <b>not</b> try to "understand generics in
+ * general".
+ *
+ * <h2>What it does</h2>
+ *
+ * <ul>
+ *   <li>Unwraps common wrappers (e.g. {@code ResponseEntity}, async wrappers) until it reaches
+ *       {@code ServiceResponse<T>}.
+ *   <li>Extracts a deterministic component schema name for the {@code data} part of the response
+ *       <b>only</b> for the shapes guaranteed by this setup.
+ * </ul>
+ *
+ * <h2>Guaranteed shapes</h2>
+ *
+ * <ul>
+ *   <li>{@code ServiceResponse<T>} where {@code T} is a non-generic DTO type
+ *   <li>{@code ServiceResponse<Page<T>>} (pagination-only nested generic)
+ * </ul>
+ *
+ * <h2>Everything else</h2>
+ *
+ * <p>Other compositions such as {@code ServiceResponse<List<T>>}, {@code
+ * ServiceResponse<Map<K,V>>}, or arbitrary nested generics are intentionally treated as out of
+ * scope for auto-wrapper registration. In those cases, this introspector returns {@link
+ * java.util.Optional#empty()} so the OpenAPI output remains on Springdoc defaults and client
+ * generation follows OpenAPI Generator's default behavior.
+ *
+ * <p>In short: this class defines <b>what the server explicitly marks as contract-aware</b> in the
+ * spec — not what Java could theoretically express.
+ */
 @Component
 public final class ResponseTypeIntrospector {
 
@@ -29,22 +63,22 @@ public final class ResponseTypeIntrospector {
   /**
    * Extracts the schema ref name for the {@code data} field of {@code ServiceResponse<T>}.
    *
-   * <p>Guaranteed shapes (auto-registered wrappers):
+   * <p><b>Guaranteed shapes</b> (auto-registered wrapper schemas):
    *
    * <ul>
-   *   <li>{@code ServiceResponse<T>} where {@code T} is NOT a generic container
+   *   <li>{@code ServiceResponse<T>} where {@code T} is a non-generic DTO type
    *   <li>{@code ServiceResponse<Page<T>>}
    * </ul>
    *
-   * <p>Non-guaranteed shapes (left to Springdoc/OpenAPI Generator defaults):
+   * <p><b>Out of scope</b> (left to Springdoc/OpenAPI Generator defaults):
    *
    * <ul>
    *   <li>{@code ServiceResponse<List<T>>}, {@code ServiceResponse<Map<K,V>>}, {@code
    *       ServiceResponse<Foo<Bar>>}, ...
    * </ul>
    *
-   * <p>For non-guaranteed shapes, this method returns {@link Optional#empty()} so that no
-   * auto-wrapper schema is registered for them.
+   * <p>For out-of-scope shapes, this method returns {@link Optional#empty()} so no wrapper schema
+   * is auto-registered for them.
    */
   public Optional<String> extractDataRefName(Method method) {
     if (method == null) return Optional.empty();
@@ -102,8 +136,8 @@ public final class ResponseTypeIntrospector {
   }
 
   /**
-   * Returns a deterministic wrapper-suffix ref name ONLY for the shapes this architecture
-   * explicitly guarantees.
+   * Returns a deterministic wrapper-suffix ref name ONLY for the shapes explicitly guaranteed by
+   * the contract.
    *
    * <p>Rules:
    *
@@ -112,7 +146,8 @@ public final class ResponseTypeIntrospector {
    *       PageCustomerDto}).
    *   <li>If {@code data} is a plain (non-generic) DTO type, return its simple name (e.g. {@code
    *       CustomerDto}).
-   *   <li>Otherwise (List/Map/any other generic container), return empty to keep default behavior.
+   *   <li>Otherwise (List/Map/any other generic container), return empty to preserve default
+   *       generator behavior.
    * </ul>
    */
   private Optional<String> buildGuaranteedRefName(ResolvableType dataType) {
@@ -136,7 +171,7 @@ public final class ResponseTypeIntrospector {
       return Optional.of(raw.getSimpleName());
     }
 
-    // Everything else is outside the canonical contract: do not auto-register wrappers.
+    // Everything else is out of contract scope: do not auto-register wrapper schemas.
     return Optional.empty();
   }
 

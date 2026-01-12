@@ -9,14 +9,19 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <p align="center">
-  <img src="docs/images/cover/cover.png" alt="OpenAPI Generics Cover" width="720"/>
+  <img src="docs/images/cover/cover.png" alt="OpenAPI Generics Reference Setup" width="720"/>
   <br/>
-  <em><strong>Contract‑driven, generics‑aware OpenAPI clients</strong> — one response model, zero drift.</em>
+  <em>
+    Generics-aware OpenAPI client generation using a single shared response contract —
+    no duplicated envelopes, no client-side drift.
+  </em>
 </p>
 
-This repository is a **reference architecture** for building **end‑to‑end, generics‑aware APIs** with **Spring Boot**, **Springdoc**, and **OpenAPI Generator**.
+This repository is a **reference implementation** demonstrating
+**generics-aware OpenAPI client generation** with **Spring Boot**, **Springdoc**, and **OpenAPI Generator**.
 
-It demonstrates a **single‑contract approach** where **server and client share the same canonical response model**:
+It demonstrates a **single-contract approach** where **server and client share
+the same canonical response model**:
 
 ```java
 ServiceResponse<T>
@@ -213,31 +218,37 @@ io.github.bsayli:api-contract
 
 ### Supported Shapes
 
-| Shape                      | Supported | Notes                                                   |
-| -------------------------- | --------- | ------------------------------------------------------- |
-| `ServiceResponse<T>`       | ✅        | Canonical success envelope (guaranteed)                 |
-| `ServiceResponse<Page<T>>` | ✅        | **Guaranteed nested generic**                           |
-| `ServiceResponse<List<T>>` | ⚠️        | Uses OpenAPI Generator default behavior (unchanged)     |
-| Arbitrary nested generics  | ❌        | Outside the supported contract                          |
+| Shape                      | Supported | Notes                                               |
+| -------------------------- | --------- | --------------------------------------------------- |
+| `ServiceResponse<T>`       | ✅        | Canonical success envelope (guaranteed)             |
+| `ServiceResponse<Page<T>>` | ✅        | **Guaranteed nested generic**                       |
+| `ServiceResponse<List<T>>` | ⚠️        | Uses OpenAPI Generator default behavior (unchanged) |
+| Arbitrary nested generics  | ❌        | Outside the supported contract                      |
 
-This architecture **does not alter or restrict** OpenAPI Generator’s default handling of
-standard collection types such as `List<T>`.
+This implementation **does not alter or restrict** OpenAPI Generator’s default handling
+of standard collection types such as `List<T>`.
 
-It **only defines explicit guarantees** for:
+It **defines explicit guarantees only** for:
 - `ServiceResponse<T>`
 - `ServiceResponse<Page<T>>`
 
 All other shapes follow the generator’s default behavior and are intentionally kept
-**outside the canonical contract** to preserve deterministic schemas and generator-safe evolution.
+**outside the canonical contract** to preserve deterministic schemas and
+generator-safe evolution.
 
 ---
 
 ## 🏗 Architecture Overview
 
 <p align="center">
-  <img src="docs/images/architecture/architectural-diagram.png" alt="OpenAPI Generics Architecture" width="900"/>
+  <img src="docs/images/architecture/architectural-diagram.png"
+       alt="Generics-Aware OpenAPI Contract Flow"
+       width="900"/>
   <br/>
-  <em>End-to-end, generics-aware OpenAPI architecture: from Spring Boot producer to type-safe client consumption.</em>
+  <em>
+    Contract-driven, generics-aware OpenAPI setup —
+    from Spring Boot producer to type-safe client generation and consumption.
+  </em>
 </p>
 
 ```
@@ -255,13 +266,13 @@ All other shapes follow the generator’s default behavior and are intentionally
    └─ depends only on adapter interfaces
 ```
 
-### Architectural principles
+### Design Choices
 
-* **Contract-first** — the OpenAPI specification describes *contracts*, not implementations.
-* **Canonical envelope** — all successful responses share a unified `{ data, meta }` shape via `ServiceResponse<T>`.
-* **Deterministic generics** — nested generics are intentionally limited to `ServiceResponse<Page<T>>`.
-* **Generator-safe** — thin wrapper classes are emitted via Mustache overlays, not handwritten code.
-* **Adapter boundary** — consumer services depend on stable adapters, never on generated APIs directly.
+* **Contract-first** — the OpenAPI specification describes *API contracts*, not implementations.
+* **Single canonical envelope** — all successful responses share a unified `{ data, meta }` shape via `ServiceResponse<T>`.
+* **Explicit generic scope** — nested generics are intentionally limited to `ServiceResponse<Page<T>>`.
+* **Generator-safe modeling** — thin wrapper classes are emitted via Mustache overlays, not handwritten code.
+* **Adapter boundary** — consumer applications depend on stable adapters, not on generated APIs directly.
 
 ### Layers at a glance
 
@@ -335,18 +346,17 @@ No duplicated envelope. No lost generics.
 
 ## 🧠 Design Guarantees
 
-This architecture guarantees:
+This repository guarantees:
 
-* **One response contract** across server and client
-* **No duplicated envelopes**
-* **Page‑only nested generics**
-* **Deterministic schema names**
-* **RFC 9457‑first error handling**
-* **Generator‑safe long‑term evolution**
+* **One shared response contract** across server and client
+* **No duplicated envelopes** in generated clients
+* **Page-only nested generics** (`ServiceResponse<Page<T>>`)
+* **Deterministic schema names** for the guaranteed shapes
+* **RFC 9457-first error handling** (Problem Details)
+* **Generator-safe evolution** through minimal, explicit template overlays
 
-This is not a demo.
-
-It is a **reference architecture**.
+This is not a demo.  
+It is a **reference implementation**.
 
 ---
 
@@ -374,15 +384,15 @@ Step-by-step integration guides live under [`docs/adoption`](docs/adoption):
 
 ## 🤝 Contributing & Feedback
 
-This repository is a **reference architecture**, not a closed framework.
+This repository is a **reference implementation**, not a closed framework.
 
 If you:
 
 * apply this pattern in a real project,
 * spot an inconsistency,
-* or want to evolve the contract or templates,
+* or want to evolve the shared contract or generator templates,
 
-feel free to open an issue or start a discussion:
+feel free to open an issue or start a discussion.
 
 👉 [Discussions](https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions)
 
