@@ -4,6 +4,7 @@ title: Client-Side Build Setup
 parent: Client-Side Adoption
 nav_order: 1
 ---
+
 # Client-Side Build Setup — Maven Plugins & Dependencies
 
 This guide describes how to configure a **client module build** to generate **type‑safe OpenAPI clients** with **deterministic wrapper typing** and **zero contract duplication**.

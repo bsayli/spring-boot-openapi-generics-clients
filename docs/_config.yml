@@ -1,18 +1,19 @@
 title: OpenAPI Generics Clients
 description: Type-safe OpenAPI clients with generics (Spring Boot + OpenAPI Generator)
 
-just_the_docs:
-  custom_css: assets/css/custom.css
-
 remote_theme: just-the-docs/just-the-docs
 
 plugins:
   - jekyll-remote-theme
+
+baseurl: "/spring-boot-openapi-generics-clients"
+
+just_the_docs:
+  custom_css:
+    - assets/css/custom.css
 
 aux_links:
   "View on GitHub":
     - "https://github.com/bsayli/spring-boot-openapi-generics-clients"
 
 search_enabled: true
-
-baseurl: "/spring-boot-openapi-generics-clients"

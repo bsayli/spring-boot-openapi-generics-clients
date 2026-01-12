@@ -4,6 +4,7 @@ title: Client-Side Adoption
 parent: Adoption Guides
 nav_order: 2
 ---
+
 # Client‑Side Adoption
 
 This guide explains how to integrate a **generics‑aware OpenAPI client** into *your own application* using a **single canonical contract**, without leaking domain‑specific assumptions from the reference project.

@@ -4,6 +4,7 @@ title: Home
 nav_order: 1
 canonical_url: https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04
 ---
+
 # Spring Boot OpenAPI Generics — Adoption Hub
 
 > A production‑grade blueprint for **contract‑driven, generics‑aware API boundaries** built with Spring Boot, Springdoc, and OpenAPI Generator.
@@ -11,15 +12,13 @@ canonical_url: https://medium.com/@baris.sayli/type-safe-generic-api-responses-w
 Welcome 👋
 This documentation describes a **domain‑agnostic, single‑contract architecture** where **both server and client** share the same canonical success envelope:
 
-```java
-ServiceResponse<T>
-```
+> **Canonical success envelope:** `ServiceResponse<T>`
 
 No duplicated envelopes.
 No parallel client contracts.
 No schema drift.
 
-The result is an **end‑to‑end type‑safe API boundary** with deterministic OpenAPI output, explicit generic rules, and RFC 9457‑compliant error handling.
+The result is an **end‑to‑end type‑safe API boundary** with deterministic OpenAPI output, explicit generic rules, and **RFC 9457‑compliant error handling**.
 
 ---
 
@@ -44,17 +43,13 @@ This blueprint solves these problems by enforcing **one shared contract** and ma
 
 ## 🧱 Canonical Contract (Single Source of Truth)
 
-All **successful responses** — on **both server and client** — use:
+All **successful responses** — on **both server and client** — use the same envelope:
 
-```java
-ServiceResponse<T>
-```
+> `ServiceResponse<T>`
 
 Provided by the shared module:
 
-```
-io.github.bsayli:api-contract
-```
+`io.github.bsayli:api-contract`
 
 This module defines the **only** envelope, paging, and metadata types used across the system.
 
@@ -131,9 +126,7 @@ public class ServiceResponsePageFooDto
 
 All non‑2xx responses are modeled as **RFC 9457 Problem Details** and surfaced to the client as a single exception type:
 
-```java
-ApiProblemException
-```
+`ApiProblemException`
 
 This exception:
 

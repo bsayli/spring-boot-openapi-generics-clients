@@ -4,6 +4,7 @@ title: Server-Side Adoption
 parent: Adoption Guides
 nav_order: 1
 ---
+
 # Server-Side Adoption — Spring MVC + Springdoc
 
 **Goal:** integrate a contract-driven setup into your Spring MVC service so it:
