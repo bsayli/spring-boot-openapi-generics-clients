@@ -1,4 +1,4 @@
-package io.github.bsayli.customerservice.common.api.response;
+package io.github.bsayli.apicontract.paging;
 
 import java.util.List;
 

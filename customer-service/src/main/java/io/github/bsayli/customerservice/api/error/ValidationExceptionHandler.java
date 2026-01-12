@@ -3,7 +3,7 @@ package io.github.bsayli.customerservice.api.error;
 import static io.github.bsayli.customerservice.api.error.ProblemSupport.*;
 import static io.github.bsayli.customerservice.common.api.ApiConstants.ErrorCode.*;
 
-import io.github.bsayli.customerservice.common.api.response.error.ErrorItem;
+import io.github.bsayli.apicontract.error.ErrorItem;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;

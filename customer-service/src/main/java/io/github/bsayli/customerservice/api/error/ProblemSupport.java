@@ -1,7 +1,7 @@
 package io.github.bsayli.customerservice.api.error;
 
-import io.github.bsayli.customerservice.common.api.response.error.ErrorItem;
-import io.github.bsayli.customerservice.common.api.response.error.ProblemExtensions;
+import io.github.bsayli.apicontract.error.ErrorItem;
+import io.github.bsayli.apicontract.error.ProblemExtensions;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.List;

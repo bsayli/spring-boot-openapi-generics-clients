@@ -2,7 +2,7 @@ package io.github.bsayli.customerservice.common.openapi.introspector;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.bsayli.customerservice.common.api.response.ServiceResponse;
+import io.github.bsayli.apicontract.envelope.ServiceResponse;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

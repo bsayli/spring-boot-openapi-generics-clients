@@ -6,40 +6,71 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
-    <version>0.7.3</version>
+    <version>0.7.4</version>
     <name>customer-service-client</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
+    <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
+        <connection>scm:git:https://github.com/bsayli/spring-boot-openapi-generics-clients.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:bsayli/spring-boot-openapi-generics-clients.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>bsayli</id>
+            <name>Baris Sayli</name>
+            <url>https://github.com/bsayli</url>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>21</java.version>
 
-        <spring-boot.version>3.4.11</spring-boot.version>
-        <openapi.generator.version>7.17.0</openapi.generator.version>
+        <spring-boot.version>3.5.9</spring-boot.version>
+        <openapi.generator.version>7.18.0</openapi.generator.version>
 
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
-        <mockwebserver.version>5.1.0</mockwebserver.version>
-        <httpclient5.version>5.5</httpclient5.version>
-        <junit-jupiter.version>5.13.4</junit-jupiter.version>
+        <mockwebserver.version>5.3.2</mockwebserver.version>
+        <httpclient5.version>5.5.2</httpclient5.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
 
-        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
-        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
-        <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
-        <build.helper.plugin.version>3.6.0</build.helper.plugin.version>
-        <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
-        <maven.dependency.plugin.version>3.8.1</maven.dependency.plugin.version>
-        <spotless-maven-plugin.version>3.0.0</spotless-maven-plugin.version>
+        <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
+        <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
+        <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
+        <spotless-maven-plugin.version>3.1.0</spotless-maven-plugin.version>
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
 
         <openapi.templates.upstream>${project.build.directory}/upstream-templates</openapi.templates.upstream>
         <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
-
+        <api-contract.version>0.7.4</api-contract.version>
+        <argLine/>
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>io.github.bsayli</groupId>
+            <artifactId>api-contract</artifactId>
+            <version>${api-contract.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -124,6 +155,11 @@
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
+                    </execution>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -216,8 +252,8 @@
                                 <sourceFolder>src/gen/java</sourceFolder>
                             </configOptions>
                             <additionalProperties>
-                                <additionalProperty>commonPackage=io.github.bsayli.openapi.client.common
-                                </additionalProperty>
+                                <additionalProperty>apiContractEnvelope=io.github.bsayli.apicontract.envelope</additionalProperty>
+                                <additionalProperty>apiContractPage=io.github.bsayli.apicontract.paging</additionalProperty>
                             </additionalProperties>
                             <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>
                         </configuration>
@@ -269,6 +305,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -284,7 +321,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <useModulePath>false</useModulePath>
+                    <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
                 </configuration>
             </plugin>
 
@@ -294,15 +334,16 @@
                 <version>${maven-failsafe-plugin.version}</version>
                 <executions>
                     <execution>
+                        <id>default</id>
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>
                         </goals>
                         <configuration>
+                            <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
                             <includes>
                                 <include>**/*IT.java</include>
                             </includes>
-                            <useModulePath>false</useModulePath>
                         </configuration>
                     </execution>
                 </executions>
@@ -334,6 +375,7 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
+
                     <execution>
                         <id>report-integration</id>
                         <phase>verify</phase>

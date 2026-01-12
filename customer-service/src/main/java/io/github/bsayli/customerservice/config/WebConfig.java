@@ -1,6 +1,6 @@
 package io.github.bsayli.customerservice.config;
 
-import io.github.bsayli.customerservice.common.api.sort.SortDirection;
+import io.github.bsayli.apicontract.paging.SortDirection;
 import io.github.bsayli.customerservice.common.api.sort.SortField;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;

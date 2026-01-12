@@ -1,6 +1,7 @@
 package io.github.bsayli.customerservice.common.openapi.introspector;
 
-import io.github.bsayli.customerservice.common.api.response.ServiceResponse;
+import io.github.bsayli.apicontract.envelope.ServiceResponse;
+import io.github.bsayli.apicontract.paging.Page;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.Set;
@@ -19,20 +20,23 @@ public final class ResponseTypeIntrospector {
 
   private static final Logger log = LoggerFactory.getLogger(ResponseTypeIntrospector.class);
   private static final int MAX_UNWRAP_DEPTH = 8;
+
+  private static final String FALLBACK_OBJECT_REF = "Object";
+
   private static final Set<String> REACTOR_WRAPPERS =
       Set.of("reactor.core.publisher.Mono", "reactor.core.publisher.Flux");
 
   public Optional<String> extractDataRefName(Method method) {
     if (method == null) return Optional.empty();
 
-    ResolvableType t = ResolvableType.forMethodReturnType(method);
-    t = unwrapToServiceResponse(t);
+    ResolvableType type = ResolvableType.forMethodReturnType(method);
+    type = unwrapToServiceResponse(type);
 
-    Class<?> raw = t.resolve();
+    Class<?> raw = type.resolve();
     if (raw == null || !ServiceResponse.class.isAssignableFrom(raw)) return Optional.empty();
-    if (!t.hasGenerics()) return Optional.empty();
+    if (!type.hasGenerics()) return Optional.empty();
 
-    ResolvableType dataType = t.getGeneric(0);
+    ResolvableType dataType = type.getGeneric(0);
     String ref = buildRefName(dataType);
 
     if (log.isDebugEnabled()) {
@@ -45,8 +49,10 @@ public final class ResponseTypeIntrospector {
     for (int i = 0; i < MAX_UNWRAP_DEPTH; i++) {
       Class<?> raw = type.resolve();
       if (raw == null || ServiceResponse.class.isAssignableFrom(raw)) return type;
+
       ResolvableType next = nextLayer(type, raw);
       if (next == null) return type;
+
       type = next;
     }
     return type;
@@ -54,24 +60,46 @@ public final class ResponseTypeIntrospector {
 
   private ResolvableType nextLayer(ResolvableType current, Class<?> raw) {
     if (ResponseEntity.class.isAssignableFrom(raw)) return current.getGeneric(0);
-    if (CompletionStage.class.isAssignableFrom(raw) || Future.class.isAssignableFrom(raw))
+
+    if (CompletionStage.class.isAssignableFrom(raw) || Future.class.isAssignableFrom(raw)) {
       return current.getGeneric(0);
-    if (DeferredResult.class.isAssignableFrom(raw) || WebAsyncTask.class.isAssignableFrom(raw))
+    }
+
+    if (DeferredResult.class.isAssignableFrom(raw) || WebAsyncTask.class.isAssignableFrom(raw)) {
       return current.getGeneric(0);
+    }
+
     if (REACTOR_WRAPPERS.contains(raw.getName())) return current.getGeneric(0);
+
     return null;
   }
 
+  /**
+   * Contract rule: - Nested generics are supported ONLY for Page<T>. - For any other generic type
+   * (List<T>, Map<K,V>, Foo<Bar>), generics are ignored and only the raw type name is used.
+   */
   private String buildRefName(ResolvableType type) {
     Class<?> raw = type.resolve();
-    if (raw == null) return "Object";
-    String base = raw.getSimpleName();
-    if (!type.hasGenerics()) return base;
+    if (raw == null) return FALLBACK_OBJECT_REF;
 
-    StringBuilder sb = new StringBuilder(base);
-    for (ResolvableType g : type.getGenerics()) {
-      sb.append(buildRefName(g));
+    // Special-case: Page<T> is the only allowed "container" that contributes its item type
+    if (Page.class.isAssignableFrom(raw)) {
+      ResolvableType itemType = safeGeneric(type, 0);
+      String itemRef = buildRefName(itemType);
+      return raw.getSimpleName() + itemRef;
     }
-    return sb.toString();
+
+    // Default: ignore generics to keep the contract deterministic
+    return raw.getSimpleName();
+  }
+
+  private ResolvableType safeGeneric(ResolvableType type, int index) {
+    if (type == null || !type.hasGenerics()) return ResolvableType.forClass(Object.class);
+
+    ResolvableType[] generics = type.getGenerics();
+    if (index < 0 || index >= generics.length) return ResolvableType.forClass(Object.class);
+
+    ResolvableType g = generics[index];
+    return (g.resolve() == null) ? ResolvableType.forClass(Object.class) : g;
   }
 }

@@ -1,0 +1,111 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.4 Chrome/128.0.6613.186 Electron/32.2.5 Safari/537.36" version="26.0.4">
+  <diagram id="arch1" name="OpenAPI Generics Architecture (Domain-Agnostic)">
+    <mxGraphModel dx="1266" dy="743" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===================== LANE: PRODUCER ===================== -->
+        <mxCell id="laneProducer" value="API Producer (Server)" style="swimlane;rounded=1;strokeColor=#1e293b;fillColor=#0b1220;fontColor=#e5e7eb;horizontal=1;startSize=28;" parent="1" vertex="1">
+          <mxGeometry x="40" y="80" width="520" height="500" as="geometry" />
+        </mxCell>
+
+        <mxCell id="srv" value="service-api (example)&lt;br&gt;&lt;b&gt;Spring Boot 3.5.9 + Springdoc 2.8.15&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0ea5a4;strokeColor=#0b6261;fontColor=#062c2b" parent="laneProducer" vertex="1">
+          <mxGeometry x="30" y="40" width="460" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="contract" value="api-contract&lt;br&gt;&lt;b&gt;Canonical model&lt;/b&gt;&lt;br&gt;• ServiceResponse&lt;T&gt;&lt;br&gt;• Meta&lt;br&gt;• Page&lt;T&gt;, Sort, SortDirection&lt;br&gt;• RFC 9457 extensions (ProblemExtensions/ErrorItem)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d1fae5;strokeColor=#10b981;fontColor=#064e3b" parent="laneProducer" vertex="1">
+          <mxGeometry x="30" y="140" width="220" height="170" as="geometry" />
+        </mxCell>
+
+        <mxCell id="customizer" value="OpenAPI schema enricher&lt;br&gt;&lt;b&gt;(OpenApiCustomizer)&lt;/b&gt;&lt;br&gt;• detects ServiceResponse&lt;T&gt;&lt;br&gt;• emits vendor extensions:&lt;br&gt;&amp;nbsp;&amp;nbsp;x-api-wrapper, x-api-wrapper-datatype,&lt;br&gt;&amp;nbsp;&amp;nbsp;x-data-container, x-data-item,&lt;br&gt;&amp;nbsp;&amp;nbsp;x-class-extra-annotation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#22d3ee;strokeColor=#0284c7;fontColor=#052c3b" parent="laneProducer" vertex="1">
+          <mxGeometry x="270" y="140" width="220" height="170" as="geometry" />
+        </mxCell>
+
+        <mxCell id="spec" value="/v3/api-docs.yaml (OpenAPI 3.1)" style="shape=document;whiteSpace=wrap;html=1;rounded=1;fillColor=#fef3c7;strokeColor=#f59e0b;fontColor=#7c2d12" parent="laneProducer" vertex="1">
+          <mxGeometry x="170" y="340" width="200" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;" parent="laneProducer" source="srv" target="contract" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;" parent="laneProducer" source="srv" target="customizer" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;" parent="laneProducer" source="customizer" target="spec" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== LANE: CODEGEN ===================== -->
+        <mxCell id="laneBuild" value="Code Generation" style="swimlane;rounded=1;strokeColor=#1e293b;fillColor=#0b1220;fontColor=#e5e7eb;horizontal=1;startSize=28;" parent="1" vertex="1">
+          <mxGeometry x="580" y="80" width="520" height="500" as="geometry" />
+        </mxCell>
+
+        <mxCell id="generator" value="OpenAPI Generator 7.18.0&lt;br&gt;&lt;b&gt;java / restclient&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#93c5fd;strokeColor=#2563eb;fontColor=#111827" parent="laneBuild" vertex="1">
+          <mxGeometry x="30" y="60" width="460" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="templates" value="Mustache overlay&lt;br&gt;&lt;b&gt;model.mustache&lt;/b&gt; (+ wrapper partials)&lt;br&gt;→ emit thin wrappers bound to api-contract" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4f46e5;fontColor=#111827" parent="laneBuild" vertex="1">
+          <mxGeometry x="30" y="150" width="460" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="generated" value="Generated Client (Java)&lt;div&gt;• Thin wrapper models:&lt;br&gt;&amp;nbsp;&amp;nbsp;ServiceResponseFooDto extends ServiceResponse&lt;FooDto&gt;&lt;br&gt;&amp;nbsp;&amp;nbsp;ServiceResponsePageFooDto extends ServiceResponse&lt;Page&lt;FooDto&gt;&gt;&lt;br&gt;• APIs + RestClient + Invoker&lt;br&gt;• DTOs (domain-specific)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbf7d0;strokeColor=#16a34a;fontColor=#052e16" parent="laneBuild" vertex="1">
+          <mxGeometry x="30" y="270" width="460" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="problem" value="Error handling&lt;br&gt;• RFC 9457 ProblemDetail → ApiProblemException&lt;br&gt;• ProblemExtensions/ErrorItem supported" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fecaca;strokeColor=#ef4444;fontColor=#7f1d1d" parent="laneBuild" vertex="1">
+          <mxGeometry x="30" y="410" width="460" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;" parent="laneBuild" source="generator" target="templates" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;" parent="laneBuild" source="templates" target="generated" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;dashed=1;" parent="laneBuild" source="generated" target="problem" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== LANE: CONSUMER ===================== -->
+        <mxCell id="laneConsumer" value="API Consumer (Client App)" style="swimlane;rounded=1;strokeColor=#1e293b;fillColor=#0b1220;fontColor=#e5e7eb;horizontal=1;startSize=28;" parent="1" vertex="1">
+          <mxGeometry x="1120" y="80" width="520" height="500" as="geometry" />
+        </mxCell>
+
+        <mxCell id="adapter" value="Adapter Layer&lt;br&gt;&lt;i&gt;ServiceClientAdapter&lt;/i&gt; (stable interface)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e9d5ff;strokeColor=#7c3aed;fontColor=#2e1065" parent="laneConsumer" vertex="1">
+          <mxGeometry x="30" y="60" width="460" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="consumer" value="Consumer application/service&lt;br&gt;• uses adapter methods&lt;br&gt;• receives type-safe ServiceResponse&lt;...&gt;&lt;br&gt;• handles ApiProblemException" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fde68a;strokeColor=#d97706;fontColor=#78350f" parent="laneConsumer" vertex="1">
+          <mxGeometry x="30" y="180" width="460" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="meta" value="Unified success envelope&lt;br&gt;{ data, meta }&lt;br&gt;• deterministic shapes&lt;br&gt;• Page-only nested generics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d1fae5;strokeColor=#10b981;fontColor=#064e3b" parent="laneConsumer" vertex="1">
+          <mxGeometry x="30" y="330" width="460" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;" parent="laneConsumer" source="adapter" target="consumer" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;" parent="laneConsumer" source="consumer" target="meta" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== LEGEND ===================== -->
+        <mxCell id="legend" value="Legend&lt;br&gt;• Canonical contract: ServiceResponse&lt;T&gt; (from api-contract)&lt;br&gt;• Nested generics allowed only for: ServiceResponse&lt;Page&lt;T&gt;&gt;&lt;br&gt;• Vendor extensions: x-api-wrapper, x-api-wrapper-datatype, x-data-container, x-data-item, x-class-extra-annotation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#334155;fontColor=#0f172a" parent="1" vertex="1">
+          <mxGeometry x="40" y="600" width="1600" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== CROSS-LANE EDGES ===================== -->
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;" parent="1" source="spec" target="generator" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;" parent="1" source="generated" target="adapter" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

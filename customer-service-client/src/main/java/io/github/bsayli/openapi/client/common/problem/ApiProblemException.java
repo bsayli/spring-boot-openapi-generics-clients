@@ -1,4 +1,4 @@
-package io.github.bsayli.openapi.client.common.error;
+package io.github.bsayli.openapi.client.common.problem;
 
 import io.github.bsayli.openapi.client.generated.dto.ProblemDetail;
 import java.io.Serial;
@@ -9,20 +9,20 @@ import java.io.Serializable;
  * ProblemDetail}. Thrown by the RestClient defaultStatusHandler in client config. See: <a
  * href="https://www.rfc-editor.org/rfc/rfc9457">...</a>
  */
-public final class ClientProblemException extends RuntimeException implements Serializable {
+public final class ApiProblemException extends RuntimeException implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
 
   private final transient ProblemDetail problem;
   private final int status;
 
-  public ClientProblemException(ProblemDetail problem, int status) {
+  public ApiProblemException(ProblemDetail problem, int status) {
     super(buildMessage(problem, status));
     this.problem = problem;
     this.status = status;
   }
 
-  public ClientProblemException(ProblemDetail problem, int status, Throwable cause) {
+  public ApiProblemException(ProblemDetail problem, int status, Throwable cause) {
     super(buildMessage(problem, status), cause);
     this.problem = problem;
     this.status = status;

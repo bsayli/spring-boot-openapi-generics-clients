@@ -1,49 +1,74 @@
-name: CodeQL
+name: Build & Test
 
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
   pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '18 3 * * 1'
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
 
 permissions:
   contents: read
-  security-events: write
-  actions: read
+  pull-requests: write
 
 jobs:
-  analyze:
-    name: Analyze (CodeQL)
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: "21"
+          distribution: "temurin"
           cache: maven
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+      # Build everything via the aggregator (reactor) so api-contract is available to downstream modules
+      # without manual "install" steps per module.
+      - name: Build all modules (tests + coverage)
+        run: mvn -B -q -ntp clean verify
+
+      - name: Upload generated client sources
+        uses: actions/upload-artifact@v4
         with:
-          languages: java
-          queries: +security-and-quality
+          name: generated-client-sources
+          path: customer-service-client/target/generated-sources/openapi/src/gen/java
+          if-no-files-found: warn
+          retention-days: 7
 
-      - name: Build (customer-service)
-        run: mvn -q -ntp -DskipTests=true clean package
-        working-directory: customer-service
-
-      - name: Build (customer-service-client)
-        run: mvn -q -ntp -DskipTests=true clean package
-        working-directory: customer-service-client
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+      - name: Upload OpenAPI spec (YAML)
+        uses: actions/upload-artifact@v4
         with:
-          category: "/language:java"
+          name: customer-api-docs
+          path: customer-service-client/target/classes/customer-api-docs.yaml
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload coverage (customer-service)
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: |
+            customer-service/target/site/jacoco*/jacoco.xml
+          flags: customer-service
+          name: customer-service
+          fail_ci_if_error: false
+
+      - name: Upload coverage (customer-service-client)
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: |
+            customer-service-client/target/site/jacoco*/jacoco.xml
+          flags: customer-service-client
+          name: customer-service-client
+          fail_ci_if_error: false

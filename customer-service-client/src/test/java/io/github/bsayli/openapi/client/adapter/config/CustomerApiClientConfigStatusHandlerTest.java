@@ -6,7 +6,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.bsayli.openapi.client.common.error.ClientProblemException;
+import io.github.bsayli.openapi.client.common.problem.ApiProblemException;
 import io.github.bsayli.openapi.client.generated.dto.ProblemDetail;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,6 @@ class CustomerApiClientConfigStatusHandlerTest {
   @DisplayName(
       "400 with application/problem+json -> throws ClientProblemException with parsed ProblemDetail")
   void handler_parses_problem_detail_on_4xx() {
-    // Arrange
     var om = new ObjectMapper();
     RestClient.Builder builder = RestClient.builder().baseUrl("http://localhost");
 
@@ -55,9 +54,9 @@ class CustomerApiClientConfigStatusHandlerTest {
     RestClient client = builder.build();
 
     // Act + Assert
-    ClientProblemException ex =
+    ApiProblemException ex =
         assertThrows(
-            ClientProblemException.class,
+            ApiProblemException.class,
             () -> client.get().uri("/err400").retrieve().body(String.class));
 
     assertEquals(400, ex.getStatus());
@@ -73,7 +72,6 @@ class CustomerApiClientConfigStatusHandlerTest {
   @Test
   @DisplayName("500 with empty body -> throws ClientProblemException with fallback ProblemDetail")
   void handler_handles_empty_body_on_5xx() {
-    // Arrange
     var om = new ObjectMapper();
     RestClient.Builder builder = RestClient.builder().baseUrl("http://localhost");
 
@@ -89,14 +87,13 @@ class CustomerApiClientConfigStatusHandlerTest {
     RestClient client = builder.build();
 
     // Act + Assert
-    ClientProblemException ex =
+    ApiProblemException ex =
         assertThrows(
-            ClientProblemException.class,
+            ApiProblemException.class,
             () -> client.get().uri("/err500").retrieve().body(String.class));
 
     assertEquals(500, ex.getStatus());
 
-    // Yeni davranış: fallback ProblemDetail DOLU geliyor
     ProblemDetail pd = ex.getProblem();
     assertNotNull(pd);
     assertEquals(500, pd.getStatus()); // fallback status

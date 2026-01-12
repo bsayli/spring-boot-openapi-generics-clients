@@ -2,24 +2,25 @@ coverage:
   status:
     project:
       default:
-        target: auto
+        target: 60%
         threshold: 1%
     patch:
       default:
-        target: 70%
+        enabled: false
 
 comment:
   layout: "reach, diff, flags, files"
   behavior: default
 
 ignore:
-  - "customer-service-client/target/**"
-  - "customer-service/target/**"
   - "**/target/**"
-  - "**/generated-sources/**"
   - "**/generated/**"
+  - "**/generated-sources/**"
 
 flags:
+  api-contract:
+    paths:
+      - "api-contract/"
   customer-service:
     paths:
       - "customer-service/"

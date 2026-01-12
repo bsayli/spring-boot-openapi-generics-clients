@@ -8,10 +8,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.bsayli.apicontract.paging.Page;
+import io.github.bsayli.apicontract.paging.SortDirection;
 import io.github.bsayli.customerservice.api.dto.*;
 import io.github.bsayli.customerservice.api.error.*;
-import io.github.bsayli.customerservice.common.api.response.Page;
-import io.github.bsayli.customerservice.common.api.sort.SortDirection;
 import io.github.bsayli.customerservice.common.api.sort.SortField;
 import io.github.bsayli.customerservice.service.CustomerService;
 import io.github.bsayli.customerservice.testconfig.TestControllerMocksConfig;
@@ -133,14 +133,18 @@ class CustomerControllerIT {
   }
 
   @Test
-  @DisplayName("GET /v1/customers/{id} -> 500 Internal Server Error (generic)")
+  @DisplayName("GET /v1/customers/{id} -> 500 Internal Server Error (RFC 9457 ProblemDetail)")
   void getCustomer_internalServerError_generic() throws Exception {
-    when(customerService.getCustomer(1)).thenThrow(new RuntimeException("Boom"));
+    when(customerService.getCustomer(1)).thenThrow(new RuntimeException("Unexpected failure"));
 
     mvc.perform(get("/v1/customers/{id}", 1))
         .andExpect(status().isInternalServerError())
         .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
-        .andExpect(jsonPath("$.status").value(500));
+        .andExpect(jsonPath("$.status").value(500))
+        .andExpect(jsonPath("$.title").value("Internal server error"))
+        .andExpect(jsonPath("$.detail").value("Unexpected error occurred."))
+        .andExpect(jsonPath("$.errorCode").value("INTERNAL_ERROR"))
+        .andExpect(jsonPath("$.extensions.errors[0].code").value("INTERNAL_ERROR"));
   }
 
   @Test

@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Customer Service API
   description: Customer Service API with type-safe generic responses using OpenAPI
-  version: 0.7.3
+  version: 0.7.4
 servers:
   - url: http://localhost:8084/customer-service
     description: Local service URL
@@ -317,10 +317,6 @@ components:
       properties:
         field:
           type: string
-          enum:
-            - customerId
-            - name
-            - email
         direction:
           type: string
           enum:
@@ -414,7 +410,7 @@ components:
         - message
     ProblemDetail:
       type: object
-      additionalProperties: true
+      additionalProperties: false
       properties:
         type:
           type: string

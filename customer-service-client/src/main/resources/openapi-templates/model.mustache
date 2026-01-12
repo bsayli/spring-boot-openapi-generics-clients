@@ -8,7 +8,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 {{/useReflectionEqualsHashCode}}
 import java.util.Objects;
 import java.util.Arrays;
-import java.util.Locale;
 {{#imports}}
 import {{import}};
 {{/imports}}
@@ -67,24 +66,24 @@ import java.util.StringJoiner;
 
 {{! ---- Generics-aware thin wrappers when x-api-wrapper is present ---- }}
 {{#vendorExtensions.x-api-wrapper}}
-  {{>api_wrapper}}
+{{>api_wrapper}}
 {{/vendorExtensions.x-api-wrapper}}
 
 {{! ---- Fallback to stock generation when not a wrapper ---- }}
 {{^vendorExtensions.x-api-wrapper}}
-  {{#isEnum}}
-    {{>modelEnum}}
-  {{/isEnum}}
+{{#isEnum}}
+{{>modelEnum}}
+{{/isEnum}}
 
-  {{^isEnum}}
-    {{#vendorExtensions.x-is-one-of-interface}}
-      {{>oneof_interface}}
-    {{/vendorExtensions.x-is-one-of-interface}}
+{{^isEnum}}
+{{#vendorExtensions.x-is-one-of-interface}}
+{{>oneof_interface}}
+{{/vendorExtensions.x-is-one-of-interface}}
 
-    {{^vendorExtensions.x-is-one-of-interface}}
-      {{>pojo}}
-    {{/vendorExtensions.x-is-one-of-interface}}
-  {{/isEnum}}
+{{^vendorExtensions.x-is-one-of-interface}}
+{{>pojo}}
+{{/vendorExtensions.x-is-one-of-interface}}
+{{/isEnum}}
 {{/vendorExtensions.x-api-wrapper}}
 
 {{/model}}

@@ -3,12 +3,16 @@ package io.github.bsayli.customerservice.api.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import io.github.bsayli.customerservice.api.dto.*;
-import io.github.bsayli.customerservice.common.api.response.Meta;
-import io.github.bsayli.customerservice.common.api.response.Page;
-import io.github.bsayli.customerservice.common.api.response.ServiceResponse;
-import io.github.bsayli.customerservice.common.api.sort.Sort;
-import io.github.bsayli.customerservice.common.api.sort.SortDirection;
+import io.github.bsayli.apicontract.envelope.Meta;
+import io.github.bsayli.apicontract.envelope.ServiceResponse;
+import io.github.bsayli.apicontract.paging.Page;
+import io.github.bsayli.apicontract.paging.Sort;
+import io.github.bsayli.apicontract.paging.SortDirection;
+import io.github.bsayli.customerservice.api.dto.CustomerCreateRequest;
+import io.github.bsayli.customerservice.api.dto.CustomerDeleteResponse;
+import io.github.bsayli.customerservice.api.dto.CustomerDto;
+import io.github.bsayli.customerservice.api.dto.CustomerSearchCriteria;
+import io.github.bsayli.customerservice.api.dto.CustomerUpdateRequest;
 import io.github.bsayli.customerservice.common.api.sort.SortField;
 import io.github.bsayli.customerservice.service.CustomerService;
 import java.util.List;
@@ -54,21 +58,22 @@ class CustomerControllerTest {
   @Test
   @DisplayName("POST /v1/customers -> 201 Created + ServiceResponse(data, meta)")
   void createCustomer_shouldReturnCreated() {
-    var request = new CustomerCreateRequest("John Smith", "john.smith@example.com");
-    when(customerService.createCustomer(request)).thenReturn(dto1);
+    var req = new CustomerCreateRequest("John Smith", "john.smith@example.com");
+    when(customerService.createCustomer(req)).thenReturn(dto1);
 
-    ResponseEntity<ServiceResponse<CustomerDto>> resp = controller.createCustomer(request);
+    ResponseEntity<ServiceResponse<CustomerDto>> resp = controller.createCustomer(req);
 
     assertEquals(HttpStatus.CREATED, resp.getStatusCode());
     assertNotNull(resp.getHeaders().getLocation(), "Location header should be set");
 
     var body = resp.getBody();
     assertNotNull(body);
-    assertEquals(dto1, body.data());
-    assertNotNull(body.meta());
-    assertNotNull(body.meta().serverTime());
 
-    verify(customerService).createCustomer(request);
+    assertEquals(dto1, body.getData());
+    assertNotNull(body.getMeta());
+    assertNotNull(body.getMeta().serverTime());
+
+    verify(customerService).createCustomer(req);
   }
 
   @Test
@@ -79,10 +84,14 @@ class CustomerControllerTest {
     ResponseEntity<ServiceResponse<CustomerDto>> resp = controller.getCustomer(1);
 
     assertEquals(HttpStatus.OK, resp.getStatusCode());
+
     var body = resp.getBody();
     assertNotNull(body);
-    assertEquals(dto1, body.data());
-    assertNotNull(body.meta());
+
+    assertEquals(dto1, body.getData());
+    assertNotNull(body.getMeta());
+    assertNotNull(body.getMeta().serverTime());
+
     verify(customerService).getCustomer(1);
   }
 
@@ -100,31 +109,36 @@ class CustomerControllerTest {
         controller.getCustomers(criteria, 0, 5, sortBy, direction);
 
     assertEquals(HttpStatus.OK, resp.getStatusCode());
+
     var body = resp.getBody();
     assertNotNull(body);
 
     // Page assertions
-    assertNotNull(body.data());
-    assertEquals(2, body.data().content().size());
-    assertEquals(0, body.data().page());
-    assertEquals(5, body.data().size());
-    assertEquals(2, body.data().totalElements());
-    assertEquals(1, body.data().totalPages());
+    Page<CustomerDto> data = body.getData();
+    assertNotNull(data);
+    assertEquals(2, data.content().size());
+    assertEquals(0, data.page());
+    assertEquals(5, data.size());
+    assertEquals(2, data.totalElements());
+    assertEquals(1, data.totalPages());
 
-    Meta meta = body.meta();
+    // Meta + sort assertions (api-contract: field is String)
+    Meta meta = body.getMeta();
     assertNotNull(meta);
     assertNotNull(meta.serverTime());
+
     assertNotNull(meta.sort());
     assertFalse(meta.sort().isEmpty());
-    Sort s = meta.sort().getFirst();
-    assertEquals(sortBy, s.field());
+
+    Sort s = meta.sort().get(0);
+    assertEquals(sortBy.value(), s.field());
     assertEquals(direction, s.direction());
 
     verify(customerService).getCustomers(criteria, 0, 5, sortBy, direction);
   }
 
   @Test
-  @DisplayName("PUT /v1/customers/{id} -> 200 OK + ServiceResponse(data)")
+  @DisplayName("PUT /v1/customers/{id} -> 200 OK + ServiceResponse(data, meta)")
   void updateCustomer_shouldReturnOk() {
     var req = new CustomerUpdateRequest("John Smith", "john.smith@example.com");
     var updated = new CustomerDto(1, req.name(), req.email());
@@ -133,10 +147,14 @@ class CustomerControllerTest {
     ResponseEntity<ServiceResponse<CustomerDto>> resp = controller.updateCustomer(1, req);
 
     assertEquals(HttpStatus.OK, resp.getStatusCode());
+
     var body = resp.getBody();
     assertNotNull(body);
-    assertEquals(updated, body.data());
-    assertNotNull(body.meta());
+
+    assertEquals(updated, body.getData());
+    assertNotNull(body.getMeta());
+    assertNotNull(body.getMeta().serverTime());
+
     verify(customerService).updateCustomer(1, req);
   }
 
@@ -148,11 +166,15 @@ class CustomerControllerTest {
     ResponseEntity<ServiceResponse<CustomerDeleteResponse>> resp = controller.deleteCustomer(1);
 
     assertEquals(HttpStatus.OK, resp.getStatusCode());
+
     var body = resp.getBody();
     assertNotNull(body);
-    assertNotNull(body.data());
-    assertEquals(1, body.data().customerId());
-    assertNotNull(body.meta());
+
+    assertNotNull(body.getData());
+    assertEquals(1, body.getData().customerId());
+
+    assertNotNull(body.getMeta());
+    assertNotNull(body.getMeta().serverTime());
 
     verify(customerService).deleteCustomer(1);
   }
