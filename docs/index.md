@@ -2,6 +2,7 @@
 layout: default
 title: Home
 nav_order: 1
+has_toc: true
 canonical_url: https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04
 ---
 
@@ -14,9 +15,13 @@ This documentation describes a **domain‑agnostic, single‑contract architectu
 
 > **Canonical success envelope:** `ServiceResponse<T>`
 
-No duplicated envelopes.
-No parallel client contracts.
-No schema drift.
+<div class="callout">
+
+**No duplicated envelopes**  
+**No parallel client contracts**  
+**No schema drift**
+
+</div>
 
 The result is an **end‑to‑end type‑safe API boundary** with deterministic OpenAPI output, explicit generic rules, and **RFC 9457‑compliant error handling**.
 
@@ -146,6 +151,13 @@ Client‑side error handling therefore mirrors Spring’s server‑side semantic
 4. **Consumers** interact only with stable adapters
 
 Concrete setup steps are covered in the adoption guides below.
+
+---
+
+## 📚 Learn More
+
+* [Server-Side Adoption](adoption/server-side-adoption.md)
+* [Client-Side Adoption](adoption/client-side-adoption.md)
 
 ---
 

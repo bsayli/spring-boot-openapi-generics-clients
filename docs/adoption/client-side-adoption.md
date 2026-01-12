@@ -88,6 +88,14 @@ curl -s http://<service-host>/<base-path>/v3/api-docs.yaml \
 >
 > If `api-contract` is not resolvable at build time, `mvn clean install` will fail.
 
+> 🔧 **Build & Maven configuration**
+>
+> This guide focuses on **concepts, rules, and integration patterns**.
+>
+> For the exact **Maven setup, OpenAPI Generator configuration, and template wiring**, see:
+>
+> → [Client-Side Adoption — Build & POM Setup](client-side-adoption-pom.md)
+
 ```bash
 mvn clean install
 ```

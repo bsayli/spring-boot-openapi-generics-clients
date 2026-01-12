@@ -344,9 +344,8 @@ It is a **reference architecture**.
 
 Step-by-step integration guides live under [`docs/adoption`](docs/adoption):
 
-* **[Server-Side Adoption](docs/adoption/server-side-adoption.md)** — publishing generics-aware OpenAPI specs
-* **[Client-Side Adoption (Build Setup)](docs/adoption/client-side-adoption-pom.md)** — Maven & template configuration
-* **[Client-Side Adoption (Integration)](docs/adoption/client-side-adoption.md)** — adapters, errors, runtime wiring
+* **[Server-Side Adoption](docs/adoption/server-side-adoption.md)** — publishing a deterministic, generics-aware OpenAPI 3.1 contract
+* **[Client-Side Adoption](docs/adoption/client-side-adoption-pom.md)** — Maven, OpenAPI Generator, and Mustache template wiring (build-time setup only)
 
 ---
 
