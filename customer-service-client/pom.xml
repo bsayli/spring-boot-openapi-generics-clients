@@ -40,7 +40,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>21</java.version>
 
-        <spring-boot.version>3.5.9</spring-boot.version>
+        <spring-boot.version>4.0.1</spring-boot.version>
         <openapi.generator.version>7.18.0</openapi.generator.version>
 
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
