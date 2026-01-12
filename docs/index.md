@@ -2,8 +2,6 @@
 layout: default
 title: Home
 nav_order: 1
-has_toc: true
-toc: true
 canonical_url: https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04
 ---
 
@@ -18,15 +16,32 @@ This documentation describes a **domain‑agnostic, single‑contract architectu
 
 <div class="callout">
 
-**No duplicated envelopes**  
-**No parallel client contracts**  
-**No schema drift**
+- **No duplicated envelopes**
+- **No parallel client contracts**
+- **No schema drift**
 
 </div>
 
 The result is an **end‑to‑end type‑safe API boundary** with deterministic OpenAPI output, explicit generic rules, and **RFC 9457‑compliant error handling**.
 
 ---
+
+## 📑 Table of Contents
+
+- [What This Blueprint Solves](#-what-this-blueprint-solves)
+- [Canonical Contract (Single Source of Truth)](#-canonical-contract-single-source-of-truth)
+- [High-Level Architecture](#-highlevel-architecture)
+- [Thin Wrapper Generation](#-thin-wrapper-generation-conceptual)
+- [Error Handling (RFC 9457)](#-error-handling-rfc-9457-first)
+- [Getting Started](#-getting-started-conceptual-flow)
+- [Learn More](#-learn-more)
+- [Toolchain](#-toolchain-reference)
+- [Adoption Guides](#-adoption-guides)
+- [Design Guarantees](#-design-guarantees)
+- [References & External Links](#-references--external-links)
+
+---
+
 
 ## 💡 What This Blueprint Solves
 
@@ -128,7 +143,7 @@ public class ServiceResponsePageFooDto
 
 ---
 
-## ⚠️ Error Handling (RFC 9457‑First)
+## ⚠️ Error Handling (RFC 9457 First)
 
 All non‑2xx responses are modeled as **RFC 9457 Problem Details** and surfaced to the client as a single exception type:
 

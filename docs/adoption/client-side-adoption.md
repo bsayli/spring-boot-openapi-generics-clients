@@ -152,6 +152,7 @@ Your wrapper templates must:
 
 ### Template (excerpt)
 
+{% raw %}
 ```mustache
 import {{apiContractEnvelope}}.ServiceResponse;
 {{#vendorExtensions.x-data-container}}
@@ -167,6 +168,7 @@ public class {{classname}} extends ServiceResponse<
 {{/vendorExtensions.x-data-container}}
 > {}
 ```
+{% endraw %}
 
 > The property name `apiContractEnvelope` intentionally mirrors the Maven configuration.
 
