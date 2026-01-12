@@ -295,11 +295,17 @@ All success responses are wrapped in `ServiceResponse<...>`.
 
 ## 🔗 OpenAPI Endpoints
 
-* Swagger UI → `http://localhost:8084/customer-service/swagger-ui/index.html`
-* OpenAPI JSON → `http://localhost:8084/customer-service/v3/api-docs`
-* OpenAPI YAML → `http://localhost:8084/customer-service/v3/api-docs.yaml`
+* **Swagger UI**  
+  👉 [http://localhost:8084/customer-service/swagger-ui/index.html](http://localhost:8084/customer-service/swagger-ui/index.html)
 
-> The YAML/JSON spec above is the **canonical contract** consumed by `customer-service-client`.
+* **OpenAPI JSON**  
+  👉 [http://localhost:8084/customer-service/v3/api-docs](http://localhost:8084/customer-service/v3/api-docs)
+
+* **OpenAPI YAML**  
+  👉 [http://localhost:8084/customer-service/v3/api-docs.yaml](http://localhost:8084/customer-service/v3/api-docs.yaml)
+
+> The YAML/JSON specification above is the **canonical contract** consumed by  
+> **`customer-service-client`**.
 
 ### Example Wrapper Snippet (Page-only nested generics)
 

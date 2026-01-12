@@ -253,6 +253,7 @@ Pin versions for deterministic generation and reproducible builds.
       <groupId>org.openapitools</groupId>
       <artifactId>openapi-generator-maven-plugin</artifactId>
       <version>${openapi.generator.version}</version>
+
       <executions>
         <execution>
           <id>generate-client</id>
@@ -260,30 +261,30 @@ Pin versions for deterministic generation and reproducible builds.
           <goals>
             <goal>generate</goal>
           </goals>
+
           <configuration>
+            <!-- 1) Input OpenAPI spec (your published contract) -->
+            <inputSpec>${project.basedir}/src/main/resources/your-api-docs.yml</inputSpec>
 
-            <!-- Your checked-in spec (or fetched by a separate step) -->
-            <inputSpec>${project.basedir}/src/main/resources/your-api-docs.yaml</inputSpec>
-
+            <!-- 2) Generator setup -->
             <generatorName>java</generatorName>
             <library>restclient</library>
             <output>${project.build.directory}/generated-sources/openapi</output>
 
-            <apiPackage>io.github.bsayli.openapi.client.generated.api</apiPackage>
-            <modelPackage>io.github.bsayli.openapi.client.generated.dto</modelPackage>
-            <invokerPackage>io.github.bsayli.openapi.client.generated.invoker</invokerPackage>
+            <!-- 3) Choose packages for generated sources (adjust for your project) -->
+            <!--
+              apiPackage    : generated API interfaces / clients
+              modelPackage  : generated DTOs (your domain DTOs + thin wrappers)
+              invokerPackage: generated HTTP/invoker infrastructure
+            -->
+            <apiPackage>com.yourcompany.yourapp.client.generated.api</apiPackage>
+            <modelPackage>com.yourcompany.yourapp.client.generated.dto</modelPackage>
+            <invokerPackage>com.yourcompany.yourapp.client.generated.invoker</invokerPackage>
 
+            <!-- 4) Templates (use your effective/overlay templates) -->
             <templateDirectory>${openapi.templates.effective}/Java</templateDirectory>
 
-            <generateSupportingFiles>true</generateSupportingFiles>
-            <generateApiDocumentation>false</generateApiDocumentation>
-            <generateApiTests>false</generateApiTests>
-            <generateModelDocumentation>false</generateModelDocumentation>
-            <generateModelTests>false</generateModelTests>
-
-            <cleanupOutput>true</cleanupOutput>
-            <skipValidateSpec>false</skipValidateSpec>
-
+            <!-- 5) Generator behavior -->
             <configOptions>
               <useSpringBoot3>true</useSpringBoot3>
               <useJakartaEe>true</useJakartaEe>
@@ -294,14 +295,40 @@ Pin versions for deterministic generation and reproducible builds.
               <sourceFolder>src/gen/java</sourceFolder>
             </configOptions>
 
-            <!-- Mustache template imports for the shared contract -->
+            <!--
+              6) api-contract integration
+              These keys are consumed by your mustache overlays to import the canonical types
+              from api-contract instead of generating duplicates.
+            -->
             <additionalProperties>
               <additionalProperty>apiContractEnvelope=io.github.bsayli.apicontract.envelope</additionalProperty>
               <additionalProperty>apiContractPage=io.github.bsayli.apicontract.paging</additionalProperty>
             </additionalProperties>
 
-            <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>
+            <!--
+              7) Force specific models to resolve to api-contract classes.
+              This is the critical part that makes generated DTOs (e.g. ServiceResponseListX)
+              reference Meta/Sort/Page/ServiceResponse from api-contract.
+            -->
+            <importMappings>
+              <importMapping>ServiceResponse=io.github.bsayli.apicontract.envelope.ServiceResponse</importMapping>
+              <importMapping>Meta=io.github.bsayli.apicontract.envelope.Meta</importMapping>
+              <importMapping>Page=io.github.bsayli.apicontract.paging.Page</importMapping>
+              <importMapping>Sort=io.github.bsayli.apicontract.paging.Sort</importMapping>
+              <importMapping>SortDirection=io.github.bsayli.apicontract.paging.SortDirection</importMapping>
+            </importMappings>
 
+            <!-- 8) Output hygiene -->
+            <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>
+            <cleanupOutput>true</cleanupOutput>
+            <skipValidateSpec>false</skipValidateSpec>
+
+            <!-- 9) Disable noise -->
+            <generateSupportingFiles>true</generateSupportingFiles>
+            <generateApiDocumentation>false</generateApiDocumentation>
+            <generateApiTests>false</generateApiTests>
+            <generateModelDocumentation>false</generateModelDocumentation>
+            <generateModelTests>false</generateModelTests>
           </configuration>
         </execution>
       </executions>

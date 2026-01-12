@@ -215,6 +215,7 @@
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <version>${openapi.generator.version}</version>
+
                 <executions>
                     <execution>
                         <id>generate-client</id>
@@ -222,26 +223,23 @@
                         <goals>
                             <goal>generate</goal>
                         </goals>
+
                         <configuration>
+                            <!-- Inputs / generator -->
                             <inputSpec>${project.basedir}/src/main/resources/customer-api-docs.yaml</inputSpec>
                             <generatorName>java</generatorName>
                             <library>restclient</library>
                             <output>${project.build.directory}/generated-sources/openapi</output>
 
+                            <!-- Packages -->
                             <apiPackage>io.github.bsayli.openapi.client.generated.api</apiPackage>
                             <modelPackage>io.github.bsayli.openapi.client.generated.dto</modelPackage>
                             <invokerPackage>io.github.bsayli.openapi.client.generated.invoker</invokerPackage>
 
+                            <!-- Templates -->
                             <templateDirectory>${openapi.templates.effective}/Java</templateDirectory>
 
-                            <generateSupportingFiles>true</generateSupportingFiles>
-                            <generateApiDocumentation>false</generateApiDocumentation>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelDocumentation>false</generateModelDocumentation>
-                            <generateModelTests>false</generateModelTests>
-                            <cleanupOutput>true</cleanupOutput>
-                            <skipValidateSpec>false</skipValidateSpec>
-
+                            <!-- Generator behavior -->
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <useJakartaEe>true</useJakartaEe>
@@ -251,11 +249,31 @@
                                 <openApiNullable>false</openApiNullable>
                                 <sourceFolder>src/gen/java</sourceFolder>
                             </configOptions>
+
                             <additionalProperties>
                                 <additionalProperty>apiContractEnvelope=io.github.bsayli.apicontract.envelope</additionalProperty>
                                 <additionalProperty>apiContractPage=io.github.bsayli.apicontract.paging</additionalProperty>
                             </additionalProperties>
+
+                            <importMappings>
+                                <importMapping>Meta=io.github.bsayli.apicontract.envelope.Meta</importMapping>
+                                <importMapping>ServiceResponse=io.github.bsayli.apicontract.envelope.ServiceResponse</importMapping>
+                                <importMapping>Page=io.github.bsayli.apicontract.paging.Page</importMapping>
+                                <importMapping>Sort=io.github.bsayli.apicontract.paging.Sort</importMapping>
+                                <importMapping>SortDirection=io.github.bsayli.apicontract.paging.SortDirection</importMapping>
+                            </importMappings>
+
+                            <!-- Output hygiene -->
                             <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>
+                            <cleanupOutput>true</cleanupOutput>
+                            <skipValidateSpec>false</skipValidateSpec>
+
+                            <!-- Disable noise -->
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateModelTests>false</generateModelTests>
                         </configuration>
                     </execution>
                 </executions>
