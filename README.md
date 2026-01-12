@@ -31,12 +31,12 @@ The result is a **deterministic, type‑safe API boundary** with **Page‑aware 
 ## 📑 Table of Contents
 
 * 📦 [Modules](#-modules)
+* ⚡ [Quick Start](#-quick-start)
 * 🚨 [The Problem](#-the-problem)
 * 💡 [The Core Idea](#-the-core-idea)
 * 🧱 [Canonical Contract](#-canonical-contract)
 * 🏗 [Architecture Overview](#-architecture-overview)
-* ⚡ [Quick Start](#-quick-start)
-* 🔄 [Before & After: Generated Clients](#-before--after-generated-clients)
+* 🔎 [Executable Proof: Generated Clients](#-executable-proof-generated-clients)
 * 🧩 [Example Responses](#-example-responses)
 * 🧠 [Design Guarantees](#-design-guarantees)
 * 📘 [Adoption Guides](#-adoption-guides)
@@ -58,6 +58,91 @@ The result is a **deterministic, type‑safe API boundary** with **Page‑aware 
 * **[customer-service-client](customer-service-client/README.md)**  
   Generated Java client that **reuses the canonical contract** and preserves generics  
   without duplicating envelopes or paging models.
+
+---
+
+## ⚡ Quick Start
+
+This repository uses an **aggregator (root) build** to guarantee that the shared **`api-contract`** module is always available to both the server and the client.
+For first-time users, **start from the repo root**.
+
+---
+
+### ✅ Option A — Recommended (Deterministic, First-Time Setup)
+
+This is the **canonical way** to get everything running after cloning the repository.
+It installs `api-contract` locally and builds all modules in the correct order.
+
+```bash
+# 1) Build everything once from the repo root
+mvn -q -ntp clean install
+
+# 2) Run the backend service
+cd customer-service && mvn -q -ntp spring-boot:run
+```
+
+At this point:
+
+* `api-contract` is installed into your local Maven repository
+* `customer-service` is running
+* `customer-service-client` has been generated and compiled
+
+No additional setup is required.
+
+---
+
+### 🔄 Option B — Regenerate the Client from the Live OpenAPI Spec
+
+Use this flow **only when you change the server contract** and want to regenerate
+client wrappers from the live OpenAPI definition.
+
+```bash
+# 1) Ensure the backend is running
+cd customer-service && mvn -q -ntp spring-boot:run
+
+# 2) Pull the OpenAPI spec into the client module
+cd ../customer-service-client
+curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
+  -o src/main/resources/customer-api-docs.yaml
+
+# 3) Regenerate and build the client
+mvn -q -ntp clean install
+```
+
+This regenerates **thin wrappers** extending the canonical contract:
+
+```java
+ServiceResponse<T>
+ServiceResponse<Page<T>>
+```
+
+---
+
+### 📂 Generated Sources
+
+Generated client sources are written to:
+
+```
+customer-service-client/target/generated-sources/openapi/src/gen/java
+```
+
+They are **automatically added to compilation** via `build-helper-maven-plugin`.
+
+---
+
+### 📝 Notes
+
+* You do **not** need to manually build or install `api-contract`.
+  The root build handles this by design.
+* If you skip the root build and run the client directly, the build may fail
+  because `api-contract` is not yet available.
+* For CI and local parity, all commands use `-ntp` (no transfer progress).
+
+---
+
+> **Rule of thumb:**
+> If you just cloned the repo → **build from root**.
+> If you changed the API contract → **regenerate the client**.
 
 ---
 
@@ -185,93 +270,7 @@ This restriction is **intentional** — it guarantees deterministic schema names
 
 ---
 
-## ⚡ Quick Start
-
-This repository uses an **aggregator (root) build** to guarantee that the shared **`api-contract`** module is always available to both the server and the client.
-For first-time users, **start from the repo root**.
-
----
-
-### ✅ Option A — Recommended (Deterministic, First-Time Setup)
-
-This is the **canonical way** to get everything running after cloning the repository.
-It installs `api-contract` locally and builds all modules in the correct order.
-
-```bash
-# 1) Build everything once from the repo root
-mvn -q -ntp clean install
-
-# 2) Run the backend service
-cd customer-service && mvn -q -ntp spring-boot:run
-```
-
-At this point:
-
-* `api-contract` is installed into your local Maven repository
-* `customer-service` is running
-* `customer-service-client` has been generated and compiled
-
-No additional setup is required.
-
----
-
-### 🔄 Option B — Regenerate the Client from the Live OpenAPI Spec
-
-Use this flow **only when you change the server contract** and want to regenerate
-client wrappers from the live OpenAPI definition.
-
-```bash
-# 1) Ensure the backend is running
-cd customer-service && mvn -q -ntp spring-boot:run
-
-# 2) Pull the OpenAPI spec into the client module
-cd ../customer-service-client
-curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
-  -o src/main/resources/customer-api-docs.yaml
-
-# 3) Regenerate and build the client
-mvn -q -ntp clean install
-```
-
-This regenerates **thin wrappers** extending the canonical contract:
-
-```java
-ServiceResponse<T>
-ServiceResponse<Page<T>>
-```
-
----
-
-### 📂 Generated Sources
-
-Generated client sources are written to:
-
-```
-customer-service-client/target/generated-sources/openapi/src/gen/java
-```
-
-They are **automatically added to compilation** via `build-helper-maven-plugin`.
-
----
-
-### 📝 Notes
-
-* You do **not** need to manually build or install `api-contract`.
-  The root build handles this by design.
-* If you skip the root build and run the client directly, the build may fail
-  because `api-contract` is not yet available.
-* For CI and local parity, all commands use `-ntp` (no transfer progress).
-
----
-
-> **Rule of thumb:**
-> If you just cloned the repo → **build from root**.
-> If you changed the API contract → **regenerate the client**.
-
-
----
-
-## 🔄 Before & After: Generated Clients
+## 🔎 Executable Proof: Generated Clients
 
 **Before (duplicated models):**
 
@@ -343,11 +342,11 @@ It is a **reference architecture**.
 
 ## 📘 Adoption Guides
 
-Step‑by‑step integration guides live under `docs/adoption`:
+Step-by-step integration guides live under [`docs/adoption`](docs/adoption):
 
-* **Server‑Side Adoption** — publishing generics‑aware OpenAPI specs
-* **Client‑Side Adoption (Build Setup)** — Maven & template configuration
-* **Client‑Side Adoption (Integration)** — adapters, errors, runtime wiring
+* **[Server-Side Adoption](docs/adoption/server-side-adoption.md)** — publishing generics-aware OpenAPI specs
+* **[Client-Side Adoption (Build Setup)](docs/adoption/client-side-adoption-pom.md)** — Maven & template configuration
+* **[Client-Side Adoption (Integration)](docs/adoption/client-side-adoption.md)** — adapters, errors, runtime wiring
 
 ---
 
@@ -363,7 +362,32 @@ Step‑by‑step integration guides live under `docs/adoption`:
 
 ---
 
-🛡 Licensed under **MIT**. All modules inherit the same license.
+
+## 🤝 Contributing & Feedback
+
+This repository is a **reference architecture**, not a closed framework.
+
+If you:
+
+* apply this pattern in a real project,
+* spot an inconsistency,
+* or want to evolve the contract or templates,
+
+feel free to open an issue or start a discussion:
+
+👉 [Discussions](https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions)
+
+Even short, practical feedback helps refine the pattern.
+
+---
+
+## 🛡 License
+
+Licensed under **MIT** — see [LICENSE](LICENSE).
+
+All modules inherit the same license.
+
+---
 
 **Barış Saylı**
 [GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)

@@ -2,8 +2,8 @@ services:
   customer-service:
     container_name: customer-service
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: customer-service/Dockerfile
     image: customer-service:latest
     restart: on-failure
     environment:

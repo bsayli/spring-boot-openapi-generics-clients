@@ -12,14 +12,14 @@
 - 🎯 [Purpose](#-purpose)
 - 📊 [Architecture at a Glance](#-architecture-at-a-glance)
 - 🛠 [Tech Stack](#-tech-stack)
-- 🚀 [How to Run (Local JVM)](#-how-to-run-local-jvm)
+- 🚀 [How to Run](#-how-to-run)
   - ✅ [Recommended (from repo root)](#-recommended-from-repo-root)
   - ⚙️ [Alternative (module-only, if api-contract is already installed)](#-alternative-module-only-if-api-contract-is-already-installed)
+  - 🐳 [Run with Docker](#-run-with-docker)
 - 🧪 [Verify with a Simple Request](#-verify-with-a-simple-request)
 - 📙 [CRUD Endpoints](#-crud-endpoints)
 - 🔗 [OpenAPI Endpoints](#-openapi-endpoints)
 - ⚠️ [Error Response (RFC 9457)](#-error-response-rfc-9457)
-- 🐳 [Run with Docker](#-run-with-docker)
 - 🧪 [Testing](#-testing)
 - 🖖 [Notes](#-notes)
 - 📦 [Related Module](#-related-module)
@@ -110,7 +110,7 @@ public class ServiceResponsePageCustomerDto extends ServiceResponse<Page<Custome
 
 ---
 
-## 🚀 How to Run (Local JVM)
+## 🚀 How to Run
 
 This service depends on the shared **`api-contract`** module. The easiest and safest way to run it locally is via the **root aggregator build**, which guarantees all modules are compiled and resolved correctly.
 
@@ -151,6 +151,83 @@ cd customer-service
 mvn clean package
 java -jar target/customer-service-*.jar
 ```
+
+---
+
+### 🐳 Run with Docker
+
+> `customer-service` depends on the shared `api-contract` module.
+> The Docker build uses the **repository root** as the build context to ensure all modules are compiled deterministically.
+
+---
+
+#### Using Docker Compose (recommended)
+
+Run from the `customer-service` directory:
+
+```bash
+cd customer-service
+docker compose up --build -d
+```
+
+Stop and clean up:
+
+```bash
+docker compose down
+```
+
+This setup:
+
+* Uses the repository root (`..`) as the build context
+* Builds `api-contract` and `customer-service` together
+* Produces a self-contained runtime image for `customer-service`
+
+---
+
+#### Using plain Docker (manual)
+
+Run the build from the **repository root** so the build context includes all required modules:
+
+```bash
+docker build -t customer-service:latest \
+  -f customer-service/Dockerfile \
+  .
+```
+
+Run the container:
+
+```bash
+docker run --rm -p 8084:8084 \
+  -e APP_PORT=8084 \
+  -e SPRING_PROFILES_ACTIVE=local \
+  -e JAVA_OPTS= \
+  customer-service:latest
+```
+
+---
+
+## Notes
+
+* You **do not** need to run `mvn package` locally when using Docker — the multi-stage Dockerfile handles the build.
+
+* The Dockerfile intentionally runs Maven with:
+
+  ```bash
+  mvn -q -DskipTests -ntp clean package -pl customer-service -am
+  ```
+
+  This guarantees:
+
+  * `api-contract` is built first
+  * `customer-service` is packaged with correct dependencies
+  * No reliance on local Maven state
+
+* Port `8084` is exposed by default and matches the local JVM setup.
+
+---
+
+If Docker works but local JVM does not, the issue is almost always a missing `api-contract` build — use the **root aggregator build** for local runs.
+
 
 ---
 
@@ -278,34 +355,6 @@ curl -X GET "http://localhost:8084/customer-service/v1/customers/999"
 
 > Content-Type: `application/problem+json` — compliant with **RFC 9457** (*obsoletes RFC 7807*).
 > Spring’s `ProblemDetail` maps directly to this structure.
-
----
-
-## 🐳 Run with Docker
-
-```bash
-cd customer-service
-mvn -q -DskipTests package
-```
-
-```bash
-docker build -t customer-service:latest .
-docker run --rm -p 8084:8084 \
-  -e APP_PORT=8084 \
-  -e SPRING_PROFILES_ACTIVE=local \
-  customer-service:latest
-```
-
-### Using Docker Compose
-
-```bash
-cd customer-service
-docker compose up --build -d
-```
-
-```bash
-docker compose down
-```
 
 ---
 
