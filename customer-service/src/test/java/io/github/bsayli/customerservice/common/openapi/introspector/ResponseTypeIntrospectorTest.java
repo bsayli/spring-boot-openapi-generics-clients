@@ -3,7 +3,9 @@ package io.github.bsayli.customerservice.common.openapi.introspector;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.bsayli.apicontract.envelope.ServiceResponse;
+import io.github.bsayli.apicontract.paging.Page;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -28,10 +30,25 @@ class ResponseTypeIntrospectorTest {
   }
 
   @Test
-  @DisplayName("Returns T simple name for plain ServiceResponse<T>")
+  @DisplayName("Returns T simple name for plain ServiceResponse<T> when T is non-generic")
   void plain_serviceResponse() throws Exception {
     Optional<String> ref = introspector.extractDataRefName(method("plain"));
     assertEquals(Optional.of("Foo"), ref);
+  }
+
+  @Test
+  @DisplayName("Returns Page+Item simple name for ServiceResponse<Page<T>>")
+  void page_nested_generic_isGuaranteed() throws Exception {
+    Optional<String> ref = introspector.extractDataRefName(method("paged"));
+    assertEquals(Optional.of("PageFoo"), ref);
+  }
+
+  @Test
+  @DisplayName("Returns empty for non-guaranteed generic containers like ServiceResponse<List<T>>")
+  void list_nested_generic_isNotGuaranteed() throws Exception {
+    Optional<String> ref = introspector.extractDataRefName(method("listWrapped"));
+    assertTrue(
+        ref.isEmpty(), "List<T> is outside the canonical contract, must not be auto-registered");
   }
 
   @Test
@@ -71,13 +88,27 @@ class ResponseTypeIntrospectorTest {
   }
 
   @Test
-  @DisplayName("Returns empty when return type is not a wrapper")
+  @DisplayName("Returns empty when return type is not ServiceResponse (even if it's a DTO)")
   void notAWrapper_empty() throws Exception {
     assertTrue(introspector.extractDataRefName(method("notAWrapper")).isEmpty());
   }
 
+  @Test
+  @DisplayName("Returns empty for raw ServiceResponse (no generics)")
+  void rawServiceResponse_empty() throws Exception {
+    assertTrue(introspector.extractDataRefName(method("rawServiceResponse")).isEmpty());
+  }
+
   static class Samples {
     public ServiceResponse<Foo> plain() {
+      return null;
+    }
+
+    public ServiceResponse<Page<Foo>> paged() {
+      return null;
+    }
+
+    public ServiceResponse<List<Foo>> listWrapped() {
       return null;
     }
 

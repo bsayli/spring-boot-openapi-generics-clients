@@ -62,14 +62,21 @@ public class AutoWrapperSchemaCustomizer {
         openApi.getComponents().setSchemas(new LinkedHashMap<>());
       }
 
+      Map<String, Schema> schemas = openApi.getComponents().getSchemas();
+
       dataRefs.forEach(
           ref -> {
+            // Guard: only wrap if the data schema actually exists in components
+            if (!schemas.containsKey(ref)) {
+              return; // skip
+            }
+
             String wrapperName = OpenApiSchemas.SCHEMA_SERVICE_RESPONSE + ref;
-            openApi
-                .getComponents()
-                .addSchemas(
-                    wrapperName,
-                    ApiResponseSchemaFactory.createComposedWrapper(ref, classExtraAnnotation));
+
+            schemas.put(
+                wrapperName,
+                ApiResponseSchemaFactory.createComposedWrapper(ref, classExtraAnnotation));
+
             enrichWrapperExtensions(openApi, wrapperName, ref);
           });
     };

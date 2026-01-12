@@ -213,14 +213,22 @@ io.github.bsayli:api-contract
 
 ### Supported Shapes
 
-| Shape                      | Supported | Notes                           |
-| -------------------------- | --------- | ------------------------------- |
-| `ServiceResponse<T>`       | ✅         | Default envelope                |
-| `ServiceResponse<Page<T>>` | ✅         | **Only allowed nested generic** |
-| `ServiceResponse<List<T>>` | ❌         | Treated as raw type             |
-| Arbitrary nested generics  | ❌         | Explicitly rejected             |
+| Shape                      | Supported | Notes                                                   |
+| -------------------------- | --------- | ------------------------------------------------------- |
+| `ServiceResponse<T>`       | ✅        | Canonical success envelope (guaranteed)                 |
+| `ServiceResponse<Page<T>>` | ✅        | **Guaranteed nested generic**                           |
+| `ServiceResponse<List<T>>` | ⚠️        | Uses OpenAPI Generator default behavior (unchanged)     |
+| Arbitrary nested generics  | ❌        | Outside the supported contract                          |
 
-This restriction is **intentional** — it guarantees deterministic schema names and generator‑safe evolution.
+This architecture **does not alter or restrict** OpenAPI Generator’s default handling of
+standard collection types such as `List<T>`.
+
+It **only defines explicit guarantees** for:
+- `ServiceResponse<T>`
+- `ServiceResponse<Page<T>>`
+
+All other shapes follow the generator’s default behavior and are intentionally kept
+**outside the canonical contract** to preserve deterministic schemas and generator-safe evolution.
 
 ---
 

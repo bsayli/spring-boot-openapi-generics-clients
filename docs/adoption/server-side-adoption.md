@@ -62,13 +62,13 @@ This setup is **contract-first and non-negotiable**.
 ### Contract Rules
 
 * The canonical success envelope is **`ServiceResponse<T>`**.
-* Nested generics are supported **only** for:
+* Nested generics are **explicitly guaranteed only** for:
 
 ```text
 ServiceResponse<Page<T>>
 ```
 
-* For any other generic type:
+* For any other generic composition:
 
 ```text
 ServiceResponse<List<T>>
@@ -76,9 +76,21 @@ ServiceResponse<Map<K,V>>
 ServiceResponse<Foo<Bar>>
 ```
 
-➡️ **Generics are ignored** in schema naming and wrapper typing. Only the **raw type** name is used.
+➡️ **Generic structure is not part of the contract guarantee**.
+OpenAPI Generator falls back to its **default behavior**, where generics may be
+flattened and schema names are derived from the **raw container type only**.
 
-This rule is enforced at **OpenAPI generation time** and is intentional (determinism + generator safety).
+This architecture:
+
+* does **not** restrict OpenAPI Generator defaults
+* does **not** introduce custom handling for arbitrary generics
+* provides **hard guarantees only** for `ServiceResponse<T>` and `ServiceResponse<Page<T>>`
+
+These rules are enforced at **OpenAPI schema enrichment time** to ensure:
+
+* deterministic schema names
+* stable client generation across versions
+* generator-safe long-term evolution
 
 ---
 
@@ -233,36 +245,61 @@ Each composed schema typically:
 
 ## Automatic Wrapper Registration
 
+This section describes how wrapper schemas are **automatically registered** for API responses, and—just as importantly—what is **explicitly not guaranteed** by the contract.
+
 <a id="responsetypeintrospector"></a>
 
 ### `ResponseTypeIntrospector`
 
+Responsibilities:
+
 * scans controller return types
 * unwraps `ResponseEntity`, async wrappers, etc.
 * detects `ServiceResponse<T>`
-* enforces the **Page-only nested generics** rule
+* **identifies only guaranteed shapes** for wrapper registration
 
-Behavior summary:
+Guaranteed behavior:
 
 | Return type                        | Resulting data schema name |
 | ---------------------------------- | -------------------------- |
 | `ServiceResponse<EntityDto>`       | `EntityDto`                |
 | `ServiceResponse<Page<EntityDto>>` | `PageEntityDto`            |
-| `ServiceResponse<List<EntityDto>>` | `List` (raw)               |
+
+Non‑guaranteed (default generator behavior):
+
+| Return type                        | Handling                               |
+| ---------------------------------- | -------------------------------------- |
+| `ServiceResponse<List<EntityDto>>` | Left to OpenAPI Generator (raw `List`) |
+| Any other nested generics          | Not part of the contract               |
+
+➡️ The introspector **does not modify or override** OpenAPI Generator’s default handling for collections like `List<T>` or `Map<K,V>`.
 
 <a id="autowrapperschemacustomizer"></a>
 
 ### `AutoWrapperSchemaCustomizer`
 
+Responsibilities:
+
 * runs at OpenAPI generation time
-* discovers all `T` values from your controllers
-* registers composed wrapper schemas automatically
-* adds:
+* collects **only guaranteed data refs** discovered by `ResponseTypeIntrospector`
+* automatically registers composed wrapper schemas
+* enriches wrappers with metadata extensions:
 
   * `x-data-container`
   * `x-data-item`
 
-➡️ only when `T` is `Page<…>`.
+➡️ These extensions are added **only** when the data type is `Page<T>`.
+
+### Key Principle
+
+This architecture **adds no new semantics** for OpenAPI shapes.
+
+It defines **explicit guarantees only** for:
+
+* `ServiceResponse<T>`
+* `ServiceResponse<Page<T>>`
+
+All other response shapes intentionally remain **outside the canonical contract** and follow the OpenAPI Generator’s default behavior, ensuring deterministic schema naming and safe evolution over time.
 
 ---
 

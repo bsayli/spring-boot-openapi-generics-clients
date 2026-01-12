@@ -19,13 +19,33 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 public final class ResponseTypeIntrospector {
 
   private static final Logger log = LoggerFactory.getLogger(ResponseTypeIntrospector.class);
-  private static final int MAX_UNWRAP_DEPTH = 8;
 
-  private static final String FALLBACK_OBJECT_REF = "Object";
+  // Prevent infinite recursion on exotic wrappers
+  private static final int MAX_UNWRAP_DEPTH = 8;
 
   private static final Set<String> REACTOR_WRAPPERS =
       Set.of("reactor.core.publisher.Mono", "reactor.core.publisher.Flux");
 
+  /**
+   * Extracts the schema ref name for the {@code data} field of {@code ServiceResponse<T>}.
+   *
+   * <p>Guaranteed shapes (auto-registered wrappers):
+   *
+   * <ul>
+   *   <li>{@code ServiceResponse<T>} where {@code T} is NOT a generic container
+   *   <li>{@code ServiceResponse<Page<T>>}
+   * </ul>
+   *
+   * <p>Non-guaranteed shapes (left to Springdoc/OpenAPI Generator defaults):
+   *
+   * <ul>
+   *   <li>{@code ServiceResponse<List<T>>}, {@code ServiceResponse<Map<K,V>>}, {@code
+   *       ServiceResponse<Foo<Bar>>}, ...
+   * </ul>
+   *
+   * <p>For non-guaranteed shapes, this method returns {@link Optional#empty()} so that no
+   * auto-wrapper schema is registered for them.
+   */
   public Optional<String> extractDataRefName(Method method) {
     if (method == null) return Optional.empty();
 
@@ -37,12 +57,19 @@ public final class ResponseTypeIntrospector {
     if (!type.hasGenerics()) return Optional.empty();
 
     ResolvableType dataType = type.getGeneric(0);
-    String ref = buildRefName(dataType);
+
+    // We only auto-register wrappers for guaranteed shapes.
+    Optional<String> refOpt = buildGuaranteedRefName(dataType);
 
     if (log.isDebugEnabled()) {
-      log.debug("Introspected method [{}]: dataRef={}", method.toGenericString(), ref);
+      log.debug(
+          "Introspected method [{}]: dataType={}, guaranteedRef={}",
+          method.toGenericString(),
+          safeToString(dataType),
+          refOpt.orElse("<default>"));
     }
-    return Optional.of(ref);
+
+    return refOpt;
   }
 
   private ResolvableType unwrapToServiceResponse(ResolvableType type) {
@@ -75,22 +102,42 @@ public final class ResponseTypeIntrospector {
   }
 
   /**
-   * Contract rule: - Nested generics are supported ONLY for Page<T>. - For any other generic type
-   * (List<T>, Map<K,V>, Foo<Bar>), generics are ignored and only the raw type name is used.
+   * Returns a deterministic wrapper-suffix ref name ONLY for the shapes this architecture
+   * explicitly guarantees.
+   *
+   * <p>Rules:
+   *
+   * <ul>
+   *   <li>If {@code data} is {@code Page<T>}, return {@code "Page" + <TRef>} (e.g. {@code
+   *       PageCustomerDto}).
+   *   <li>If {@code data} is a plain (non-generic) DTO type, return its simple name (e.g. {@code
+   *       CustomerDto}).
+   *   <li>Otherwise (List/Map/any other generic container), return empty to keep default behavior.
+   * </ul>
    */
-  private String buildRefName(ResolvableType type) {
-    Class<?> raw = type.resolve();
-    if (raw == null) return FALLBACK_OBJECT_REF;
+  private Optional<String> buildGuaranteedRefName(ResolvableType dataType) {
+    if (dataType == null) return Optional.empty();
 
-    // Special-case: Page<T> is the only allowed "container" that contributes its item type
+    Class<?> raw = dataType.resolve();
+    if (raw == null) return Optional.empty();
+
+    // Guaranteed nested container: Page<T>
     if (Page.class.isAssignableFrom(raw)) {
-      ResolvableType itemType = safeGeneric(type, 0);
-      String itemRef = buildRefName(itemType);
-      return raw.getSimpleName() + itemRef;
+      ResolvableType itemType = safeGeneric(dataType, 0);
+      Class<?> itemRaw = itemType.resolve();
+      if (itemRaw == null) return Optional.empty();
+
+      // Only allow Page<Dto> where Dto resolves cleanly
+      return Optional.of(raw.getSimpleName() + itemRaw.getSimpleName());
     }
 
-    // Default: ignore generics to keep the contract deterministic
-    return raw.getSimpleName();
+    // Guaranteed simple DTO: T without generics
+    if (!dataType.hasGenerics()) {
+      return Optional.of(raw.getSimpleName());
+    }
+
+    // Everything else is outside the canonical contract: do not auto-register wrappers.
+    return Optional.empty();
   }
 
   private ResolvableType safeGeneric(ResolvableType type, int index) {
@@ -101,5 +148,13 @@ public final class ResponseTypeIntrospector {
 
     ResolvableType g = generics[index];
     return (g.resolve() == null) ? ResolvableType.forClass(Object.class) : g;
+  }
+
+  private String safeToString(ResolvableType type) {
+    try {
+      return String.valueOf(type);
+    } catch (Exception ignored) {
+      return "<unprintable>";
+    }
   }
 }

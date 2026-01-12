@@ -69,18 +69,25 @@ Provided by the shared module:
 
 This module defines the **only** envelope, paging, and metadata types used across the system.
 
-### Supported Shapes (Intentional Constraints)
+### Supported Shapes (Guaranteed vs. Default)
 
-| Shape                       | Supported | Notes                                  |
-| --------------------------- | --------- | -------------------------------------- |
-| `ServiceResponse<T>`        | ✅         | Canonical success envelope             |
-| `ServiceResponse<Page<T>>`  | ✅         | **Only allowed nested generic**        |
-| `ServiceResponse<List<T>>`  | ❌         | Treated as raw type (generics ignored) |
-| `ServiceResponse<Map<K,V>>` | ❌         | Not supported                          |
-| Arbitrary nested generics   | ❌         | Explicitly rejected                    |
+| Shape                       | Supported | Notes                                                       |
+| --------------------------- | --------- | ----------------------------------------------------------- |
+| `ServiceResponse<T>`        | ✅        | Canonical success envelope (explicitly guaranteed)          |
+| `ServiceResponse<Page<T>>`  | ✅        | **Guaranteed nested generic**                               |
+| `ServiceResponse<List<T>>`  | ⚠️        | Uses OpenAPI Generator default behavior (not part of contract) |
+| `ServiceResponse<Map<K,V>>` | ⚠️        | Uses OpenAPI Generator default behavior                     |
+| Arbitrary nested generics   | ❌        | Outside the canonical contract                              |
 
-These constraints are **deliberate**.
-They guarantee deterministic schema names and stable client generation across versions.
+This architecture **does not restrict or modify** OpenAPI Generator’s default handling
+of standard Java collection types such as [index.md](index.md)`List<T>` or `Map<K,V>`.
+
+It defines **explicit guarantees only** for:
+- `ServiceResponse<T>`
+- `ServiceResponse<Page<T>>`
+
+All other shapes are intentionally left **outside the canonical contract** to preserve
+deterministic schema naming and generator-safe evolution across versions.
 
 ---
 
