@@ -22,7 +22,9 @@ It demonstrates a **single‑contract approach** where **server and client share
 ServiceResponse<T>
 ```
 
-No duplicated envelopes. No parallel client contracts. No generics erased at generation time.
+- No duplicated envelopes
+- No parallel client contracts
+- No generics erased at generation time
 
 The result is a **deterministic, type‑safe API boundary** with **Page‑aware generics** and **RFC 9457‑compliant error handling**.
 
@@ -141,8 +143,8 @@ They are **automatically added to compilation** via `build-helper-maven-plugin`.
 ---
 
 > **Rule of thumb:**
-> If you just cloned the repo → **build from root**.
-> If you changed the API contract → **regenerate the client**.
+> - If you just cloned the repo → **build from root**
+> - If you changed the API contract → **regenerate the client**
 
 ---
 
@@ -345,7 +347,7 @@ It is a **reference architecture**.
 Step-by-step integration guides live under [`docs/adoption`](docs/adoption):
 
 * **[Server-Side Adoption](docs/adoption/server-side-adoption.md)** — publishing a deterministic, generics-aware OpenAPI 3.1 contract
-* **[Client-Side Adoption](docs/adoption/client-side-adoption-pom.md)** — Maven, OpenAPI Generator, and Mustache template wiring (build-time setup only)
+* **[Client-Side Adoption](docs/adoption/client-side-adoption.md)** — Maven, OpenAPI Generator, and Mustache template wiring (build-time setup only)
 
 ---
 
