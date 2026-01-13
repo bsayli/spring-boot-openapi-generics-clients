@@ -18,30 +18,6 @@ The intent is not to dump all implementation details here. It’s to make the ad
 
 ## 📑 Table of Contents (Updated)
 
-* [🎯 Goals](#-goals)
-* [✅ Prerequisites](#-prerequisites)
-* [🧱 Shared Response Contract](#-shared-response-contract)
-* [📦 Dependencies](#-dependencies)
-* [🧩 OpenAPI Schema Enrichment (Who Does What)](#-openapi-schema-enrichment-who-does-what)
-  * [What gets added to the spec](#what-gets-added-to-the-spec)
-  * [1) The baseline: shared schema names and constants](#1-the-baseline-shared-schema-names-and-constants)
-    * [OpenApiSchemas](#openapischemas)
-  * [2) The “base contract” schemas](#2-the-base-contract-schemas)
-    * [SwaggerResponseCustomizer](#swaggerresponsecustomizer)
-  * [3) Detecting what should get a wrapper](#3-detecting-what-should-get-a-wrapper)
-    * [ResponseTypeIntrospector](#responsetypeintrospector)
-  * [4) Building the composed wrapper schema](#4-building-the-composed-wrapper-schema)
-    * [ApiResponseSchemaFactory](#apiresponseschemafactory)
-  * [5) Registering wrappers into the OpenAPI components](#5-registering-wrappers-into-the-openapi-components)
-    * [AutoWrapperSchemaCustomizer](#autowrapperschemacustomizer)
-  * [6) Publishing error responses consistently](#6-publishing-error-responses-consistently)
-    * [GlobalErrorResponsesCustomizer](#globalerrorresponsescustomizer)
-  * [7) Deterministic Naming (How to think about schema names)](#7-deterministic-naming-how-to-think-about-schema-names)
-    * [Data schema reference name](#data-schema-reference-name)
-    * [Wrapper schema name](#wrapper-schema-name)
-* [🧭 Suggested Package Layout](#-suggested-package-layout)
-* [🎯 Outcome](#-outcome)
-
 ---
 
 ## 🎯 Goals
