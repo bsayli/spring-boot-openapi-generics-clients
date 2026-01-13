@@ -217,14 +217,14 @@ Each guide is **domain-agnostic** and focuses on the integration approach rather
 
 ## 🎯 Design Principles & Outcomes
 
-This approach is built around a small set of **clear, intentional design outcomes**:
+This approach is built around a small set of clear, intentional design outcomes:
 
-* A **single response contract** shared by server and client
-* **No duplicated response envelopes** across generated code
-* **Predictable schema naming** over time
-* A clearly defined scope for generics (pagination via `Page<T>`)
-* **RFC 9457–based error modeling** as a first-class concern
-* Client generation that remains stable as the API evolves
+- A single response contract shared by server and client
+- No duplicated response envelopes across generated code
+- Predictable schema naming over time
+- A clearly defined scope for generics (pagination via `Page<T>`)
+- RFC 9457–based error modeling as a first-class concern
+- Client generation that remains stable as the API evolves
 
 This is not a tutorial example or a framework experiment.
 
