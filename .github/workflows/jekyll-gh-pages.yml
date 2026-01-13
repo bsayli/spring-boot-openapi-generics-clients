@@ -1,11 +1,11 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
-name: Deploy Jekyll with GitHub Pages dependencies preinstalled
+name: Pages
 
 on:
   push:
     branches: ["main"]
     paths:
       - "docs/**"
+      - "_config.yml"
       - ".github/workflows/jekyll-gh-pages.yml"
   workflow_dispatch:
 
@@ -15,7 +15,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "github-pages"
+  group: github-pages
   cancel-in-progress: true
 
 jobs:
@@ -40,11 +40,11 @@ jobs:
           path: ./_site
 
   deploy:
-    environment:
-      name: github-pages-v2
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
