@@ -230,7 +230,7 @@ At generation time, the server adds:
 
 ### 1) The baseline: shared schema names and constants
 
-#### `OpenApiSchemas`
+#### OpenApiSchemas
 
 **Why it exists:** one place for canonical schema names, property keys, and vendor extension keys.
 
@@ -252,7 +252,7 @@ This keeps the rest of the code *string-safe* and reduces accidental drift.
 
 ### 2) The “base contract” schemas
 
-#### `SwaggerResponseCustomizer`
+#### SwaggerResponseCustomizer
 
 **Why it exists:** ensure core envelope schemas exist in `#/components/schemas` even when Springdoc doesn’t materialize them the way we need.
 
@@ -270,7 +270,7 @@ What it does:
 
 ### 3) Detecting what should get a wrapper
 
-#### `ResponseTypeIntrospector`
+#### ResponseTypeIntrospector
 
 **Why it exists:** Spring MVC controllers often return nested wrappers (`ResponseEntity<…>`, async types, etc.). This component normalizes those signatures and extracts the *data reference name* used for wrapper schema naming.
 
@@ -296,7 +296,7 @@ This is the mechanism that keeps the contract small and predictable.
 
 ### 4) Building the composed wrapper schema
 
-#### `ApiResponseSchemaFactory`
+#### ApiResponseSchemaFactory
 
 **Why it exists:** wrapper schema creation should be a pure, reusable operation with stable output.
 
@@ -326,7 +326,7 @@ Vendor extensions added on the wrapper schema:
 
 ### 5) Registering wrappers into the OpenAPI components
 
-#### `AutoWrapperSchemaCustomizer`
+#### AutoWrapperSchemaCustomizer
 
 **Why it exists:** it is the coordinator that ties together:
 
@@ -371,7 +371,7 @@ without guessing.
 
 ### 6) Publishing error responses consistently
 
-#### `GlobalErrorResponsesCustomizer`
+#### GlobalErrorResponsesCustomizer
 
 **Why it exists:** standardize non-2xx responses as **RFC 9457 Problem Details** in the published OpenAPI contract.
 
