@@ -41,12 +41,24 @@ This module is intentionally contract-driven: response models are sourced from t
 * Feeds the [`customer-service-client`](../customer-service-client/README.md) module for type-safe, boilerplate-free client generation.
 * Demonstrates **automatic schema registration** and **wrapper introspection** via custom Springdoc customizers.
 
-### Contract rules (non-negotiable)
+### Contract semantics
 
-* The canonical success envelope is **`ServiceResponse<T>`**.
-* Nested generics are supported **only** for **`ServiceResponse<Page<T>>`**.
+This module follows a **clear and intentionally limited contract scope** to keep the published OpenAPI specification and client generation predictable.
 
-  * For any other generic type (`List<T>`, `Map<K,V>`, `Foo<Bar>`), generics are **ignored** in schema naming: only the **raw type name** is used.
+* Successful responses use the shared envelope **`ServiceResponse<T>`**, sourced from the common `api-contract` module.
+
+* Nested generics are treated as contract-aware **only** for:
+
+  ```java
+  ServiceResponse<Page<T>>
+  ```
+
+  This reflects the common pagination use case and allows stable schema naming.
+
+* For all other generic shapes (`List<T>`, `Map<K,V>`, `Foo<Bar>`, etc.), generic information is **not interpreted** during schema naming.
+  In those cases, the OpenAPI output follows the default behavior and uses the **raw container type** only.
+
+This scoped approach ensures that both the server-published contract and the generated client remain consistent, understandable, and evolvable over time.
 
 ---
 
@@ -67,7 +79,7 @@ This module is intentionally contract-driven: response models are sourced from t
 * **customer-service** auto-registers wrapper schemas by scanning controller methods and extracting the `T` inside `ServiceResponse<T>`.
 
   * `AutoWrapperSchemaCustomizer` registers composed schemas for each discovered `T`.
-  * `ResponseTypeIntrospector` enforces the **Page-only nested generics rule**.
+  * `ResponseTypeIntrospector` **identifies and marks only Page-based nested generics as contract-aware**.
 
 * The OpenAPI document is enriched with vendor extensions:
 
@@ -269,11 +281,12 @@ Example JSON:
 
 ## 🧠 Why This Matters
 
-* The runtime behavior exactly matches what clients generate against.
-* `{ data, meta }` is **not a demo wrapper** — it is the enforced contract.
-* This is the same shape consumed by `customer-service-client`.
+* The runtime response shape exactly matches what clients are generated against.
+* `{ data, meta }` is **not a demo or sample wrapper** — it is the canonical response contract.
+* The same contract is reused directly by `customer-service-client`.
 
-If this response looks correct, your **end‑to‑end contract** is working as designed.
+If this response shape looks correct, it means the **end-to-end contract flow** —
+from server, to OpenAPI specification, to generated client — is working as intended.
 
 ---
 
@@ -376,11 +389,11 @@ mvn verify
 ## 🖖 Notes
 
 * Uses shared response models from **`io.github.bsayli:api-contract`**.
-* Demonstrates **`ServiceResponse<T>`** and **`ServiceResponse<Page<T>>`** (Page-only nested generics rule).
+* Demonstrates **`ServiceResponse<T>`** and the paged variant **`ServiceResponse<Page<T>>`**.
 * Adds wrapper typing hints via vendor extensions (`x-api-wrapper`, `x-api-wrapper-datatype`).
-* Adds Page container hints **only** for `Page<T>` (`x-data-container`, `x-data-item`).
-* Implements **RFC 9457-compliant Problem Details** (`application/problem+json`) responses.
-* Provides **unit and integration tests** for controller and OpenAPI customization layers.
+* Adds pagination container hints **only when** `Page<T>` is involved (`x-data-container`, `x-data-item`).
+* Implements **RFC 9457–compliant Problem Details** (`application/problem+json`) responses.
+* Provides **unit and integration tests** for controller logic and OpenAPI customization.
 * Supports optional annotation injection for generated wrappers via `app.openapi.wrapper.class-extra-annotation`.
 
 ---

@@ -285,9 +285,10 @@ generator-safe evolution.
 | **Error Handling**          | RFC 9457 **Problem Details** decoded into `ApiProblemException` with extension support                                     |
 | **API Consumer**            | Application/service layer using adapter interfaces and receiving fully type-safe responses                                 |
 
-> **Key rule**
+> **Key principle**
 >
-> The OpenAPI specification is the *single source of truth*. Generated code is disposable; contracts are not.
+> The OpenAPI specification is the *single source of truth*.  
+> Generated code is disposable; contracts are not.
 
 ---
 

@@ -45,7 +45,7 @@ parallel or duplicated response models.
 - [2) Maven Properties](#2-maven-properties)
 - [3) Maven Plugins — Full Build Pipeline](#3-maven-plugins--full-build-pipeline)
 - [4) Why These Plugins Exist (and Why This Order Matters)](#4-why-these-plugins-exist-and-why-this-order-matters)
-- [5) Mustache Contract Integration (What Your Templates Must Do)](#5-mustache-contract-integration-what-your-templates-must-do)
+- [5) Mustache Contract Integration (What Your Templates Must Do)](#5-mustache-contract-integration-template-responsibilities)
 - [6) Verification](#6-verification)
 
 ## 1) Core Dependencies
@@ -418,65 +418,90 @@ Pin versions for deterministic generation and reproducible builds.
 
 ---
 
-## 5) Mustache Contract Integration (What Your Templates Must Do)
+## 5) Mustache Contract Integration (Template Responsibilities)
 
-Your Mustache overlays are **not free-form templates**. They are part of a **contract-enforcement mechanism** between the server’s OpenAPI output and the client’s generated code.
+Mustache overlays in this project are **not free-form templates**.
+They exist to **bind generated client models to the shared `api-contract` types** described by the OpenAPI specification.
 
-The primary responsibility of your templates is:
+Their responsibility is intentionally narrow and declarative.
 
-> **Bind generated wrapper models to the shared `api-contract` types — without re‑defining them.**
+### Primary responsibility
+
+> **Bind generated wrapper models to the shared `api-contract` types — without redefining response structures.**
+
+Templates do not introduce new response semantics.
+They simply reflect what the server already publishes in its OpenAPI contract.
+
+---
 
 ### What this means in practice
 
-* **Do not generate** your own `ServiceResponse`, `Meta`, `Page`, or `Sort` classes.
-* **Do not duplicate** envelope or paging models already provided by `io.github.bsayli:api-contract`.
-* **Always extend** the shared contract types in generated wrappers.
+* Do **not** generate your own `ServiceResponse`, `Meta`, `Page`, or `Sort` classes.
+* Do **not** duplicate envelope or paging models already provided by `io.github.bsayli:api-contract`.
+* Generated wrappers must **extend** the shared contract types directly.
 
-### Expected wrapper shape (domain‑agnostic)
-
-Wrapper class names are derived from your **domain DTO names**, but their structure is fixed.
+Wrapper class names are derived from your domain DTOs, but their structure is fixed.
 
 Examples (illustrative only):
 
 * `ServiceResponseFooDto extends ServiceResponse<FooDto>`
-* `ServiceResponsePageFooDto extends ServiceResponse<Page<FooDto>>`
+* `ServiceResponsePageFooDto extends ServiceResponse<Page<FooDto>)`
 
-> The concrete `FooDto` type comes from *your* service domain.
-> This document does **not** assume or enforce any specific domain model.
+The concrete `FooDto` type comes from your service domain.
+This document does not assume or prescribe any specific domain model.
 
-### How this is enforced
+---
 
-Wrapper generation is driven entirely by **vendor extensions emitted by the server‑side OpenAPI contract**.
+### How wrapper generation is driven
 
-Your templates must react to — not invent — these extensions:
+Wrapper generation is guided entirely by **vendor extensions** emitted in the server-side OpenAPI specification.
+
+Templates **react to** these extensions — they never invent them.
+
+Relevant extensions:
 
 * `x-api-wrapper: true`
-  Marks a schema as a generated wrapper bound to `ServiceResponse<T>`.
+  Marks a schema as a response wrapper bound to `ServiceResponse<T>`.
 
 * `x-api-wrapper-datatype: <T>`
-  The **raw domain DTO type** wrapped by `ServiceResponse<T>`.
+  Indicates the domain DTO type wrapped by `ServiceResponse<T>`.
 
-* `x-data-container: Page` *(only for nested generics)*
-  Indicates that the wrapper represents `ServiceResponse<Page<T>>`.
+* `x-data-container: Page` *(pagination only)*
+  Signals a `ServiceResponse<Page<T>>` wrapper.
 
-* `x-data-item: <T>` *(only for nested generics)*
-  The item type inside the `Page<T>` container.
+* `x-data-item: <T>` *(pagination only)*
+  Indicates the item type inside `Page<T>`.
 
-> ⚠️ **Important rule:** Nested generics are supported **only** for `Page<T>`.
-> Any other generic form (`List<T>`, `Map<K,V>`, `Foo<Bar>`) is treated as a **raw type** during wrapper generation.
+---
 
-### Template responsibility (summary)
+### Design scope for generics
 
-Your Mustache templates must:
+Only one nested generic shape is treated as contract-aware:
+
+```java
+ServiceResponse<Page<T>>
+```
+
+All other generic forms (`List<T>`, `Map<K,V>`, `Foo<Bar>`, etc.) follow OpenAPI Generator’s default
+schema naming and model generation behavior.
+
+This keeps client output predictable while covering the most common real-world use case.
+
+---
+
+### Template checklist (summary)
+
+Your Mustache templates should:
 
 * Import `ServiceResponse` from `io.github.bsayli.apicontract.envelope`
-* Import `Page` from `io.github.bsayli.apicontract.paging` **only when** `x-data-container` is present
-* Generate a wrapper class that:
+* Import `Page` from `io.github.bsayli.apicontract.paging` **only when** pagination metadata is present
+* Generate wrapper classes that:
 
-    * extends `ServiceResponse<T>` or `ServiceResponse<Page<T>>`
-    * contains **no duplicated envelope or paging logic**
+  * extend `ServiceResponse<T>` or `ServiceResponse<Page<T>>`
+  * contain **no duplicated envelope or paging logic**
 
-If these rules are followed, the client build remains **contract‑aligned and future‑proof**.
+When these responsibilities are respected, client generation remains minimal, stable,
+and aligned with the shared API contract.
 
 ---
 
@@ -505,7 +530,7 @@ Confirm that:
 * No duplicated contract DTOs are present in generated output
   *(assuming `.openapi-generator-ignore` is correctly configured)*
 
-If any of the following appear, the setup is **incorrect**:
+If any of the following appear, the setup is **misaligned**:
 
 * Locally generated `ServiceResponse`, `Meta`, or `Page` classes
 * Wrapper models that do **not** extend the shared contract
@@ -520,6 +545,6 @@ If any of the following appear, the setup is **incorrect**:
 * **Template-safe** — Mustache overlays apply minimal, intentional changes only
 * **Generics-aware** — explicit and predictable support for `ServiceResponse<Page<T>>`
 
-This section defines **binding rules for client generation**, not illustrative examples.
+This section describes the expected bindings used during client generation, not illustrative examples.
 
-If your generated client code or templates violate these rules, the build is no longer aligned with the published OpenAPI contract — even if it still compiles.
+If the generated client code or templates diverge from these guidelines, the build may still compile, but it no longer accurately reflects the published OpenAPI contract.

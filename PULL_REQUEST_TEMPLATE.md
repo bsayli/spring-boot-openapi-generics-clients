@@ -38,12 +38,12 @@ Describe the **practical impact** of this change:
 - Improves API contract consistency or clarity
 - Reduces duplicated or unstable generated code
 - Improves server–client alignment
-- Preserves or clarifies existing guarantees (e.g. generics handling, paging rules)
-- Improves CI reliability, tests, or build determinism
+- Clarifies how generics and paging are handled
+- Improves CI reliability, test coverage, or build determinism
 
-> If this PR changes any observable behavior  
-> (generated code shape, OpenAPI schema output, or client behavior),  
-> **call it out explicitly**.
+> If this PR introduces any observable change  
+> (such as generated code shape, OpenAPI schema output, or client behavior),  
+> please describe it explicitly so reviewers can assess the impact.
 
 ---
 
@@ -113,9 +113,9 @@ Please confirm the following:
 >
 > **Good PR titles:**
 >
-> * `feature(client): enforce Page‑only nested generics`
-> * `bugfix(server): avoid schema drift on composed responses`
-> * `docs(adoption): clarify single‑contract guarantees`
+> * `feature(client): support Page-only nested generics`
+> * `bugfix(server): prevent schema drift on composed responses`
+> * `docs(adoption): clarify single-contract semantics`
 
 This template reflects the project’s core principle:
-**contracts are enforced at generation time — not patched downstream.**
+**contracts are defined at generation time — not corrected downstream.**

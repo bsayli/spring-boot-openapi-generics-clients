@@ -195,15 +195,25 @@ Those concerns belong to **other modules**.
 
 ## 📜 Contract Guarantees
 
-These rules define the **scope and guarantees of the API contract**:
+`api-contract` provides the **canonical domain types** for successful responses, paging metadata, and RFC 9457-compatible error extensions.
 
-1. **Single success envelope** — `ServiceResponse<T>`
-2. **No envelope duplication** — clients extend the contract, they do not redefine it
-3. **Page-only nested generics** — deeper nesting is intentionally out of scope
-4. **Explicit contract evolution** — breaking changes are deliberate and visible
+It guarantees:
 
-These rules describe what the contract **guarantees** —
-not how those guarantees are enforced.
+1. **Canonical success envelope**  
+   `ServiceResponse<T>` is the single, shared success shape used across server and client code.
+
+2. **Shared type ownership**  
+   The envelope, paging, and error extension types are defined **once** in this module and **reused directly** (not redefined per service or per client).
+
+3. **Explicit scope for nested generics**  
+   The contract explicitly defines `Page<T>` as the standard paging container and recognizes the common success shape  
+   `ServiceResponse<Page<T>>`.  
+   Any other generic compositions (e.g., `List<T>`, `Map<K,V>`, arbitrary nesting) are **out of scope** for contract guarantees.
+
+4. **Forward-compatible evolution**  
+   The contract is designed for additive evolution (e.g., adding optional fields) without forcing widespread rewrites across consumers.
+
+These guarantees describe **what the contract means and covers**, not how it is published or consumed.
 
 ---
 

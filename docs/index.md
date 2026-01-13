@@ -41,7 +41,7 @@ The result is an **end-to-end, type-safe API boundary** with:
 - [Getting Started](#-getting-started-conceptual-flow)
 - [Toolchain](#-toolchain-reference)
 - [Adoption Guides](#-adoption-guides)
-- [Design Guarantees](#-design-guarantees)
+- [Design Principles & Outcomes](#-design-principles--outcomes)
 - [References & External Links](#-references--external-links)
 
 ---
@@ -211,25 +211,26 @@ Use these guides to integrate the pattern step‑by‑step:
 * **Client‑Side Adoption — Integration**
   How to consume the generated client safely using adapters and RFC 9457 handling.
 
-Each guide is **domain‑agnostic** and focuses on architectural rules rather than examples.
+Each guide is **domain-agnostic** and focuses on the integration approach rather than concrete domain examples.
 
 ---
 
-## 🎯 Design Guarantees
+## 🎯 Design Principles & Outcomes
 
-This pattern guarantees:
+This approach is built around a small set of **clear, intentional design outcomes**:
 
-* **One response contract** across server and client
-* **Zero duplicated envelopes**
-* **Deterministic schema names**
-* **Explicit generic rules (Page‑only nesting)**
-* **RFC 9457‑first error handling**
-* **Generator‑safe evolution over time**
+* A **single response contract** shared by server and client
+* **No duplicated response envelopes** across generated code
+* **Predictable schema naming** over time
+* A clearly defined scope for generics (pagination via `Page<T>`)
+* **RFC 9457–based error modeling** as a first-class concern
+* Client generation that remains stable as the API evolves
 
-This is not a tutorial demo.
+This is not a tutorial example or a framework experiment.
 
-It is a **reference implementation** for teams who care about API correctness,
-long-term maintainability, and zero contract drift.
+It is a **reference implementation** for teams who care about
+API clarity, long-term maintainability, and keeping server and client
+contracts aligned without drift.
 
 ---
 

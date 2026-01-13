@@ -170,28 +170,72 @@ No response envelope is duplicated; everything delegates to `ServiceResponse<T>`
 
 ### Canonical Response Contract
 
-All successful responses use the shared contract:
+All successful responses use a **single, shared response contract**:
 
 ```java
 ServiceResponse<T>
 ```
 
+This contract is:
+
 * Defined in **`io.github.bsayli:api-contract`**
-* Shared by **both server and client**
-* Guarantees `{ data, meta }` consistency across boundaries
+* Reused **unchanged** by both server and client
+* The sole owner of the `{ data, meta }` response shape
+
+As a result, the response envelope is **never generated**, duplicated, or redefined by tooling.
+It exists once, as an explicit contract, and is referenced everywhere else.
+
+---
 
 ### Page Semantics
 
-Nested generics are supported **only** for:
+This setup **explicitly supports exactly one nested generic shape**:
 
 ```java
 ServiceResponse<Page<T>>
 ```
 
-Any other generic shape (`List<T>`, `Map<K,V>`, custom generics) is treated as a **raw type**
-in schema naming and wrapper generation.
+This is the **only** nested generic treated as *contract-aware*.
 
-This rule is **intentional and enforced** to keep the contract deterministic.
+What this means in practice:
+
+* Pagination semantics are preserved end‑to‑end
+* Schema names remain deterministic
+* Generated clients bind generics without duplicating envelope fields
+
+---
+
+### Everything Else (Intentionally Out of Scope)
+
+All other generic compositions — including but not limited to:
+
+* `ServiceResponse<List<T>>`
+* `ServiceResponse<Map<K,V>>`
+* `ServiceResponse<Foo<Bar>>`
+
+are **intentionally left to OpenAPI Generator's default behavior**.
+
+They are:
+
+* **Not** treated as contract‑aware
+* **Not** given special schema naming rules
+* **Not** enriched with wrapper‑specific vendor extensions
+
+This is a deliberate design boundary.
+
+By limiting guarantees to:
+
+* `ServiceResponse<T>`
+* `ServiceResponse<Page<T>>`
+
+the contract remains:
+
+* predictable
+* generator‑safe
+* stable over time
+
+> The goal is not to support every possible generic shape —
+> but to make the **supported ones boringly reliable**.
 
 ---
 
@@ -322,7 +366,7 @@ This guarantees **one contract, one source of truth**.
 ## 📘 Summary
 
 * **Single response contract**: `ServiceResponse<T>`
-* **Explicit rule**: nested generics supported only for `Page<T>`
+* **Explicit generic scope**: nested generics are supported only for `Page<T>`
 * **No duplication** between server and client
 * **RFC 9457-first** error handling
 * Generated code isolated behind adapters

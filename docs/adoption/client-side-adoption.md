@@ -28,7 +28,7 @@ The examples intentionally avoid concrete domain names (like `Customer`) and foc
 * [🚀 Generate the Client](#-generate-the-client)
 * [🧹 Avoid Duplicated Contracts](#-avoid-duplicated-contracts)
 * [🧩 Thin Wrapper Generation (Mustache Overlay)](#-thin-wrapper-generation-mustache-overlay)
-* [🧠 Contract Rules (Deterministic)](#-contract-rules-deterministic)
+* [🧠 Contract Semantics (Deterministic by Design)](#-contract-semantics-deterministic-by-design)
 * [⚠️ Error Handling (RFC 9457)](#-error-handling-rfc-9457)
 * [⚙️ Spring Boot Integration](#-spring-boot-integration)
 * [🧩 Adapter Pattern (Recommended)](#-adapter-pattern-recommended)
@@ -90,11 +90,11 @@ curl -s http://<service-host>/<base-path>/v3/api-docs.yaml \
 
 > 🔧 **Build & Maven configuration**
 >
-> This guide focuses on **concepts, rules, and integration patterns**.
+> This guide focuses on **concepts and integration semantics**, not concrete build wiring.
 >
 > For the exact **Maven setup, OpenAPI Generator configuration, and template wiring**, see:
->
 > → [Client-Side Adoption — Build & POM Setup](client-side-adoption-pom.md)
+
 
 ```bash
 mvn clean install
@@ -144,15 +144,22 @@ Place your template overlays under:
 src/main/resources/openapi-templates/
 ```
 
-Your wrapper templates must:
+These overlays are responsible only for **binding generic parameters** to the shared API contract. They do not redefine response fields or invent new envelopes.
+
+### Wrapper template responsibilities
+
+Your wrapper templates should:
 
 * Import **`ServiceResponse`** from `api-contract`
 * Import **`Page`** from `api-contract` *only* when `x-data-container: Page` is present
 * Extend **`ServiceResponse<T>`** or **`ServiceResponse<Page<T>>`**
 
+The goal is to generate **thin wrappers** that simply connect OpenAPI schema information to the canonical contract types.
+
 ### Template (excerpt)
 
 {% raw %}
+
 ```mustache
 import {{apiContractEnvelope}}.ServiceResponse;
 {{#vendorExtensions.x-data-container}}
@@ -168,49 +175,75 @@ public class {{classname}} extends ServiceResponse<
 {{/vendorExtensions.x-data-container}}
 > {}
 ```
+
 {% endraw %}
 
-> The property name `apiContractEnvelope` intentionally mirrors the Maven configuration.
+> The property name `apiContractEnvelope` intentionally mirrors the Maven configuration to keep template wiring explicit and predictable.
 
 ---
 
-## 🧠 Contract Rules (Deterministic)
+## 🧠 Contract Semantics (Deterministic by Design)
+
+This project deliberately limits the scope of what is considered *contract-aware* in order to keep schema naming and client generation predictable over time.
 
 ### Canonical success envelope
 
-All successful responses must use:
+All successful responses use the shared contract:
 
 ```java
 ServiceResponse<T>
 ```
 
+This type is defined once in **`api-contract`** and reused by both server and client. Generated models never redefine its fields.
+
 ### Nested generics
 
-Supported **only** for:
+Nested generics are treated as contract-aware **only** for:
 
 ```java
 ServiceResponse<Page<T>>
 ```
 
-Any other generic shape (`List<T>`, `Map<K,V>`, `Foo<Bar>`) is treated as a **raw type** during schema naming and wrapper generation.
+This reflects a conscious design decision:
 
-This rule is **intentional and enforced**.
+* Pagination is a common, well-understood use case
+* Its semantics are stable across endpoints
+* Supporting it explicitly keeps schema names deterministic
+
+All other generic shapes (`List<T>`, `Map<K,V>`, `Foo<Bar>`, etc.) follow OpenAPI Generator’s default behavior during schema naming and model generation.
+
+The contract defines **what is guaranteed**, not every shape Java could theoretically express.
 
 ---
 
-## ⚠️ Error Handling (RFC 9457)
+## ⚠️ Error Handling (RFC-9457)
 
-Non‑2xx responses are decoded into **RFC 9457 `ProblemDetail`** and thrown as **`ApiProblemException`**.
+Non‑2xx responses are represented using **RFC 9457 Problem Details** and surfaced to consumers as **`ApiProblemException`**.
+
+Error responses are intentionally **not** wrapped in `ServiceResponse`.
+
+Example usage:
 
 ```java
 try {
   adapter.getResource(id);
 } catch (ApiProblemException ex) {
   ProblemDetail pd = ex.getProblem();
-  log.warn("API error [status={}, code={}, title={}]",
-      ex.getStatus(), pd.getErrorCode(), pd.getTitle());
+  log.warn(
+      "API error [status={}, code={}, title={}]",
+      ex.getStatus(),
+      pd.getErrorCode(),
+      pd.getTitle()
+  );
 }
 ```
+
+This keeps success and error paths clearly separated:
+
+* success responses use the shared `{ data, meta }` envelope
+* error responses follow a standardized, RFC‑defined structure
+
+No runtime tricks or framework magic — just explicit contracts and predictable generation.
 
 ---
 
@@ -303,5 +336,5 @@ client-module/
 * **RFC 9457-first**: errors surfaced as `ApiProblemException`
 * **Isolation**: adapters protect your application from generator churn
 
-This document describes **how to adopt the mechanism**, not the sample domain.
-Your domain types plug in cleanly without changing the rules.
+This document explains **how the mechanism is adopted**, not a sample domain.
+Your domain types plug in cleanly without requiring changes to the mechanism itself.
