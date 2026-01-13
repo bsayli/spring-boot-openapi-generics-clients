@@ -184,9 +184,9 @@ Concrete setup steps are covered in the adoption guides below.
 ## 📦 Toolchain (Reference)
 
 | Component         | Role                    |
-| ----------------- | ----------------------- |
+|-------------------| ----------------------- |
 | Java 21           | Language baseline       |
-| Spring Boot 3.x   | REST runtime            |
+| Spring Boot 3.5.x | REST runtime            |
 | Springdoc         | OpenAPI 3.1 producer    |
 | OpenAPI Generator | Client code generation  |
 | HttpClient5       | Production HTTP backend |

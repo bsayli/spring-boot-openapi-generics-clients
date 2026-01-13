@@ -41,14 +41,56 @@ parallel or duplicated response models.
 
 ## 📑 Table of Contents
 
-- [1) Core Dependencies](#1-core-dependencies)
-- [2) Maven Properties](#2-maven-properties)
+- [1) Maven Properties](#1-maven-properties)
+- [2) Core Dependencies](#2-core-dependencies)
 - [3) Maven Plugins — Full Build Pipeline](#3-maven-plugins--full-build-pipeline)
 - [4) Why These Plugins Exist (and Why This Order Matters)](#4-why-these-plugins-exist-and-why-this-order-matters)
 - [5) Mustache Contract Integration (What Your Templates Must Do)](#5-mustache-contract-integration-template-responsibilities)
 - [6) Verification](#6-verification)
 
-## 1) Core Dependencies
+---
+
+## 1) Maven Properties
+
+Pin versions for deterministic generation and reproducible builds.
+
+```xml
+<properties>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  <java.version>21</java.version>
+
+  <spring-boot.version>3.5.9</spring-boot.version>
+  <openapi.generator.version>7.18.0</openapi.generator.version>
+
+  <jakarta.validation.version>3.1.1</jakarta.validation.version>
+  <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
+
+  <httpclient5.version>5.5.2</httpclient5.version>
+  <mockwebserver.version>5.3.2</mockwebserver.version>
+
+  <api-contract.version>0.7.4</api-contract.version>
+
+  <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+  <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
+
+  <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
+  <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
+  <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
+  <spotless-maven-plugin.version>3.1.0</spotless-maven-plugin.version>
+  <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+  <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
+
+  <openapi.templates.upstream>${project.build.directory}/upstream-templates</openapi.templates.upstream>
+  <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
+
+  <argLine/>
+</properties>
+```
+
+---
+
+## 2) Core Dependencies
 
 Add these dependencies to your client module.
 
@@ -116,46 +158,6 @@ Add these dependencies to your client module.
   </dependency>
 
 </dependencies>
-```
-
----
-
-## 2) Maven Properties
-
-Pin versions for deterministic generation and reproducible builds.
-
-```xml
-<properties>
-  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-  <java.version>21</java.version>
-
-  <spring-boot.version>3.5.9</spring-boot.version>
-  <openapi.generator.version>7.18.0</openapi.generator.version>
-
-  <jakarta.validation.version>3.1.1</jakarta.validation.version>
-  <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
-
-  <httpclient5.version>5.5.2</httpclient5.version>
-  <mockwebserver.version>5.3.2</mockwebserver.version>
-
-  <api-contract.version>0.7.4</api-contract.version>
-
-  <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-  <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
-
-  <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
-  <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
-  <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
-  <spotless-maven-plugin.version>3.1.0</spotless-maven-plugin.version>
-  <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
-  <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
-
-  <openapi.templates.upstream>${project.build.directory}/upstream-templates</openapi.templates.upstream>
-  <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
-
-  <argLine/>
-</properties>
 ```
 
 ---
