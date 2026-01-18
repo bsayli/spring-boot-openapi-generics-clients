@@ -186,9 +186,8 @@ This scales poorly and makes contract evolution painful.
 
 ---
 
-> **Context (Medium):**  
+> **Background:** The rationale behind the canonical `ServiceResponse<T>` contract is explained here (updated Jan 2026):  
 > [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
-
 ---
 
 ## 💡 The Core Idea
