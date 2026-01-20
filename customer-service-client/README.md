@@ -277,32 +277,32 @@ public class CustomerApiClientConfig {
   @Bean
   RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
     return builder ->
-        builder.defaultStatusHandler(
-            HttpStatusCode::isError,
-            (request, response) -> {
-              ProblemDetail pd = ProblemDetailSupport.extract(om, response);
-              throw new ApiProblemException(pd, response.getStatusCode().value());
-            });
+            builder.defaultStatusHandler(
+                    HttpStatusCode::isError,
+                    (request, response) -> {
+                      ProblemDetail pd = ProblemDetailSupport.extract(om, response);
+                      throw new ApiProblemException(pd, response.getStatusCode().value());
+                    });
   }
 
   @Bean(destroyMethod = "close")
   CloseableHttpClient customerHttpClient(
-      @Value("${customer.api.max-connections-total:64}") int maxTotal,
-      @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute) {
+          @Value("${customer.api.max-connections-total:64}") int maxTotal,
+          @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute) {
 
-    var cm =
-        PoolingHttpClientConnectionManagerBuilder.create()
-            .setMaxConnTotal(maxTotal)
-            .setMaxConnPerRoute(maxPerRoute)
-            .build();
+    var connectionManager =
+            PoolingHttpClientConnectionManagerBuilder.create()
+                    .setMaxConnTotal(maxTotal)
+                    .setMaxConnPerRoute(maxPerRoute)
+                    .build();
 
     return HttpClients.custom()
-        .setConnectionManager(cm)
-        .evictExpiredConnections()
-        .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
-        .setUserAgent("customer-service-client")
-        .disableAutomaticRetries()
-        .build();
+            .setConnectionManager(connectionManager)
+            .evictExpiredConnections()
+            .evictIdleConnections(TimeValue.ofSeconds(30))
+            .setUserAgent("customer-service-client")
+            .disableAutomaticRetries()
+            .build();
   }
 }
 ```

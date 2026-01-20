@@ -6,11 +6,14 @@ import io.github.bsayli.openapi.client.common.problem.ApiProblemException;
 import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
 import io.github.bsayli.openapi.client.generated.dto.ProblemDetail;
 import io.github.bsayli.openapi.client.generated.invoker.ApiClient;
-import java.time.Duration;
 import java.util.List;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -25,53 +28,60 @@ public class CustomerApiClientConfig {
   @Bean
   RestClientCustomizer problemDetailStatusHandler(ObjectMapper om) {
     return builder ->
-        builder.defaultStatusHandler(
-            HttpStatusCode::isError,
-            (request, response) -> {
-              ProblemDetail pd = ProblemDetailSupport.extract(om, response);
-              throw new ApiProblemException(pd, response.getStatusCode().value());
-            });
+            builder.defaultStatusHandler(
+                    HttpStatusCode::isError,
+                    (request, response) -> {
+                      ProblemDetail pd = ProblemDetailSupport.extract(om, response);
+                      throw new ApiProblemException(pd, response.getStatusCode().value());
+                    });
   }
 
   @Bean(destroyMethod = "close")
   CloseableHttpClient customerHttpClient(
-      @Value("${customer.api.max-connections-total:64}") int maxTotal,
-      @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute) {
+          @Value("${customer.api.max-connections-total:64}") int maxTotal,
+          @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute,
+          @Value("${customer.api.connect-timeout-seconds:10}") long connect,
+          @Value("${customer.api.connection-request-timeout-seconds:10}") long connReq,
+          @Value("${customer.api.read-timeout-seconds:15}") long read) {
+
+    var connectionConfig =
+            ConnectionConfig.custom()
+                    .setConnectTimeout(Timeout.ofSeconds(connect))
+                    .build();
+
+    var requestConfig =
+            RequestConfig.custom()
+                    .setConnectionRequestTimeout(Timeout.ofSeconds(connReq))
+                    .setResponseTimeout(Timeout.ofSeconds(read))
+                    .build();
 
     var cm =
-        PoolingHttpClientConnectionManagerBuilder.create()
-            .setMaxConnTotal(maxTotal)
-            .setMaxConnPerRoute(maxPerRoute)
-            .build();
+            PoolingHttpClientConnectionManagerBuilder.create()
+                    .setMaxConnTotal(maxTotal)
+                    .setMaxConnPerRoute(maxPerRoute)
+                    .setDefaultConnectionConfig(connectionConfig)
+                    .build();
 
     return HttpClients.custom()
-        .setConnectionManager(cm)
-        .evictExpiredConnections()
-        .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
-        .setUserAgent("customer-service-client")
-        .disableAutomaticRetries()
-        .build();
+            .setConnectionManager(cm)
+            .setDefaultRequestConfig(requestConfig)
+            .evictExpiredConnections()
+            .evictIdleConnections(TimeValue.ofSeconds(30))
+            .setUserAgent("customer-service-client")
+            .disableAutomaticRetries()
+            .build();
   }
 
   @Bean
-  HttpComponentsClientHttpRequestFactory customerRequestFactory(
-      CloseableHttpClient customerHttpClient,
-      @Value("${customer.api.connect-timeout-seconds:10}") long connect,
-      @Value("${customer.api.connection-request-timeout-seconds:10}") long connReq,
-      @Value("${customer.api.read-timeout-seconds:15}") long read) {
-
-    var f = new HttpComponentsClientHttpRequestFactory(customerHttpClient);
-    f.setConnectTimeout(Duration.ofSeconds(connect));
-    f.setConnectionRequestTimeout(Duration.ofSeconds(connReq));
-    f.setReadTimeout(Duration.ofSeconds(read));
-    return f;
+  HttpComponentsClientHttpRequestFactory customerRequestFactory(CloseableHttpClient customerHttpClient) {
+    return new HttpComponentsClientHttpRequestFactory(customerHttpClient);
   }
 
   @Bean
   RestClient customerRestClient(
-      RestClient.Builder builder,
-      HttpComponentsClientHttpRequestFactory customerRequestFactory,
-      List<RestClientCustomizer> customizers) {
+          RestClient.Builder builder,
+          HttpComponentsClientHttpRequestFactory customerRequestFactory,
+          List<RestClientCustomizer> customizers) {
     builder.requestFactory(customerRequestFactory);
     if (customizers != null) {
       customizers.forEach(c -> c.customize(builder));
@@ -81,7 +91,7 @@ public class CustomerApiClientConfig {
 
   @Bean
   ApiClient customerApiClient(
-      RestClient customerRestClient, @Value("${customer.api.base-url}") String baseUrl) {
+          RestClient customerRestClient, @Value("${customer.api.base-url}") String baseUrl) {
     return new ApiClient(customerRestClient).setBasePath(baseUrl);
   }
 
