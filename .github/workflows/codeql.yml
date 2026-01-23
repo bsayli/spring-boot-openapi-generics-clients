@@ -1,4 +1,4 @@
-name: Build & Test
+name: CodeQL
 
 on:
   push:
@@ -10,14 +10,16 @@ on:
     paths-ignore:
       - "**/*.md"
       - "docs/**"
+  schedule:
+    - cron: "0 3 * * 1"
 
 permissions:
   contents: read
-  pull-requests: write
+  security-events: write
 
 jobs:
-  build:
-    name: Build & Test
+  analyze:
+    name: Analyze (Java)
     runs-on: ubuntu-latest
 
     steps:
@@ -33,42 +35,13 @@ jobs:
           distribution: "temurin"
           cache: maven
 
-      # Build everything via the aggregator (reactor) so api-contract is available to downstream modules
-      - name: Build all modules (tests + coverage)
-        run: mvn -B -q -ntp clean verify
-
-      - name: Upload generated client sources
-        uses: actions/upload-artifact@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
         with:
-          name: generated-client-sources
-          path: customer-service-client/target/generated-sources/openapi/src/gen/java
-          if-no-files-found: warn
-          retention-days: 7
+          languages: java-kotlin
 
-      - name: Upload OpenAPI spec (YAML)
-        uses: actions/upload-artifact@v4
-        with:
-          name: customer-api-docs
-          path: customer-service-client/target/classes/customer-api-docs.yaml
-          if-no-files-found: warn
-          retention-days: 7
+      - name: Build (Maven reactor)
+        run: mvn -B -q -ntp -DskipTests clean package
 
-      - name: Upload coverage (customer-service)
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: |
-            customer-service/target/site/jacoco*/jacoco.xml
-          flags: customer-service
-          name: customer-service
-          fail_ci_if_error: false
-
-      - name: Upload coverage (customer-service-client)
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: |
-            customer-service-client/target/site/jacoco*/jacoco.xml
-          flags: customer-service-client
-          name: customer-service-client
-          fail_ci_if_error: false
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
