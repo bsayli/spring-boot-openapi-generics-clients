@@ -352,7 +352,7 @@ curl -X GET "http://localhost:8084/customer-service/v1/customers/999"
 
 ```json
 {
-  "type": "https://example.com/problems/not-found",
+  "type": "urn:customer-service:problem:not-found",
   "title": "Resource not found",
   "status": 404,
   "detail": "Requested resource was not found.",
@@ -363,9 +363,7 @@ curl -X GET "http://localhost:8084/customer-service/v1/customers/999"
       {
         "code": "NOT_FOUND",
         "message": "Customer not found: 999",
-        "field": null,
-        "resource": "Customer",
-        "id": null
+        "resource": "Customer"
       }
     ]
   }

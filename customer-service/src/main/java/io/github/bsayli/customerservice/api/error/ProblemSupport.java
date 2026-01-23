@@ -21,19 +21,7 @@ final class ProblemSupport {
   static final String TYPE_INTERNAL_ERROR = "internal-error";
   static final String TYPE_METHOD_NOT_ALLOWED = "method-not-allowed";
 
-  static final String TITLE_BAD_REQUEST = "Bad request";
-  static final String TITLE_VALIDATION_FAILED = "Validation failed";
-  static final String TITLE_NOT_FOUND = "Resource not found";
-  static final String TITLE_INTERNAL_ERROR = "Internal server error";
-  static final String TITLE_METHOD_NOT_ALLOWED = "Method not allowed";
-
-  static final String DETAIL_NOT_FOUND = "Requested resource was not found.";
-  static final String DETAIL_VALIDATION_FAILED = "One or more fields are invalid.";
-  static final String DETAIL_NOT_READABLE = "Malformed request body.";
-  static final String DETAIL_PARAM_INVALID = "One or more parameters are invalid.";
-  static final String DETAIL_GENERIC_ERROR = "Unexpected error occurred.";
-
-  private static final String PROBLEM_BASE = "https://example.com/problems/";
+  private static final String PROBLEM_BASE = "urn:customer-service:problem:";
 
   private ProblemSupport() {}
 
@@ -43,11 +31,14 @@ final class ProblemSupport {
 
   static ProblemDetail baseProblem(
       URI type, HttpStatus status, String title, String detail, HttpServletRequest req) {
+
     ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, detail);
     pd.setType(type);
     pd.setTitle(title);
+
     String path = Optional.ofNullable(req.getRequestURI()).orElse("/");
     pd.setInstance(UriComponentsBuilder.fromPath(path).build().toUri());
+
     return pd;
   }
 

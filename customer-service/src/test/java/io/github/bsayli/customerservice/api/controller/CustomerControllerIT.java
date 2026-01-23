@@ -142,9 +142,12 @@ class CustomerControllerIT {
         .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
         .andExpect(jsonPath("$.status").value(500))
         .andExpect(jsonPath("$.title").value("Internal server error"))
-        .andExpect(jsonPath("$.detail").value("Unexpected error occurred."))
+        .andExpect(jsonPath("$.detail").value("Internal server error. Please try again later."))
         .andExpect(jsonPath("$.errorCode").value("INTERNAL_ERROR"))
-        .andExpect(jsonPath("$.extensions.errors[0].code").value("INTERNAL_ERROR"));
+        .andExpect(jsonPath("$.extensions.errors[0].code").value("INTERNAL_ERROR"))
+        .andExpect(
+            jsonPath("$.extensions.errors[0].message")
+                .value("Internal server error. Please try again later."));
   }
 
   @Test
