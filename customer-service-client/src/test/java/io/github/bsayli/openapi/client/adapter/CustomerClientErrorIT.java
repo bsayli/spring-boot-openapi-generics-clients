@@ -38,18 +38,18 @@ class CustomerClientErrorIT {
 
   @Test
   @DisplayName(
-      "GET /v1/customers/{id} -> 404 Problem => throws ClientProblemException with parsed body")
+      "GET /v1/customers/{id} -> 404 Problem => throws ApiProblemException with parsed body")
   void getCustomer_404_problem() {
     var problem =
         """
-                {
-                  "type":"https://example.org/problem/not-found",
-                  "title":"Not Found",
-                  "status":404,
-                  "detail":"Customer 999 not found",
-                  "errorCode":"CUS_404"
-                }
-                """;
+                    {
+                      "type":"https://example.org/problem/not-found",
+                      "title":"Not Found",
+                      "status":404,
+                      "detail":"Customer 999 not found",
+                      "errorCode":"CUS_404"
+                    }
+                    """;
 
     server.enqueue(
         new MockResponse()
@@ -67,20 +67,20 @@ class CustomerClientErrorIT {
   }
 
   @Test
-  @DisplayName("POST /v1/customers -> 400 Problem (validation) => throws ClientProblemException")
+  @DisplayName("POST /v1/customers -> 400 Problem (validation) => throws ApiProblemException")
   void createCustomer_400_problem() {
     var problem =
         """
-                {
-                  "title":"Bad Request",
-                  "status":400,
-                  "detail":"email must be a well-formed email address",
-                  "errorCode":"VAL_001",
-                  "extensions": {
-                    "errors":[{"code":"invalid_email","message":"email format"}]
-                  }
-                }
-                """;
+                    {
+                      "title":"Bad Request",
+                      "status":400,
+                      "detail":"email must be a well-formed email address",
+                      "errorCode":"VAL_001",
+                      "extensions": {
+                        "errors":[{"code":"invalid_email","message":"email format"}]
+                      }
+                    }
+                    """;
 
     server.enqueue(
         new MockResponse()
@@ -96,11 +96,15 @@ class CustomerClientErrorIT {
     assertNotNull(ex.getProblem());
     assertEquals("Bad Request", ex.getProblem().getTitle());
     assertEquals("VAL_001", ex.getProblem().getErrorCode());
+
+    assertTrue(ex.hasErrors());
+    assertEquals(1, ex.getErrors().size());
+    assertEquals("invalid_email", ex.firstErrorOrNull().getCode());
   }
 
   @Test
   @DisplayName(
-      "DELETE /v1/customers/{id} -> 500 (no body) => throws ClientProblemException with fallback ProblemDetail")
+      "DELETE /v1/customers/{id} -> 500 (no body) => throws ApiProblemException with fallback ProblemDetail")
   void deleteCustomer_500_no_body() {
     server.enqueue(
         new MockResponse()
@@ -113,9 +117,12 @@ class CustomerClientErrorIT {
 
     var pd = ex.getProblem();
     assertNotNull(pd);
+
     assertEquals(500, pd.getStatus());
-    assertEquals("HTTP error", pd.getTitle());
-    assertEquals("Empty problem response body", pd.getDetail());
+    assertEquals("Empty problem response body", pd.getTitle());
+    assertEquals("Upstream returned an empty error response body.", pd.getDetail());
+    assertEquals("UPSTREAM_EMPTY_PROBLEM", pd.getErrorCode());
+    assertNotNull(pd.getType());
   }
 
   @Configuration
