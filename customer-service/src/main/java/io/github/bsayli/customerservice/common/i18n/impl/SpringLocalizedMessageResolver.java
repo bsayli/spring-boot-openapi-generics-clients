@@ -9,32 +9,32 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpringLocalizedMessageResolver implements LocalizedMessageResolver {
 
-    private final MessageSource messageSource;
-    private final CurrentLocaleProvider localeProvider;
+  private final MessageSource messageSource;
+  private final CurrentLocaleProvider localeProvider;
 
-    public SpringLocalizedMessageResolver(
-            MessageSource messageSource, CurrentLocaleProvider localeProvider) {
-        this.messageSource = messageSource;
-        this.localeProvider = localeProvider;
-    }
+  public SpringLocalizedMessageResolver(
+      MessageSource messageSource, CurrentLocaleProvider localeProvider) {
+    this.messageSource = messageSource;
+    this.localeProvider = localeProvider;
+  }
 
-    @Override
-    public String getMessage(String messageKey) {
-        return messageSource.getMessage(messageKey, null, localeProvider.getCurrentLocale());
-    }
+  @Override
+  public String getMessage(String messageKey) {
+    return messageSource.getMessage(messageKey, null, localeProvider.getCurrentLocale());
+  }
 
-    @Override
-    public String getMessage(String messageKey, Object... args) {
-        return messageSource.getMessage(messageKey, args, localeProvider.getCurrentLocale());
-    }
+  @Override
+  public String getMessage(String messageKey, Object... args) {
+    return messageSource.getMessage(messageKey, args, localeProvider.getCurrentLocale());
+  }
 
-    @Override
-    public String getMessage(String messageKey, Locale locale) {
-        return messageSource.getMessage(messageKey, null, locale);
-    }
+  @Override
+  public String getMessage(String messageKey, Locale locale) {
+    return messageSource.getMessage(messageKey, null, locale);
+  }
 
-    @Override
-    public String getMessage(String messageKey, Locale locale, Object... args) {
-        return messageSource.getMessage(messageKey, args, locale);
-    }
+  @Override
+  public String getMessage(String messageKey, Locale locale, Object... args) {
+    return messageSource.getMessage(messageKey, args, locale);
+  }
 }

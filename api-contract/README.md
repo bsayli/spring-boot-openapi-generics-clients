@@ -225,7 +225,7 @@ Add to both server and client modules:
 <dependency>
   <groupId>io.github.bsayli</groupId>
   <artifactId>api-contract</artifactId>
-  <version>0.7.4</version>
+  <version>0.7.5</version>
 </dependency>
 ```
 

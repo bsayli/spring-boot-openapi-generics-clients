@@ -99,7 +99,9 @@ class CustomerClientErrorIT {
 
     assertTrue(ex.hasErrors());
     assertEquals(1, ex.getErrors().size());
-    assertEquals("invalid_email", ex.firstErrorOrNull().getCode());
+    var firstError = ex.firstErrorOrNull();
+    assertNotNull(firstError);
+    assertEquals("invalid_email", firstError.getCode());
   }
 
   @Test

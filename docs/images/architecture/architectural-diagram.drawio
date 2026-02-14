@@ -7,7 +7,7 @@
         <mxCell id="laneProducer" parent="1" style="swimlane;rounded=1;strokeColor=#1e293b;fillColor=#0b1220;fontColor=#e5e7eb;horizontal=1;startSize=28;" value="API Producer (Server)" vertex="1">
           <mxGeometry height="500" width="520" x="40" y="80" as="geometry" />
         </mxCell>
-        <mxCell id="srv" parent="laneProducer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0ea5a4;strokeColor=#0b6261;fontColor=#062c2b" value="service-api (example)&lt;br&gt;&lt;b&gt;Spring Boot 3.5.9 + Springdoc 2.8.15&lt;/b&gt;" vertex="1">
+        <mxCell id="srv" parent="laneProducer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0ea5a4;strokeColor=#0b6261;fontColor=#062c2b" value="service-api (example)&lt;br&gt;&lt;b&gt;Spring Boot 3.5.10 + Springdoc 2.8.15&lt;/b&gt;" vertex="1">
           <mxGeometry height="80" width="480" x="20" y="40" as="geometry" />
         </mxCell>
         <mxCell id="SINfS5sGlvs2-EreDV72-1" edge="1" parent="laneProducer" source="contract" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="customizer">
@@ -34,7 +34,7 @@
         <mxCell id="laneBuild" parent="1" style="swimlane;rounded=1;strokeColor=#1e293b;fillColor=#0b1220;fontColor=#e5e7eb;horizontal=1;startSize=28;" value="Code Generation" vertex="1">
           <mxGeometry height="500" width="520" x="580" y="80" as="geometry" />
         </mxCell>
-        <mxCell id="generator" parent="laneBuild" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#93c5fd;strokeColor=#2563eb;fontColor=#111827" value="OpenAPI Generator 7.18.0&lt;br&gt;&lt;b&gt;java / restclient&lt;/b&gt;" vertex="1">
+        <mxCell id="generator" parent="laneBuild" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#93c5fd;strokeColor=#2563eb;fontColor=#111827" value="&lt;b&gt;OpenAPI Generator 7.19.0&lt;/b&gt;&lt;br&gt;&lt;b&gt;java / restclient&lt;/b&gt;" vertex="1">
           <mxGeometry height="80" width="460" x="30" y="40" as="geometry" />
         </mxCell>
         <mxCell id="templates" parent="laneBuild" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4f46e5;fontColor=#111827" value="Mustache overlay&lt;br&gt;&lt;b&gt;model.mustache&lt;/b&gt; (+ wrapper partials)&lt;br&gt;→ emit thin wrappers bound to api-contract" vertex="1">

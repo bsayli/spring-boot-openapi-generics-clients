@@ -6,7 +6,7 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>spring-boot-openapi-generics-clients</artifactId>
-    <version>0.7.4</version>
+    <version>0.7.5</version>
     <packaging>pom</packaging>
 
     <name>spring-boot-openapi-generics-clients (aggregator)</name>

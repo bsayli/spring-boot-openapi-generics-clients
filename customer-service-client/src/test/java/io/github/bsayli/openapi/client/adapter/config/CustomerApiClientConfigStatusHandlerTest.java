@@ -73,6 +73,7 @@ class CustomerApiClientConfigStatusHandlerTest {
 
     assertTrue(ex.hasErrors());
     assertEquals(1, ex.getErrors().size());
+    assertNotNull(ex.firstErrorOrNull());
     assertEquals("too_short", ex.firstErrorOrNull().getCode());
 
     server.verify();

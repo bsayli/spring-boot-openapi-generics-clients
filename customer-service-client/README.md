@@ -1,8 +1,8 @@
 # customer-service-client
 
 [![Java 21](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.9-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.18.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.10-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.19.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 
 ---
@@ -99,7 +99,7 @@ mvn -q clean install
 
 ## ✅ What You Get
 
-* **OpenAPI Generator 7.18.0** + **Spring `RestClient`**-based Java client.
+* **OpenAPI Generator 7.19.0** + **Spring `RestClient`**-based Java client.
 * Canonical response envelope: **`ServiceResponse<T>`** (from `api-contract`).
 * **Page-only nested generics** support: `ServiceResponse<Page<CustomerDto>>`.
 * **RFC 9457 Problem decoding** surfaced as `ApiProblemException`.

@@ -4,8 +4,8 @@
 [![Release](https://img.shields.io/github/v/release/bsayli/spring-boot-openapi-generics-clients?logo=github\&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
 [![codecov](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients/branch/main/graph/badge.svg)](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients)
 [![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.9-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.18.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.10-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.19.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <p align="center">
@@ -281,10 +281,10 @@ generator-safe evolution.
 ### Layers at a glance
 
 | Layer                       | Responsibility                                                                                                             |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| --------------------------- |----------------------------------------------------------------------------------------------------------------------------|
 | **API Producer (Server)**   | Spring Boot service publishing an **OpenAPI 3.1** spec via Springdoc, backed by the shared `api-contract`                  |
 | **OpenAPI Schema Enricher** | `OpenApiCustomizer` detecting `ServiceResponse<T>` and emitting vendor extensions (`x-api-wrapper`, `x-data-container`, …) |
-| **Code Generation**         | OpenAPI Generator **7.18.0** (`java / restclient`) with Mustache overlays bound to the canonical contract                  |
+| **Code Generation**         | OpenAPI Generator **7.19.0** (`java / restclient`) with Mustache overlays bound to the canonical contract                  |
 | **Generated Client**        | Thin wrapper models, domain DTOs, APIs, `RestClient`, and `ApiClient` (invoker layer)                                      |
 | **Error Handling**          | RFC 9457 **Problem Details** decoded into `ApiProblemException` with extension support                                     |
 | **API Consumer**            | Application/service layer using adapter interfaces and receiving fully type-safe responses                                 |

@@ -6,7 +6,7 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>api-contract</artifactId>
-    <version>0.7.4</version>
+    <version>0.7.5</version>
 
     <name>api-contract</name>
     <description>Shared API contract for the unified {data, meta} response model and pagination primitives.</description>

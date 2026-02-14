@@ -7,20 +7,21 @@ public class ServiceResponse<T> {
   private T data;
   private Meta meta;
 
-  public ServiceResponse() {}
+  public ServiceResponse() {
+    this.meta = Meta.now();
+  }
 
   public ServiceResponse(T data, Meta meta) {
     this.data = data;
-    this.meta = meta;
+    this.meta = (meta != null) ? meta : Meta.now();
   }
 
   public static <T> ServiceResponse<T> of(T data, Meta meta) {
-    Meta effectiveMeta = (meta != null) ? meta : Meta.now();
-    return new ServiceResponse<>(data, effectiveMeta);
+    return new ServiceResponse<>(data, meta);
   }
 
   public static <T> ServiceResponse<T> of(T data) {
-    return new ServiceResponse<>(data, Meta.now());
+    return new ServiceResponse<>(data, null);
   }
 
   public T getData() {
@@ -36,7 +37,7 @@ public class ServiceResponse<T> {
   }
 
   public void setMeta(Meta meta) {
-    this.meta = meta;
+    this.meta = (meta != null) ? meta : Meta.now();
   }
 
   @Override

@@ -6,7 +6,7 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
-    <version>0.7.4</version>
+    <version>0.7.5</version>
     <name>customer-service-client</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
@@ -40,8 +40,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>21</java.version>
 
-        <spring-boot.version>3.5.9</spring-boot.version>
-        <openapi.generator.version>7.18.0</openapi.generator.version>
+        <spring-boot.version>3.5.10</spring-boot.version>
+        <openapi.generator.version>7.19.0</openapi.generator.version>
+        <assertj.version>3.27.7</assertj.version>
 
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
@@ -59,7 +60,7 @@
 
         <openapi.templates.upstream>${project.build.directory}/upstream-templates</openapi.templates.upstream>
         <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
-        <api-contract.version>0.7.4</api-contract.version>
+        <api-contract.version>0.7.5</api-contract.version>
         <argLine/>
     </properties>
 
@@ -109,6 +110,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <version>${spring-boot.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
 

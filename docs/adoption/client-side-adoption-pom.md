@@ -60,8 +60,8 @@ Pin versions for deterministic generation and reproducible builds.
   <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   <java.version>21</java.version>
 
-  <spring-boot.version>3.5.9</spring-boot.version>
-  <openapi.generator.version>7.18.0</openapi.generator.version>
+  <spring-boot.version>3.5.10</spring-boot.version>
+  <openapi.generator.version>7.19.0</openapi.generator.version>
 
   <jakarta.validation.version>3.1.1</jakarta.validation.version>
   <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
@@ -69,7 +69,7 @@ Pin versions for deterministic generation and reproducible builds.
   <httpclient5.version>5.5.2</httpclient5.version>
   <mockwebserver.version>5.3.2</mockwebserver.version>
 
-  <api-contract.version>0.7.4</api-contract.version>
+  <api-contract.version>0.7.5</api-contract.version>
 
   <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
   <build.helper.plugin.version>3.6.1</build.helper.plugin.version>

@@ -43,17 +43,17 @@ public class ApplicationExceptionHandler {
   @ExceptionHandler(NoSuchElementException.class)
   public ProblemDetail handleNotFound(NoSuchElementException ex, HttpServletRequest req) {
     ProblemDetail pd =
-            baseProblem(
-                    type(TYPE_NOT_FOUND),
-                    HttpStatus.NOT_FOUND,
-                    messageResolver.getMessage(KEY_PROBLEM_TITLE_NOT_FOUND),
-                    messageResolver.getMessage(KEY_PROBLEM_DETAIL_NOT_FOUND),
-                    req);
+        baseProblem(
+            type(TYPE_NOT_FOUND),
+            HttpStatus.NOT_FOUND,
+            messageResolver.getMessage(KEY_PROBLEM_TITLE_NOT_FOUND),
+            messageResolver.getMessage(KEY_PROBLEM_DETAIL_NOT_FOUND),
+            req);
 
     String msg =
-            Optional.ofNullable(ex.getMessage())
-                    .filter(s -> !s.isBlank())
-                    .orElseGet(() -> messageResolver.getMessage(KEY_ENDPOINT_RESOURCE_NOT_FOUND));
+        Optional.ofNullable(ex.getMessage())
+            .filter(s -> !s.isBlank())
+            .orElseGet(() -> messageResolver.getMessage(KEY_ENDPOINT_RESOURCE_NOT_FOUND));
 
     if (msg == null || msg.isBlank()) {
       msg = FALLBACK_RESOURCE_NOT_FOUND;
@@ -73,12 +73,12 @@ public class ApplicationExceptionHandler {
     }
 
     ProblemDetail pd =
-            baseProblem(
-                    type(TYPE_INTERNAL_ERROR),
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    messageResolver.getMessage(KEY_PROBLEM_TITLE_INTERNAL_ERROR),
-                    detail,
-                    req);
+        baseProblem(
+            type(TYPE_INTERNAL_ERROR),
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            messageResolver.getMessage(KEY_PROBLEM_TITLE_INTERNAL_ERROR),
+            detail,
+            req);
 
     attachErrors(pd, INTERNAL_ERROR, List.of(error(INTERNAL_ERROR, detail, null, null, null)));
     return pd;
