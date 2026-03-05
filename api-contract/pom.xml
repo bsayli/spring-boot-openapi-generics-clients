@@ -6,7 +6,7 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>api-contract</artifactId>
-    <version>0.7.5</version>
+    <version>0.7.6</version>
 
     <name>api-contract</name>
     <description>Shared API contract for the unified {data, meta} response model and pagination primitives.</description>
@@ -47,7 +47,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson-annotations.version>2.19.4</jackson-annotations.version>
+        <jackson-annotations.version>2.21</jackson-annotations.version>
     </properties>
 
     <dependencies>

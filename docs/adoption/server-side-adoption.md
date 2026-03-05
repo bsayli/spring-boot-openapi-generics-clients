@@ -114,7 +114,7 @@ The goal is clarity: *what you must add*, *why it exists*, and *what you should 
 
 ## 1) Spring Boot Baseline
 
-This guide assumes **Spring Boot 3.5.10** (or another 3.5.x version) using **Spring MVC (WebMVC)**.
+This guide assumes **Spring Boot 3.5.11** (or another 3.5.x version) using **Spring MVC (WebMVC)**.
 
 Using the Spring Boot parent keeps dependency alignment predictable:
 
@@ -122,7 +122,7 @@ Using the Spring Boot parent keeps dependency alignment predictable:
 <parent>
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-starter-parent</artifactId>
-  <version>3.5.10</version>
+  <version>3.5.11</version>
   <relativePath/>
 </parent>
 ```
@@ -140,10 +140,10 @@ Only a small set of properties are required for server-side adoption:
   <java.version>21</java.version>
 
   <!-- OpenAPI publication -->
-  <springdoc-openapi-starter.version>2.8.15</springdoc-openapi-starter.version>
+  <springdoc-openapi-starter.version>2.8.16</springdoc-openapi-starter.version>
 
   <!-- Shared response contract -->
-  <api-contract.version>0.7.5</api-contract.version>
+  <api-contract.version>0.7.6</api-contract.version>
 </properties>
 ```
 

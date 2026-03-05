@@ -2,7 +2,7 @@ package io.github.bsayli.openapi.client.adapter.support;
 
 import io.github.bsayli.openapi.client.generated.dto.ErrorItem;
 import io.github.bsayli.openapi.client.generated.dto.ProblemDetail;
-import io.github.bsayli.openapi.client.generated.dto.ProblemDetailExtensions;
+import io.github.bsayli.openapi.client.generated.dto.ProblemExtensions;
 import java.net.URI;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -117,7 +117,7 @@ final class ProblemDetailFallbacks {
       MediaType contentType,
       Throwable cause) {
 
-    ProblemDetailExtensions ext = new ProblemDetailExtensions();
+    ProblemExtensions ext = new ProblemExtensions();
 
     String ct = contentType != null ? contentType.toString() : "";
     if (!ct.isBlank()) {

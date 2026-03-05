@@ -19,8 +19,14 @@ import org.springframework.context.annotation.Configuration;
 public class GlobalErrorResponsesCustomizer {
 
   private static final String MEDIA_TYPE_PROBLEM_JSON = "application/problem+json";
-  private static final String REF_PROBLEM_DETAIL = "#/components/schemas/" + SCHEMA_PROBLEM_DETAIL;
+
   private static final String SCHEMA_ERROR_ITEM = "ErrorItem";
+  private static final String SCHEMA_PROBLEM_EXTENSIONS = "ProblemExtensions";
+
+  private static final String REF_PROBLEM_DETAIL = "#/components/schemas/" + SCHEMA_PROBLEM_DETAIL;
+  private static final String REF_ERROR_ITEM = "#/components/schemas/" + SCHEMA_ERROR_ITEM;
+  private static final String REF_PROBLEM_EXTENSIONS =
+      "#/components/schemas/" + SCHEMA_PROBLEM_EXTENSIONS;
 
   private static final String STATUS_400 = "400";
   private static final String STATUS_404 = "404";
@@ -38,8 +44,12 @@ public class GlobalErrorResponsesCustomizer {
       var components = openApi.getComponents();
       if (components == null) return;
 
-      ensureErrorItemSchema(components.getSchemas());
-      ensureProblemDetailSchema(components.getSchemas());
+      var schemas = components.getSchemas();
+      if (schemas == null) return;
+
+      ensureErrorItemSchema(schemas);
+      ensureProblemExtensionsSchema(schemas);
+      ensureProblemDetailSchema(schemas);
 
       openApi
           .getPaths()
@@ -82,7 +92,6 @@ public class GlobalErrorResponsesCustomizer {
 
   @SuppressWarnings("rawtypes")
   private void ensureProblemDetailSchema(Map<String, Schema> schemas) {
-    if (schemas == null) return;
     if (schemas.containsKey(SCHEMA_PROBLEM_DETAIL)) return;
 
     ObjectSchema pd = new ObjectSchema();
@@ -114,9 +123,18 @@ public class GlobalErrorResponsesCustomizer {
     errorCode.setDescription("Application-specific error code.");
     pd.addProperty("errorCode", errorCode);
 
-    // extensions.errors[]
+    pd.addProperty("extensions", new Schema<>().$ref(REF_PROBLEM_EXTENSIONS));
+    pd.setAdditionalProperties(Boolean.FALSE);
+
+    schemas.put(SCHEMA_PROBLEM_DETAIL, pd);
+  }
+
+  @SuppressWarnings("rawtypes")
+  private void ensureProblemExtensionsSchema(Map<String, Schema> schemas) {
+    if (schemas.containsKey(SCHEMA_PROBLEM_EXTENSIONS)) return;
+
     ArraySchema errorsArray = new ArraySchema();
-    errorsArray.setItems(new Schema<>().$ref("#/components/schemas/" + SCHEMA_ERROR_ITEM));
+    errorsArray.setItems(new Schema<>().$ref(REF_ERROR_ITEM));
     errorsArray.setDescription("List of error items (field-level or domain-specific).");
 
     ObjectSchema extensions = new ObjectSchema();
@@ -124,16 +142,11 @@ public class GlobalErrorResponsesCustomizer {
     extensions.setDescription("Additional problem metadata.");
     extensions.setAdditionalProperties(Boolean.FALSE);
 
-    pd.addProperty("extensions", extensions);
-
-    pd.setAdditionalProperties(Boolean.FALSE);
-
-    schemas.put(SCHEMA_PROBLEM_DETAIL, pd);
+    schemas.put(SCHEMA_PROBLEM_EXTENSIONS, extensions);
   }
 
   @SuppressWarnings("rawtypes")
   private void ensureErrorItemSchema(Map<String, Schema> schemas) {
-    if (schemas == null) return;
     if (schemas.containsKey(SCHEMA_ERROR_ITEM)) return;
 
     ObjectSchema errorItem = new ObjectSchema();

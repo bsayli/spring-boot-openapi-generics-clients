@@ -6,7 +6,7 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
-    <version>0.7.5</version>
+    <version>0.7.6</version>
     <name>customer-service-client</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
@@ -40,9 +40,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>21</java.version>
 
-        <spring-boot.version>3.5.10</spring-boot.version>
-        <openapi.generator.version>7.19.0</openapi.generator.version>
-        <assertj.version>3.27.7</assertj.version>
+        <spring-boot.version>3.5.11</spring-boot.version>
+        <openapi.generator.version>7.20.0</openapi.generator.version>
 
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
@@ -60,8 +59,11 @@
 
         <openapi.templates.upstream>${project.build.directory}/upstream-templates</openapi.templates.upstream>
         <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
-        <api-contract.version>0.7.5</api-contract.version>
+        <api-contract.version>0.7.6</api-contract.version>
+        <slf4j-api.version>2.0.17</slf4j-api.version>
+        <logback.version>1.5.32</logback.version>
         <argLine/>
+        <jackson.version>2.21.1</jackson.version>
     </properties>
 
     <dependencies>
@@ -114,19 +116,38 @@
         </dependency>
 
         <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>mockwebserver</artifactId>
             <version>${mockwebserver.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <resources>

@@ -2,7 +2,7 @@ package io.github.bsayli.openapi.client.common.problem;
 
 import io.github.bsayli.openapi.client.generated.dto.ErrorItem;
 import io.github.bsayli.openapi.client.generated.dto.ProblemDetail;
-import io.github.bsayli.openapi.client.generated.dto.ProblemDetailExtensions;
+import io.github.bsayli.openapi.client.generated.dto.ProblemExtensions;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
@@ -45,7 +45,7 @@ public final class ApiProblemException extends RuntimeException implements Seria
 
   private static List<ErrorItem> resolveErrors(ProblemDetail pd) {
     if (pd == null) return List.of();
-    ProblemDetailExtensions ext = pd.getExtensions();
+    ProblemExtensions ext = pd.getExtensions();
     if (ext == null) return List.of();
     List<ErrorItem> list = ext.getErrors();
     if (list == null || list.isEmpty()) return List.of();
@@ -70,7 +70,7 @@ public final class ApiProblemException extends RuntimeException implements Seria
   }
 
   private static int countErrors(ProblemDetail pd) {
-    ProblemDetailExtensions ext = pd.getExtensions();
+    ProblemExtensions ext = pd.getExtensions();
     if (ext == null) return 0;
     List<ErrorItem> errors = ext.getErrors();
     return (errors == null) ? 0 : errors.size();
