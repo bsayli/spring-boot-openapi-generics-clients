@@ -143,7 +143,7 @@ Only a small set of properties are required for server-side adoption:
   <springdoc-openapi-starter.version>2.8.16</springdoc-openapi-starter.version>
 
   <!-- Shared response contract -->
-  <api-contract.version>0.7.6</api-contract.version>
+  <api-contract.version>0.7.7</api-contract.version>
 </properties>
 ```
 

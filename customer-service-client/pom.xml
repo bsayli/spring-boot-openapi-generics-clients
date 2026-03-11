@@ -6,7 +6,7 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
-    <version>0.7.6</version>
+    <version>0.7.7</version>
     <name>customer-service-client</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
@@ -50,20 +50,20 @@
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
 
-        <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
-        <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
+        <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
+        <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
-        <spotless-maven-plugin.version>3.1.0</spotless-maven-plugin.version>
-        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
+        <spotless-maven-plugin.version>3.3.0</spotless-maven-plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
 
         <openapi.templates.upstream>${project.build.directory}/upstream-templates</openapi.templates.upstream>
         <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
-        <api-contract.version>0.7.6</api-contract.version>
+        <api-contract.version>0.7.7</api-contract.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
         <logback.version>1.5.32</logback.version>
-        <argLine/>
         <jackson.version>2.21.1</jackson.version>
+        <argLine/>
     </properties>
 
     <dependencies>

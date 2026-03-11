@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>api-contract</artifactId>
-    <version>0.7.6</version>
+    <version>0.7.7</version>
+    <packaging>jar</packaging>
 
     <name>api-contract</name>
     <description>Shared API contract for the unified {data, meta} response model and pagination primitives.</description>
@@ -20,13 +21,6 @@
         </license>
     </licenses>
 
-    <scm>
-        <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
-        <connection>scm:git:https://github.com/bsayli/spring-boot-openapi-generics-clients.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:bsayli/spring-boot-openapi-generics-clients.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
-
     <developers>
         <developer>
             <id>bsayli</id>
@@ -35,28 +29,129 @@
         </developer>
     </developers>
 
+    <scm>
+        <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
+        <connection>scm:git:https://github.com/bsayli/spring-boot-openapi-generics-clients.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:bsayli/spring-boot-openapi-generics-clients.git</developerConnection>
+        <tag>v0.7.7</tag>
+    </scm>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <java.version>21</java.version>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+
+        <jackson-annotations.version>2.21</jackson-annotations.version>
+
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+
+        <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
+        <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+        <gpg.keyname>3F8AA661C1DBE5CD</gpg.keyname>
+
+    </properties>
+
     <distributionManagement>
         <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/bsayli/spring-boot-openapi-generics-clients</url>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://central.sonatype.com/api/v1/publisher</url>
         </repository>
     </distributionManagement>
 
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson-annotations.version>2.21</jackson-annotations.version>
-    </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
             <version>${jackson-annotations.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven-source-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>${maven-gpg-plugin.version}</version>
+
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <keyname>${gpg.keyname}</keyname>
+                    <gpgArguments>
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                    </gpgArguments>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>${central-publishing-maven-plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>false</autoPublish>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

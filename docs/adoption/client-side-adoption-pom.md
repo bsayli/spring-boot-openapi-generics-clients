@@ -69,7 +69,7 @@ Pin versions for deterministic generation and reproducible builds.
   <httpclient5.version>5.5.2</httpclient5.version>
   <mockwebserver.version>5.3.2</mockwebserver.version>
 
-  <api-contract.version>0.7.6</api-contract.version>
+  <api-contract.version>0.7.7</api-contract.version>
 
   <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
   <build.helper.plugin.version>3.6.1</build.helper.plugin.version>

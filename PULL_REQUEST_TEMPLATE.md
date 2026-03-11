@@ -101,7 +101,7 @@ Please confirm the following:
 
 **Type:** `feature` / `bugfix` / `docs` / `refactor` / `chore` / `test` / `ci`
 **Related Issue / Discussion:** (optional) `#number`
-**Target Release:** (optional) e.g. `v0.7.6`
+**Target Release:** (optional) e.g. `v0.7.7`
 
 ---
 

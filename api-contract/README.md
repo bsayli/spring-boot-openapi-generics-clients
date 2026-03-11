@@ -1,260 +1,258 @@
 # api-contract
 
-> **Single source of truth for API response, pagination, and error contracts.**
+> **Canonical API response and pagination contract for server–client ecosystems**
 
-`api-contract` is a **pure contract module** that defines the canonical response and paging model shared by **both server and client**.
+`api-contract` is a **framework-agnostic Java library** that defines a stable,
+reusable response envelope and pagination model for distributed systems.
 
-It intentionally contains **no framework dependencies** (no Spring, no HTTP, no OpenAPI logic) and is designed to be:
+It provides a **single, authoritative contract** that can be shared across:
 
-* stable
-* reusable
-* generator‑friendly
-* language‑agnostic
+* backend services
+* generated API clients
+* integration adapters
+* consumer applications
 
-This module is the **single authoritative contract** that both server and client are built against.
+The goal is simple:
 
----
-
-## 📑 Table of Contents
-
-* 🎯 [Purpose](#-purpose)
-* 🧱 [Core Types](#-core-types)
-  * [ServiceResponse<T>](#serviceresponset)
-  * [Meta](#meta)
-  * [Pagination](#pagination)
-    * [Page<T>](#paget)
-  * [Sorting](#sorting)
-* ⚠️ [Error Contracts (RFC 9457)](#-error-contracts-rfc9457)
-  * [ProblemExtensions](#problemextensions)
-  * [ErrorItem](#erroritem)
-* 🚫 [What This Module Does Not Do](#-what-this-module-does-not-do)
-* 📜 [Contract Guarantees](#-contract-guarantees)
-* 📦 [Dependency Usage](#-dependency-usage)
-* 🔐 [Versioning & Stability](#-versioning--stability)
-* 📄 [License](#-license)
+> Define response semantics **once** and reuse them everywhere.
 
 ---
 
-## 🎯 Purpose
+## 🎯 Why This Library Exists
 
-Modern APIs almost always wrap responses with metadata:
+Modern HTTP APIs almost always wrap payloads with additional metadata:
 
 * timestamps
-* pagination
-* sorting
-* structured errors
+* pagination context
+* sorting information
+* structured error extensions
 
-The problem is not wrapping — the problem is **duplicating those wrappers** across server and client.
+In many systems, these wrappers are:
 
-`api-contract` solves this by providing **one canonical contract** that:
+* duplicated per service
+* re-generated in clients
+* inconsistently evolved over time
 
-* servers **return directly**
-* clients **extend**, never re‑generate
+This leads to:
 
-> There must be **exactly one** definition of the response envelope.
+* schema drift
+* duplicated DTO hierarchies
+* brittle client contracts
+* unclear ownership of response shape
+
+`api-contract` addresses this by introducing a **shared response contract**
+that both producers and consumers can depend on directly.
 
 ---
 
-## 🧱 Core Types
+## 🧠 Design Philosophy
 
-### `ServiceResponse<T>`
+This library follows several explicit architectural principles:
 
-Canonical success envelope used everywhere:
+### Single source of truth
+
+The response envelope is **not generated**, **not copied**, and **not redefined**.
+It is defined once and reused directly.
+
+### Contract before tooling
+
+OpenAPI generators, frameworks, and transport layers are considered
+**implementation concerns**.
+The response model itself is treated as a **domain contract**.
+
+### Framework neutrality
+
+The module intentionally avoids dependencies on:
+
+* Spring / Jakarta / HTTP abstractions
+* OpenAPI annotations
+* serialization frameworks beyond minimal JSON hints
+
+This allows the contract to remain:
+
+* stable
+* portable
+* long-lived
+
+### Predictable evolution
+
+The contract is designed for **additive change**.
+Optional fields may be introduced without forcing ecosystem-wide rewrites.
+
+---
+
+## 🧱 Core Concepts
+
+### Canonical Success Envelope
+
+All successful responses share the same structure:
 
 ```java
-public class ServiceResponse<T> {
-  private T data;
-  private Meta meta;
-}
+ServiceResponse<T>
 ```
 
-Usage:
+This envelope provides:
+
+* a generic payload (`data`)
+* request-level metadata (`meta`)
+
+Example:
 
 ```java
 return ServiceResponse.of(customerDto);
 ```
 
-Key properties:
-
-* Generic payload: `T`
-* Metadata always present (`Meta.now()` by default)
-* No framework annotations
+The metadata component is always initialized and safe to consume.
 
 ---
 
-### `Meta`
+### Response Metadata
 
-Common metadata attached to every successful response.
+`Meta` represents contextual information attached to every response.
+
+Typical use cases include:
+
+* server timestamps
+* sorting descriptors
+* future extensibility points (trace identifiers, locale hints, etc.)
+
+The metadata model is intentionally **minimal and extensible**.
+
+---
+
+### Pagination Contract
+
+`Page<T>` provides a language-agnostic container for paged results.
+
+It standardizes:
+
+* page index
+* page size
+* total element count
+* navigation flags
+
+This library explicitly recognizes the common nested response shape:
 
 ```java
-public record Meta(
-    Instant serverTime,
-    List<Sort> sort
-) {}
+ServiceResponse<Page<T>>
 ```
 
-Design goals:
+Other nested generic combinations remain outside the contract’s guarantees.
 
-* request‑level context
-* extensible without breaking clients
-* deterministic serialization
+This scoped approach helps maintain:
+
+* deterministic schema modeling
+* generator-safe evolution
+* predictable client typing
 
 ---
 
-### Pagination
+### Sorting Descriptor
 
-#### `Page<T>`
-
-Language‑agnostic pagination container:
+Sorting information is modeled as a simple value object:
 
 ```java
-public record Page<T>(
-    List<T> content,
-    int page,
-    int size,
-    long totalElements,
-    int totalPages,
-    boolean hasNext,
-    boolean hasPrev
-) {}
+Sort(field, direction)
 ```
 
-Important rule:
-
-> **The only supported nested generic is:**
->
-> ```java
-> ServiceResponse<Page<T>>
-> ```
-
-This constraint is intentional and guarantees deterministic OpenAPI schemas and client generation.
+This avoids framework-specific pagination constructs while preserving intent.
 
 ---
 
-### Sorting
+### Error Extensions (RFC 9457)
 
-```java
-public record Sort(String field, SortDirection direction) {}
-```
+The library provides structured extension types intended to be embedded
+inside `application/problem+json` responses.
 
-```java
-public enum SortDirection {
-  ASC, DESC
-}
-```
+These include:
 
-Used exclusively inside `Meta`.
+* `ProblemExtensions`
+* `ErrorItem`
 
----
+They are designed to be:
 
-## ⚠️ Error Contracts (RFC 9457)
+* forward-compatible
+* transport-agnostic
+* safe for cross-service reuse
 
-### `ProblemExtensions`
-
-Optional extension container for `application/problem+json`:
-
-```java
-public record ProblemExtensions(
-    List<ErrorItem> errors
-) {}
-```
-
-### `ErrorItem`
-
-```java
-public record ErrorItem(
-    String code,
-    String message,
-    String field,
-    String resource,
-    String id
-) {}
-```
-
-Design principles:
-
-* fully RFC 9457‑compatible
-* additive and forward‑compatible
-* no transport or framework coupling
+The library does **not** implement HTTP error handling itself.
 
 ---
 
-## 🚫 What This Module Does **Not** Do
+## 🚫 Explicit Non-Goals
 
-This module intentionally does **not**:
+`api-contract` deliberately does **not**:
 
-* depend on Spring or Spring Boot
-* publish OpenAPI schemas
-* perform validation or HTTP mapping
-* contain controllers or adapters
-* generate client code
+* publish OpenAPI specifications
+* implement HTTP controllers or filters
+* perform validation logic
+* generate client SDKs
+* enforce transport-layer policies
 
-Those concerns belong to **other modules**.
-
----
-
-## 📜 Contract Guarantees
-
-`api-contract` provides the **canonical domain types** for successful responses, paging metadata, and RFC 9457-compatible error extensions.
-
-It guarantees:
-
-1. **Canonical success envelope**  
-   `ServiceResponse<T>` is the single, shared success shape used across server and client code.
-
-2. **Shared type ownership**  
-   The envelope, paging, and error extension types are defined **once** in this module and **reused directly** (not redefined per service or per client).
-
-3. **Explicit scope for nested generics**  
-   The contract explicitly defines `Page<T>` as the standard paging container and recognizes the common success shape  
-   `ServiceResponse<Page<T>>`.  
-   Any other generic compositions (e.g., `List<T>`, `Map<K,V>`, arbitrary nesting) are **out of scope** for contract guarantees.
-
-4. **Forward-compatible evolution**  
-   The contract is designed for additive evolution (e.g., adding optional fields) without forcing widespread rewrites across consumers.
-
-These guarantees describe **what the contract means and covers**, not how it is published or consumed.
+Those responsibilities belong to higher-level modules or frameworks.
 
 ---
 
-## 📦 Dependency Usage
-
-Add to both server and client modules:
+## 📦 Dependency
 
 ```xml
 <dependency>
   <groupId>io.github.bsayli</groupId>
   <artifactId>api-contract</artifactId>
-  <version>0.7.6</version>
+  <version>0.7.7</version>
 </dependency>
 ```
 
-Scope recommendations:
+Typical usage:
 
-* **server**: `compile`
-* **client**: `compile` or `provided` (depending on packaging)
-
----
-
-## 🔐 Versioning & Stability
-
-* This project is **pre‑1.0**
-* Contracts may evolve, but:
-
-    * changes are intentional
-    * documented
-    * reflected across server & client
-
-Always upgrade **all modules together**.
+* **service modules** → compile scope
+* **generated clients** → compile or provided scope
 
 ---
 
-## 📄 License
+## 🔐 Versioning Strategy
+
+This project is currently **pre-1.0**.
+
+This implies:
+
+* APIs may evolve
+* binary compatibility is considered but not strictly guaranteed
+* contract changes are intentional and documented
+
+When upgrading, it is recommended to:
+
+> Align server and client modules to the same contract version.
+
+---
+
+## 🧩 Intended Usage Contexts
+
+This library is particularly useful in systems that must share a **single, stable response contract across server and generated clients**.
+
+Especially when server and generated clients must share the same response semantics.
+
+Typical scenarios include systems that:
+
+* expose typed REST APIs
+* rely on OpenAPI-driven client generation
+* maintain multiple consumer services
+* aim to minimize contract duplication
+* treat response structure as a long-term architectural decision
+
+It can also be adopted incrementally in existing codebases.
+
+---
+
+## 📜 License
 
 MIT License.
 
-This module defines **contracts**, not behavior.
-Once published, those contracts become promises.
+This library defines **contracts, not runtime behavior**.
+Once adopted, these contracts become part of your system’s public surface.
 
-> **Architecture starts with contracts.**
-> `api-contract` is where that promise lives.
+---
+
+**Maintained by:**
+**Barış Saylı**
+[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)
