@@ -1,12 +1,16 @@
-package io.github.bsayli.openapi.client.adapter.impl;
+package io.github.bsayli.customerservice.client.adapter.impl;
 
 import io.github.bsayli.apicontract.envelope.ServiceResponse;
 import io.github.bsayli.apicontract.paging.Page;
 import io.github.bsayli.apicontract.paging.SortDirection;
-import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
-import io.github.bsayli.openapi.client.customer.CustomerSortField;
-import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
-import io.github.bsayli.openapi.client.generated.dto.*;
+import io.github.bsayli.customerservice.client.adapter.CustomerClientAdapter;
+import io.github.bsayli.customerservice.client.customer.CustomerSortField;
+import io.github.bsayli.customerservice.client.generated.api.CustomerControllerApi;
+import io.github.bsayli.customerservice.client.generated.dto.*;
+import io.github.bsayli.customerservice.client.generated.dto.CustomerCreateRequest;
+import io.github.bsayli.customerservice.client.generated.dto.CustomerDeleteResponse;
+import io.github.bsayli.customerservice.client.generated.dto.CustomerDto;
+import io.github.bsayli.customerservice.client.generated.dto.CustomerUpdateRequest;
 import org.springframework.stereotype.Service;
 
 @Service

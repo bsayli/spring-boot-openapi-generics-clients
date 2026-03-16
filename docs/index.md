@@ -73,7 +73,7 @@ All **successful responses** — on **both server and client** — use the same 
 
 Provided by the shared module:
 
-`io.github.bsayli:api-contract`
+`io.github.bsayli:api-contract:0.7.7`
 
 This module defines the **only** envelope, paging, and metadata types used across the system.
 
@@ -197,18 +197,19 @@ Exact versions are pinned in the respective adoption guides to ensure reproducib
 ## 📚 Adoption Guides
 
 - **[Server-Side Adoption](adoption/server-side-adoption.md)** — Publish a deterministic, generics-aware OpenAPI 3.1 contract.
-- **[Client-Side Adoption](adoption/client-side-adoption.md)** — Configure Maven + OpenAPI Generator + Mustache overlays.
+- **[Client-Side Adoption](adoption/client-side-adoption.md)** — Integrate a generics-aware client using the shared canonical contract.
+  - **[Client-Side Build Setup](adoption/client-side-adoption-pom.md)** — Configure Maven, OpenAPI Generator, template overlays, and shared contract bindings.
 
-Use these guides to integrate the pattern step‑by‑step:
+Use these guides to adopt the pattern step by step:
 
-* **Server‑Side Adoption**
-  How to expose `ServiceResponse<T>` and publish a deterministic, generics‑aware OpenAPI contract.
+* **Server-Side Adoption**  
+  How to expose `ServiceResponse<T>` and publish a deterministic, generics-aware OpenAPI contract.
 
-* **Client‑Side Adoption — Build Setup**
-  How to configure Maven, generator plugins, and Mustache overlays.
+* **Client-Side Adoption**  
+  How to integrate the generated client into your application using shared contract semantics, RFC 9457 handling, and adapter boundaries.
 
-* **Client‑Side Adoption — Integration**
-  How to consume the generated client safely using adapters and RFC 9457 handling.
+  * **Client-Side Build Setup**  
+    How to configure Maven plugins, dependencies, OpenAPI Generator, and Mustache overlays so generation stays deterministic and does not duplicate shared contract models.
 
 Each guide is **domain-agnostic** and focuses on the integration approach rather than concrete domain examples.
 
@@ -224,8 +225,6 @@ This approach is built around a small set of clear, intentional design outcomes:
 - A clearly defined scope for generics (pagination via `Page<T>`)
 - RFC 9457–based error modeling as a first-class concern
 - Client generation that remains stable as the API evolves
-
-This is not a tutorial example or a framework experiment.
 
 It is a **reference implementation** for teams who care about
 API clarity, long-term maintainability, and keeping server and client

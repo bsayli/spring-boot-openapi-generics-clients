@@ -1,4 +1,4 @@
-package io.github.bsayli.openapi.client.customer;
+package io.github.bsayli.customerservice.client.customer;
 
 public enum CustomerSortField {
   CUSTOMER_ID("customerId"),

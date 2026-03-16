@@ -65,24 +65,24 @@ Pin versions for deterministic generation and reproducible builds.
 
   <jakarta.validation.version>3.1.1</jakarta.validation.version>
   <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
-
-  <httpclient5.version>5.5.2</httpclient5.version>
   <mockwebserver.version>5.3.2</mockwebserver.version>
-
-  <api-contract.version>0.7.7</api-contract.version>
-
+  <httpclient5.version>5.5.2</httpclient5.version>
   <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
   <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
 
-  <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
-  <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
+  <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
+  <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
   <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
-  <spotless-maven-plugin.version>3.1.0</spotless-maven-plugin.version>
-  <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
-  <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
+  <spotless-maven-plugin.version>3.3.0</spotless-maven-plugin.version>
+  <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+  <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
 
   <openapi.templates.upstream>${project.build.directory}/upstream-templates</openapi.templates.upstream>
   <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
+  <api-contract.version>0.7.7</api-contract.version>
+  <slf4j-api.version>2.0.17</slf4j-api.version>
+  <logback.version>1.5.32</logback.version>
+  <jackson.version>2.21.1</jackson.version>
 
   <argLine/>
 </properties>
@@ -478,7 +478,7 @@ Relevant extensions:
 
 ### Design scope for generics
 
-Only one nested generic shape is treated as contract-aware:
+Exactly one nested generic shape is intentionally treated as contract-aware:
 
 ```java
 ServiceResponse<Page<T>>
@@ -532,11 +532,13 @@ Confirm that:
 * No duplicated contract DTOs are present in generated output
   *(assuming `.openapi-generator-ignore` is correctly configured)*
 
-If any of the following appear, the setup is **misaligned**:
+If any of the following symptoms appear, the client setup is **contract-misaligned**:
 
 * Locally generated `ServiceResponse`, `Meta`, or `Page` classes
-* Wrapper models that do **not** extend the shared contract
-* Multiple envelope implementations across modules
+* Wrapper models that do **not** extend the shared canonical contract
+* Multiple response-envelope implementations across modules
+
+Such symptoms typically indicate **contract drift** between the published OpenAPI specification and the effective client generation configuration.
 
 ---
 

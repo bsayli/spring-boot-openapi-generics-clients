@@ -124,27 +124,26 @@ public class ServiceResponsePageCustomerDto extends ServiceResponse<Page<Custome
 
 ## 🚀 How to Run
 
-This service depends on the shared **`api-contract`** module. The easiest and safest way to run it locally is via the **root aggregator build**, which guarantees all modules are compiled and resolved correctly.
-
-> ⚠️ Running `customer-service` in isolation may fail if `api-contract` is not already installed in your local Maven repository.
+`customer-service` depends on the shared **`api-contract`** library, which is now **published to Maven Central**.
+This means the service can be built and run **independently**, without requiring a full repository build.
 
 ---
 
-### ✅ Recommended (from repo root)
+### ✅ Recommended (module‑only)
+
+Build and run the service directly from its module directory:
 
 ```bash
-# Build all modules (api-contract, customer-service, client)
-mvn -q clean package
-
-# Run the service
-java -jar customer-service/target/customer-service-*.jar
+cd customer-service
+mvn clean package
+java -jar target/customer-service-*.jar
 ```
 
-This ensures:
+This approach:
 
-* `api-contract` is built and available
-* no missing dependencies at runtime
-* consistent behavior with CI
+* Resolves `api-contract` automatically from Maven Central
+* Matches real‑world consumer usage (service as a standalone artifact)
+* Keeps local development workflow simple and fast
 
 The service starts at:
 
@@ -154,28 +153,31 @@ http://localhost:8084/customer-service
 
 ---
 
-### ⚙️ Alternative (module-only, if api-contract is already installed)
+### 🧪 Optional (full repository build)
 
-Use this **only if** you have already run a full build once or installed `api-contract` locally:
+If you want to verify the **entire multi‑module repository** (for example before pushing changes or running CI‑like validation), you can still build from the root:
 
 ```bash
-cd customer-service
-mvn clean package
-java -jar target/customer-service-*.jar
+mvn -q clean package
+java -jar customer-service/target/customer-service-*.jar
 ```
+
+This is useful for:
+
+* validating cross‑module compatibility
+* running the full test suite
+* ensuring deterministic CI parity
+
+However, it is **not required** for normal local development.
 
 ---
 
 ### 🐳 Run with Docker
 
-> `customer-service` depends on the shared `api-contract` module.
-> The Docker build uses the **repository root** as the build context to ensure all modules are compiled deterministically.
-
----
+The Docker image builds and runs **only the `customer-service` module**.
+Dependencies such as `api-contract` are resolved from Maven Central during the image build.
 
 #### Using Docker Compose (recommended)
-
-Run from the `customer-service` directory:
 
 ```bash
 cd customer-service
@@ -190,15 +192,15 @@ docker compose down
 
 This setup:
 
-* Uses the repository root (`..`) as the build context
-* Builds `api-contract` and `customer-service` together
-* Produces a self-contained runtime image for `customer-service`
+* Builds a self‑contained runtime image for `customer-service`
+* Does not require building other modules locally
+* Mirrors a realistic deployment pipeline
 
 ---
 
 #### Using plain Docker (manual)
 
-Run the build from the **repository root** so the build context includes all required modules:
+Build the image from the repository root (or any context that contains the module sources):
 
 ```bash
 docker build -t customer-service:latest \
@@ -210,9 +212,7 @@ Run the container:
 
 ```bash
 docker run --rm -p 8084:8084 \
-  -e APP_PORT=8084 \
   -e SPRING_PROFILES_ACTIVE=local \
-  -e JAVA_OPTS= \
   customer-service:latest
 ```
 
@@ -220,26 +220,12 @@ docker run --rm -p 8084:8084 \
 
 ## Notes
 
-* You **do not** need to run `mvn package` locally when using Docker — the multi-stage Dockerfile handles the build.
+* `api-contract` is resolved as a **regular external dependency**.
+* No local Maven installation or multi‑module pre‑build is required.
+* Docker builds perform a clean Maven package step inside the container.
+* Port `8084` is exposed by default and matches the local JVM runtime configuration.
 
-* The Dockerfile intentionally runs Maven with:
-
-  ```bash
-  mvn -q -DskipTests -ntp clean package -pl customer-service -am
-  ```
-
-  This guarantees:
-
-  * `api-contract` is built first
-  * `customer-service` is packaged with correct dependencies
-  * No reliance on local Maven state
-
-* Port `8084` is exposed by default and matches the local JVM setup.
-
----
-
-If Docker works but local JVM does not, the issue is almost always a missing `api-contract` build — use the **root aggregator build** for local runs.
-
+If Docker runs successfully but a local JVM run fails, the issue is most likely unrelated to dependency resolution (for example environment variables or local configuration differences).
 
 ---
 

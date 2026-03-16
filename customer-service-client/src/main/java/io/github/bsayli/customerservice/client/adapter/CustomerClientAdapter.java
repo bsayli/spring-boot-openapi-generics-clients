@@ -1,13 +1,13 @@
-package io.github.bsayli.openapi.client.adapter;
+package io.github.bsayli.customerservice.client.adapter;
 
 import io.github.bsayli.apicontract.envelope.ServiceResponse;
 import io.github.bsayli.apicontract.paging.Page;
 import io.github.bsayli.apicontract.paging.SortDirection;
-import io.github.bsayli.openapi.client.customer.CustomerSortField;
-import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
-import io.github.bsayli.openapi.client.generated.dto.CustomerDeleteResponse;
-import io.github.bsayli.openapi.client.generated.dto.CustomerDto;
-import io.github.bsayli.openapi.client.generated.dto.CustomerUpdateRequest;
+import io.github.bsayli.customerservice.client.customer.CustomerSortField;
+import io.github.bsayli.customerservice.client.generated.dto.CustomerCreateRequest;
+import io.github.bsayli.customerservice.client.generated.dto.CustomerDeleteResponse;
+import io.github.bsayli.customerservice.client.generated.dto.CustomerDto;
+import io.github.bsayli.customerservice.client.generated.dto.CustomerUpdateRequest;
 
 public interface CustomerClientAdapter {
 

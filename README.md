@@ -54,54 +54,50 @@ The result is a **deterministic, type‑safe API boundary** with **Page‑aware 
 
 ## 📦 Modules
 
-* **[api-contract](api-contract/README.md)**  
-  Shared, framework-agnostic API contract defining the canonical `{ data, meta }` response model,  
-  pagination primitives, and RFC 9457 error extensions.  
-  This module is the **single source of truth** shared by both server and client.
+* **[api-contract](api-contract/README.md)**
+  Shared, framework-agnostic API contract defining the canonical `{ data, meta }` response model,
+  pagination primitives, and RFC 9457 error extensions.
+  This module is published to **Maven Central** and serves as the **single source of truth** shared by both server and client.
 
-* **[customer-service](customer-service/README.md)**  
-  Spring Boot API producer exposing a deterministic **OpenAPI 3.1** specification enriched with  
+* **[customer-service](customer-service/README.md)**
+  Spring Boot API producer exposing a deterministic **OpenAPI 3.1** specification enriched with
   generics semantics (`ServiceResponse<T>`, `ServiceResponse<Page<T>>`).
 
-* **[customer-service-client](customer-service-client/README.md)**  
-  Generated Java client that **reuses the canonical contract** and preserves generics  
+* **[customer-service-client](customer-service-client/README.md)**
+  Generated Java client that **reuses the canonical contract** and preserves generics
   without duplicating envelopes or paging models.
 
 ---
 
 ## ⚡ Quick Start
 
-This repository uses an **aggregator (root) build** to guarantee that the shared **`api-contract`** module is always available to both the server and the client.
-For first-time users, **start from the repo root**.
+The shared `api-contract` module is published to Maven Central as `0.7.7`,
+so individual modules can now be built and run independently without requiring
+a root-level bootstrap step just to make the contract available locally.
 
 ---
 
-### ✅ Option A — Recommended (Deterministic, First-Time Setup)
+### ✅ Option A — Recommended for Normal Use
 
-This is the **canonical way** to get everything running after cloning the repository.
-It installs `api-contract` locally and builds all modules in the correct order.
+Build and run modules directly in their own scope:
 
 ```bash
-# 1) Build everything once from the repo root
-mvn -q -ntp clean install
-
-# 2) Run the backend service
-cd customer-service && mvn -q -ntp spring-boot:run
+cd customer-service
+mvn -q -ntp clean package
+java -jar target/customer-service-*.jar
 ```
 
-At this point:
+This works because:
 
-* `api-contract` is installed into your local Maven repository
-* `customer-service` is running
-* `customer-service-client` has been generated and compiled
-
-No additional setup is required.
+* `api-contract:0.7.7` is resolved directly from Maven Central
+* no prior local installation step is required
+* the service can now be treated like a normal standalone module
 
 ---
 
 ### 🔄 Option B — Regenerate the Client from the Live OpenAPI Spec
 
-Use this flow **only when you change the server contract** and want to regenerate
+Use this flow when you change the server contract and want to regenerate
 client wrappers from the live OpenAPI definition.
 
 ```bash
@@ -117,7 +113,7 @@ curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
 mvn -q -ntp clean install
 ```
 
-This regenerates **thin wrappers** extending the canonical contract:
+This regenerates thin wrappers extending the canonical contract:
 
 ```java
 ServiceResponse<T>
@@ -130,27 +126,28 @@ ServiceResponse<Page<T>>
 
 Generated client sources are written to:
 
-```
+```text
 customer-service-client/target/generated-sources/openapi/src/gen/java
 ```
 
-They are **automatically added to compilation** via `build-helper-maven-plugin`.
+They are automatically added to compilation via `build-helper-maven-plugin`.
 
 ---
 
 ### 📝 Notes
 
-* You do **not** need to manually build or install `api-contract`.
-  The root build handles this by design.
-* If you skip the root build and run the client directly, the build may fail
-  because `api-contract` is not yet available.
-* For CI and local parity, all commands use `-ntp` (no transfer progress).
+* You do **not** need to manually install `api-contract` locally.
+* The shared contract is consumed as **`io.github.bsayli:api-contract:0.7.7`** from Maven Central.
+* Root-level builds are still useful for full repository verification, but they are no longer required just to make the contract resolvable.
+* For CI and local parity, commands use `-ntp` (no transfer progress).
 
 ---
 
 > **Rule of thumb:**
-> - If you just cloned the repo → **build from root**
-> - If you changed the API contract → **regenerate the client**
+>
+> * If you want to run or build a module normally → **run it directly**
+> * If you changed the published API contract surface → **regenerate the client**
+> * If you want full repository verification → **build from root**
 
 ---
 
@@ -187,8 +184,9 @@ This scales poorly and makes contract evolution painful.
 
 ---
 
-> **Background:** The rationale behind the canonical `ServiceResponse<T>` contract is explained here (updated Jan 2026):  
+> **Background:** The rationale behind the canonical `ServiceResponse<T>` contract is explained here (updated Jan 2026):
 > [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+
 ---
 
 ## 💡 The Core Idea
@@ -217,28 +215,29 @@ ServiceResponse<T>
 
 Provided by the shared module:
 
-```
-io.github.bsayli:api-contract
+```text
+io.github.bsayli:api-contract:0.7.7
 ```
 
 ### Supported Shapes
 
 | Shape                      | Supported | Notes                                               |
 | -------------------------- | --------- | --------------------------------------------------- |
-| `ServiceResponse<T>`       | ✅        | Canonical success envelope (guaranteed)             |
-| `ServiceResponse<Page<T>>` | ✅        | **Guaranteed nested generic**                       |
+| `ServiceResponse<T>`       | ✅         | Canonical success envelope (guaranteed)             |
+| `ServiceResponse<Page<T>>` | ✅         | **Guaranteed nested generic**                       |
 | `ServiceResponse<List<T>>` | ⚠️        | Uses OpenAPI Generator default behavior (unchanged) |
-| Arbitrary nested generics  | ❌        | Outside the supported contract                      |
+| Arbitrary nested generics  | ❌         | Outside the supported contract                      |
 
 This implementation **does not alter or restrict** OpenAPI Generator’s default handling
 of standard collection types such as `List<T>`.
 
-It **defines explicit guarantees only** for:
-- `ServiceResponse<T>`
-- `ServiceResponse<Page<T>>`
+It defines explicit guarantees only for:
+
+* `ServiceResponse<T>`
+* `ServiceResponse<Page<T>>`
 
 All other shapes follow the generator’s default behavior and are intentionally kept
-**outside the canonical contract** to preserve deterministic schemas and
+outside the canonical contract to preserve deterministic schemas and
 generator-safe evolution.
 
 ---
@@ -292,8 +291,9 @@ generator-safe evolution.
 
 > **Key principle**
 >
-> The OpenAPI specification is the *single source of truth*.  
-> Generated code is disposable; contracts are not.
+> The shared contract library defines the runtime source of truth.  
+> The OpenAPI specification provides a semantic contract projection used for client generation.  
+> Generated sources are treated as build artifacts aligned with the published contract.
 
 ---
 
@@ -352,17 +352,21 @@ No duplicated envelope. No lost generics.
 
 ## 🧠 Design Guarantees
 
-This repository guarantees:
+This repository focuses on a **contract-driven approach** for building
+type-safe API boundaries across server and client.
 
-* **One shared response contract** across server and client
-* **No duplicated envelopes** in generated clients
-* **Page-only nested generics** (`ServiceResponse<Page<T>>`)
-* **Deterministic schema names** for the guaranteed shapes
-* **RFC 9457-first error handling** (Problem Details)
-* **Generator-safe evolution** through minimal, explicit template overlays
+It provides:
 
-This is not a demo.  
-It is a **reference implementation**.
+* A **single shared response contract** reused on both producer and consumer sides
+* **No envelope duplication** in generated client models
+* Explicit support for **nested pagination generics** (`ServiceResponse<Page<T>>`)
+* **Deterministic and stable schema naming** for supported response shapes
+* **RFC 9457-compliant error handling** based on Problem Details
+* **Generator-safe evolution** via minimal and explicit template overlays
+
+The implementation demonstrates a practical setup where
+OpenAPI acts as a **semantic contract bridge**, while shared models
+remain the primary source of runtime truth.
 
 ---
 
@@ -390,7 +394,9 @@ Step-by-step integration guides live under [`docs/adoption`](docs/adoption):
 
 ## 🤝 Contributing & Feedback
 
-This repository is a **reference implementation**, not a closed framework.
+This repository presents a contract-driven reference setup
+for building type-safe API boundaries with shared response models
+and generics-aware client generation.
 
 If you:
 

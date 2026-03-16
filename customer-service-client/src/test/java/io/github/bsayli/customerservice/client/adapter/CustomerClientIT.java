@@ -1,12 +1,12 @@
-package io.github.bsayli.openapi.client.adapter;
+package io.github.bsayli.customerservice.client.adapter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.bsayli.openapi.client.adapter.config.CustomerApiClientConfig;
-import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
-import io.github.bsayli.openapi.client.generated.dto.CustomerCreateRequest;
-import io.github.bsayli.openapi.client.generated.dto.CustomerUpdateRequest;
+import io.github.bsayli.customerservice.client.adapter.config.CustomerApiClientConfig;
+import io.github.bsayli.customerservice.client.generated.api.CustomerControllerApi;
+import io.github.bsayli.customerservice.client.generated.dto.CustomerCreateRequest;
+import io.github.bsayli.customerservice.client.generated.dto.CustomerUpdateRequest;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.client.RestClient;
 
@@ -131,7 +132,7 @@ class CustomerClientIT {
     assertNotNull(resp);
     assertNotNull(resp.getData());
 
-    var page = resp.getData(); // this is io.github.bsayli.openapi.client.common.Page<CustomerDto>
+    var page = resp.getData();
     assertEquals(0, page.page());
     assertEquals(5, page.size());
     assertEquals(2L, page.totalElements());
@@ -213,7 +214,7 @@ class CustomerClientIT {
 
     @Bean
     ObjectMapper objectMapper() {
-      return new ObjectMapper();
+      return Jackson2ObjectMapperBuilder.json().build();
     }
   }
 }

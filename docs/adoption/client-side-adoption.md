@@ -17,7 +17,7 @@ The examples intentionally avoid concrete domain names (like `Customer`) and foc
 * Nested generics: **supported only for** **`ServiceResponse<Page<T>>`**
 * Errors: **RFC 9457** `ProblemDetail`, decoded and raised as **`ApiProblemException`**
 
-> Scope: Spring MVC (WebMVC) consumers + OpenAPI Generator `java` (`restclient`) + Spring `RestClient`.
+> Scope: Spring MVC (WebMVC) applications using OpenAPI Generator `java` (`restclient`) and Spring `RestClient`.
 
 ---
 
@@ -116,7 +116,9 @@ ServiceResponsePageFooDto extends ServiceResponse<Page<FooDto>>
 
 ## 🧹 Avoid Duplicated Contracts
 
-Because **both server and client depend on `api-contract`**, OpenAPI Generator must not re‑generate the same DTOs.
+Because both server and client rely on the shared `api-contract`,
+generated client models must be configured to reuse these canonical types
+instead of producing parallel DTO implementations.
 
 Add the following to `.openapi-generator-ignore`:
 

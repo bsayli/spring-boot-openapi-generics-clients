@@ -1,11 +1,10 @@
-package io.github.bsayli.openapi.client.adapter.config;
+package io.github.bsayli.customerservice.client.adapter.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.bsayli.openapi.client.adapter.support.ProblemDetailSupport;
-import io.github.bsayli.openapi.client.common.problem.ApiProblemException;
-import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
-import io.github.bsayli.openapi.client.generated.dto.ProblemDetail;
-import io.github.bsayli.openapi.client.generated.invoker.ApiClient;
+import io.github.bsayli.customerservice.client.adapter.support.ProblemDetailSupport;
+import io.github.bsayli.customerservice.client.common.problem.ApiProblemException;
+import io.github.bsayli.customerservice.client.generated.api.CustomerControllerApi;
+import io.github.bsayli.customerservice.client.generated.invoker.ApiClient;
 import java.util.List;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
@@ -19,6 +18,7 @@ import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 

@@ -13,7 +13,7 @@
 
         <groupId>io.github.bsayli</groupId>
         <artifactId>customer-service</artifactId>
-        <version>0.7.7</version>
+        <version>0.7.8</version>
         <name>customer-service</name>
         <description>Spring Boot 3.5 + Springdoc (OpenAPI) for generics-aware client generation</description>
         <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>

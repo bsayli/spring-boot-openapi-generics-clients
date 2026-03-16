@@ -1,4 +1,4 @@
-package io.github.bsayli.openapi.client.adapter.impl;
+package io.github.bsayli.customerservice.client.adapter.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -8,10 +8,10 @@ import io.github.bsayli.apicontract.envelope.Meta;
 import io.github.bsayli.apicontract.envelope.ServiceResponse;
 import io.github.bsayli.apicontract.paging.Page;
 import io.github.bsayli.apicontract.paging.SortDirection;
-import io.github.bsayli.openapi.client.adapter.CustomerClientAdapter;
-import io.github.bsayli.openapi.client.customer.CustomerSortField;
-import io.github.bsayli.openapi.client.generated.api.CustomerControllerApi;
-import io.github.bsayli.openapi.client.generated.dto.*;
+import io.github.bsayli.customerservice.client.adapter.CustomerClientAdapter;
+import io.github.bsayli.customerservice.client.customer.CustomerSortField;
+import io.github.bsayli.customerservice.client.generated.api.CustomerControllerApi;
+import io.github.bsayli.customerservice.client.generated.dto.*;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

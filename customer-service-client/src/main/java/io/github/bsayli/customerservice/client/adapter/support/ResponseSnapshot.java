@@ -1,4 +1,4 @@
-package io.github.bsayli.openapi.client.adapter.support;
+package io.github.bsayli.customerservice.client.adapter.support;
 
 import java.io.IOException;
 import java.io.InputStream;

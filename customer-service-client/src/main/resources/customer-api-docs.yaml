@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Customer Service API
   description: Customer Service API with type-safe generic responses using OpenAPI
-  version: 0.7.7
+  version: 0.7.8
 servers:
   - url: http://localhost:8084/customer-service
     description: Local service URL
@@ -27,30 +27,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseCustomerDto"
-        "400":
-          description: Bad Request
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "405":
-          description: Method Not Allowed
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "500":
-          description: Internal Server Error
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
     put:
       tags:
         - customer-controller
@@ -76,30 +52,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseCustomerDto"
-        "400":
-          description: Bad Request
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "405":
-          description: Method Not Allowed
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "500":
-          description: Internal Server Error
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
     delete:
       tags:
         - customer-controller
@@ -119,30 +71,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseCustomerDeleteResponse"
-        "400":
-          description: Bad Request
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "405":
-          description: Method Not Allowed
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "500":
-          description: Internal Server Error
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
   /v1/customers:
     get:
       tags:
@@ -202,30 +130,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponsePageCustomerDto"
-        "400":
-          description: Bad Request
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "405":
-          description: Method Not Allowed
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "500":
-          description: Internal Server Error
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
     post:
       tags:
         - customer-controller
@@ -243,30 +147,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseCustomerDto"
-        "400":
-          description: Bad Request
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "405":
-          description: Method Not Allowed
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-        "500":
-          description: Internal Server Error
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
 components:
   schemas:
     CustomerUpdateRequest:
@@ -385,66 +265,6 @@ components:
               $ref: "#/components/schemas/CustomerDeleteResponse"
       x-api-wrapper: true
       x-api-wrapper-datatype: CustomerDeleteResponse
-    ErrorItem:
-      type: object
-      additionalProperties: false
-      description: Standard error item structure.
-      properties:
-        code:
-          type: string
-          description: Short application-specific error code.
-        message:
-          type: string
-          description: Human-readable error message.
-        field:
-          type: string
-          description: Field name when error is field-specific.
-        resource:
-          type: string
-          description: Domain resource name if applicable.
-        id:
-          type: string
-          description: Resource identifier if applicable.
-      required:
-        - code
-        - message
-    ProblemExtensions:
-      type: object
-      additionalProperties: false
-      description: Additional problem metadata.
-      properties:
-        errors:
-          type: array
-          description: List of error items (field-level or domain-specific).
-          items:
-            $ref: "#/components/schemas/ErrorItem"
-    ProblemDetail:
-      type: object
-      additionalProperties: false
-      properties:
-        type:
-          type: string
-          format: uri
-          description: Problem type as a URI.
-        title:
-          type: string
-          description: "Short, human-readable summary of the problem type."
-        status:
-          type: integer
-          format: int32
-          description: HTTP status code for this problem.
-        detail:
-          type: string
-          description: Human-readable explanation specific to this occurrence.
-        instance:
-          type: string
-          format: uri
-          description: URI that identifies this specific occurrence.
-        errorCode:
-          type: string
-          description: Application-specific error code.
-        extensions:
-          $ref: "#/components/schemas/ProblemExtensions"
     ServiceResponse:
       type: object
       properties:

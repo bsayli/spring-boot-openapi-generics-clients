@@ -34,9 +34,7 @@ The intent is not to dump all implementation details here. It’s to make the ad
     * [ApiResponseSchemaFactory](#apiresponseschemafactory)
   * [5) Registering wrappers into the OpenAPI components](#5-registering-wrappers-into-the-openapi-components)
     * [AutoWrapperSchemaCustomizer](#autowrapperschemacustomizer)
-  * [6) Publishing error responses consistently](#6-publishing-error-responses-consistently)
-    * [GlobalErrorResponsesCustomizer](#globalerrorresponsescustomizer)
-  * [7) Deterministic Naming (How to think about schema names)](#7-deterministic-naming-how-to-think-about-schema-names)
+  * [6) Deterministic Naming (How to think about schema names)](#7-deterministic-naming-how-to-think-about-schema-names)
     * [Data schema reference name](#data-schema-reference-name)
     * [Wrapper schema name](#wrapper-schema-name)
 * [🧭 Suggested Package Layout](#-suggested-package-layout)
@@ -369,23 +367,7 @@ without guessing.
 
 ---
 
-### 6) Publishing error responses consistently
-
-### GlobalErrorResponsesCustomizer
-
-**Why it exists:** standardize non-2xx responses as **RFC 9457 Problem Details** in the published OpenAPI contract.
-
-What it does:
-
-* registers `ErrorItem` and `ProblemDetail` component schemas (if missing)
-* adds default responses (400, 404, 405, 500) to all operations
-* uses `application/problem+json`
-
-This keeps the success path (`ServiceResponse<T>`) and error path (RFC 9457) clearly separated.
-
----
-
-### 7) Deterministic Naming (How to think about schema names)
+### 6) Deterministic Naming (How to think about schema names)
 
 You only need one naming model while adopting and debugging:
 
@@ -427,7 +409,6 @@ src/main/java/<base.package>/
       OpenApiSchemas.java
       ApiResponseSchemaFactory.java
       SwaggerResponseCustomizer.java
-      GlobalErrorResponsesCustomizer.java
 
       introspector/
         ResponseTypeIntrospector.java
@@ -450,9 +431,10 @@ This structure keeps OpenAPI concerns isolated and easy to lift into another ser
 
 Your service now:
 
-* publishes a **stable OpenAPI 3.1 contract**
+* publishes a **stable and contract-explicit OpenAPI 3.1 specification**
 * uses **one shared success envelope** from `api-contract`
-* provides explicit support for **Page-only nested generics**
-* enables thin, type-safe client generation without duplicated wrappers
+* provides explicit, deterministic support for **Page-only nested generics**
+* enables thin, type-safe client generation without duplicating response wrappers
 
-The server publishes **what it guarantees** — and nothing more.
+The server publishes **only the response semantics it explicitly guarantees**.  
+All other shapes remain under Springdoc and OpenAPI Generator default behavior.

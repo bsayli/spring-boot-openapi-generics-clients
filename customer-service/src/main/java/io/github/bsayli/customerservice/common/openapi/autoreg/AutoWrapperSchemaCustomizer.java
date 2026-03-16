@@ -11,7 +11,11 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.JsonSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -22,40 +26,31 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 /**
- * Registers composed OpenAPI wrapper schemas for contract-aware responses and enriches them with
- * vendor extensions used by client-side templates.
+ * Registers contract-aware wrapper schemas in the published OpenAPI document.
  *
- * <p>This customizer runs during OpenAPI generation (Springdoc). It does not change runtime
- * behavior and does not affect the JSON payload. Its sole responsibility is to make the published
- * specification explicit and deterministic for a small, explicitly supported set of response
- * shapes.
+ * <p>This customizer makes Springdoc output explicit for the response shapes intentionally
+ * supported by this setup. It does not change runtime payloads. Its role is limited to OpenAPI
+ * enrichment so client generation can remain deterministic and reuse the shared canonical contract.
  *
- * <h2>How it works</h2>
- *
- * <ol>
- *   <li>Collects data schema references from controller methods via {@link
- *       ResponseTypeIntrospector}.
- *   <li>For each detected reference (e.g. {@code CustomerDto} or {@code PageCustomerDto}),
- *       registers a composed schema named {@code ServiceResponse{RefName}} (for example, {@code
- *       ServiceResponseCustomerDto}).
- *   <li>Adds vendor extensions that allow client-side templates to emit thin wrapper classes
- *       instead of duplicating response envelope fields.
- * </ol>
- *
- * <h2>Vendor extensions</h2>
+ * <p>Supported wrapper registration scope:
  *
  * <ul>
- *   <li>{@code x-api-wrapper: true} marks the schema as a <em>contract-aware wrapper</em> intended
- *       for client-side template selection.
- *   <li>{@code x-api-wrapper-datatype: &lt;T&gt;} points to the underlying data schema name.
- *   <li>{@code x-data-container} and {@code x-data-item} are added <b>only</b> for {@code
- *       Page&lt;T&gt;} to preserve pagination semantics.
+ *   <li>{@code ServiceResponse<T>}
+ *   <li>{@code ServiceResponse<Page<T>>}
  * </ul>
  *
- * <p>Collection types such as {@code List&lt;T&gt;} or {@code Map&lt;K,V&gt;} are intentionally not
- * overridden here and remain on Springdoc / OpenAPI Generator defaults. Only {@code
- * ServiceResponse&lt;T&gt;} and {@code ServiceResponse&lt;Page&lt;T&gt;&gt;} are treated as
- * contract-aware for wrapper schema registration.
+ * <p>Other shapes such as {@code ServiceResponse<List<T>>}, {@code ServiceResponse<Map<K,V>>}, or
+ * arbitrary nested generics are intentionally left on Springdoc and OpenAPI Generator defaults.
+ *
+ * <p>For each detected response data type, this customizer registers a composed wrapper schema
+ * named {@code ServiceResponse{RefName}} and enriches it with vendor extensions used by client
+ * templates:
+ *
+ * <ul>
+ *   <li>{@code x-api-wrapper}
+ *   <li>{@code x-api-wrapper-datatype}
+ *   <li>{@code x-data-container} and {@code x-data-item} for {@code Page<T>} only
+ * </ul>
  */
 @Configuration
 public class AutoWrapperSchemaCustomizer {
@@ -88,6 +83,14 @@ public class AutoWrapperSchemaCustomizer {
     this.genericContainers = Set.of(Page.class.getSimpleName());
   }
 
+  /**
+   * Adds composed wrapper schemas for the contract-aware response types detected from controller
+   * methods.
+   *
+   * <p>Wrapper schemas are created only when the underlying data schema already exists in
+   * components. This keeps the published specification aligned with Springdoc materialization and
+   * avoids inventing synthetic component schemas.
+   */
   @Bean
   public OpenApiCustomizer autoResponseWrappers() {
     return openApi -> {
@@ -102,11 +105,8 @@ public class AutoWrapperSchemaCustomizer {
 
       dataRefs.forEach(
           ref -> {
-            // Guard: only wrap schemas that are already materialized by Springdoc.
-            // We never invent component schemas here — this keeps the OpenAPI output deterministic
-            // and prevents accidental drift between Java types and published contracts.
             if (!schemas.containsKey(ref)) {
-              return; // skip
+              return;
             }
 
             String wrapperName = OpenApiSchemas.SCHEMA_SERVICE_RESPONSE + ref;
@@ -125,7 +125,7 @@ public class AutoWrapperSchemaCustomizer {
     if (container == null) return;
 
     Map<String, Schema> schemas =
-        (openApi.getComponents() != null) ? openApi.getComponents().getSchemas() : null;
+        openApi.getComponents() != null ? openApi.getComponents().getSchemas() : null;
     if (schemas == null) return;
 
     Schema<?> raw = schemas.get(dataRefName);
@@ -146,53 +146,62 @@ public class AutoWrapperSchemaCustomizer {
       Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
     if (schema == null) return null;
 
-    Schema<?> cur = derefIfNeeded(schemas, schema, visited);
-    if (cur == null) return null;
+    Schema<?> current = derefIfNeeded(schemas, schema, visited);
+    if (current == null) return null;
 
-    if (isObjectLike(cur)) return cur;
+    if (isObjectLike(current)) return current;
 
-    if (cur instanceof ComposedSchema cs && cs.getAllOf() != null) {
-      for (Schema<?> s : cs.getAllOf()) {
-        Schema<?> resolved = resolveObjectLikeSchema(schemas, s, visited);
+    if (current instanceof ComposedSchema composed && composed.getAllOf() != null) {
+      for (Schema<?> candidate : composed.getAllOf()) {
+        Schema<?> resolved = resolveObjectLikeSchema(schemas, candidate, visited);
         if (resolved != null) return resolved;
       }
     }
+
     return null;
   }
 
-  private boolean isObjectLike(Schema<?> s) {
-    return (s instanceof ObjectSchema)
-        || "object".equals(s.getType())
-        || (s.getProperties() != null && !s.getProperties().isEmpty());
+  private boolean isObjectLike(Schema<?> schema) {
+    return schema instanceof ObjectSchema
+        || "object".equals(schema.getType())
+        || (schema.getProperties() != null && !schema.getProperties().isEmpty());
   }
 
-  private Schema<?> derefIfNeeded(Map<String, Schema> schemas, Schema<?> s, Set<String> visited) {
-    if (s == null) return null;
-    String ref = s.get$ref();
-    if (ref == null || !ref.startsWith(SCHEMA_REF_PREFIX)) return s;
+  private Schema<?> derefIfNeeded(
+      Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
+    if (schema == null) return null;
+
+    String ref = schema.get$ref();
+    if (ref == null || !ref.startsWith(SCHEMA_REF_PREFIX)) {
+      return schema;
+    }
 
     String name = ref.substring(SCHEMA_REF_PREFIX.length());
-    if (!visited.add(name)) return null; // cycle guard
+    if (!visited.add(name)) {
+      return null;
+    }
+
     return schemas.get(name);
   }
 
   private String extractItemNameFromSchema(Schema<?> containerSchema) {
-    Map<String, Schema> props = containerSchema.getProperties();
-    if (props == null) return null;
+    Map<String, Schema> properties = containerSchema.getProperties();
+    if (properties == null) return null;
 
-    Schema<?> content = props.get(CONTENT);
+    Schema<?> content = properties.get(CONTENT);
     if (content == null) return null;
 
     Schema<?> items = null;
-    if (content instanceof ArraySchema arr) {
-      items = arr.getItems();
+    if (content instanceof ArraySchema arraySchema) {
+      items = arraySchema.getItems();
     } else if ("array".equals(content.getType())) {
       items = content.getItems();
-    } else if (content instanceof JsonSchema js
-        && js.getTypes() != null
-        && js.getTypes().contains("array")) {
-      items = js.getItems();
+    } else if (content instanceof JsonSchema jsonSchema
+        && jsonSchema.getTypes() != null
+        && jsonSchema.getTypes().contains("array")) {
+      items = jsonSchema.getItems();
     }
+
     if (items == null) return null;
 
     String itemRef = items.get$ref();

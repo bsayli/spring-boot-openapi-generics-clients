@@ -49,16 +49,11 @@ It exists solely to adapt the generated OpenAPI client into a clean, Spring-frie
 
 ## 🔧 TL;DR — Generate in 1 Minute
 
-> ℹ️ **First‑time setup (important)**
-> This repository is a **multi‑module build** and includes a shared **`api-contract`** module.
-> If you just cloned the repo, install all modules once from the **repository root**:
+> ℹ️ **Dependency note**
+> The shared `api-contract` library is published to Maven Central (`io.github.bsayli:api-contract:0.7.7`).
+> Client generation and compilation therefore do not require a root-level bootstrap build.
+> You can work with the modules independently, as in a typical multi-repository setup.
 >
-> ```bash
-> mvn -q clean install
-> ```
->
-> After this initial step, you can work with `customer-service` and
-> `customer-service-client` independently.
 
 ---
 

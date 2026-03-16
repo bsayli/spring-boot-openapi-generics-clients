@@ -17,8 +17,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(basePackages = "io.github.bsayli.customerservice.api.controller")
-@Order(4)
+@RestControllerAdvice
+@Order(2)
 public class ApplicationExceptionHandler {
 
   private static final Logger log = LoggerFactory.getLogger(ApplicationExceptionHandler.class);

@@ -1,14 +1,9 @@
 FROM maven:3.9.12-eclipse-temurin-21-noble AS builder
 WORKDIR /app
 
-COPY api-contract/pom.xml api-contract/pom.xml
 COPY customer-service/pom.xml customer-service/pom.xml
-
-COPY api-contract/src api-contract/src
-RUN --mount=type=cache,target=/root/.m2,sharing=locked \
-    mvn -q -DskipTests --no-transfer-progress -f api-contract/pom.xml clean install
-
 COPY customer-service/src customer-service/src
+
 RUN --mount=type=cache,target=/root/.m2,sharing=locked \
     mvn -q -T 2C -DskipTests --no-transfer-progress -f customer-service/pom.xml clean package && \
     JAR="$(ls -1 customer-service/target/customer-service-*.jar | head -n 1)" && \

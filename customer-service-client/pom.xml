@@ -6,7 +6,7 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
-    <version>0.7.7</version>
+    <version>0.7.8</version>
     <name>customer-service-client</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
@@ -261,9 +261,9 @@
                             <output>${project.build.directory}/generated-sources/openapi</output>
 
                             <!-- Packages -->
-                            <apiPackage>io.github.bsayli.openapi.client.generated.api</apiPackage>
-                            <modelPackage>io.github.bsayli.openapi.client.generated.dto</modelPackage>
-                            <invokerPackage>io.github.bsayli.openapi.client.generated.invoker</invokerPackage>
+                            <apiPackage>io.github.bsayli.customerservice.client.generated.api</apiPackage>
+                            <modelPackage>io.github.bsayli.customerservice.client.generated.dto</modelPackage>
+                            <invokerPackage>io.github.bsayli.customerservice.client.generated.invoker</invokerPackage>
 
                             <!-- Templates -->
                             <templateDirectory>${openapi.templates.effective}/Java</templateDirectory>

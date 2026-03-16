@@ -1,10 +1,10 @@
-package io.github.bsayli.openapi.client.adapter.support;
+package io.github.bsayli.customerservice.client.adapter.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.bsayli.openapi.client.generated.dto.ProblemDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.client.ClientHttpResponse;
 
 public final class ProblemDetailSupport {
@@ -50,7 +50,9 @@ public final class ProblemDetailSupport {
   }
 
   private static boolean isJson(MediaType contentType) {
-    if (contentType == null) return false;
+    if (contentType == null) {
+      return false;
+    }
     return MediaType.APPLICATION_JSON.isCompatibleWith(contentType)
         || MediaType.APPLICATION_PROBLEM_JSON.isCompatibleWith(contentType);
   }
