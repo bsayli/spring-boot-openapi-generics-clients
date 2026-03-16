@@ -55,25 +55,24 @@ The result is a **deterministic, type‑safe API boundary** with **Page‑aware 
 ## 📦 Modules
 
 * **[api-contract](api-contract/README.md)**
-  Shared, framework-agnostic API contract defining the canonical `{ data, meta }` response model,
+  Framework-agnostic shared API contract defining the canonical `{ data, meta }` response model,
   pagination primitives, and RFC 9457 error extensions.
-  This module is published to **Maven Central** and serves as the **single source of truth** shared by both server and client.
+  Used as the single runtime contract shared by both server and client.
 
 * **[customer-service](customer-service/README.md)**
   Spring Boot API producer exposing a deterministic **OpenAPI 3.1** specification enriched with
   generics semantics (`ServiceResponse<T>`, `ServiceResponse<Page<T>>`).
 
 * **[customer-service-client](customer-service-client/README.md)**
-  Generated Java client that **reuses the canonical contract** and preserves generics
+  Generated Java client that **reuses the shared contract** and preserves generics
   without duplicating envelopes or paging models.
 
 ---
 
 ## ⚡ Quick Start
 
-The shared `api-contract` module is published to Maven Central as `0.7.7`,
-so individual modules can now be built and run independently without requiring
-a root-level bootstrap step just to make the contract available locally.
+The shared contract is published to Maven Central (`io.github.bsayli:api-contract:0.7.7`),
+allowing modules to be built and run independently without requiring a root-level bootstrap step.
 
 ---
 
@@ -87,18 +86,14 @@ mvn -q -ntp clean package
 java -jar target/customer-service-*.jar
 ```
 
-This works because:
-
-* `api-contract:0.7.7` is resolved directly from Maven Central
-* no prior local installation step is required
-* the service can now be treated like a normal standalone module
+This works because the shared contract is resolved automatically from Maven Central.
+No prior local installation step is required, and the service behaves like a normal standalone module.
 
 ---
 
 ### 🔄 Option B — Regenerate the Client from the Live OpenAPI Spec
 
-Use this flow when you change the server contract and want to regenerate
-client wrappers from the live OpenAPI definition.
+Use this flow when the server contract changes and client wrappers must be regenerated.
 
 ```bash
 # 1) Ensure the backend is running
@@ -136,10 +131,9 @@ They are automatically added to compilation via `build-helper-maven-plugin`.
 
 ### 📝 Notes
 
-* You do **not** need to manually install `api-contract` locally.
-* The shared contract is consumed as **`io.github.bsayli:api-contract:0.7.7`** from Maven Central.
-* Root-level builds are still useful for full repository verification, but they are no longer required just to make the contract resolvable.
-* For CI and local parity, commands use `-ntp` (no transfer progress).
+* Manual local installation of the shared contract is **not required**.
+* Root-level builds are still useful for full repository verification.
+* Commands use `-ntp` for cleaner CI and local parity.
 
 ---
 
