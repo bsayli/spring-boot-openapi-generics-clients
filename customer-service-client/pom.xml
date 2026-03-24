@@ -6,7 +6,7 @@
 
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
-    <version>0.7.8</version>
+    <version>0.7.9-SNAPSHOT</version>
     <name>customer-service-client</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
@@ -40,8 +40,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>21</java.version>
 
-        <spring-boot.version>3.5.11</spring-boot.version>
-        <openapi.generator.version>7.20.0</openapi.generator.version>
+        <spring-boot.version>3.5.12</spring-boot.version>
+        <openapi.generator.version>7.21.0</openapi.generator.version>
 
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
@@ -56,8 +56,7 @@
         <spotless-maven-plugin.version>3.3.0</spotless-maven-plugin.version>
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
-
-        <openapi.templates.upstream>${project.build.directory}/upstream-templates</openapi.templates.upstream>
+        <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
         <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
         <api-contract.version>0.7.7</api-contract.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
@@ -164,13 +163,16 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>${maven.dependency.plugin.version}</version>
+
                 <executions>
+
                     <execution>
-                        <id>unpack-openapi-upstream-templates</id>
+                        <id>extract-openapi-model-template</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
+
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
@@ -179,16 +181,53 @@
                                     <version>${openapi.generator.version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
-                                    <includes>templates/Java/**</includes>
-                                    <outputDirectory>${openapi.templates.upstream}</outputDirectory>
+                                    <includes>**/Java/model.mustache</includes>
+                                    <outputDirectory>${openapi.templates.effective}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
+
                     <execution>
                         <goals>
                             <goal>properties</goal>
                         </goals>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${maven-antrun-plugin.version}</version>
+
+                <executions>
+                    <execution>
+                        <id>patch-openapi-model-template</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+
+                        <configuration>
+                            <target>
+
+                                <replaceregexp byline="false" flags="s">
+
+                                    <regexp pattern="(.*)\{\{#models}}\s*\{\{#model}}[\s\S]*?\{\{\/model}}\s*\{\{\/models}}\s*$"/>
+
+                                    <substitution expression="\1{{#models}}{{#model}}{{#vendorExtensions.x-api-wrapper}}{{>api_wrapper}}{{/vendorExtensions.x-api-wrapper}}{{^vendorExtensions.x-api-wrapper}}{{#isEnum}}{{>modelEnum}}{{/isEnum}}{{^isEnum}}{{#vendorExtensions.x-is-one-of-interface}}{{>oneof_interface}}{{/vendorExtensions.x-is-one-of-interface}}{{^vendorExtensions.x-is-one-of-interface}}{{>pojo}}{{/vendorExtensions.x-is-one-of-interface}}{{/isEnum}}{{/vendorExtensions.x-api-wrapper}}{{/model}}{{/models}}"/>
+
+                                    <fileset dir="${openapi.templates.effective}">
+                                        <include name="**/Java/model.mustache"/>
+                                    </fileset>
+
+                                </replaceregexp>
+
+                            </target>
+                        </configuration>
+
                     </execution>
                 </executions>
             </plugin>
@@ -198,24 +237,6 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>${maven.resources.plugin.version}</version>
                 <executions>
-                    <execution>
-                        <id>copy-upstream-to-effective</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${openapi.templates.effective}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${openapi.templates.upstream}/templates</directory>
-                                    <includes>
-                                        <include>Java/**</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
 
                     <execution>
                         <id>overlay-local-templates</id>

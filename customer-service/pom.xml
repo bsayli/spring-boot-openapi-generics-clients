@@ -7,13 +7,13 @@
         <parent>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-parent</artifactId>
-            <version>3.5.11</version>
+            <version>3.5.12</version>
             <relativePath/>
         </parent>
 
         <groupId>io.github.bsayli</groupId>
         <artifactId>customer-service</artifactId>
-        <version>0.7.8</version>
+        <version>0.7.9-SNAPSHOT</version>
         <name>customer-service</name>
         <description>Spring Boot 3.5 + Springdoc (OpenAPI) for generics-aware client generation</description>
         <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
