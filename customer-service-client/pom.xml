@@ -213,17 +213,33 @@
                         <configuration>
                             <target>
 
+                                <!-- PATCH LAST MODELS BLOCK -->
                                 <replaceregexp byline="false" flags="s">
-
                                     <regexp pattern="(.*)\{\{#models}}\s*\{\{#model}}[\s\S]*?\{\{\/model}}\s*\{\{\/models}}\s*$"/>
-
                                     <substitution expression="\1{{#models}}{{#model}}{{#vendorExtensions.x-api-wrapper}}{{>api_wrapper}}{{/vendorExtensions.x-api-wrapper}}{{^vendorExtensions.x-api-wrapper}}{{#isEnum}}{{>modelEnum}}{{/isEnum}}{{^isEnum}}{{#vendorExtensions.x-is-one-of-interface}}{{>oneof_interface}}{{/vendorExtensions.x-is-one-of-interface}}{{^vendorExtensions.x-is-one-of-interface}}{{>pojo}}{{/vendorExtensions.x-is-one-of-interface}}{{/isEnum}}{{/vendorExtensions.x-api-wrapper}}{{/model}}{{/models}}"/>
-
                                     <fileset dir="${openapi.templates.effective}">
                                         <include name="**/Java/model.mustache"/>
                                     </fileset>
-
                                 </replaceregexp>
+
+                                <!-- LOAD PATCHED FILE CONTENT (PATH SAFE) -->
+                                <loadfile property="patchedModelTemplate">
+                                    <fileset dir="${openapi.templates.effective}">
+                                        <include name="**/Java/model.mustache"/>
+                                    </fileset>
+                                </loadfile>
+
+                                <!-- VERIFY PATCH SIGNATURE -->
+                                <condition property="wrapperPatchMissing">
+                                    <not>
+                                        <contains string="${patchedModelTemplate}"
+                                                  substring="vendorExtensions.x-api-wrapper"/>
+                                    </not>
+                                </condition>
+
+                                <!-- FAIL FAST IF PATCH DID NOT APPLY -->
+                                <fail message="OpenAPI template patch FAILED — x-api-wrapper block not detected. Upstream model.mustache structure likely changed."
+                                      if="wrapperPatchMissing"/>
 
                             </target>
                         </configuration>
