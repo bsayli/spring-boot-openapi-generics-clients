@@ -5,253 +5,207 @@ parent: Adoption Guides
 nav_order: 2
 ---
 
-# Client‑Side Adoption
+# Client‑Side Adoption — Contract Lifecycle Interpretation Stage
 
-This guide explains how to integrate a **generics‑aware OpenAPI client** into *your own application* using a **single canonical contract**, without leaking domain‑specific assumptions from the reference project.
+This guide explains the **client‑side interpretation stage** of the contract lifecycle architecture.
 
-The examples intentionally avoid concrete domain names (like `Customer`) and focus on **reusable adoption principles**.
+At this stage, a consumer application **interprets a server‑published OpenAPI contract** and integrates a generated client in a way that:
 
-**Core contract guarantees:**
+* preserves the **canonical response envelope semantics**
+* avoids duplicating shared contract models
+* keeps regeneration safe and architecturally governed
 
-* Success envelope: **`ServiceResponse<T>`** (shared via **`io.github.bsayli:api-contract`**)
-* Nested generics: **supported only for** **`ServiceResponse<Page<T>>`**
-* Errors: **RFC 9457** `ProblemDetail`, decoded and raised as **`ApiProblemException`**
-
-> Scope: Spring MVC (WebMVC) applications using OpenAPI Generator `java` (`restclient`) and Spring `RestClient`.
+The examples are intentionally **domain‑agnostic**.
+They describe *how to integrate the mechanism*, not how to model a specific business domain.
 
 ---
 
 ## 📑 Table of Contents
 
-* [🎯 Goals](#-goals)
+* [🎯 Architectural Goals](#-architectural-goals)
+* [🧭 Lifecycle Responsibility of the Client](#-lifecycle-responsibility-of-the-client)
 * [✅ Prerequisites](#-prerequisites)
-* [🚀 Generate the Client](#-generate-the-client)
-* [🧹 Avoid Duplicated Contracts](#-avoid-duplicated-contracts)
-* [🧩 Thin Wrapper Generation (Mustache Overlay)](#-thin-wrapper-generation-mustache-overlay)
-* [🧠 Contract Semantics (Deterministic by Design)](#-contract-semantics-deterministic-by-design)
+* [🚀 Client Generation Flow](#-client-generation-flow)
+* [🧹 Preventing Contract Duplication](#-preventing-contract-duplication)
+* [🧩 Thin Wrapper Generation Strategy](#-thin-wrapper-generation-strategy)
+* [🧠 Contract Semantics Interpretation](#-contract-semantics-interpretation)
 * [⚠️ Error Handling (RFC 9457)](#-error-handling-rfc-9457)
 * [⚙️ Spring Boot Integration](#-spring-boot-integration)
-* [🧩 Adapter Pattern (Recommended)](#-adapter-pattern-recommended)
+* [🧩 Adapter Boundary Pattern](#-adapter-boundary-pattern)
 * [🧪 Example Usage](#-example-usage)
 * [🧭 Suggested Folder Structure](#-suggested-folder-structure)
-* [✅ Key Points](#-key-points)
+* [🎯 Architectural Outcome](#-architectural-outcome)
 
 ---
 
-## 🎯 Goals
+## 🎯 Architectural Goals
 
-* Generate **thin wrapper classes** that extend **`ServiceResponse<T>`** (no duplicated envelopes)
-* Preserve **Page‑only nested generics**: `ServiceResponse<Page<T>>`
-* Decode non‑2xx responses into **RFC 9457** `ProblemDetail` and throw **`ApiProblemException`**
-* Keep generated code isolated behind a **stable adapter interface**
+After adopting this approach, your consumer application will:
+
+* interpret a **server‑published canonical success envelope** without redefining it
+* generate **thin wrapper models** bound to shared runtime contract types
+* preserve deterministic nested generics for **`ServiceResponse<Page<T>>`**
+* propagate structured errors using **RFC 9457 Problem Details**
+* isolate generated transport code behind **stable application‑owned boundaries**
+
+The client does not redefine contract semantics.
+It **interprets and operationalizes** what the server explicitly guarantees.
+
+---
+
+## 🧭 Lifecycle Responsibility of the Client
+
+Within the contract lifecycle architecture, the client has a clearly scoped responsibility.
+
+It must:
+
+* consume the OpenAPI document as a **semantic projection of server contracts**
+* bind generated models to the **shared canonical contract artifact**
+* avoid introducing parallel response envelope implementations
+* isolate generated APIs from core application logic
+
+This separation ensures:
+
+> **Client regeneration remains safe because contract identity is preserved outside generated code.**
 
 ---
 
 ## ✅ Prerequisites
 
+Before integrating the generated client, ensure the following:
+
 * Java 21+
 * Maven 3.9+
-* An OpenAPI‑producing service exposing `/v3/api-docs.yaml`
-* The shared contract dependency available:
+* Access to a running service exposing `/v3/api-docs.yaml`
+* Availability of the shared contract dependency:
 
 ```
 io.github.bsayli:api-contract
 ```
 
+The shared contract must be resolvable **at build time**.
+
 ---
 
-## 🚀 Generate the Client
+## 🚀 Client Generation Flow
 
-This adoption guide assumes **your service already publishes** a valid OpenAPI 3.1 contract.
+The client integration pipeline follows a deterministic sequence.
 
-1. **Download the OpenAPI spec** into your client module:
+1. **Retrieve the OpenAPI contract projection** published by the producer service.
 
 ```bash
 curl -s http://<service-host>/<base-path>/v3/api-docs.yaml \
   -o src/main/resources/api-docs.yaml
 ```
 
-2. **Generate & compile** the client:
-
-> ⚠️ **Important prerequisite**
->
-> The generated client **depends on the shared canonical contract**:
->
-> ```text
-> io.github.bsayli:api-contract
-> ```
->
-> Your project must already provide this dependency **before** running the build:
->
-> * either as a released artifact available from your Maven repository, or
-> * as a locally built module (for example via a multi-module or parent build).
->
-> If `api-contract` is not resolvable at build time, `mvn clean install` will fail.
-
-> 🔧 **Build & Maven configuration**
->
-> This guide focuses on **concepts and integration semantics**, not concrete build wiring.
->
-> For the exact **Maven setup, OpenAPI Generator configuration, and template wiring**, see:
-> → [Client-Side Adoption — Build & POM Setup](client-side-adoption-pom.md)
-
+2. **Generate and compile client sources** using the configured OpenAPI Generator build.
 
 ```bash
 mvn clean install
 ```
 
-3. **Verify generated output**:
+3. **Verify semantic binding of generated wrappers**:
 
-* `target/generated-sources/openapi/src/gen/java`
-* Wrapper classes extending the shared contract, for example:
+Generated models should:
+
+* extend `ServiceResponse<T>` from `api-contract`
+* preserve nested generics for pagination wrappers
+* avoid redefining envelope or paging types
+
+Generated sources appear under:
+
+```
+target/generated-sources/openapi/src/gen/java
+```
+
+---
+
+## 🧹 Preventing Contract Duplication
+
+Because both producer and consumer share the canonical contract module,
+client generation must **not recreate envelope or paging DTOs**.
+
+Configure `.openapi-generator-ignore` accordingly:
+
+```bash
+**/generated/dto/ServiceResponse*.java
+**/generated/dto/Page*.java
+**/generated/dto/Meta.java
+**/generated/dto/Sort*.java
+```
+
+This ensures a **single runtime contract identity** across modules.
+
+---
+
+## 🧩 Thin Wrapper Generation Strategy
+
+Client templates should generate **inheritance‑based wrapper models** that bind OpenAPI schema information to shared runtime abstractions.
+
+Typical generated structures:
 
 ```
 ServiceResponseFooDto extends ServiceResponse<FooDto>
 ServiceResponsePageFooDto extends ServiceResponse<Page<FooDto>>
 ```
 
-> The exact DTO names depend on *your* domain model — not on this reference project.
+These wrappers:
+
+* introduce no envelope fields
+* introduce no serialization behaviour
+* only provide **type‑safe semantic binding**
+
+Template overlays must therefore remain **minimal and declarative**.
 
 ---
 
-## 🧹 Avoid Duplicated Contracts
+## 🧠 Contract Semantics Interpretation
 
-Because both server and client rely on the shared `api-contract`,
-generated client models must be configured to reuse these canonical types
-instead of producing parallel DTO implementations.
+Client generation remains deterministic because the contract defines
+**a consciously limited generic support scope**.
 
-Add the following to `.openapi-generator-ignore`:
+Contract‑aware shapes:
 
-```bash
-**/src/gen/java/**/generated/dto/Page*.java
-**/src/gen/java/**/generated/dto/ServiceResponse.java
-**/src/gen/java/**/generated/dto/ServiceResponseVoid.java
-**/src/gen/java/**/generated/dto/Meta.java
-**/src/gen/java/**/generated/dto/Sort.java
-```
+* `ServiceResponse<T>`
+* `ServiceResponse<Page<T>>`
 
-Ensure your generator configuration includes:
+All other generic compositions follow **default generator behaviour**.
 
-```xml
-<ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>
-```
+This design:
+
+* stabilizes schema naming
+* limits template complexity
+* reduces long‑term integration risk
+
+The client therefore interprets contract guarantees rather than attempting to generalize all generic forms.
 
 ---
 
-## 🧩 Thin Wrapper Generation (Mustache Overlay)
+## ⚠️ Error Handling (RFC 9457)
 
-Place your template overlays under:
+Failure responses are modeled using **RFC 9457 Problem Details** and surfaced as a single structured runtime exception.
 
-```
-src/main/resources/openapi-templates/
-```
-
-These overlays are responsible only for **binding generic parameters** to the shared API contract. They do not redefine response fields or invent new envelopes.
-
-### Wrapper template responsibilities
-
-Your wrapper templates should:
-
-* Import **`ServiceResponse`** from `api-contract`
-* Import **`Page`** from `api-contract` *only* when `x-data-container: Page` is present
-* Extend **`ServiceResponse<T>`** or **`ServiceResponse<Page<T>>`**
-
-The goal is to generate **thin wrappers** that simply connect OpenAPI schema information to the canonical contract types.
-
-### Template (excerpt)
-
-{% raw %}
-
-```mustache
-import {{apiContractEnvelope}}.ServiceResponse;
-{{#vendorExtensions.x-data-container}}
-import {{apiContractPage}}.{{vendorExtensions.x-data-container}};
-{{/vendorExtensions.x-data-container}}
-
-public class {{classname}} extends ServiceResponse<
-{{#vendorExtensions.x-data-container}}
-{{vendorExtensions.x-data-container}}<{{vendorExtensions.x-data-item}}>
-{{/vendorExtensions.x-data-container}}
-{{^vendorExtensions.x-data-container}}
-{{vendorExtensions.x-api-wrapper-datatype}}
-{{/vendorExtensions.x-data-container}}
-> {}
-```
-
-{% endraw %}
-
-> The property name `apiContractEnvelope` intentionally mirrors the Maven configuration to keep template wiring explicit and predictable.
-
----
-
-## 🧠 Contract Semantics (Deterministic by Design)
-
-This project deliberately limits the scope of what is considered *contract-aware* in order to keep schema naming and client generation predictable over time.
-
-### Canonical success envelope
-
-All successful responses use the shared contract:
-
-```java
-ServiceResponse<T>
-```
-
-This type is defined once in **`api-contract`** and reused by both server and client. Generated models never redefine its fields.
-
-### Nested generics
-
-Nested generics are treated as contract-aware **only** for:
-
-```java
-ServiceResponse<Page<T>>
-```
-
-This reflects a conscious design decision:
-
-* Pagination is a common, well-understood use case
-* Its semantics are stable across endpoints
-* Supporting it explicitly keeps schema names deterministic
-
-All other generic shapes (`List<T>`, `Map<K,V>`, `Foo<Bar>`, etc.) follow OpenAPI Generator’s default behavior during schema naming and model generation.
-
-The contract defines **what is guaranteed**, not every shape Java could theoretically express.
-
----
-
-## ⚠️ Error Handling (RFC-9457)
-
-Non‑2xx responses are represented using **RFC 9457 Problem Details** and surfaced to consumers as **`ApiProblemException`**.
-
-Error responses are intentionally **not** wrapped in `ServiceResponse`.
-
-Example usage:
+Example handling pattern:
 
 ```java
 try {
   adapter.getResource(id);
 } catch (ApiProblemException ex) {
   ProblemDetail pd = ex.getProblem();
-  log.warn(
-      "API error [status={}, code={}, title={}]",
-      ex.getStatus(),
-      pd.getErrorCode(),
-      pd.getTitle()
-  );
+  log.warn("API error status={} title={}", ex.getStatus(), pd.getTitle());
 }
 ```
 
-This keeps success and error paths clearly separated:
+This establishes a clear semantic separation:
 
-* success responses use the shared `{ data, meta }` envelope
-* error responses follow a standardized, RFC‑defined structure
-
-No runtime tricks or framework magic — just explicit contracts and predictable generation.
+* success → canonical `{ data, meta }` envelope
+* failure → standardized problem contract
 
 ---
 
 ## ⚙️ Spring Boot Integration
 
-### RestClient status handler
+A minimal `RestClient` status handler aligns runtime behaviour with published error semantics.
 
 ```java
 @Configuration
@@ -271,10 +225,11 @@ public class ApiClientConfig {
 
 ---
 
-## 🧩 Adapter Pattern (Recommended)
+## 🧩 Adapter Boundary Pattern
 
-Never expose generated APIs directly.
-Wrap them behind **your own interface** so regeneration never leaks.
+Generated APIs should never leak into core business layers.
+
+Introduce an application‑owned adapter interface to create a **stable integration boundary**.
 
 ```java
 public interface ResourceClientAdapter {
@@ -283,22 +238,7 @@ public interface ResourceClientAdapter {
 }
 ```
 
-```java
-@Service
-public class ResourceClientAdapterImpl implements ResourceClientAdapter {
-
-  private final GeneratedApi api;
-
-  public ResourceClientAdapterImpl(GeneratedApi api) {
-    this.api = api;
-  }
-
-  @Override
-  public ServiceResponse<FooDto> getFoo(Long id) {
-    return api.getFoo(id);
-  }
-}
-```
+Adapters absorb regeneration churn and protect domain logic.
 
 ---
 
@@ -306,7 +246,7 @@ public class ResourceClientAdapterImpl implements ResourceClientAdapter {
 
 ```java
 var response = adapter.getFoo(42L);
-var data = response.getData();
+var dto = response.getData();
 var serverTime = response.getMeta().serverTime();
 ```
 
@@ -316,27 +256,29 @@ var serverTime = response.getMeta().serverTime();
 
 ```
 client-module/
-  src/main/java/
-    adapter/
-    adapter/config/
-    adapter/support/
-    common/problem/
+  adapter/
+  adapter/config/
+  adapter/support/
+  common/problem/
   src/main/resources/
     openapi-templates/
     api-docs.yaml
   .openapi-generator-ignore
-  pom.xml
 ```
+
+This layout keeps **transport concerns isolated** and simplifies reuse across services.
 
 ---
 
-## ✅ Key Points
+## 🎯 Architectural Outcome
 
-* **One contract**: `ServiceResponse<T>` comes from `api-contract`
-* **Deterministic generics**: nested only for `Page<T>`
-* **No duplication**: generated DTOs never redefine the contract
-* **RFC 9457-first**: errors surfaced as `ApiProblemException`
-* **Isolation**: adapters protect your application from generator churn
+After completing client‑side adoption:
 
-This document explains **how the mechanism is adopted**, not a sample domain.
-Your domain types plug in cleanly without requiring changes to the mechanism itself.
+* generated models remain **contract‑bound and regeneration‑safe**
+* response envelope identity is preserved across system boundaries
+* pagination semantics remain structurally consistent
+* error handling aligns with standardized HTTP problem contracts
+
+The client now participates as the **semantic interpretation stage** of the contract lifecycle.
+
+Integration behaviour becomes predictable because runtime abstractions remain independent from generation tooling.

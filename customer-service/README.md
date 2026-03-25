@@ -1,7 +1,7 @@
 # customer-service
 
 [![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.11-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.12-green?logo=springboot)](https://spring.io/projects/spring-boot)
 [![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 
@@ -9,245 +9,259 @@
 
 ## 📑 Table of Contents
 
-- 🎯 [Purpose](#-purpose)
-- 📊 [Architecture at a Glance](#-architecture-at-a-glance)
-- 🛠 [Tech Stack](#-tech-stack)
-- 🚀 [How to Run](#-how-to-run)
-  - ✅ [Recommended (from repo root)](#-recommended-from-repo-root)
-  - ⚙️ [Alternative (module-only, if api-contract is already installed)](#-alternative-module-only-if-api-contract-is-already-installed)
-  - 🐳 [Run with Docker](#-run-with-docker)
-- 🧪 [Verify with a Simple Request](#-verify-with-a-simple-request)
-- 📙 [CRUD Endpoints](#-crud-endpoints)
-- 🔗 [OpenAPI Endpoints](#-openapi-endpoints)
-- ⚠️ [Error Response (RFC 9457)](#-error-response-rfc-9457)
-- 🧪 [Testing](#-testing)
-- 🖖 [Notes](#-notes)
-- 📦 [Related Module](#-related-module)
-- 💬 [Feedback](#-feedback)
-- 🤝 [Contributing](#-contributing)
-- 🛡 [License](#-license)
+- 🔎 [What this module actually is](#what-this-module-actually-is)
+- ❗ [Problem statement](#problem-statement)
+- ✅ [Solution approach](#solution-approach)
+- 🎯 [Supported contract scope](#supported-contract-scope)
+- ⚖️ [Runtime vs specification responsibilities](#runtime-vs-specification-responsibilities)
+- 🏗️ [Architecture overview](#architecture-overview)
+- 🔄 [End-to-end contract flow](#endtoend-contract-flow)
+- ⚠️ [Error contract model](#error-contract-model)
+- 🚀 [Running the reference service](#running-the-reference-service)
+- 🧪 [Verifying the contract](#verifying-the-contract)
+- 🔗 [OpenAPI endpoints](#openapi-endpoints)
+- 📦 [Related module](#related-module)
+- 🧪 [Testing](#testing)
+- 🤝 [Contributing](#contributing)
+- 🛡️ [License](#license)
 
 ---
 
-## 🎯 Purpose
+## What this module actually is
 
-`customer-service` provides a **minimal yet production-grade backend** exposing CRUD endpoints for customers. It acts as the **OpenAPI producer** that defines the canonical contract consumed by the generated client module.
+`customer-service` is **not a CRUD demo service** and **not a generic resolution library**.
 
-This module is intentionally contract-driven: response models are sourced from the shared **`api-contract`** artifact (`ServiceResponse`, `Meta`, `Page`, `Sort`, ...), ensuring server and client speak the same language.
+It is a **contract‑aware OpenAPI publication reference implementation** demonstrating how a Spring Boot service can publish a **deterministic generic response envelope contract** that can be safely consumed by OpenAPI client generators.
 
-**Key responsibilities:**
+The module exists to show a practical, production‑realistic solution for the following architectural challenge:
 
-* Publishes an OpenAPI spec (`/v3/api-docs.yaml`) enriched with **vendor extensions** required for deterministic wrapper typing.
-* Feeds the [`customer-service-client`](../customer-service-client/README.md) module for type-safe, boilerplate-free client generation.
-* Demonstrates **automatic schema registration** and **wrapper introspection** via custom Springdoc customizers.
+> How can a backend publish generic response envelopes in OpenAPI while keeping client code generation deterministic, thin, and semantically correct?
 
-### Contract semantics
-
-This module follows a **clear and intentionally limited contract scope** to keep the published OpenAPI specification and client generation predictable.
-
-* Successful responses use the shared envelope **`ServiceResponse<T>`**, sourced from the common `api-contract` module.
-
-* Nested generics are treated as contract-aware **only** for:
-
-  ```java
-  ServiceResponse<Page<T>>
-  ```
-
-  This reflects the common pagination use case and allows stable schema naming.
-
-* For all other generic shapes (`List<T>`, `Map<K,V>`, `Foo<Bar>`, etc.), generic information is **not interpreted** during schema naming.
-  In those cases, the OpenAPI output follows the default behavior and uses the **raw container type** only.
-
-This scoped approach ensures that both the server-published contract and the generated client remain consistent, understandable, and evolvable over time.
+This service provides a runnable, production‑grade reference for solving that problem.
 
 ---
 
-## 📊 Architecture at a Glance
+## Problem statement
+
+In real‑world distributed systems, backend services often standardize successful responses using envelope patterns such as:
 
 ```
-[customer-service]  ── publishes ──>  /v3/api-docs.yaml (OpenAPI 3.1 + x-api-wrapper + optional Page hints)
-        │
-        └─ consumed by OpenAPI Generator (+ custom Mustache overlays)
-                 │
-                 └─> [customer-service-client]  (type-safe wrappers)
-                          │
-                          └─ used by consumer microservices
+ServiceResponse<T>
 ```
 
-### Explanation
+However, when publishing OpenAPI specifications:
 
-* **customer-service** auto-registers wrapper schemas by scanning controller methods and extracting the `T` inside `ServiceResponse<T>`.
+* Generic information is frequently flattened or lost
+* Client generators duplicate envelope fields into every generated model
+* Nested generic containers (such as pagination) become ambiguous
+* Schema naming becomes unstable across versions
+* Server and client contracts drift over time
 
-  * `AutoWrapperSchemaCustomizer` registers composed schemas for each discovered `T`.
-  * `ResponseTypeIntrospector` **identifies and marks only Page-based nested generics as contract-aware**.
+These issues lead to:
 
-* The OpenAPI document is enriched with vendor extensions:
+* Boilerplate client models
+* Reduced type safety
+* Hard‑to‑evolve API contracts
+* Increased integration friction
 
-| Extension key                           | Example value                | Purpose                                       |
-| --------------------------------------- | ---------------------------- | --------------------------------------------- |
-| `x-api-wrapper`                         | `true`                       | Marks the schema as a response wrapper        |
-| `x-api-wrapper-datatype`                | `CustomerDto`                | Specifies the `T` in `ServiceResponse<T>`     |
-| `x-data-container`                      | `Page`                       | Present **only when** `T` is `Page<…>`        |
-| `x-data-item`                           | `CustomerDto`                | Present **only when** `T` is `Page<…>`        |
-| `x-class-extra-annotation` *(optional)* | `@JsonIgnoreProperties(...)` | Optional annotation hint for generated models |
+---
 
-* These hints allow the OpenAPI Generator to produce nested generic clients such as:
+## Solution approach
 
-```java
-public class ServiceResponsePageCustomerDto extends ServiceResponse<Page<CustomerDto>> {}
+This module demonstrates a **scoped, deterministic contract publication model** based on the following architectural principles:
+
+* Define an explicit **supported response shape subset** instead of attempting to solve arbitrary generics
+* Publish canonical envelope schemas as stable specification building blocks
+* Compose wrapper schemas deterministically using OpenAPI `allOf`
+* Enrich schemas with **vendor extensions** to carry semantic intent to client generators
+* Allow client templates to emit **thin generic wrappers** instead of duplicating fields
+
+The result is an **end‑to‑end symmetric contract flow**:
+
+```
+Controller return type
+   → OpenAPI deterministic schema
+       → client generator semantic hints
+           → thin generic wrapper class
 ```
 
-* **customer-service-client** uses custom templates to emit **thin wrappers** extending the base `ServiceResponse<T>` without duplicating model definitions.
+---
+
+## Supported contract scope
+
+This reference implementation intentionally supports a **small and explicit subset** of response shapes.
+
+### Supported
+
+* `ServiceResponse<T>` where `T` is a plain DTO
+* `ServiceResponse<Page<T>>` for pagination scenarios
+
+### Non‑goals
+
+The following are intentionally **out of scope**:
+
+* Arbitrary nested generics
+* Collection envelopes such as `ServiceResponse<List<T>>`
+* Map‑based generic containers
+* Generic graph resolution
+
+This scoped strategy ensures:
+
+* Stable schema naming
+* Predictable client generation
+* Evolvable long‑term API contracts
 
 ---
 
-## 🛠 Tech Stack
+## Runtime vs specification responsibilities
 
-* **Java 21**
+A key architectural property of this module is the strict separation between:
 
-* **Spring Boot 3.5.11**
+### Runtime behavior
 
-  * spring-boot-starter-web
-  * spring-boot-starter-validation
-  * spring-boot-starter-test (test scope)
+* Controllers return `ServiceResponse<T>` envelopes
+* JSON serialization remains standard Spring Boot behavior
+* No custom HTTP serialization layer is introduced
 
-* **OpenAPI / Swagger**
+### Specification shaping
 
-  * springdoc-openapi-starter-webmvc-ui (2.8.16)
+* Springdoc OpenAPI output is enriched using customizers
+* Wrapper schemas are composed at specification level only
+* Vendor extensions carry semantic metadata for generators
 
-* **Build & Tools**
-
-  * Maven 3.9+
-  * JaCoCo, Surefire, Failsafe
-
----
-
-## 🚀 How to Run
-
-`customer-service` depends on the shared **`api-contract`** library, which is now **published to Maven Central**.
-This means the service can be built and run **independently**, without requiring a full repository build.
+This ensures that **runtime payload semantics remain simple**, while **contract publication becomes architecture‑aware**.
 
 ---
 
-### ✅ Recommended (module‑only)
+## Architecture overview
 
-Build and run the service directly from its module directory:
+The contract publication pipeline consists of clearly separated layers.
 
-```bash
+### 1. Controller contract layer
+
+Controllers intentionally expose canonical return shapes:
+
+* `ServiceResponse<CustomerDto>`
+* `ServiceResponse<Page<CustomerDto>>`
+
+This establishes the **architectural contract boundary**.
+
+### 2. Contract introspection layer
+
+`ResponseTypeIntrospector`:
+
+* Unwraps common async wrappers (`ResponseEntity`, `CompletionStage`, etc.)
+* Detects supported generic envelope shapes
+* Produces deterministic schema suffix names
+
+This layer defines **what the server officially marks as contract‑aware**.
+
+### 3. Schema composition layer
+
+`AutoWrapperSchemaCustomizer`:
+
+* Registers composed OpenAPI schemas
+* Uses `allOf` to extend the canonical `ServiceResponse` base schema
+* Avoids generating synthetic component schemas
+
+### 4. Vendor extension signaling layer
+
+Schemas are enriched with semantic hints:
+
+| Extension key              | Meaning                          |
+| -------------------------- | -------------------------------- |
+| `x-api-wrapper`            | marks schema as contract wrapper |
+| `x-api-wrapper-datatype`   | underlying payload schema        |
+| `x-data-container`         | present only for `Page<T>`       |
+| `x-data-item`              | inner pagination item type       |
+| `x-class-extra-annotation` | optional generator hint          |
+
+These extensions form the **semantic bridge between spec and generated client code**.
+
+### 5. Client generation interpretation layer
+
+Custom OpenAPI Generator templates consume these hints to produce classes such as:
+
+```
+public class ServiceResponsePageCustomerDto
+    extends ServiceResponse<Page<CustomerDto>> {}
+```
+
+This eliminates envelope duplication and preserves generic type intent.
+
+---
+
+## End‑to‑end contract flow
+
+```
+[customer-service]
+      ↓ publishes deterministic spec
+OpenAPI 3.1 + vendor extensions
+      ↓ consumed by generator
+Thin generic client wrappers
+      ↓ used by consumer services
+Type‑safe integration
+```
+
+---
+
+## Error contract model
+
+Successful responses use the canonical envelope.
+
+Error responses follow **RFC 9457 Problem Details** using Spring `ProblemDetail`.
+
+This establishes a clean architectural separation:
+
+* Success → envelope contract
+* Failure → problem contract
+
+Such separation improves:
+
+* Client error decoding clarity
+* API semantic consistency
+* Contract evolvability
+
+---
+
+## Running the reference service
+
+This module depends on the shared `api-contract` artifact published to Maven Central.
+
+### Run locally
+
+```
 cd customer-service
 mvn clean package
 java -jar target/customer-service-*.jar
 ```
 
-This approach:
-
-* Resolves `api-contract` automatically from Maven Central
-* Matches real‑world consumer usage (service as a standalone artifact)
-* Keeps local development workflow simple and fast
-
-The service starts at:
+Service base URL:
 
 ```
 http://localhost:8084/customer-service
 ```
 
----
+### Run with Docker
 
-### 🧪 Optional (full repository build)
-
-If you want to verify the **entire multi‑module repository** (for example before pushing changes or running CI‑like validation), you can still build from the root:
-
-```bash
-mvn -q clean package
-java -jar customer-service/target/customer-service-*.jar
 ```
-
-This is useful for:
-
-* validating cross‑module compatibility
-* running the full test suite
-* ensuring deterministic CI parity
-
-However, it is **not required** for normal local development.
-
----
-
-### 🐳 Run with Docker
-
-The Docker image builds and runs **only the `customer-service` module**.
-Dependencies such as `api-contract` are resolved from Maven Central during the image build.
-
-#### Using Docker Compose (recommended)
-
-```bash
 cd customer-service
-docker compose up --build -d
+docker compose up --build
 ```
 
-Stop and clean up:
-
-```bash
-docker compose down
-```
-
-This setup:
-
-* Builds a self‑contained runtime image for `customer-service`
-* Does not require building other modules locally
-* Mirrors a realistic deployment pipeline
+The container image builds only this module and resolves dependencies from Maven Central.
 
 ---
 
-#### Using plain Docker (manual)
+## Verifying the contract
 
-Build the image from the repository root (or any context that contains the module sources):
+Example request:
 
-```bash
-docker build -t customer-service:latest \
-  -f customer-service/Dockerfile \
-  .
+```
+curl -X GET http://localhost:8084/customer-service/v1/customers/1
 ```
 
-Run the container:
-
-```bash
-docker run --rm -p 8084:8084 \
-  -e SPRING_PROFILES_ACTIVE=local \
-  customer-service:latest
-```
-
----
-
-## Notes
-
-* `api-contract` is resolved as a **regular external dependency**.
-* No local Maven installation or multi‑module pre‑build is required.
-* Docker builds perform a clean Maven package step inside the container.
-* Port `8084` is exposed by default and matches the local JVM runtime configuration.
-
-If Docker runs successfully but a local JVM run fails, the issue is most likely unrelated to dependency resolution (for example environment variables or local configuration differences).
-
----
-
-## 🧪 Verify with a Simple Request
-
-### Create Customer (example)
-
-```bash
-curl -X POST "http://localhost:8084/customer-service/v1/customers" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Jane Doe","email":"jane@example.com"}'
-```
-
-### Expected Response
-
-All successful responses are wrapped in the **canonical contract**:
-
-```java
-ServiceResponse<CustomerDto>
-```
-
-Example JSON:
+Example successful response:
 
 ```json
 {
@@ -263,147 +277,50 @@ Example JSON:
 }
 ```
 
----
-
-## 🧠 Why This Matters
-
-* The runtime response shape exactly matches what clients are generated against.
-* `{ data, meta }` is **not a demo or sample wrapper** — it is the canonical response contract.
-* The same contract is reused directly by `customer-service-client`.
-
-If this response shape looks correct, it means the **end-to-end contract flow** —
-from server, to OpenAPI specification, to generated client — is working as intended.
+If this shape matches the generated client model expectations, the **contract publication pipeline is working correctly**.
 
 ---
 
-## 📙 CRUD Endpoints
+## OpenAPI endpoints
 
-All success responses are wrapped in `ServiceResponse<...>`.
+* Swagger UI
+  [http://localhost:8084/customer-service/swagger-ui/index.html](http://localhost:8084/customer-service/swagger-ui/index.html)
 
-| Method | Path                         | Description              | Returns (`data`)         |
-| ------ | ---------------------------- | ------------------------ | ------------------------ |
-| POST   | `/v1/customers`              | Create new customer      | `CustomerDto`            |
-| GET    | `/v1/customers/{customerId}` | Get single customer      | `CustomerDto`            |
-| GET    | `/v1/customers`              | List customers (paged)   | `Page<CustomerDto>`      |
-| PUT    | `/v1/customers/{customerId}` | Update existing customer | `CustomerDto`            |
-| DELETE | `/v1/customers/{customerId}` | Delete customer          | `CustomerDeleteResponse` |
+* OpenAPI JSON
+  [http://localhost:8084/customer-service/v3/api-docs](http://localhost:8084/customer-service/v3/api-docs)
 
-**Base URL:** `/customer-service` (configured in `application.yml`)
+* OpenAPI YAML
+  [http://localhost:8084/customer-service/v3/api-docs.yaml](http://localhost:8084/customer-service/v3/api-docs.yaml)
+
+These specifications are the **canonical source of truth** for generated clients.
 
 ---
 
-## 🔗 OpenAPI Endpoints
+## Related module
 
-* **Swagger UI**  
-  👉 [http://localhost:8084/customer-service/swagger-ui/index.html](http://localhost:8084/customer-service/swagger-ui/index.html)
+* `customer-service-client` — generated Java client consuming this service’s deterministic OpenAPI contract
 
-* **OpenAPI JSON**  
-  👉 [http://localhost:8084/customer-service/v3/api-docs](http://localhost:8084/customer-service/v3/api-docs)
+Together, these modules demonstrate **spec producer / spec consumer symmetry**.
 
-* **OpenAPI YAML**  
-  👉 [http://localhost:8084/customer-service/v3/api-docs.yaml](http://localhost:8084/customer-service/v3/api-docs.yaml)
+---
 
-> The YAML/JSON specification above is the **canonical contract** consumed by  
-> **`customer-service-client`**.
+## Testing
 
-### Example Wrapper Snippet (Page-only nested generics)
-
-```yaml
-ServiceResponsePageCustomerDto:
-  allOf:
-    - $ref: "#/components/schemas/ServiceResponse"
-    - type: object
-      properties:
-        data:
-          $ref: "#/components/schemas/PageCustomerDto"
-  x-api-wrapper: true
-  x-api-wrapper-datatype: PageCustomerDto
-  x-data-container: Page
-  x-data-item: CustomerDto
 ```
-
-`x-data-container` and `x-data-item` are emitted **only** when `data` is a `Page<...>`.
-
----
-
-## ⚠️ Error Response (RFC 9457)
-
-If a resource is missing:
-
-```bash
-curl -X GET "http://localhost:8084/customer-service/v1/customers/999"
-```
-
-**Response:**
-
-```json
-{
-  "type": "urn:customer-service:problem:not-found",
-  "title": "Resource not found",
-  "status": 404,
-  "detail": "Requested resource was not found.",
-  "instance": "/customer-service/v1/customers/999",
-  "errorCode": "NOT_FOUND",
-  "extensions": {
-    "errors": [
-      {
-        "code": "NOT_FOUND",
-        "message": "Customer not found: 999",
-        "resource": "Customer"
-      }
-    ]
-  }
-}
-```
-
-> Content-Type: `application/problem+json` — compliant with **RFC 9457** (*obsoletes RFC 7807*).
-> Spring’s `ProblemDetail` maps directly to this structure.
-
----
-
-## 🧪 Testing
-
-```bash
 cd customer-service
 mvn verify
 ```
 
 ---
 
-## 🖖 Notes
+## Contributing
 
-* Uses shared response models from **`io.github.bsayli:api-contract`**.
-* Demonstrates **`ServiceResponse<T>`** and the paged variant **`ServiceResponse<Page<T>>`**.
-* Adds wrapper typing hints via vendor extensions (`x-api-wrapper`, `x-api-wrapper-datatype`).
-* Adds pagination container hints **only when** `Page<T>` is involved (`x-data-container`, `x-data-item`).
-* Implements **RFC 9457–compliant Problem Details** (`application/problem+json`) responses.
-* Provides **unit and integration tests** for controller logic and OpenAPI customization.
-* Supports optional annotation injection for generated wrappers via `app.openapi.wrapper.class-extra-annotation`.
+Contributions and architectural discussions are welcome.
+
+Please open an issue or start a discussion in the repository.
 
 ---
 
-## 📦 Related Module
+## License
 
-This service is the API producer for the generated client:
-
-* [customer-service-client](../customer-service-client/README.md) — Java client generated from this service's OpenAPI spec, supporting Page-aware wrappers and RFC 9457 problem decoding.
-
----
-
-## 💬 Feedback
-
-If you spot an error or have suggestions, open an issue or join the discussion — contributions are welcome.
-💭 [Start a discussion →](https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions)
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-Feel free to [open an issue](https://github.com/bsayli/spring-boot-openapi-generics-clients/issues) or submit a PR.
-
----
-
-## 🛡 License
-
-This repository is licensed under **MIT** (root `LICENSE`). Submodules inherit the license.
+MIT License — see repository root `LICENSE` file.

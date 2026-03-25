@@ -6,7 +6,6 @@ import io.github.bsayli.apicontract.paging.SortDirection;
 import io.github.bsayli.customerservice.client.adapter.CustomerClientAdapter;
 import io.github.bsayli.customerservice.client.customer.CustomerSortField;
 import io.github.bsayli.customerservice.client.generated.api.CustomerControllerApi;
-import io.github.bsayli.customerservice.client.generated.dto.*;
 import io.github.bsayli.customerservice.client.generated.dto.CustomerCreateRequest;
 import io.github.bsayli.customerservice.client.generated.dto.CustomerDeleteResponse;
 import io.github.bsayli.customerservice.client.generated.dto.CustomerDto;

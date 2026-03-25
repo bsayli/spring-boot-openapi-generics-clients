@@ -5,40 +5,40 @@ parent: Adoption Guides
 nav_order: 1
 ---
 
-# Server-Side Adoption — Spring MVC + Springdoc
 
-This guide shows how to adopt a **shared success envelope** in a Spring MVC service and publish an **OpenAPI 3.1** contract that enables **thin, type‑safe client generation** — without duplicating response models.
+# Server‑Side Adoption — Contract Lifecycle Publication Stage
 
-The intent is not to dump all implementation details here. It’s to make the adoption **mentally executable**: what you add, why it matters, and what to verify.
+This guide explains how a Spring MVC service participates in the **contract lifecycle architecture** by publishing a **deterministic, semantics‑explicit OpenAPI 3.1 contract**.
 
-> **Scope**: Spring MVC (WebMVC) + Springdoc
-> **Out of scope**: WebFlux, reactive servers
+The objective is practical adoption clarity:
+
+* what architectural responsibility belongs to the server
+* which concrete components shape the published contract
+* how to verify that response semantics remain stable for downstream clients
+
+> **Scope:** Spring MVC (WebMVC) + Springdoc
+> **Out of scope:** WebFlux, reactive pipelines, transport resilience concerns
 
 ---
 
-## 📑 Table of Contents (Updated)
+## 📑 Table of Contents
 
 * [🎯 Goals](#-goals)
+* [🧭 Lifecycle Responsibility of the Server](#-lifecycle-responsibility-of-the-server)
 * [✅ Prerequisites](#-prerequisites)
 * [🧱 Shared Response Contract](#-shared-response-contract)
 * [📦 Dependencies](#-dependencies)
-* [🧩 OpenAPI Schema Enrichment (Who Does What)](#-openapi-schema-enrichment-who-does-what)
+* [🧩 OpenAPI Schema Enrichment Pipeline](#-openapi-schema-enrichment-pipeline)
+
   * [What gets added to the spec](#what-gets-added-to-the-spec)
-  * [1) The baseline: shared schema names and constants](#1-the-baseline-shared-schema-names-and-constants)
-    * [OpenApiSchemas](#openapischemas)
-  * [2) The “base contract” schemas](#2-the-base-contract-schemas)
-    * [SwaggerResponseCustomizer](#swaggerresponsecustomizer)
-  * [3) Detecting what should get a wrapper](#3-detecting-what-should-get-a-wrapper)
-    * [ResponseTypeIntrospector](#responsetypeintrospector)
-  * [4) Building the composed wrapper schema](#4-building-the-composed-wrapper-schema)
-    * [ApiResponseSchemaFactory](#apiresponseschemafactory)
-  * [5) Registering wrappers into the OpenAPI components](#5-registering-wrappers-into-the-openapi-components)
-    * [AutoWrapperSchemaCustomizer](#autowrapperschemacustomizer)
-  * [6) Deterministic Naming (How to think about schema names)](#7-deterministic-naming-how-to-think-about-schema-names)
-    * [Data schema reference name](#data-schema-reference-name)
-    * [Wrapper schema name](#wrapper-schema-name)
+  * [1) Baseline schema constants — OpenApiSchemas](#1-baseline-schema-constants--openapischemas)
+  * [2) Base contract schema registration — SwaggerResponseCustomizer](#2-base-contract-schema-registration--swaggerresponsecustomizer)
+  * [3) Wrapper eligibility detection — ResponseTypeIntrospector](#3-wrapper-eligibility-detection--responsetypeintrospector)
+  * [4) Composed wrapper schema construction — ApiResponseSchemaFactory](#4-composed-wrapper-schema-construction--apiresponseschemafactory)
+  * [5) Wrapper registration & pagination hints — AutoWrapperSchemaCustomizer](#5-wrapper-registration--pagination-hints--autowrapperschemacustomizer)
+  * [6) Deterministic naming model](#6-deterministic-naming-model)
 * [🧭 Suggested Package Layout](#-suggested-package-layout)
-* [🎯 Outcome](#-outcome)
+* [🎯 Architectural Outcome](#-architectural-outcome)
 
 ---
 
@@ -46,11 +46,31 @@ The intent is not to dump all implementation details here. It’s to make the ad
 
 After completing this guide, your Spring MVC service will:
 
-* return all successful responses using **one shared envelope**
-* publish a **deterministic OpenAPI 3.1** contract that clients can consume safely
-* enable **thin wrapper generation** on the client side (no duplicated envelope fields)
+* return all successful responses using **one shared canonical envelope**
+* publish a **deterministic OpenAPI 3.1 contract projection**
+* enable **thin generics‑aware wrapper generation** on the client side
+* preserve **response contract identity** across service boundaries
 
-The server does **not** generate clients. It publishes **what it guarantees** in the contract.
+The server does **not** generate clients.
+It publishes **explicit contract guarantees** that downstream consumers can rely on safely.
+
+---
+
+## 🧭 Lifecycle Responsibility of the Server
+
+Within the contract lifecycle architecture, the server is the **semantic authority stage**.
+
+Its responsibility is to:
+
+* define runtime response semantics using the shared canonical envelope
+* project those semantics into OpenAPI in a **deterministic and explicit form**
+* avoid embedding generator‑specific assumptions into runtime behaviour
+
+This separation ensures:
+
+> Runtime payload handling remains simple, while specification publication becomes architecture‑aware.
+
+OpenAPI therefore acts as a **projection layer of contract semantics**, not the runtime source of truth.
 
 ---
 
@@ -58,383 +78,300 @@ The server does **not** generate clients. It publishes **what it guarantees** in
 
 You should already have:
 
-* Spring Boot 3.5.x app using **Spring MVC**
-* Springdoc configured for `/v3/api-docs` (JSON/YAML)
-* controllers returning DTOs
+* a Spring Boot 3.5.x application using Spring MVC
+* Springdoc configured to expose `/v3/api-docs`
+* controllers returning domain DTOs
 
-This guide uses Maven snippets, but the idea is build-tool agnostic.
+Build examples use Maven for clarity; the architecture itself is build‑tool agnostic.
 
 ---
 
 ## 🧱 Shared Response Contract
 
-All successful responses are wrapped using a **shared contract module**:
+All successful responses use the shared canonical contract module:
 
 ```
 io.github.bsayli:api-contract
 ```
 
-Your service imports and uses:
+Controllers return:
 
-* `ServiceResponse<T>` — success envelope
+* `ServiceResponse<T>` — canonical success envelope
 * `Meta` — response metadata
-* `Page<T>` — paging container
+* `Page<T>` — pagination container
 * `Sort` — sorting metadata
 
-These types are **not implemented locally**. Your code reuses them directly.
+These types are **not re‑implemented locally**.
+They remain the **single runtime source of truth** for response semantics.
 
-### Supported Response Shapes
+### Supported Contract‑Aware Shapes
 
-Only the following shapes are treated as **contract-aware** for client generation:
+| Shape                      | Contract‑aware | Notes                            |
+| -------------------------- | -------------- | -------------------------------- |
+| `ServiceResponse<T>`       | ✅              | explicitly supported             |
+| `ServiceResponse<Page<T>>` | ✅              | deterministic nested generic     |
+| `ServiceResponse<List<T>>` | ❌              | published with default semantics |
+| arbitrary nested generics  | ❌              | intentionally unsupported        |
 
-| Shape                      | Contract-aware | Notes                           |
-| -------------------------- | -------------- | ------------------------------- |
-| `ServiceResponse<T>`       | ✅              | supported and enriched          |
-| `ServiceResponse<Page<T>>` | ✅              | supported and enriched          |
-| `ServiceResponse<List<T>>` | ❌              | published as-is (defaults)      |
-| other nested generics      | ❌              | published as-is (no guarantees) |
+Constraining supported shapes ensures:
 
-This keeps the contract small, deterministic, and generator-friendly.
+* stable schema naming
+* predictable client generation behaviour
+* long‑term evolvability of the contract surface
 
 ---
 
 ## 📦 Dependencies
 
-This section explains the **minimum but realistic Maven setup** required on the **server side** to:
+A minimal Maven setup sufficient for publishing a contract‑aware OpenAPI specification:
 
-* expose `ServiceResponse<T>` directly from your controllers,
-* publish an **OpenAPI 3.1** specification via Springdoc,
-* enrich that specification later using custom OpenAPI customizers.
-
-The goal is clarity: *what you must add*, *why it exists*, and *what you should verify* — without copying a full production `pom.xml`.
-
----
-
-## 1) Spring Boot Baseline
-
-This guide assumes **Spring Boot 3.5.11** (or another 3.5.x version) using **Spring MVC (WebMVC)**.
-
-Using the Spring Boot parent keeps dependency alignment predictable:
+### Spring Boot baseline
 
 ```xml
 <parent>
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-starter-parent</artifactId>
-  <version>3.5.11</version>
-  <relativePath/>
+  <version>3.5.12</version>
 </parent>
 ```
 
-You do **not** need to declare versions for Spring-managed starters unless you intentionally override them.
-
----
-
-## 2) Required Properties
-
-Only a small set of properties are required for server-side adoption:
+### Required properties
 
 ```xml
 <properties>
   <java.version>21</java.version>
-
-  <!-- OpenAPI publication -->
   <springdoc-openapi-starter.version>2.8.16</springdoc-openapi-starter.version>
-
-  <!-- Shared response contract -->
   <api-contract.version>0.7.7</api-contract.version>
 </properties>
 ```
 
-Notes:
-
-* Springdoc is versioned explicitly because it is *not* managed by Spring Boot.
-* `api-contract` is versioned explicitly because it is your **shared API contract**.
-
----
-
-## 3) Core Dependencies
-
-The following dependencies are sufficient for publishing a contract-aware OpenAPI specification.
+### Core dependencies
 
 ```xml
 <dependencies>
-
-  <!-- Shared API contract (used directly by controllers) -->
   <dependency>
     <groupId>io.github.bsayli</groupId>
     <artifactId>api-contract</artifactId>
     <version>${api-contract.version}</version>
   </dependency>
 
-  <!-- Spring MVC / REST controllers -->
   <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-web</artifactId>
   </dependency>
 
-  <!-- Bean validation (commonly used with request/response DTOs) -->
   <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-validation</artifactId>
   </dependency>
 
-  <!-- OpenAPI 3.1 publication via Springdoc -->
   <dependency>
     <groupId>org.springdoc</groupId>
     <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
     <version>${springdoc-openapi-starter.version}</version>
   </dependency>
-
 </dependencies>
 ```
 
-### Why each dependency exists
-
-| Dependency                            | Why it is needed                                                                                                         |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `api-contract`                        | Provides `ServiceResponse<T>`, `Meta`, `Page<T>`, `Sort`, and RFC 9457 helpers. Controllers return these types directly. |
-| `spring-boot-starter-web`             | Enables Spring MVC controllers and JSON serialization.                                                                   |
-| `spring-boot-starter-validation`      | Commonly used with request/response DTOs and integrates cleanly with OpenAPI.                                            |
-| `springdoc-openapi-starter-webmvc-ui` | Generates `/v3/api-docs` (OpenAPI 3.1) and Swagger UI.                                                                   |
-
-Nothing else is required to *publish* the contract.
+These dependencies are sufficient to **publish the contract projection**.
 
 ---
 
-## 🧩 OpenAPI Schema Enrichment (Who Does What)
+## 🧩 OpenAPI Schema Enrichment Pipeline
 
-To enable **thin wrappers** on the client side, the server enriches the OpenAPI specification **during Springdoc generation time**.
+Thin client wrappers become possible only if the server publishes **semantically enriched wrapper schemas** during Springdoc generation.
 
-This enrichment does **not** change runtime behavior and does **not** affect the JSON payload. It only makes the published specification:
+This enrichment:
 
-* **explicit** (what the server publishes is visible in the spec)
-* **predictable** (schema names and wrapper shapes are stable)
-* **template-friendly** (client templates can bind generics without duplicating the contract)
+* does not affect runtime JSON payloads
+* does not introduce custom serialization logic
+* only shapes the **OpenAPI contract projection surface**
 
-Below is the mental model of *which class exists for what* in the server module.
+Think of this pipeline as the **publication engine room** of the architecture.
 
 ---
 
 ### What gets added to the spec
 
-At generation time, the server adds:
+At OpenAPI generation time the service contributes:
 
-* detection of controller return types that use `ServiceResponse<T>`
-* special handling for pagination as `ServiceResponse<Page<T>>`
-* composed wrapper schemas (`ServiceResponse{DataRef}`) for a limited, explicit set of shapes
-* vendor extensions that guide client templates (`x-api-wrapper`, `x-data-container`, …)
+* detection of controller return types using `ServiceResponse<T>`
+* deterministic handling of pagination envelopes
+* composed wrapper schemas named `ServiceResponse{DataRef}`
+* vendor extensions guiding client generation templates
 
 ---
 
-### 1) The baseline: shared schema names and constants
+### 1) Baseline schema constants — OpenApiSchemas
 
-### OpenApiSchemas
+**Purpose:** centralize canonical schema names and vendor‑extension keys.
 
-**Why it exists:** one place for canonical schema names, property keys, and vendor extension keys.
+Responsibilities:
 
-What it centralizes:
-
-* common properties: `data`, `meta`
-* base schema names: `ServiceResponse`, `Meta`, `Sort`, `ProblemDetail`
-* vendor extension keys:
+* define property names such as `data`, `meta`
+* define base schema identifiers: `ServiceResponse`, `Meta`, `Sort`, `ProblemDetail`
+* define vendor‑extension keys:
 
   * `x-api-wrapper`
   * `x-api-wrapper-datatype`
   * `x-data-container`
   * `x-data-item`
-  * optional: `x-class-extra-annotation`
 
-This keeps the rest of the code *string-safe* and reduces accidental drift.
-
----
-
-### 2) The “base contract” schemas
-
-### SwaggerResponseCustomizer
-
-**Why it exists:** ensure core envelope schemas exist in `#/components/schemas` even when Springdoc doesn’t materialize them the way we need.
-
-What it does:
-
-* registers `Sort`, `Meta`, and the **base** `ServiceResponse` schema
-* keeps the base `ServiceResponse` intentionally simple:
-
-  * `meta` is strongly typed (`#/components/schemas/Meta`)
-  * `data` is present but not bound to a specific DTO here
-
-**Reasoning:** the `data` binding is made explicit later in the composed wrapper schemas. This avoids a “free-form data object” ambiguity and keeps the contract consistent.
+This prevents naming drift and keeps schema evolution predictable.
 
 ---
 
-### 3) Detecting what should get a wrapper
+### 2) Base contract schema registration — SwaggerResponseCustomizer
 
-### ResponseTypeIntrospector
+**Purpose:** ensure core envelope primitives exist in `#/components/schemas`.
 
-**Why it exists:** Spring MVC controllers often return nested wrappers (`ResponseEntity<…>`, async types, etc.). This component normalizes those signatures and extracts the *data reference name* used for wrapper schema naming.
+Key behaviour:
 
-What it does:
+* registers canonical schemas such as `Meta`, `Sort`, and the base `ServiceResponse`
+* keeps the base envelope intentionally **data‑agnostic**
 
-1. **Unwraps** common wrappers (up to a safe depth) until it reaches `ServiceResponse<T>`.
+Reasoning:
 
-  * `ResponseEntity<…>`
-  * `CompletionStage<…>`, `Future<…>`
-  * `DeferredResult<…>`, `WebAsyncTask<…>`
-  * (and it ignores reactive wrappers as out-of-scope for this guide)
-2. Once it reaches `ServiceResponse<T>`, it determines whether the `T` shape is one of the **explicitly supported** shapes:
+> Data typing is made explicit later via composed wrapper schemas.
 
-  * `T` is a plain DTO type → returns `"CustomerDto"`
-  * `T` is `Page<CustomerDto>` → returns `"PageCustomerDto"`
-  * anything else (`List<T>`, `Map<K,V>`, `Foo<Bar>`) → returns empty
-
-**What “empty” means:** no auto wrapper schema is registered; Springdoc/OpenAPI Generator defaults apply.
-
-This is the mechanism that keeps the contract small and predictable.
+This separation stabilizes envelope identity across specification evolution.
 
 ---
 
-### 4) Building the composed wrapper schema
+### 3) Wrapper eligibility detection — ResponseTypeIntrospector
 
-### ApiResponseSchemaFactory
+**Purpose:** normalize controller return signatures and detect supported generic shapes.
 
-**Why it exists:** wrapper schema creation should be a pure, reusable operation with stable output.
+Typical controller signatures may include wrappers such as:
 
-What it produces:
+* `ResponseEntity<ServiceResponse<T>>`
+* async wrappers (`CompletionStage`, `DeferredResult`, etc.)
 
-A composed schema like:
+This component:
+
+1. unwraps transport or async containers
+2. detects whether the inner type is a **contract‑aware shape**
+
+Detection outcomes:
+
+* `ServiceResponse<CustomerDto>` → `CustomerDto`
+* `ServiceResponse<Page<CustomerDto>>` → `PageCustomerDto`
+* other shapes → ignored (default OpenAPI behaviour)
+
+This step defines **what the server explicitly guarantees in its contract surface**.
+
+---
+
+### 4) Composed wrapper schema construction — ApiResponseSchemaFactory
+
+**Purpose:** create deterministic wrapper schemas binding the canonical envelope to a concrete payload schema.
+
+Produced schemas follow a stable pattern:
 
 * `ServiceResponseCustomerDto`
 * `ServiceResponsePageCustomerDto`
 
-Implementation approach:
+Construction model:
 
-* `allOf` composition:
+* `allOf` composition
 
-  * base `#/components/schemas/ServiceResponse`
-  * plus an object that binds `data` to `#/components/schemas/{DataRef}`
+  * base `ServiceResponse`
+  * typed `data` property referencing the DTO schema
 
-Vendor extensions added on the wrapper schema:
-
-* `x-api-wrapper: true`
-* `x-api-wrapper-datatype: {DataRef}`
-* optional: `x-class-extra-annotation` (to let client wrappers inject an annotation hint)
-
-**Important note:** in your current code, `x-api-wrapper-datatype` is set to the `dataRefName` (e.g. `PageCustomerDto` for pagination). That’s fine as long as client templates treat it as “the data schema ref name”. Pagination item typing is handled separately via `x-data-container` / `x-data-item`.
+Vendor extensions added here provide semantic hints required by client templates.
 
 ---
 
-### 5) Registering wrappers into the OpenAPI components
+### 5) Wrapper registration & pagination hints — AutoWrapperSchemaCustomizer
 
-### AutoWrapperSchemaCustomizer
+**Purpose:** coordinate controller discovery, eligibility detection, and wrapper schema registration.
 
-**Why it exists:** it is the coordinator that ties together:
+Key orchestration steps:
 
-* controller discovery (Spring MVC mappings)
-* type introspection (`ResponseTypeIntrospector`)
-* wrapper schema creation (`ApiResponseSchemaFactory`)
-* optional pagination hints (`x-data-container`, `x-data-item`)
+1. scan Spring MVC handler mappings
+2. resolve wrapper‑eligible response shapes
+3. register composed schemas only if DTO schemas already exist
 
-How it works at a glance:
+This guard prevents accidental publication of **phantom wrapper schemas**.
 
-1. Scans Spring MVC handler mappings (`RequestMappingHandlerMapping`) to find controller methods.
-2. For each method, asks the introspector for a `dataRefName`.
-3. For each returned ref name:
+Pagination semantics are surfaced using:
 
-  * **guards** that Springdoc already has a schema for that ref (`schemas.containsKey(ref)`)
-  * registers a composed wrapper schema named `ServiceResponse{ref}`
-  * enriches vendor extensions for pagination wrappers
+* `x-data-container: Page`
+* `x-data-item: <DtoType>`
 
-Why the guard matters:
-
-* this code never invents data component schemas; it only wraps what Springdoc materialized.
-* this prevents “phantom” wrapper schemas that don’t actually correspond to published DTO schemas.
-
-Pagination hints:
-
-* if the `dataRefName` starts with `Page` (container match)
-* resolve the container schema, extract the item type via `content.items.$ref`
-* add:
-
-  * `x-data-container: Page`
-  * `x-data-item: CustomerDto`
-
-These two hints are what allow client templates to generate:
+These hints allow client generators to safely emit nested generic wrappers such as:
 
 ```java
-class ServiceResponsePageCustomerDto extends ServiceResponse<Page<CustomerDto>> {}
+class ServiceResponsePageCustomerDto
+    extends ServiceResponse<Page<CustomerDto>> {}
 ```
-
-without guessing.
 
 ---
 
-### 6) Deterministic Naming (How to think about schema names)
+### 6) Deterministic naming model
 
-You only need one naming model while adopting and debugging:
+Adopt a single naming mental model when reasoning about wrapper schemas.
 
-### Data schema reference name
-
-Used for binding `data` in wrapper schemas.
+**Data reference naming**
 
 * `T` → `T`
-* `Page<T>` → `Page` + `T`
+* `Page<T>` → `PageT`
 
 Examples:
 
 * `ServiceResponse<CustomerDto>` → `CustomerDto`
 * `ServiceResponse<Page<CustomerDto>>` → `PageCustomerDto`
 
-### Wrapper schema name
+**Wrapper schema naming**
 
-Wrapper schemas are composed and always named:
+Always:
 
-* `ServiceResponse` + `{DataRef}`
+```
+ServiceResponse + {DataRef}
+```
 
 Examples:
 
 * `ServiceResponseCustomerDto`
 * `ServiceResponsePageCustomerDto`
 
+Consistency here directly influences long‑term schema stability.
+
 ---
 
 ## 🧭 Suggested Package Layout
 
-A minimal, copy-friendly layout showing **where OpenAPI publication ends** and **schema enrichment begins**:
-
 ```text
-src/main/java/<base.package>/
-  common/
-    openapi/
-      OpenApiConfig.java
-      OpenApiConstants.java
-      OpenApiSchemas.java
-      ApiResponseSchemaFactory.java
-      SwaggerResponseCustomizer.java
+common/
+  openapi/
+    OpenApiConfig.java
+    OpenApiSchemas.java
+    ApiResponseSchemaFactory.java
+    SwaggerResponseCustomizer.java
 
-      introspector/
-        ResponseTypeIntrospector.java
+    introspector/
+      ResponseTypeIntrospector.java
 
-      autoreg/
-        AutoWrapperSchemaCustomizer.java
+    autoreg/
+      AutoWrapperSchemaCustomizer.java
 ```
 
-**Intent (brief):**
+Intent:
 
-* `openapi/` → OpenAPI baseline + shared schema primitives
-* `introspector/` → decide which response shapes are contract-aware
-* `autoreg/` → register wrapper schemas and vendor extensions
-
-This structure keeps OpenAPI concerns isolated and easy to lift into another service.
+* isolate contract publication concerns
+* enable lift‑and‑shift reuse across multiple services
 
 ---
 
-## 🎯 Outcome
+## 🎯 Architectural Outcome
 
-Your service now:
+After adoption, your service:
 
-* publishes a **stable and contract-explicit OpenAPI 3.1 specification**
-* uses **one shared success envelope** from `api-contract`
-* provides explicit, deterministic support for **Page-only nested generics**
-* enables thin, type-safe client generation without duplicating response wrappers
+* publishes a **contract‑explicit OpenAPI projection** aligned with runtime semantics
+* preserves **response envelope identity** across producer–consumer boundaries
+* bounds schema evolution risk through deterministic wrapper modelling
+* enables downstream client generation pipelines to remain **regeneration‑safe**
 
-The server publishes **only the response semantics it explicitly guarantees**.  
-All other shapes remain under Springdoc and OpenAPI Generator default behavior.
+The server now operates as the **semantic authority stage** of the contract lifecycle.
+
+Consumers can rely on the published specification without reverse‑engineering generator behaviour.

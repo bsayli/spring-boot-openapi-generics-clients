@@ -35,16 +35,16 @@ final class ProblemDetailFallbacks {
       "UPSTREAM_STATUS_UNAVAILABLE";
 
   private static final URI TYPE_NON_JSON =
-          URI.create("urn:customer-service-client:problem:client-fallback-upstream-non-json");
+      URI.create("urn:customer-service-client:problem:client-fallback-upstream-non-json");
 
   private static final URI TYPE_UNPARSABLE =
-          URI.create("urn:customer-service-client:problem:client-fallback-upstream-unparsable");
+      URI.create("urn:customer-service-client:problem:client-fallback-upstream-unparsable");
 
   private static final URI TYPE_EMPTY =
-          URI.create("urn:customer-service-client:problem:client-fallback-upstream-empty");
+      URI.create("urn:customer-service-client:problem:client-fallback-upstream-empty");
 
   private static final URI TYPE_STATUS_UNAVAILABLE =
-          URI.create("urn:customer-service-client:problem:client-fallback-upstream-status-unavailable");
+      URI.create("urn:customer-service-client:problem:client-fallback-upstream-status-unavailable");
 
   private static final String ERROR_ITEM_RESOURCE_UPSTREAM = "upstream";
   private static final String ERROR_ITEM_FIELD_CONTENT_TYPE = "contentType";

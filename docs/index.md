@@ -4,70 +4,86 @@ title: Home
 nav_order: 1
 ---
 
-# Spring Boot OpenAPI Generics — Adoption Hub
+# Spring Boot OpenAPI Generics — Architecture Adoption Hub
 
-> A **reference implementation** for **contract-driven, generics-aware OpenAPI client generation**
-> built with Spring Boot, Springdoc, and OpenAPI Generator.
+> A **reference architecture adoption guide** for building **contract‑driven, generics‑aware API boundaries**
+> using Spring Boot, Springdoc, and OpenAPI Generator.
 
 ---
 
 ## Welcome 👋
 
-This documentation describes a **domain-agnostic, single-contract approach** where
-**both server and client** share the same canonical success envelope:
+This documentation introduces a **contract lifecycle approach** for designing and evolving HTTP API boundaries where
+**server and client share a single canonical success envelope**:
 
 > **Canonical success envelope:** `ServiceResponse<T>`
 
-* No duplicated envelopes
-* No parallel client models
-* No schema drift between server and client
+Rather than treating OpenAPI generation as a tooling detail, this approach treats it as an **architectural concern**.
 
-The result is an **end-to-end, type-safe API boundary** with:
+It enables teams to:
 
-* deterministic OpenAPI output
-* explicit, limited generic support
-* **RFC 9457-compliant error handling**
+* preserve response contract identity across service boundaries
+* avoid duplicated envelope DTO hierarchies
+* maintain deterministic client generation behaviour over time
+* evolve APIs safely without silent schema drift
+
+The outcome is an **end‑to‑end, type‑safe integration boundary** supported by:
+
+* deterministic OpenAPI publication
+* explicit and intentionally limited generic scope
+* **RFC 9457‑aligned error semantics**
+
+This hub serves as the **architectural onboarding entry point** for adopting the pattern.
 
 ---
 
 ## 📑 Table of Contents
 
-- [What This Pattern Solves](#-what-this-pattern-solves)
-- [Canonical Contract (Single Source of Truth)](#-canonical-contract-single-source-of-truth)
-- [High-Level Architecture](#-highlevel-architecture)
-- [Thin Wrapper Generation](#-thin-wrapper-generation-conceptual)
-- [Error Handling (RFC 9457)](#-error-handling-rfc-9457-first)
-- [Getting Started](#-getting-started-conceptual-flow)
-- [Toolchain](#-toolchain-reference)
-- [Adoption Guides](#-adoption-guides)
-- [Design Principles & Outcomes](#-design-principles--outcomes)
-- [References & External Links](#-references--external-links)
+* [What This Architecture Solves](#-what-this-architecture-solves)
+* [Canonical Contract (Single Source of Truth)](#-canonical-contract-single-source-of-truth)
+* [Contract Lifecycle Overview](#-contract-lifecycle-overview)
+* [Semantic Wrapper Generation Model](#-semantic-wrapper-generation-model)
+* [Error Handling (RFC 9457)](#-error-handling-rfc-9457-first)
+* [Adoption Flow (Conceptual)](#-adoption-flow-conceptual)
+* [Toolchain Roles](#-toolchain-roles)
+* [Adoption Guides](#-adoption-guides)
+* [Design Principles & Architectural Outcomes](#-design-principles--architectural-outcomes)
+* [References & External Links](#-references--external-links)
 
 ---
 
+## 💡 What This Architecture Solves
 
-## 💡 What This Pattern Solves
-
-Modern HTTP APIs almost always wrap responses:
+In mature distributed systems, HTTP responses are rarely raw payloads.
+They typically include:
 
 * metadata (pagination, sorting, timestamps)
-* data payloads
-* standardized error structures
+* structured domain data
+* standardized error representations
 
-Yet most OpenAPI‑based workflows still suffer from fundamental issues:
+However, conventional OpenAPI‑driven workflows often introduce architectural friction:
 
-* generics are flattened or erased
-* envelopes are duplicated on the client
-* nested containers produce unstable or ambiguous schemas
-* client contracts silently diverge from server contracts
+* generic envelope intent is flattened or erased
+* client generators duplicate response structures per endpoint
+* nested container semantics become ambiguous
+* schema naming drifts across specification evolution
+* generated clients diverge from runtime server contracts
 
-This pattern solves these problems by enforcing **one shared contract** and making OpenAPI generation **generics‑aware by design**, not by convention.
+Over time, these issues lead to:
+
+* brittle integrations
+* excessive client boilerplate
+* reduced type safety
+* unclear contract ownership
+
+This architecture addresses these challenges by establishing **one shared runtime contract** and ensuring that
+OpenAPI acts as a **semantic projection layer**, not as the source of truth.
 
 ---
 
 ## 🧱 Canonical Contract (Single Source of Truth)
 
-All **successful responses** — on **both server and client** — use the same envelope:
+All successful responses — on **both producer and consumer sides** — use the same envelope abstraction:
 
 > `ServiceResponse<T>`
 
@@ -75,67 +91,54 @@ Provided by the shared module:
 
 `io.github.bsayli:api-contract:0.7.7`
 
-This module defines the **only** envelope, paging, and metadata types used across the system.
+This artifact defines the **only authoritative response envelope, paging primitives, and metadata model**.
 
-### Supported Shapes (Guaranteed vs. Default)
+### Supported Shapes (Guaranteed vs Default)
 
-| Shape                       | Supported | Notes                                                       |
-| --------------------------- | --------- | ----------------------------------------------------------- |
-| `ServiceResponse<T>`        | ✅        | Canonical success envelope (explicitly guaranteed)          |
-| `ServiceResponse<Page<T>>`  | ✅        | **Guaranteed nested generic**                               |
-| `ServiceResponse<List<T>>`  | ⚠️        | Uses OpenAPI Generator default behavior (not part of contract) |
-| `ServiceResponse<Map<K,V>>` | ⚠️        | Uses OpenAPI Generator default behavior                     |
-| Arbitrary nested generics   | ❌        | Outside the canonical contract                              |
+| Shape                       | Supported | Notes                                                 |
+| --------------------------- | --------- | ----------------------------------------------------- |
+| `ServiceResponse<T>`        | ✅         | Canonical success envelope (explicit guarantee)       |
+| `ServiceResponse<Page<T>>`  | ✅         | Deterministic nested generic support                  |
+| `ServiceResponse<List<T>>`  | ⚠️        | Generator default behaviour (outside canonical scope) |
+| `ServiceResponse<Map<K,V>>` | ⚠️        | Generator default behaviour                           |
+| Arbitrary nested generics   | ❌         | Intentionally unsupported                             |
 
-This approach **does not restrict or modify** OpenAPI Generator’s default handling
-of standard Java collection types such as `List<T>` or `Map<K,V>`.
-
-It defines **explicit guarantees only** for:
-- `ServiceResponse<T>`
-- `ServiceResponse<Page<T>>`
-
-All other shapes are intentionally left **outside the canonical contract** to preserve
-deterministic schema naming and generator-safe evolution across versions.
+The design goal is **predictable long‑term schema evolution**, not exhaustive generic modelling.
 
 ---
 
-## 🧩 High‑Level Architecture
+## 🧩 Contract Lifecycle Overview
 
 ```
-[any-service]
-   └─ publishes OpenAPI 3.1 spec
-        └─ enriched with wrapper semantics
-              │
-              ▼
-[generated-client]
-   └─ thin wrapper models
-        └─ extend ServiceResponse<T>
-              │
-              ▼
-[consumer applications]
-   └─ depend only on adapters
+[Canonical Contract Definition]
+        ↓
+[Deterministic OpenAPI Publication]
+        ↓
+[Semantics‑Aware Client Generation]
+        ↓
+[Adapter‑Bound Application Consumption]
 ```
 
-### Core Principle
+Each stage reinforces **contract identity preservation** and limits the surface area where accidental divergence can occur.
 
-> **The OpenAPI specification describes contracts — not implementations.**
+Key principle:
 
-Wrapper semantics are expressed via vendor extensions, but **all concrete Java types** come from the shared `api-contract` module.
+> The OpenAPI specification expresses **contract semantics**, while the shared contract module defines **runtime truth**.
 
 ---
 
-## 🧠 Thin Wrapper Generation (Conceptual)
+## 🧠 Semantic Wrapper Generation Model
 
-The server publishes OpenAPI schemas enriched with semantic hints such as:
+The server publishes wrapper schemas enriched with semantic metadata such as:
 
 ```
 x-api-wrapper: true
 x-api-wrapper-datatype: <DomainDto>
-x-data-container: Page        # only for Page<T>
-x-data-item: <DomainDto>      # only for Page<T>
+x-data-container: Page
+x-data-item: <DomainDto>
 ```
 
-The client build uses a minimal Mustache overlay to generate **thin wrapper classes** like:
+Client generation templates interpret these hints to emit **thin inheritance‑based wrapper classes**:
 
 ```java
 public class ServiceResponseFooDto
@@ -147,95 +150,83 @@ public class ServiceResponsePageFooDto
     extends ServiceResponse<Page<FooDto>> {}
 ```
 
-* No envelope logic is duplicated
-* No runtime reflection or adapters are required
-* All behavior comes from the shared contract
+This approach ensures:
+
+* envelope logic is never duplicated
+* nested generic semantics remain intact
+* runtime serialization behaviour stays symmetric
 
 ---
 
 ## ⚠️ Error Handling (RFC 9457 First)
 
-All non‑2xx responses are modeled as **RFC 9457 Problem Details** and surfaced to the client as a single exception type:
+Non‑2xx responses follow **RFC 9457 Problem Details semantics** and are surfaced to consumers as:
 
 `ApiProblemException`
 
-This exception:
+This guarantees:
 
-* wraps the decoded `ProblemDetail`
-* preserves the HTTP status
-* carries full error context for logging and diagnostics
-
-Client‑side error handling therefore mirrors Spring’s server‑side semantics.
+* structured error propagation
+* consistent diagnostic context
+* symmetry between Spring server behaviour and generated client runtime
 
 ---
 
-## 🚀 Getting Started (Conceptual Flow)
+## 🚀 Adoption Flow (Conceptual)
 
-1. **Server‑side** publishes a generics‑aware OpenAPI 3.1 contract
-2. **Client‑side build** consumes that spec using template overlays
-3. **Generated wrappers** extend `ServiceResponse<T>` from `api-contract`
-4. **Consumers** interact only with stable adapters
+1. A **producer service** publishes a generics‑aware deterministic OpenAPI contract.
+2. A **consumer build pipeline** interprets wrapper semantics via controlled template overlays.
+3. Generated wrappers bind directly to the shared canonical contract artifact.
+4. Application code interacts only with **stable adapter interfaces**.
 
-Concrete setup steps are covered in the adoption guides below.
+This separation keeps **generation concerns inside the build boundary**, protecting domain logic from tooling churn.
 
 ---
 
-## 📦 Toolchain (Reference)
+## 📦 Toolchain Roles
 
-| Component         | Role                    |
-|-------------------| ----------------------- |
-| Java 21           | Language baseline       |
-| Spring Boot 3.5.x | REST runtime            |
-| Springdoc         | OpenAPI 3.1 producer    |
-| OpenAPI Generator | Client code generation  |
-| HttpClient5       | Production HTTP backend |
+| Component          | Architectural Role               |
+| ------------------ | -------------------------------- |
+| Java 21            | Language baseline                |
+| Spring Boot 3.5.x  | Contract runtime & serialization |
+| Springdoc          | Deterministic OpenAPI projection |
+| OpenAPI Generator  | Governed client code emission    |
+| Apache HttpClient5 | Production‑grade HTTP transport  |
 
-Exact versions are pinned in the respective adoption guides to ensure reproducibility.
+Exact versions are pinned within individual adoption guides to ensure reproducible setups.
 
 ---
 
 ## 📚 Adoption Guides
 
-- **[Server-Side Adoption](adoption/server-side-adoption.md)** — Publish a deterministic, generics-aware OpenAPI 3.1 contract.
-- **[Client-Side Adoption](adoption/client-side-adoption.md)** — Integrate a generics-aware client using the shared canonical contract.
-  - **[Client-Side Build Setup](adoption/client-side-adoption-pom.md)** — Configure Maven, OpenAPI Generator, template overlays, and shared contract bindings.
+* **[Server-Side Adoption](adoption/server-side-adoption.md)** — Publish a deterministic, generics‑aware OpenAPI contract.
+* **[Client-Side Adoption](adoption/client-side-adoption.md)** — Integrate a generics‑aware client using shared contract semantics.
 
-Use these guides to adopt the pattern step by step:
+  * **[Client-Side Build Setup](adoption/client-side-adoption-pom.md)** — Configure Maven, generator templates, and contract bindings.
 
-* **Server-Side Adoption**  
-  How to expose `ServiceResponse<T>` and publish a deterministic, generics-aware OpenAPI contract.
-
-* **Client-Side Adoption**  
-  How to integrate the generated client into your application using shared contract semantics, RFC 9457 handling, and adapter boundaries.
-
-  * **Client-Side Build Setup**  
-    How to configure Maven plugins, dependencies, OpenAPI Generator, and Mustache overlays so generation stays deterministic and does not duplicate shared contract models.
-
-Each guide is **domain-agnostic** and focuses on the integration approach rather than concrete domain examples.
+Each guide focuses on **architectural integration steps**, remaining domain‑agnostic and tooling‑explicit.
 
 ---
 
-## 🎯 Design Principles & Outcomes
+## 🎯 Design Principles & Architectural Outcomes
 
-This approach is built around a small set of clear, intentional design outcomes:
+This pattern is built around a small set of intentional engineering outcomes:
 
-- A single response contract shared by server and client
-- No duplicated response envelopes across generated code
-- Predictable schema naming over time
-- A clearly defined scope for generics (pagination via `Page<T>`)
-- RFC 9457–based error modeling as a first-class concern
-- Client generation that remains stable as the API evolves
+* a single canonical response contract shared across boundaries
+* elimination of duplicated envelope DTO hierarchies
+* deterministic schema naming and generator stability
+* explicitly scoped nested generic support (`Page<T>`)
+* first‑class structured error modelling via RFC 9457
+* regeneration‑safe client integration through adapter isolation
 
-It is a **reference implementation** for teams who care about
-API clarity, long-term maintainability, and keeping server and client
-contracts aligned without drift.
+The result is a **clear, evolvable API boundary architecture** suitable for long‑lived service ecosystems.
 
 ---
 
 ## 🔗 References & External Links
 
-- 🌐 **GitHub Repository** — [spring-boot-openapi-generics-clients](https://github.com/bsayli/spring-boot-openapi-generics-clients)
-- 📘 **Medium** — [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+* 🌐 **GitHub Repository** — [spring-boot-openapi-generics-clients](https://github.com/bsayli/spring-boot-openapi-generics-clients)
+* 📘 **Medium** — [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
 
 ---
 
