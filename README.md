@@ -58,10 +58,21 @@ This repository demonstrates a different architectural stance:
 
 It presents a cohesive **contract lifecycle architecture** where a single canonical response model is:
 
+This repository demonstrates that approach through a minimal but end-to-end reference implementation.
+
 * defined once as a shared runtime abstraction
 * published deterministically through an OpenAPI specification
 * interpreted semantically during client generation
 * consumed safely behind stable application boundaries
+
+---
+
+> **Background reading**
+>
+> This repository demonstrates the implementation pattern.  
+> For the architectural reasoning and real-world context behind it:
+>
+> - [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
 
 ---
 
@@ -180,7 +191,7 @@ The shared contract module defines deterministic guarantees for supported respon
 | -------------------------- | --------- | --------------------------------------- |
 | `ServiceResponse<T>`       | ✅         | canonical success envelope              |
 | `ServiceResponse<Page<T>>` | ✅         | deterministic nested generic support    |
-| `ServiceResponse<List<T>>` | ⚠️        | default generator behavior preserved    |
+| `ServiceResponse<List<T>>` | ⚠️        |  treated as non-contract-aware shape (generator default behavior) |
 | Arbitrary nested generics  | ❌         | outside intentional architectural scope |
 
 This constrained design prioritizes **schema stability and long‑term evolvability** over exhaustive generic coverage.
@@ -239,9 +250,17 @@ predictable, maintainable, and safe to evolve over time.
 
 ## Proof: Generated Client Models (Before / After)
 
-Traditional OpenAPI client generation typically produces endpoint-specific response envelope DTOs that duplicate the canonical contract and erase nested generic intent.
+> **Illustrative comparison**
+>
+> The following simplified example highlights the structural difference  
+> between conventional OpenAPI generator output and contract-bound wrapper rendering.
 
 ### Before — flattened envelope models
+
+In many conventional OpenAPI client generation setups,
+endpoint-specific response envelope DTOs are produced,
+which may duplicate canonical contract structures
+and obscure nested generic intent.
 
 <p align="center">
   <img src="docs/images/proof/generated-client-wrapper-before.png" width="820"/>
@@ -346,8 +365,6 @@ customer-service-client/target/generated-sources/openapi/src/gen/java
 ---
 
 ## Adoption Guides
-
-Detailed step‑by‑step adoption documentation is available under:
 
 Step-by-step integration guides live under [`docs/adoption`](docs/adoption):
 
