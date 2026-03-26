@@ -213,23 +213,26 @@
                         <configuration>
                             <target>
 
-                                <!-- PATCH LAST MODELS BLOCK -->
-                                <replaceregexp byline="false" flags="s">
-                                    <regexp pattern="(.*)\{\{#models}}\s*\{\{#model}}[\s\S]*?\{\{\/model}}\s*\{\{\/models}}\s*$"/>
-                                    <substitution expression="\1{{#models}}{{#model}}{{#vendorExtensions.x-api-wrapper}}{{>api_wrapper}}{{/vendorExtensions.x-api-wrapper}}{{^vendorExtensions.x-api-wrapper}}{{#isEnum}}{{>modelEnum}}{{/isEnum}}{{^isEnum}}{{#vendorExtensions.x-is-one-of-interface}}{{>oneof_interface}}{{/vendorExtensions.x-is-one-of-interface}}{{^vendorExtensions.x-is-one-of-interface}}{{>pojo}}{{/vendorExtensions.x-is-one-of-interface}}{{/isEnum}}{{/vendorExtensions.x-api-wrapper}}{{/model}}{{/models}}"/>
-                                    <fileset dir="${openapi.templates.effective}">
-                                        <include name="**/Java/model.mustache"/>
-                                    </fileset>
-                                </replaceregexp>
+                                <!-- OPEN wrapper ONLY inside render models block -->
+                                <replaceregexp
+                                        byline="false"
+                                        flags="s"
+                                        file="${openapi.templates.effective}/Java/model.mustache"
+                                        match="\{\{#models\}\}\s*\{\{#model\}\}\s*\{\{#isEnum\}\}"
+                                        replace="{{#models}}{{#model}}{{#vendorExtensions.x-api-wrapper}}{{>api_wrapper}}{{/vendorExtensions.x-api-wrapper}}{{^vendorExtensions.x-api-wrapper}}{{#isEnum}}"/>
 
-                                <!-- LOAD PATCHED FILE CONTENT (PATH SAFE) -->
-                                <loadfile property="patchedModelTemplate">
-                                    <fileset dir="${openapi.templates.effective}">
-                                        <include name="**/Java/model.mustache"/>
-                                    </fileset>
-                                </loadfile>
+                                <!-- CLOSE wrapper correctly before block end -->
+                                <replaceregexp
+                                        byline="false"
+                                        flags="s"
+                                        file="${openapi.templates.effective}/Java/model.mustache"
+                                        match="\{\{\/isEnum\}\}\s*\{\{\/model\}\}\s*\{\{\/models\}\}"
+                                        replace="{{/isEnum}}{{/vendorExtensions.x-api-wrapper}}{{/model}}{{/models}}"/>
 
-                                <!-- VERIFY PATCH SIGNATURE -->
+                                <!-- VERIFY PATCH -->
+                                <loadfile property="patchedModelTemplate"
+                                          srcFile="${openapi.templates.effective}/Java/model.mustache"/>
+
                                 <condition property="wrapperPatchMissing">
                                     <not>
                                         <contains string="${patchedModelTemplate}"
@@ -237,13 +240,11 @@
                                     </not>
                                 </condition>
 
-                                <!-- FAIL FAST IF PATCH DID NOT APPLY -->
-                                <fail message="OpenAPI template patch FAILED — x-api-wrapper block not detected. Upstream model.mustache structure likely changed."
+                                <fail message="OpenAPI template patch FAILED — upstream model.mustache structure changed."
                                       if="wrapperPatchMissing"/>
 
                             </target>
                         </configuration>
-
                     </execution>
                 </executions>
             </plugin>
