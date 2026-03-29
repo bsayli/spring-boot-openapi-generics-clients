@@ -6,54 +6,54 @@ import static io.github.bsayli.openapi.generics.server.core.schema.contract.Vend
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+
 import java.util.Map;
-import org.springdoc.core.customizers.OpenApiCustomizer;
 
 /**
- * Fail-fast validator ensuring that generated OpenAPI output adheres to the generics-aware response
- * contract.
+ * Fail-fast validator ensuring that generated OpenAPI output adheres to
+ * the generics-aware response contract.
  *
- * <p>This guard performs a minimal but critical validation pass after all schema customizers have
- * been applied.
+ * <p>This component represents the <b>final validation stage</b> of the
+ * OpenAPI processing pipeline.
  *
- * <h2>Purpose</h2>
+ * <h2>Responsibilities</h2>
  *
  * <ul>
- *   <li>Detect contract violations early (startup time)
- *   <li>Prevent silent schema corruption
- *   <li>Protect client generation integrity
+ *   <li>Validate presence of required base schemas</li>
+ *   <li>Validate structural correctness of wrapper schemas</li>
+ *   <li>Ensure required vendor extensions are present</li>
  * </ul>
  *
- * <h2>Validation scope</h2>
+ * <h2>Pipeline Role</h2>
+ *
+ * <p>This class is invoked by {@code OpenApiPipelineOrchestrator}
+ * after all schema generation and enrichment steps are completed.
+ *
+ * <h2>Design Principles</h2>
  *
  * <ul>
- *   <li>Presence of base schemas (ServiceResponse, Meta, Sort)
- *   <li>Wrapper schemas must declare required vendor extensions
- *   <li>Wrapper schemas must contain {@code data} property
- * </ul>
- *
- * <h2>Design principles</h2>
- *
- * <ul>
- *   <li><b>Fail-fast</b> → throws exception on violation
- *   <li><b>Minimal</b> → validates only critical invariants
- *   <li><b>Deterministic</b> → no heuristics or reflection
+ *   <li><b>Fail-fast</b> → throws exception on any contract violation</li>
+ *   <li><b>Minimal</b> → validates only critical invariants</li>
+ *   <li><b>Deterministic</b> → no heuristics or reflection</li>
  * </ul>
  *
  * <h2>Non-goals</h2>
  *
  * <ul>
- *   <li>No deep schema graph validation
- *   <li>No attempt to fix invalid schemas
+ *   <li>No deep schema graph validation</li>
+ *   <li>No attempt to fix invalid schemas</li>
  * </ul>
  *
- * <p>This class is intended for controlled environments where contract integrity is more important
- * than leniency.
+ * <p>This class is framework-independent and operates purely on the OpenAPI model.
  */
-public class OpenApiContractGuard implements OpenApiCustomizer {
+public class OpenApiContractGuard {
 
-  @Override
-  public void customise(OpenAPI openApi) {
+  /**
+   * Executes validation on the given OpenAPI document.
+   *
+   * @param openApi OpenAPI document
+   */
+  public void validate(OpenAPI openApi) {
 
     Map<String, Schema> schemas = getSchemas(openApi);
 
@@ -75,7 +75,8 @@ public class OpenApiContractGuard implements OpenApiCustomizer {
 
   private void requireSchema(Map<String, Schema> schemas, String name) {
     if (!schemas.containsKey(name)) {
-      throw new IllegalStateException("Missing required OpenAPI schema: '" + name + "'");
+      throw new IllegalStateException(
+              "Missing required OpenAPI schema: '" + name + "'");
     }
   }
 
@@ -85,20 +86,20 @@ public class OpenApiContractGuard implements OpenApiCustomizer {
 
   private void validateWrapperSchemas(Map<String, Schema> schemas) {
 
-    schemas.forEach(
-        (name, schema) -> {
-          if (!isWrapper(schema)) {
-            return;
-          }
+    schemas.forEach((name, schema) -> {
 
-          validateWrapperExtensions(name, schema);
-          validateWrapperStructure(name, schema);
-        });
+      if (!isWrapper(schema)) {
+        return;
+      }
+
+      validateWrapperExtensions(name, schema);
+      validateWrapperStructure(name, schema);
+    });
   }
 
   private boolean isWrapper(Schema<?> schema) {
     return schema.getExtensions() != null
-        && Boolean.TRUE.equals(schema.getExtensions().get(API_WRAPPER));
+            && Boolean.TRUE.equals(schema.getExtensions().get(API_WRAPPER));
   }
 
   private void validateWrapperExtensions(String name, Schema<?> schema) {
@@ -107,24 +108,27 @@ public class OpenApiContractGuard implements OpenApiCustomizer {
 
     if (dataType == null) {
       throw new IllegalStateException(
-          "Wrapper schema '" + name + "' is missing required extension: " + API_WRAPPER_DATATYPE);
+              "Wrapper schema '" + name +
+                      "' is missing required extension: " + API_WRAPPER_DATATYPE);
     }
   }
 
   private void validateWrapperStructure(String name, Schema<?> schema) {
 
     if (schema.getAllOf() == null || schema.getAllOf().isEmpty()) {
-      throw new IllegalStateException("Wrapper schema '" + name + "' must use allOf composition");
+      throw new IllegalStateException(
+              "Wrapper schema '" + name + "' must use allOf composition");
     }
 
     boolean hasDataProperty =
-        schema.getAllOf().stream()
-            .filter(s -> s.getProperties() != null)
-            .anyMatch(s -> s.getProperties().containsKey(DATA));
+            schema.getAllOf().stream()
+                    .filter(s -> s.getProperties() != null)
+                    .anyMatch(s -> s.getProperties().containsKey(DATA));
 
     if (!hasDataProperty) {
       throw new IllegalStateException(
-          "Wrapper schema '" + name + "' must define '" + DATA + "' property");
+              "Wrapper schema '" + name +
+                      "' must define '" + DATA + "' property");
     }
   }
 
@@ -134,9 +138,11 @@ public class OpenApiContractGuard implements OpenApiCustomizer {
 
   private Map<String, Schema> getSchemas(OpenAPI openApi) {
 
-    if (openApi.getComponents() == null || openApi.getComponents().getSchemas() == null) {
+    if (openApi.getComponents() == null
+            || openApi.getComponents().getSchemas() == null) {
 
-      throw new IllegalStateException("OpenAPI components.schemas is missing");
+      throw new IllegalStateException(
+              "OpenAPI components.schemas is missing");
     }
 
     return openApi.getComponents().getSchemas();
