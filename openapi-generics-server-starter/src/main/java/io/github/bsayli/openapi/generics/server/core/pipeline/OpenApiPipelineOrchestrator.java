@@ -6,13 +6,12 @@ import io.github.bsayli.openapi.generics.server.core.schema.WrapperSchemaProcess
 import io.github.bsayli.openapi.generics.server.core.schema.base.BaseSchemaRegistrar;
 import io.github.bsayli.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Central orchestrator for the generics-aware OpenAPI system.

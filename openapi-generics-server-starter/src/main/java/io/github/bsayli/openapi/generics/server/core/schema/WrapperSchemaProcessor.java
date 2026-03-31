@@ -3,10 +3,9 @@ package io.github.bsayli.openapi.generics.server.core.schema;
 import io.github.bsayli.openapi.generics.server.core.schema.contract.SchemaNames;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * Processes contract-aware wrapper schemas for {@code ServiceResponse<T>} structures.

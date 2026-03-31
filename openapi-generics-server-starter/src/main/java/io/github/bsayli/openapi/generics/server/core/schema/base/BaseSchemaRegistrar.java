@@ -5,7 +5,6 @@ import io.github.bsayli.openapi.generics.server.core.schema.contract.SchemaNames
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.*;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

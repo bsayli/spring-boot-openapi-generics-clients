@@ -6,10 +6,9 @@ import static io.github.bsayli.openapi.generics.server.core.schema.contract.Vend
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * Fail-fast validator ensuring that generated OpenAPI output adheres to

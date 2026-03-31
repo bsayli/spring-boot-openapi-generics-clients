@@ -19,15 +19,15 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 /**
  * Auto-configuration entry point for generics-aware OpenAPI support.
  *
- * <p>This configuration assembles a <b>single deterministic pipeline</b>
- * for generating contract-aware OpenAPI schemas.
+ * <p>This configuration assembles a <b>single deterministic pipeline</b> for generating
+ * contract-aware OpenAPI schemas.
  *
  * <h2>Architecture</h2>
  *
  * <ul>
- *   <li>No multiple customizers</li>
- *   <li>No ordering hacks</li>
- *   <li>Single entry point → {@link OpenApiPipelineOrchestrator}</li>
+ *   <li>No multiple customizers
+ *   <li>No ordering hacks
+ *   <li>Single entry point → {@link OpenApiPipelineOrchestrator}
  * </ul>
  *
  * <h2>Pipeline Flow</h2>
@@ -43,10 +43,10 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * <h2>Design Guarantees</h2>
  *
  * <ul>
- *   <li><b>Deterministic</b> → single execution path</li>
- *   <li><b>Fail-fast</b> → validation enforced at the end</li>
- *   <li><b>Extensible</b> → replaceable components</li>
- *   <li><b>Non-intrusive</b> → backs off when user overrides beans</li>
+ *   <li><b>Deterministic</b> → single execution path
+ *   <li><b>Fail-fast</b> → validation enforced at the end
+ *   <li><b>Extensible</b> → replaceable components
+ *   <li><b>Non-intrusive</b> → backs off when user overrides beans
  * </ul>
  */
 @AutoConfiguration
@@ -91,8 +91,8 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public WrapperSchemaProcessor wrapperSchemaProcessor(
-          WrapperSchemaEnricher enricher,
-          @Value("${app.openapi.wrapper.class-extra-annotation:}") String extraAnnotation) {
+      WrapperSchemaEnricher enricher,
+      @Value("${app.openapi.wrapper.class-extra-annotation:}") String extraAnnotation) {
 
     return new WrapperSchemaProcessor(enricher, extraAnnotation);
   }
@@ -110,18 +110,18 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public OpenApiPipelineOrchestrator openApiPipelineOrchestrator(
-          BaseSchemaRegistrar baseSchemaRegistrar,
-          ResponseTypeDiscoveryStrategy discoveryStrategy,
-          ResponseTypeIntrospector introspector,
-          WrapperSchemaProcessor wrapperSchemaProcessor,
-          OpenApiContractGuard contractGuard) {
+      BaseSchemaRegistrar baseSchemaRegistrar,
+      ResponseTypeDiscoveryStrategy discoveryStrategy,
+      ResponseTypeIntrospector introspector,
+      WrapperSchemaProcessor wrapperSchemaProcessor,
+      OpenApiContractGuard contractGuard) {
 
     return new OpenApiPipelineOrchestrator(
-            baseSchemaRegistrar,
-            discoveryStrategy,
-            introspector,
-            wrapperSchemaProcessor,
-            contractGuard);
+        baseSchemaRegistrar,
+        discoveryStrategy,
+        introspector,
+        wrapperSchemaProcessor,
+        contractGuard);
   }
 
   // -------------------------------------------------------------------------
@@ -130,8 +130,7 @@ public class OpenApiGenericsAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean(name = "openApiGenericsCustomizer")
-  public OpenApiCustomizer openApiGenericsCustomizer(
-          OpenApiPipelineOrchestrator orchestrator) {
+  public OpenApiCustomizer openApiGenericsCustomizer(OpenApiPipelineOrchestrator orchestrator) {
 
     return orchestrator::run;
   }
