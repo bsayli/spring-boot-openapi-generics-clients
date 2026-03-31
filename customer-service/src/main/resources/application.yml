@@ -24,7 +24,7 @@ logging:
   level:
     root: INFO
     org.springframework.web: INFO
-    io.github.bsayli: INFO
+    io.github.bsayli: DEBUG
 
 app:
   openapi:

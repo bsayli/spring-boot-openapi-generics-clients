@@ -1,281 +1,285 @@
-  openapi: 3.1.0
-  info:
-    title: Customer Service API
-    description: Customer Service API with type-safe generic responses using OpenAPI
-    version: 0.8.0-SNAPSHOT
-  servers:
-    - url: http://localhost:8084/customer-service
-      description: Local service URL
-  paths:
-    /v1/customers/{customerId}:
-      get:
-        tags:
-          - customer-controller
-        operationId: getCustomer
-        parameters:
-          - name: customerId
-            in: path
-            required: true
-            schema:
-              type: integer
-              format: int32
-              minimum: 1
-        responses:
-          "200":
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ServiceResponseCustomerDto"
-      put:
-        tags:
-          - customer-controller
-        operationId: updateCustomer
-        parameters:
-          - name: customerId
-            in: path
-            required: true
-            schema:
-              type: integer
-              format: int32
-              minimum: 1
-        requestBody:
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CustomerUpdateRequest"
+openapi: 3.1.0
+info:
+  title: Customer Service API
+  description: Customer Service API with type-safe generic responses using OpenAPI
+  version: 0.8.0-SNAPSHOT
+servers:
+  - url: http://localhost:8084/customer-service
+    description: Local service URL
+paths:
+  /v1/customers/{customerId}:
+    get:
+      tags:
+        - customer-controller
+      operationId: getCustomer
+      parameters:
+        - name: customerId
+          in: path
           required: true
-        responses:
-          "200":
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ServiceResponseCustomerDto"
-      delete:
-        tags:
-          - customer-controller
-        operationId: deleteCustomer
-        parameters:
-          - name: customerId
-            in: path
-            required: true
-            schema:
-              type: integer
-              format: int32
-              minimum: 1
-        responses:
-          "200":
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ServiceResponseCustomerDeleteResponse"
-    /v1/customers:
-      get:
-        tags:
-          - customer-controller
-        operationId: getCustomers
-        parameters:
-          - name: name
-            in: query
-            required: false
-            schema:
-              type: string
-          - name: email
-            in: query
-            required: false
-            schema:
-              type: string
-          - name: page
-            in: query
-            required: false
-            schema:
-              type: integer
-              format: int32
-              default: 0
-              minimum: 0
-          - name: size
-            in: query
-            required: false
-            schema:
-              type: integer
-              format: int32
-              default: 5
-              maximum: 10
-              minimum: 1
-          - name: sortBy
-            in: query
-            required: false
-            schema:
-              type: string
-              default: customerId
-              enum:
-                - customerId
-                - name
-                - email
-          - name: direction
-            in: query
-            required: false
-            schema:
-              type: string
-              default: asc
-              enum:
-                - asc
-                - desc
-        responses:
-          "200":
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ServiceResponsePageCustomerDto"
-      post:
-        tags:
-          - customer-controller
-        operationId: createCustomer
-        requestBody:
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CustomerCreateRequest"
-          required: true
-        responses:
-          "200":
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ServiceResponseCustomerDto"
-  components:
-    schemas:
-      CustomerUpdateRequest:
-        type: object
-        properties:
-          name:
-            type: string
-            maxLength: 80
-            minLength: 2
-          email:
-            type: string
-            format: email
-            minLength: 1
-        required:
-          - email
-          - name
-      CustomerDto:
-        type: object
-        properties:
-          customerId:
+          schema:
             type: integer
             format: int32
-          name:
+            minimum: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseCustomerDto"
+    put:
+      tags:
+        - customer-controller
+      operationId: updateCustomer
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseCustomerDto"
+    delete:
+      tags:
+        - customer-controller
+      operationId: deleteCustomer
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseCustomerDeleteResponse"
+  /v1/customers:
+    get:
+      tags:
+        - customer-controller
+      operationId: getCustomers
+      parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
             type: string
-          email:
+        - name: email
+          in: query
+          required: false
+          schema:
             type: string
-      Meta:
-        type: object
-        properties:
-          serverTime:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 5
+            maximum: 10
+            minimum: 1
+        - name: sortBy
+          in: query
+          required: false
+          schema:
             type: string
-            format: date-time
-          sort:
-            type: array
-            items:
-              $ref: "#/components/schemas/Sort"
-      ServiceResponseCustomerDto:
-        allOf:
-          - $ref: "#/components/schemas/ServiceResponse"
-          - type: object
-            properties:
-              data:
-                $ref: "#/components/schemas/CustomerDto"
-        x-api-wrapper: true
-        x-api-wrapper-datatype: CustomerDto
-      Sort:
-        type: object
-        properties:
-          field:
+            default: customerId
+            enum:
+              - customerId
+              - name
+              - email
+        - name: direction
+          in: query
+          required: false
+          schema:
             type: string
-          direction:
-            type: string
+            default: asc
             enum:
               - asc
               - desc
-      CustomerCreateRequest:
-        type: object
-        properties:
-          name:
-            type: string
-            maxLength: 80
-            minLength: 2
-          email:
-            type: string
-            format: email
-            minLength: 1
-        required:
-          - email
-          - name
-      PageCustomerDto:
-        type: object
-        properties:
+      responses:
+        "200":
+          description: OK
           content:
-            type: array
-            items:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponsePageCustomerDto"
+    post:
+      tags:
+        - customer-controller
+      operationId: createCustomer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerCreateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseCustomerDto"
+components:
+  schemas:
+    CustomerUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          minLength: 2
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+        - email
+        - name
+    CustomerDto:
+      type: object
+      properties:
+        customerId:
+          type: integer
+          format: int32
+        name:
+          type: string
+        email:
+          type: string
+    Meta:
+      type: object
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/Sort"
+    ServiceResponseCustomerDto:
+      allOf:
+        - $ref: "#/components/schemas/ServiceResponse"
+        - type: object
+          properties:
+            data:
               $ref: "#/components/schemas/CustomerDto"
-          page:
-            type: integer
-            format: int32
-          size:
-            type: integer
-            format: int32
-          totalElements:
-            type: integer
-            format: int64
-          totalPages:
-            type: integer
-            format: int32
-          hasNext:
-            type: boolean
-          hasPrev:
-            type: boolean
-      ServiceResponsePageCustomerDto:
-        allOf:
-          - $ref: "#/components/schemas/ServiceResponse"
-          - type: object
-            properties:
-              data:
-                $ref: "#/components/schemas/PageCustomerDto"
-        x-api-wrapper: true
-        x-api-wrapper-datatype: PageCustomerDto
-        x-data-container: Page
-        x-data-item: CustomerDto
-      CustomerDeleteResponse:
-        type: object
-        properties:
-          customerId:
-            type: integer
-            format: int32
-      ServiceResponseCustomerDeleteResponse:
-        allOf:
-          - $ref: "#/components/schemas/ServiceResponse"
-          - type: object
-            properties:
-              data:
-                $ref: "#/components/schemas/CustomerDeleteResponse"
-        x-api-wrapper: true
-        x-api-wrapper-datatype: CustomerDeleteResponse
-      ServiceResponse:
-        type: object
-        properties:
-          data:
-            type: object
-          meta:
-            $ref: "#/components/schemas/Meta"
-      ServiceResponseVoid:
-        type: object
-        properties:
-          data:
-            type: object
-          meta:
-            $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CustomerDto
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+        direction:
+          type: string
+          enum:
+            - asc
+            - desc
+    CustomerCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          minLength: 2
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+        - email
+        - name
+    PageCustomerDto:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomerDto"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+    ServiceResponsePageCustomerDto:
+      allOf:
+        - $ref: "#/components/schemas/ServiceResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/PageCustomerDto"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: PageCustomerDto
+      x-data-container: Page
+      x-data-item: CustomerDto
+    CustomerDeleteResponse:
+      type: object
+      properties:
+        customerId:
+          type: integer
+          format: int32
+    ServiceResponseCustomerDeleteResponse:
+      allOf:
+        - $ref: "#/components/schemas/ServiceResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CustomerDeleteResponse"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CustomerDeleteResponse
+    ServiceResponse:
+      type: object
+      properties:
+        data:
+          type: object
+        meta:
+          $ref: "#/components/schemas/Meta"
+      required:
+        - meta
+    ServiceResponseVoid:
+      type: object
+      properties:
+        data:
+          type: object
+        meta:
+          $ref: "#/components/schemas/Meta"
+      required:
+        - meta

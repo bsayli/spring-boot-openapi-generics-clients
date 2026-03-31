@@ -103,23 +103,35 @@ public class BaseSchemaRegistrar {
     private void registerServiceResponse(Map<String, Schema> schemas) {
         schemas.computeIfAbsent(
                 SchemaNames.SERVICE_RESPONSE,
-                key ->
-                        new ObjectSchema()
-                                .addProperty(PropertyNames.DATA, new ObjectSchema())
-                                .addProperty(
-                                        PropertyNames.META,
-                                        new Schema<>().$ref(ref(SchemaNames.META))));
+                key -> {
+                    ObjectSchema schema = new ObjectSchema();
+
+                    schema.addProperty(PropertyNames.DATA, new ObjectSchema());
+                    schema.addProperty(
+                            PropertyNames.META,
+                            new Schema<>().$ref(ref(SchemaNames.META)));
+
+                    schema.setRequired(List.of(PropertyNames.META));
+
+                    return schema;
+                });
     }
 
     private void registerServiceResponseVoid(Map<String, Schema> schemas) {
         schemas.computeIfAbsent(
                 SchemaNames.SERVICE_RESPONSE_VOID,
-                key ->
-                        new ObjectSchema()
-                                .addProperty(PropertyNames.DATA, new ObjectSchema())
-                                .addProperty(
-                                        PropertyNames.META,
-                                        new Schema<>().$ref(ref(SchemaNames.META))));
+                key -> {
+                    ObjectSchema schema = new ObjectSchema();
+
+                    schema.addProperty(PropertyNames.DATA, new ObjectSchema());
+                    schema.addProperty(
+                            PropertyNames.META,
+                            new Schema<>().$ref(ref(SchemaNames.META)));
+
+                    schema.setRequired(List.of(PropertyNames.META));
+
+                    return schema;
+                });
     }
 
     // -------------------------------------------------------------------------

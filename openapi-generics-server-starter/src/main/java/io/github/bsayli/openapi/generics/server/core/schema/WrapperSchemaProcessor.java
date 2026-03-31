@@ -3,9 +3,10 @@ package io.github.bsayli.openapi.generics.server.core.schema;
 import io.github.bsayli.openapi.generics.server.core.schema.contract.SchemaNames;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Processes contract-aware wrapper schemas for {@code ServiceResponse<T>} structures.
@@ -16,9 +17,8 @@ import java.util.Objects;
  * <h2>Responsibilities</h2>
  *
  * <ul>
- *   <li><b>Precondition check</b> → ensures referenced schema exists</li>
- *   <li><b>Wrapper creation</b> → builds composed schema via {@link ServiceResponseSchemaFactory}</li>
- *   <li><b>Conflict-safe registration</b> → inserts schema deterministically</li>
+ *   <li><b>Authoritative creation</b> → always rebuilds wrapper schema from contract</li>
+ *   <li><b>Normalization</b> → replaces any existing schema with contract-compliant version</li>
  *   <li><b>Enrichment</b> → applies container metadata (e.g. {@code Page<T>})</li>
  * </ul>
  *
@@ -32,17 +32,21 @@ import java.util.Objects;
  * <ul>
  *   <li><b>Single responsibility</b> → owns wrapper schema lifecycle</li>
  *   <li><b>Deterministic</b> → same input produces identical schema</li>
- *   <li><b>Fail-fast</b> → conflicting schema definitions are rejected</li>
+ *   <li><b>Contract-driven</b> → contract is the single source of truth</li>
+ *   <li><b>Authoritative overwrite</b> → existing schemas are replaced</li>
  * </ul>
  *
  * <h2>Important</h2>
  *
  * <ul>
- *   <li>This class contains schema construction and mutation logic</li>
- *   <li>Orchestration must remain outside (see OpenApiPipelineOrchestrator)</li>
+ *   <li>Wrapper structure is ALWAYS enforced via factory</li>
+ *   <li>No attempt is made to partially fix existing schemas</li>
+ *   <li>Vendor extensions are applied during creation (factory responsibility)</li>
  * </ul>
  */
 public class WrapperSchemaProcessor {
+
+    private static final Logger log = LoggerFactory.getLogger(WrapperSchemaProcessor.class);
 
     private final WrapperSchemaEnricher enricher;
     private final String classExtraAnnotation;
@@ -57,12 +61,11 @@ public class WrapperSchemaProcessor {
     /**
      * Processes a single contract-aware wrapper schema for the given reference.
      *
-     * <p>This method performs the full lifecycle:
+     * <p>This method performs the lifecycle:
      *
      * <ul>
-     *   <li>Validates that the base schema exists</li>
-     *   <li>Creates the wrapper schema</li>
-     *   <li>Registers it in a conflict-safe manner</li>
+     *   <li>Rebuilds wrapper schema from contract (authoritative)</li>
+     *   <li>Replaces any existing schema</li>
      *   <li>Applies enrichment (if applicable)</li>
      * </ul>
      *
@@ -73,71 +76,22 @@ public class WrapperSchemaProcessor {
 
         Map<String, Schema> schemas = openApi.getComponents().getSchemas();
 
-        // Guard → referenced schema must exist
-        if (!schemas.containsKey(ref)) {
-            return;
-        }
-
         String wrapperName = SchemaNames.SERVICE_RESPONSE + ref;
 
-        Schema<?> wrapperSchema =
+        boolean exists = schemas.containsKey(wrapperName);
+
+        Schema<?> wrapper =
                 ServiceResponseSchemaFactory.createComposedWrapper(ref, classExtraAnnotation);
 
-        registerSchemaSafely(schemas, wrapperName, wrapperSchema);
+        schemas.put(wrapperName, wrapper);
+
+        if (exists) {
+            log.debug("Wrapper schema '{}' replaced (normalized)", wrapperName);
+        } else {
+            log.debug("Wrapper schema '{}' created", wrapperName);
+        }
 
         // Enrich (e.g. Page<T>, metadata)
         enricher.enrich(openApi, wrapperName, ref);
-    }
-
-    /**
-     * Registers schema in a conflict-safe and idempotent way.
-     *
-     * <p>Behavior:
-     *
-     * <ul>
-     *   <li>If schema does not exist → registers it</li>
-     *   <li>If schema exists and is equivalent → no-op</li>
-     *   <li>If schema exists but differs → throws exception</li>
-     * </ul>
-     */
-    private void registerSchemaSafely(
-            Map<String, Schema> schemas,
-            String name,
-            Schema<?> newSchema) {
-
-        Schema<?> existing = schemas.get(name);
-
-        if (existing == null) {
-            schemas.put(name, newSchema);
-            return;
-        }
-
-        if (schemasEquivalent(existing, newSchema)) {
-            return;
-        }
-
-        throw new IllegalStateException(
-                "OpenAPI schema conflict detected for '" + name +
-                        "'. Multiple components attempted to register different schemas.");
-    }
-
-    /**
-     * Lightweight structural equivalence check for schemas.
-     *
-     * <p>Compares only relevant parts for wrapper schemas:
-     *
-     * <ul>
-     *   <li>$ref</li>
-     *   <li>allOf composition</li>
-     *   <li>vendor extensions</li>
-     * </ul>
-     */
-    private boolean schemasEquivalent(Schema<?> a, Schema<?> b) {
-        if (a == b) return true;
-        if (a == null || b == null) return false;
-
-        return Objects.equals(a.get$ref(), b.get$ref())
-                && Objects.equals(a.getAllOf(), b.getAllOf())
-                && Objects.equals(a.getExtensions(), b.getExtensions());
     }
 }

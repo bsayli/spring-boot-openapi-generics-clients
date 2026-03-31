@@ -6,7 +6,11 @@ import io.github.bsayli.openapi.generics.server.core.schema.WrapperSchemaProcess
 import io.github.bsayli.openapi.generics.server.core.schema.base.BaseSchemaRegistrar;
 import io.github.bsayli.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -45,6 +49,16 @@ import java.util.Set;
  */
 public class OpenApiPipelineOrchestrator {
 
+    private static final Logger log = LoggerFactory.getLogger(OpenApiPipelineOrchestrator.class);
+
+    /**
+     * Internal execution guard to prevent multiple pipeline runs on the same OpenAPI instance.
+     *
+     * <p>Uses identity-based tracking to avoid leaking runtime state into the OpenAPI model.
+     */
+    private final Set<OpenAPI> processed =
+            Collections.newSetFromMap(new IdentityHashMap<>());
+
     private final BaseSchemaRegistrar baseSchemaRegistrar;
     private final ResponseTypeDiscoveryStrategy discoveryStrategy;
     private final ResponseTypeIntrospector introspector;
@@ -72,17 +86,29 @@ public class OpenApiPipelineOrchestrator {
      */
     public void run(OpenAPI openApi) {
 
-        // 1. Base schemas (also ensures components initialization)
+        if (!processed.add(openApi)) {
+            log.debug("Pipeline already executed → skipping");
+            return;
+        }
+
+        log.debug("OpenAPI pipeline started");
+
+        // 1. Base schemas
         baseSchemaRegistrar.register(openApi);
 
         // 2–3. Discovery + Introspection
         Set<String> refs = discoverRefs();
+        log.debug("Discovered {} contract-aware response types", refs.size());
 
-        // 4. Wrapper processing (generation + enrichment)
+        // 4. Wrapper processing
         refs.forEach(ref -> wrapperSchemaProcessor.process(openApi, ref));
 
-        // 5. Validation (fail-fast)
+        log.debug("Processed {} wrapper schemas", refs.size());
+
+        // 5. Validation
         contractGuard.validate(openApi);
+
+        log.debug("OpenAPI pipeline completed successfully");
     }
 
     // -------------------------------------------------------------------------

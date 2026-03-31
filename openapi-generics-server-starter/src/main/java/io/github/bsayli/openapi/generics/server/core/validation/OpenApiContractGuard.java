@@ -6,6 +6,8 @@ import static io.github.bsayli.openapi.generics.server.core.schema.contract.Vend
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -48,17 +50,22 @@ import java.util.Map;
  */
 public class OpenApiContractGuard {
 
+  private static final Logger log = LoggerFactory.getLogger(OpenApiContractGuard.class);
+
   /**
    * Executes validation on the given OpenAPI document.
    *
    * @param openApi OpenAPI document
    */
   public void validate(OpenAPI openApi) {
+    log.debug("OpenAPI contract validation started");
 
     Map<String, Schema> schemas = getSchemas(openApi);
 
     validateBaseSchemas(schemas);
     validateWrapperSchemas(schemas);
+
+    log.debug("OpenAPI contract validation completed successfully");
   }
 
   // -------------------------------------------------------------------------
@@ -75,6 +82,7 @@ public class OpenApiContractGuard {
 
   private void requireSchema(Map<String, Schema> schemas, String name) {
     if (!schemas.containsKey(name)) {
+      log.error("Missing required base schema '{}'", name);
       throw new IllegalStateException(
               "Missing required OpenAPI schema: '" + name + "'");
     }
@@ -107,6 +115,7 @@ public class OpenApiContractGuard {
     Object dataType = schema.getExtensions().get(API_WRAPPER_DATATYPE);
 
     if (dataType == null) {
+      log.error("Wrapper '{}' missing required extension '{}'", name, API_WRAPPER_DATATYPE);
       throw new IllegalStateException(
               "Wrapper schema '" + name +
                       "' is missing required extension: " + API_WRAPPER_DATATYPE);
@@ -116,6 +125,7 @@ public class OpenApiContractGuard {
   private void validateWrapperStructure(String name, Schema<?> schema) {
 
     if (schema.getAllOf() == null || schema.getAllOf().isEmpty()) {
+      log.error("Wrapper '{}' has invalid structure: missing allOf composition", name);
       throw new IllegalStateException(
               "Wrapper schema '" + name + "' must use allOf composition");
     }
@@ -126,6 +136,7 @@ public class OpenApiContractGuard {
                     .anyMatch(s -> s.getProperties().containsKey(DATA));
 
     if (!hasDataProperty) {
+      log.error("Wrapper '{}' missing required property '{}'", name, DATA);
       throw new IllegalStateException(
               "Wrapper schema '" + name +
                       "' must define '" + DATA + "' property");
@@ -140,6 +151,8 @@ public class OpenApiContractGuard {
 
     if (openApi.getComponents() == null
             || openApi.getComponents().getSchemas() == null) {
+
+      log.error("OpenAPI validation failed: components.schemas is missing");
 
       throw new IllegalStateException(
               "OpenAPI components.schemas is missing");

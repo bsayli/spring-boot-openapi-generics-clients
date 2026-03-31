@@ -5,7 +5,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- aggregator parent for multi-module build alignment -->
+    <!-- internal build parent ONLY -->
     <parent>
         <groupId>io.github.bsayli</groupId>
         <artifactId>spring-boot-openapi-generics-clients</artifactId>
@@ -54,38 +54,40 @@
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <!-- platform contract -->
-        <api-contract.version>0.7.7</api-contract.version>
+        <spring-boot-dependencies.version>3.5.13</spring-boot-dependencies.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
     </properties>
 
     <dependencies>
 
-        <!-- canonical response contract (core semantic dependency) -->
+        <!-- canonical response contract -->
         <dependency>
             <groupId>io.github.bsayli</groupId>
             <artifactId>api-contract</artifactId>
         </dependency>
 
-        <!-- Spring Boot auto-config infrastructure -->
+        <!-- Spring Boot auto-config -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
 
-        <!-- configuration metadata generation -->
+        <!-- metadata -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
-        <!-- OpenAPI publication integration -->
+        <!-- OpenAPI integration -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-common</artifactId>
         </dependency>
 
+        <!-- optional MVC binding -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
@@ -93,7 +95,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- testing -->
+        <!-- test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -102,12 +104,30 @@
 
     </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <build>
         <plugins>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <release>${java.version}</release>
                     <encoding>${project.build.sourceEncoding}</encoding>
