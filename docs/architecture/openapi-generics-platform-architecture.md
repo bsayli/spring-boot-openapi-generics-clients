@@ -5,18 +5,19 @@
 1. [Vision](#vision)
 2. [High-Level Platform Structure](#highlevel-platform-structure)
 3. [Core Architectural Principle](#core-architectural-principle)
-4. [Architectural Layers (Authority → Projection → Consumption)](#architectural-layers-authority--projection--consumption)
-5. [Supported Contract Shapes (Explicit Scope)](#supported-contract-shapes-explicit-scope)
-6. [Server Platform Design (Deterministic Pipeline)](#server-platform-design-deterministic-pipeline)
-7. [Client Platform Design](#client-platform-design)
-8. [Dependency & Packaging Strategy (BOM + Starter)](#dependency--packaging-strategy-bom--starter)
-9. [Configuration Philosophy](#configuration-philosophy)
-10. [Generator Orchestration Strategy](#generator-orchestration-strategy)
-11. [Deterministic Wrapper Semantics](#deterministic-wrapper-semantics)
-12. [Developer Experience Goal](#developer-experience-goal)
-13. [Adoption Strategy Principle](#adoption-strategy-principle)
-14. [Long-Term Evolution Axis](#long-term-evolution-axis)
-15. [Final Architectural Identity](#final-architectural-identity)
+4. [Contract Ownership Principle](#contract-ownership-principle)
+5. [Architectural Layers (Authority → Projection → Consumption)](#architectural-layers-authority--projection--consumption)
+6. [Supported Contract Shapes (Explicit Scope)](#supported-contract-shapes-explicit-scope)
+7. [Server Platform Design (Deterministic Pipeline)](#server-platform-design-deterministic-pipeline)
+8. [Client Platform Design](#client-platform-design)
+9. [Dependency & Packaging Strategy (BOM + Starter)](#dependency--packaging-strategy-bom--starter)
+10. [Configuration Philosophy](#configuration-philosophy)
+11. [Generator Orchestration Strategy](#generator-orchestration-strategy)
+12. [Deterministic Wrapper Semantics](#deterministic-wrapper-semantics)
+13. [Developer Experience Goal](#developer-experience-goal)
+14. [Adoption Strategy Principle](#adoption-strategy-principle)
+15. [Long-Term Evolution Axis](#long-term-evolution-axis)
+16. [Final Architectural Identity](#final-architectural-identity)
 
 ---
 
@@ -77,6 +78,22 @@ Guarantees:
 * no envelope duplication
 * deterministic schema composition
 * stable client generation
+
+---
+
+## Contract Ownership Principle
+
+The response envelope is owned by `api-contract`, not by OpenAPI.
+
+OpenAPI is treated as a projection layer, not as a source of truth.
+
+Implications:
+
+- Generators must not define or reinterpret response structures
+- Clients must not duplicate envelope models
+- Server and client share the same canonical contract
+
+This eliminates schema drift and ensures deterministic API evolution.
 
 ---
 

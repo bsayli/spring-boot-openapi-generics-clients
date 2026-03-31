@@ -192,7 +192,7 @@ Behavior:
 
 Key rule:
 
-> schema is never patched — only replaced
+> Existing schemas are treated as non-authoritative and are always replaced
 
 Naming:
 
@@ -433,7 +433,8 @@ Reason:
 
 Think of the system as:
 
-> A deterministic compiler from runtime types to OpenAPI schemas
+> A deterministic compiler from runtime types to OpenAPI schemas,
+> with strict contract boundary enforcement
 
 Not:
 
