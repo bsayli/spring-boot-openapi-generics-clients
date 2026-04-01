@@ -4,6 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>io.github.bsayli</groupId>
+        <artifactId>openapi-generics-java-codegen</artifactId>
+        <version>0.8.0-SNAPSHOT</version>
+        <relativePath>../openapi-generics-java-codegen/pom.xml</relativePath>
+    </parent>
+
     <groupId>io.github.bsayli</groupId>
     <artifactId>customer-service-client</artifactId>
     <version>0.8.0-SNAPSHOT</version>
@@ -38,8 +45,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>21</java.version>
 
+        <api-contract.version>0.7.7</api-contract.version>
+
+        <java.version>21</java.version>
         <spring-boot.version>3.5.13</spring-boot.version>
         <openapi.generator.version>7.21.0</openapi.generator.version>
 
@@ -48,17 +57,10 @@
         <mockwebserver.version>5.3.2</mockwebserver.version>
         <httpclient5.version>5.5.2</httpclient5.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-        <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
-
         <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
-        <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
-        <spotless-maven-plugin.version>3.3.0</spotless-maven-plugin.version>
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
-        <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
-        <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
-        <api-contract.version>0.7.7</api-contract.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
         <logback.version>1.5.32</logback.version>
         <jackson.version>2.21.1</jackson.version>
@@ -148,121 +150,17 @@
         </resources>
 
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>${maven.dependency.plugin.version}</version>
 
                 <executions>
-
                     <execution>
-                        <id>extract-openapi-model-template</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.openapitools</groupId>
-                                    <artifactId>openapi-generator</artifactId>
-                                    <version>${openapi.generator.version}</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                    <includes>**/Java/model.mustache</includes>
-                                    <outputDirectory>${openapi.templates.effective}</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-
-                    <execution>
+                        <id>resolve-mockito-agent</id>
                         <goals>
                             <goal>properties</goal>
                         </goals>
-                    </execution>
-
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>${maven-antrun-plugin.version}</version>
-
-                <executions>
-                    <execution>
-                        <id>patch-openapi-model-template</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-
-                        <configuration>
-                            <target>
-
-                                <!-- OPEN wrapper ONLY inside render models block -->
-                                <replaceregexp
-                                        byline="false"
-                                        flags="s"
-                                        file="${openapi.templates.effective}/Java/model.mustache"
-                                        match="\{\{#models\}\}\s*\{\{#model\}\}\s*\{\{#isEnum\}\}"
-                                        replace="{{#models}}{{#model}}{{#vendorExtensions.x-api-wrapper}}{{>api_wrapper}}{{/vendorExtensions.x-api-wrapper}}{{^vendorExtensions.x-api-wrapper}}{{#isEnum}}"/>
-
-                                <!-- CLOSE wrapper correctly before block end -->
-                                <replaceregexp
-                                        byline="false"
-                                        flags="s"
-                                        file="${openapi.templates.effective}/Java/model.mustache"
-                                        match="\{\{\/isEnum\}\}\s*\{\{\/model\}\}\s*\{\{\/models\}\}"
-                                        replace="{{/isEnum}}{{/vendorExtensions.x-api-wrapper}}{{/model}}{{/models}}"/>
-
-                                <!-- VERIFY PATCH -->
-                                <loadfile property="patchedModelTemplate"
-                                          srcFile="${openapi.templates.effective}/Java/model.mustache"/>
-
-                                <condition property="wrapperPatchMissing">
-                                    <not>
-                                        <contains string="${patchedModelTemplate}"
-                                                  substring="vendorExtensions.x-api-wrapper"/>
-                                    </not>
-                                </condition>
-
-                                <fail message="OpenAPI template patch FAILED — upstream model.mustache structure changed."
-                                      if="wrapperPatchMissing"/>
-
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>${maven.resources.plugin.version}</version>
-                <executions>
-
-                    <execution>
-                        <id>overlay-local-templates</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${openapi.templates.effective}/Java</outputDirectory>
-                            <changeDetection>always</changeDetection>
-                            <resources>
-                                <resource>
-                                    <directory>src/main/resources/openapi-templates</directory>
-                                    <filtering>false</filtering>
-                                    <includes>
-                                        <include>**/*.mustache</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -270,7 +168,6 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>${openapi.generator.version}</version>
 
                 <executions>
                     <execution>
@@ -281,21 +178,16 @@
                         </goals>
 
                         <configuration>
-                            <!-- Inputs / generator -->
                             <inputSpec>${project.basedir}/src/main/resources/customer-api-docs.yaml</inputSpec>
-                            <generatorName>java</generatorName>
-                            <library>restclient</library>
-                            <output>${project.build.directory}/generated-sources/openapi</output>
 
-                            <!-- Packages -->
+                            <library>restclient</library>
+
+                            <output>${openapi.generator.output}</output>
+
                             <apiPackage>io.github.bsayli.customerservice.client.generated.api</apiPackage>
                             <modelPackage>io.github.bsayli.customerservice.client.generated.dto</modelPackage>
                             <invokerPackage>io.github.bsayli.customerservice.client.generated.invoker</invokerPackage>
 
-                            <!-- Templates -->
-                            <templateDirectory>${openapi.templates.effective}/Java</templateDirectory>
-
-                            <!-- Generator behavior -->
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <useJakartaEe>true</useJakartaEe>
@@ -303,79 +195,17 @@
                                 <dateLibrary>java8</dateLibrary>
                                 <useBeanValidation>true</useBeanValidation>
                                 <openApiNullable>false</openApiNullable>
-                                <sourceFolder>src/gen/java</sourceFolder>
                             </configOptions>
 
-                            <additionalProperties>
-                                <additionalProperty>apiContractEnvelope=io.github.bsayli.apicontract.envelope</additionalProperty>
-                                <additionalProperty>apiContractPage=io.github.bsayli.apicontract.paging</additionalProperty>
-                            </additionalProperties>
-
-                            <importMappings>
-                                <importMapping>Meta=io.github.bsayli.apicontract.envelope.Meta</importMapping>
-                                <importMapping>ServiceResponse=io.github.bsayli.apicontract.envelope.ServiceResponse</importMapping>
-                                <importMapping>Page=io.github.bsayli.apicontract.paging.Page</importMapping>
-                                <importMapping>Sort=io.github.bsayli.apicontract.paging.Sort</importMapping>
-                                <importMapping>SortDirection=io.github.bsayli.apicontract.paging.SortDirection</importMapping>
-                            </importMappings>
-
-                            <!-- Output hygiene -->
-                            <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>
                             <cleanupOutput>true</cleanupOutput>
                             <skipValidateSpec>false</skipValidateSpec>
 
-                            <!-- Disable noise -->
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <generateApiDocumentation>false</generateApiDocumentation>
                             <generateApiTests>false</generateApiTests>
                             <generateModelDocumentation>false</generateModelDocumentation>
                             <generateModelTests>false</generateModelTests>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>${build.helper.plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>add-generated-sources</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/openapi/src/gen/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>${spotless-maven-plugin.version}</version>
-
-                <configuration>
-                    <java>
-                        <includes>
-                            <include>target/generated-sources/openapi/src/gen/java/**/*.java</include>
-                        </includes>
-                        <removeUnusedImports>
-                            <engine>cleanthat-javaparser-unnecessaryimport</engine>
-                        </removeUnusedImports>
-                    </java>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>spotless-apply-generated</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>apply</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -390,6 +220,7 @@
                 </configuration>
             </plugin>
 
+            <!-- TEST -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -402,6 +233,7 @@
                 </configuration>
             </plugin>
 
+            <!-- IT -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -423,6 +255,7 @@
                 </executions>
             </plugin>
 
+            <!-- COVERAGE -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -459,6 +292,7 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>

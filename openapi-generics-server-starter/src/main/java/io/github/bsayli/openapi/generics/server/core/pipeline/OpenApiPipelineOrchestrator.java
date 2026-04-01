@@ -3,6 +3,7 @@ package io.github.bsayli.openapi.generics.server.core.pipeline;
 import io.github.bsayli.openapi.generics.server.core.introspection.ResponseTypeDiscoveryStrategy;
 import io.github.bsayli.openapi.generics.server.core.introspection.ResponseTypeIntrospector;
 import io.github.bsayli.openapi.generics.server.core.schema.WrapperSchemaProcessor;
+import io.github.bsayli.openapi.generics.server.core.schema.base.BaseSchemaIgnoreMarker;
 import io.github.bsayli.openapi.generics.server.core.schema.base.BaseSchemaRegistrar;
 import io.github.bsayli.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -25,8 +26,9 @@ import org.slf4j.LoggerFactory;
  * 1. Base Schema Registration   → ensure canonical envelope schemas exist
  * 2. Discovery                 → collect response types from runtime
  * 3. Introspection             → extract contract-aware type references
- * 4. Wrapper Processing        → delegate to WrapperSchemaProcessor
- * 5. Validation                → enforce contract correctness (fail-fast)
+ * 4. Wrapper Processing        → generate wrapper schemas (ServiceResponse<T>, etc.)
+ * 5. Ignore Marking            → mark infrastructure schemas as non-generatable
+ * 6. Validation                → enforce contract correctness (fail-fast)
  * </pre>
  *
  * <h2>Design Guarantees</h2>
@@ -34,8 +36,17 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *   <li><b>Deterministic</b> → same input always produces identical OpenAPI output</li>
  *   <li><b>Single execution path</b> → no distributed lifecycle across beans</li>
- *   <li><b>Separation of concerns</b> → no schema logic inside orchestrator</li>
+ *   <li><b>Separation of concerns</b> → orchestration vs schema logic separation</li>
  *   <li><b>Fail-fast</b> → invalid contract state causes immediate failure</li>
+ * </ul>
+ *
+ * <h2>Pipeline Semantics</h2>
+ *
+ * <ul>
+ *   <li>{@link BaseSchemaRegistrar} → creates canonical base schemas</li>
+ *   <li>{@link WrapperSchemaProcessor} → composes generic-aware wrappers</li>
+ *   <li>{@link BaseSchemaIgnoreMarker} → controls generation policy (not structure)</li>
+ *   <li>{@link OpenApiContractGuard} → validates final contract integrity</li>
  * </ul>
  *
  * <h2>Important</h2>
@@ -43,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *   <li>This class coordinates execution, it does not implement schema logic</li>
  *   <li>All schema-related behavior is delegated to dedicated components</li>
- *   <li>Execution assumes {@link BaseSchemaRegistrar} initializes OpenAPI components</li>
+ *   <li>Ignore marking is applied <b>after schema creation</b> but <b>before validation</b></li>
  * </ul>
  */
 public class OpenApiPipelineOrchestrator {
@@ -59,6 +70,7 @@ public class OpenApiPipelineOrchestrator {
             Collections.newSetFromMap(new IdentityHashMap<>());
 
     private final BaseSchemaRegistrar baseSchemaRegistrar;
+    private final BaseSchemaIgnoreMarker baseSchemaIgnoreMarker;
     private final ResponseTypeDiscoveryStrategy discoveryStrategy;
     private final ResponseTypeIntrospector introspector;
     private final WrapperSchemaProcessor wrapperSchemaProcessor;
@@ -66,12 +78,14 @@ public class OpenApiPipelineOrchestrator {
 
     public OpenApiPipelineOrchestrator(
             BaseSchemaRegistrar baseSchemaRegistrar,
+            BaseSchemaIgnoreMarker baseSchemaIgnoreMarker,
             ResponseTypeDiscoveryStrategy discoveryStrategy,
             ResponseTypeIntrospector introspector,
             WrapperSchemaProcessor wrapperSchemaProcessor,
             OpenApiContractGuard contractGuard) {
 
         this.baseSchemaRegistrar = baseSchemaRegistrar;
+        this.baseSchemaIgnoreMarker = baseSchemaIgnoreMarker;
         this.discoveryStrategy = discoveryStrategy;
         this.introspector = introspector;
         this.wrapperSchemaProcessor = wrapperSchemaProcessor;
@@ -101,10 +115,13 @@ public class OpenApiPipelineOrchestrator {
 
         // 4. Wrapper processing
         refs.forEach(ref -> wrapperSchemaProcessor.process(openApi, ref));
-
         log.debug("Processed {} wrapper schemas", refs.size());
 
-        // 5. Validation
+        // 5. Ignore marking (generation control layer)
+        baseSchemaIgnoreMarker.mark(openApi);
+        log.debug("Applied ignore markers to base schemas");
+
+        // 6. Validation
         contractGuard.validate(openApi);
 
         log.debug("OpenAPI pipeline completed successfully");

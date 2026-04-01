@@ -6,6 +6,7 @@ import io.github.bsayli.openapi.generics.server.core.pipeline.OpenApiPipelineOrc
 import io.github.bsayli.openapi.generics.server.core.schema.WrapperSchemaEnricher;
 import io.github.bsayli.openapi.generics.server.core.schema.WrapperSchemaProcessor;
 import io.github.bsayli.openapi.generics.server.core.schema.base.BaseSchemaRegistrar;
+import io.github.bsayli.openapi.generics.server.core.schema.base.BaseSchemaIgnoreMarker;
 import io.github.bsayli.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.github.bsayli.openapi.generics.server.mvc.MvcResponseTypeDiscoveryStrategy;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -25,9 +26,9 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * <h2>Architecture</h2>
  *
  * <ul>
- *   <li>No multiple customizers
- *   <li>No ordering hacks
- *   <li>Single entry point → {@link OpenApiPipelineOrchestrator}
+ *   <li>No multiple customizers</li>
+ *   <li>No ordering hacks</li>
+ *   <li>Single entry point → {@link OpenApiPipelineOrchestrator}</li>
  * </ul>
  *
  * <h2>Pipeline Flow</h2>
@@ -37,16 +38,32 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  *        ↓
  * OpenApiPipelineOrchestrator
  *        ↓
- * [Base → Discovery → Introspection → Processing → Validation]
+ * [Base → Discovery → Introspection → Processing → Ignore Marking → Validation]
  * </pre>
+ *
+ * <h2>Key Responsibilities</h2>
+ *
+ * <ul>
+ *   <li>Registers infrastructure beans required for OpenAPI transformation</li>
+ *   <li>Ensures pipeline components are replaceable via {@code @ConditionalOnMissingBean}</li>
+ *   <li>Provides a single Springdoc integration point</li>
+ * </ul>
  *
  * <h2>Design Guarantees</h2>
  *
  * <ul>
- *   <li><b>Deterministic</b> → single execution path
- *   <li><b>Fail-fast</b> → validation enforced at the end
- *   <li><b>Extensible</b> → replaceable components
- *   <li><b>Non-intrusive</b> → backs off when user overrides beans
+ *   <li><b>Deterministic</b> → single execution path</li>
+ *   <li><b>Fail-fast</b> → validation enforced at the end</li>
+ *   <li><b>Extensible</b> → replaceable components</li>
+ *   <li><b>Non-intrusive</b> → backs off when user overrides beans</li>
+ * </ul>
+ *
+ * <h2>Important</h2>
+ *
+ * <ul>
+ *   <li>This class performs <b>dependency wiring only</b></li>
+ *   <li>Execution logic resides in {@link OpenApiPipelineOrchestrator}</li>
+ *   <li>{@link BaseSchemaIgnoreMarker} is injected into the pipeline but executed there</li>
  * </ul>
  */
 @AutoConfiguration
@@ -84,6 +101,12 @@ public class OpenApiGenericsAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
+  public BaseSchemaIgnoreMarker baseSchemaIgnoreMarker() {
+    return new BaseSchemaIgnoreMarker();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
   public WrapperSchemaEnricher wrapperSchemaEnricher() {
     return new WrapperSchemaEnricher();
   }
@@ -91,8 +114,8 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public WrapperSchemaProcessor wrapperSchemaProcessor(
-      WrapperSchemaEnricher enricher,
-      @Value("${app.openapi.wrapper.class-extra-annotation:}") String extraAnnotation) {
+          WrapperSchemaEnricher enricher,
+          @Value("${app.openapi.wrapper.class-extra-annotation:}") String extraAnnotation) {
 
     return new WrapperSchemaProcessor(enricher, extraAnnotation);
   }
@@ -110,18 +133,20 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public OpenApiPipelineOrchestrator openApiPipelineOrchestrator(
-      BaseSchemaRegistrar baseSchemaRegistrar,
-      ResponseTypeDiscoveryStrategy discoveryStrategy,
-      ResponseTypeIntrospector introspector,
-      WrapperSchemaProcessor wrapperSchemaProcessor,
-      OpenApiContractGuard contractGuard) {
+          BaseSchemaRegistrar baseSchemaRegistrar,
+          BaseSchemaIgnoreMarker baseSchemaIgnoreMarker,
+          ResponseTypeDiscoveryStrategy discoveryStrategy,
+          ResponseTypeIntrospector introspector,
+          WrapperSchemaProcessor wrapperSchemaProcessor,
+          OpenApiContractGuard contractGuard) {
 
     return new OpenApiPipelineOrchestrator(
-        baseSchemaRegistrar,
-        discoveryStrategy,
-        introspector,
-        wrapperSchemaProcessor,
-        contractGuard);
+            baseSchemaRegistrar,
+            baseSchemaIgnoreMarker,
+            discoveryStrategy,
+            introspector,
+            wrapperSchemaProcessor,
+            contractGuard);
   }
 
   // -------------------------------------------------------------------------
@@ -131,7 +156,6 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean(name = "openApiGenericsCustomizer")
   public OpenApiCustomizer openApiGenericsCustomizer(OpenApiPipelineOrchestrator orchestrator) {
-
     return orchestrator::run;
   }
 }

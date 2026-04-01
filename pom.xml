@@ -42,7 +42,12 @@
         <module>openapi-generics-server-starter</module>
         <module>customer-service</module>
         <module>customer-service-client</module>
+        <module>openapi-generics-java-codegen</module>
     </modules>
+
+    <properties>
+        <java.version>21</java.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>

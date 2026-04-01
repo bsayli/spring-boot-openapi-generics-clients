@@ -183,6 +183,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Sort"
+      x-ignore-model: true
     ServiceResponseCustomerDto:
       allOf:
         - $ref: "#/components/schemas/ServiceResponse"
@@ -202,6 +203,7 @@ components:
           enum:
             - asc
             - desc
+      x-ignore-model: true
     CustomerCreateRequest:
       type: object
       properties:
@@ -274,6 +276,7 @@ components:
           $ref: "#/components/schemas/Meta"
       required:
         - meta
+      x-ignore-model: true
     ServiceResponseVoid:
       type: object
       properties:
@@ -283,3 +286,4 @@ components:
           $ref: "#/components/schemas/Meta"
       required:
         - meta
+      x-ignore-model: true

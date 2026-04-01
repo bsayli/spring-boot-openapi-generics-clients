@@ -52,6 +52,19 @@ package io.github.bsayli.openapi.generics.server.core.schema.contract;
  *   x-data-item: CustomerDto
  * </pre>
  *
+ * <h2>Generation control</h2>
+ *
+ * <ul>
+ *   <li>{@link #IGNORE_MODEL} disables model generation for a schema</li>
+ *   <li>Used for infrastructure / externally provided types</li>
+ *   <li>Schema remains in OpenAPI but is excluded from code generation</li>
+ * </ul>
+ *
+ * <pre>
+ * ServiceResponse:
+ *   x-ignore-model: true
+ * </pre>
+ *
  * <p>This class contains no behavior and serves purely as a centralized vocabulary.
  */
 public final class VendorExtensions {
@@ -78,6 +91,25 @@ public final class VendorExtensions {
 
   /** Indicates the item type contained within the container. */
   public static final String DATA_ITEM = "x-data-item";
+
+  // -------------------------------------------------------------------------
+  // Generation control
+  // -------------------------------------------------------------------------
+
+  /**
+   * Marks a schema to be excluded from code generation.
+   *
+   * <p>Use this for:
+   *
+   * <ul>
+   *   <li>Shared contract types (e.g. {@code ServiceResponse}, {@code Meta})</li>
+   *   <li>Externally provided models</li>
+   *   <li>Infrastructure-level schemas not meant to be generated per client</li>
+   * </ul>
+   *
+   * <p>The schema remains part of the OpenAPI document but will be ignored by templates.
+   */
+  public static final String IGNORE_MODEL = "x-ignore-model";
 
   private VendorExtensions() {}
 }
