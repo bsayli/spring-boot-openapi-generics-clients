@@ -13,18 +13,12 @@
   <img src="docs/images/cover/cover.png" alt="Generics-Aware OpenAPI Contract Lifecycle" width="720"/>
   <br/>
   <strong>
-    OpenAPI shouldn’t generate your models.<br/>
-    It should preserve your contract semantics.
+    OpenAPI shouldn’t generate your models.
   </strong>
   <br/>
   <em>
-    Deterministic generic response contracts — published once, interpreted consistently,
-    consumed safely across service boundaries.
+    Preserve your contract semantics with deterministic, generics-aware APIs.
   </em>
-  <br/>
-  <sub>
-    Contract-first OpenAPI with deterministic, generics-aware client generation.
-  </sub>
 </p>
 
 ---
