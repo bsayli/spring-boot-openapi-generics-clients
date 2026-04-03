@@ -5,53 +5,58 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.bsayli</groupId>
+    <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-platform-bom</artifactId>
     <version>0.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>openapi-generics-platform-bom</name>
     <description>
-        Internal platform BOM for OpenAPI Generics.
-        Provides version alignment across modules and tooling.
-        Not intended for direct consumer use.
+        Platform BOM for OpenAPI Generics.
+        Defines deterministic version alignment across contract, projection, and generation layers.
     </description>
 
     <properties>
         <!-- platform modules -->
-        <api-contract.version>0.8.0-SNAPSHOT</api-contract.version>
+        <openapi.generics.contract.version>0.8.0-SNAPSHOT</openapi.generics.contract.version>
 
         <!-- platform engines -->
-        <openapi-generator.version>7.21.0</openapi-generator.version>
+        <openapi.generator.version>7.21.0</openapi.generator.version>
 
-        <!-- integration engines (affect behavior) -->
+        <!-- integration engines -->
         <springdoc.version>2.8.16</springdoc.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
 
-            <!-- core contract (shared domain) -->
+            <!-- ========================= -->
+            <!-- PLATFORM: CONTRACT LAYER -->
+            <!-- ========================= -->
             <dependency>
-                <groupId>io.github.bsayli</groupId>
-                <artifactId>api-contract</artifactId>
-                <version>${api-contract.version}</version>
+                <groupId>io.github.blueprint-platform</groupId>
+                <artifactId>openapi-generics-contract</artifactId>
+                <version>${openapi.generics.contract.version}</version>
             </dependency>
 
-            <!-- openapi generator (codegen engine - deterministic) -->
+            <!-- ========================= -->
+            <!-- PLATFORM: CODEGEN ENGINE -->
+            <!-- ========================= -->
             <dependency>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-core</artifactId>
-                <version>${openapi-generator.version}</version>
+                <version>${openapi.generator.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator</artifactId>
-                <version>${openapi-generator.version}</version>
+                <version>${openapi.generator.version}</version>
             </dependency>
 
-            <!-- springdoc (server-side OpenAPI engine - affects runtime behavior) -->
+            <!-- ========================= -->
+            <!-- PLATFORM: PROJECTION LAYER -->
+            <!-- ========================= -->
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-common</artifactId>

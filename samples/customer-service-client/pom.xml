@@ -5,19 +5,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.github.bsayli</groupId>
+        <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics-java-codegen-parent</artifactId>
         <version>0.8.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
-    <groupId>io.github.bsayli</groupId>
+    <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>customer-service-client</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
     <name>customer-service-client</name>
+    <version>0.8.0-SNAPSHOT</version>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
-    <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
+    <url>https://github.com/blueprint-platform/openapi-generics</url>
 
     <licenses>
         <license>
@@ -28,8 +28,8 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
-        <connection>scm:git:https://github.com/bsayli/spring-boot-openapi-generics-clients.git</connection>
+        <url>https://github.com/blueprint-platform/openapi-generics</url>
+        <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:bsayli/spring-boot-openapi-generics-clients.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
@@ -177,9 +177,9 @@
 
                             <output>${openapi.generator.output}</output>
 
-                            <apiPackage>io.github.bsayli.customerservice.client.generated.api</apiPackage>
-                            <modelPackage>io.github.bsayli.customerservice.client.generated.dto</modelPackage>
-                            <invokerPackage>io.github.bsayli.customerservice.client.generated.invoker</invokerPackage>
+                            <apiPackage>io.github.blueprintplatform.samples.customerservice.client.generated.api</apiPackage>
+                            <modelPackage>io.github.blueprintplatform.samples.customerservice.client.generated.dto</modelPackage>
+                            <invokerPackage>io.github.blueprintplatform.samples.customerservice.client.generated.invoker</invokerPackage>
 
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>

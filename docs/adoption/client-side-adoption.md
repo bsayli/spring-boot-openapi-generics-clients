@@ -42,7 +42,7 @@ Do this:
 
 ```xml
 <parent>
-  <groupId>io.github.bsayli</groupId>
+  <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
 </parent>
 ```
@@ -105,8 +105,8 @@ You need:
 
 ```xml
 <dependency>
-  <groupId>io.github.bsayli</groupId>
-  <artifactId>api-contract</artifactId>
+  <groupId>io.github.blueprintplatform</groupId>
+  <artifactId>openapi-generics-contract</artifactId>
 </dependency>
 ```
 

@@ -49,7 +49,7 @@ Within the platform:
 
 | Layer      | Module          | Role                       |
 | ---------- | --------------- | -------------------------- |
-| Authority  | `api-contract`  | Defines response semantics |
+| Authority  | `openapi-generics-contract`  | Defines response semantics |
 | Projection | server starter  | Produces OpenAPI           |
 | Execution  | **this module** | Orchestrates generation    |
 | Rendering  | templates       | Shape final code           |
@@ -99,9 +99,9 @@ No manual template management required.
 Mappings are injected automatically:
 
 ```
-ServiceResponse → api-contract
-Meta → api-contract
-Page → api-contract
+ServiceResponse → openapi-generics-contract
+Meta → openapi-generics-contract
+Page → openapi-generics-contract
 ```
 
 Result:
@@ -219,7 +219,7 @@ Ensures generated code is compiled as part of the project.
 
 ```xml
 <parent>
-  <groupId>io.github.bsayli</groupId>
+  <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
   <version>0.8.0-SNAPSHOT</version>
 </parent>
@@ -297,7 +297,7 @@ Everything happens at build time.
 
 ### No Contract Duplication
 
-All core models come from `api-contract`.
+All core models come from `openapi-generics-contract`.
 
 ---
 

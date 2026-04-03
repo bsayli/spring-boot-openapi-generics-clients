@@ -14,6 +14,6 @@ just_the_docs:
 
 aux_links:
   "View on GitHub":
-    - "https://github.com/bsayli/spring-boot-openapi-generics-clients"
+    - "https://github.com/blueprint-platform/openapi-generics"
 
 search_enabled: true

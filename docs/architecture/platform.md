@@ -88,7 +88,7 @@ The platform IS:
 ```text
 spring-boot-openapi-generics-clients
 │
-├── api-contract                         # Contract authority (SSOT)
+├── openapi-generics-contract                         # Contract authority (SSOT)
 ├── openapi-generics-platform-bom        # Version alignment (ecosystem boundary)
 ├── openapi-generics-server-starter      # Server projection layer (runtime → OpenAPI)
 ├── openapi-generics-java-codegen        # Generator engine (OpenAPI → code)
@@ -178,7 +178,7 @@ Generated Java Client
 
 ## 7. Contract Ownership Model
 
-Owned by: `api-contract`
+Owned by: `openapi-generics-contract`
 
 Defines:
 

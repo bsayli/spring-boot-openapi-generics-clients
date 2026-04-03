@@ -26,7 +26,7 @@
     const campaign = params.get('cmp') || 'repo';
     const content = params.get('c') || '';
 
-    const target = 'https://github.com/bsayli/spring-boot-openapi-generics-clients';
+    const target = 'https://github.com/blueprint-platform/openapi-generics';
     const utm = `?utm_source=${encodeURIComponent(src)}&utm_medium=referral&utm_campaign=${encodeURIComponent(campaign)}${content ? `&utm_content=${encodeURIComponent(content)}` : ''}`;
     const go = () => location.href = target + utm;
 

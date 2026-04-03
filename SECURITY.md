@@ -103,7 +103,7 @@ Severity directly influences prioritization and release timing.
 
 ### In scope
 
-* **`api-contract`**
+* **`openapi-generics-contract`**
   Shared response, paging, and error contracts (`ServiceResponse<T>`, `Meta`, `Page`, RFC 9457 extensions)
 
 * **`customer-service`**

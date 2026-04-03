@@ -5,7 +5,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.bsayli</groupId>
+    <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-java-codegen-parent</artifactId>
     <version>0.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -41,15 +41,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.bsayli</groupId>
-            <artifactId>api-contract</artifactId>
+            <groupId>io.github.blueprint-platform</groupId>
+            <artifactId>openapi-generics-contract</artifactId>
         </dependency>
     </dependencies>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.github.bsayli</groupId>
+                <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-platform-bom</artifactId>
                 <version>0.8.0-SNAPSHOT</version>
                 <type>pom</type>
@@ -101,7 +101,7 @@
                             <configuration>
                                 <artifactItems>
                                     <artifactItem>
-                                        <groupId>io.github.bsayli</groupId>
+                                        <groupId>io.github.blueprint-platform</groupId>
                                         <artifactId>openapi-generics-java-codegen</artifactId>
                                         <version>${openapi-generics-java-codegen.version}</version>
                                         <includes>META-INF/openapi-generics/templates/**</includes>
@@ -199,7 +199,7 @@
 
                     <dependencies>
                         <dependency>
-                            <groupId>io.github.bsayli</groupId>
+                            <groupId>io.github.blueprint-platform</groupId>
                             <artifactId>openapi-generics-java-codegen</artifactId>
                             <version>${openapi-generics-java-codegen.version}</version>
                         </dependency>
@@ -220,16 +220,16 @@
 
                         <!-- GENERICS CONTRACT -->
                         <additionalProperties>
-                            <additionalProperty>apiContractEnvelope=io.github.bsayli.apicontract.envelope</additionalProperty>
-                            <additionalProperty>apiContractPage=io.github.bsayli.apicontract.paging</additionalProperty>
+                            <additionalProperty>apiContractEnvelope=io.github.blueprintplatform.openapi.generics.contract.envelope</additionalProperty>
+                            <additionalProperty>apiContractPage=io.github.blueprintplatform.openapi.generics.contract.paging</additionalProperty>
                         </additionalProperties>
 
                         <importMappings>
-                            <importMapping>Meta=io.github.bsayli.apicontract.envelope.Meta</importMapping>
-                            <importMapping>ServiceResponse=io.github.bsayli.apicontract.envelope.ServiceResponse</importMapping>
-                            <importMapping>Page=io.github.bsayli.apicontract.paging.Page</importMapping>
-                            <importMapping>Sort=io.github.bsayli.apicontract.paging.Sort</importMapping>
-                            <importMapping>SortDirection=io.github.bsayli.apicontract.paging.SortDirection</importMapping>
+                            <importMapping>Meta=io.github.blueprintplatform.openapi.generics.contract.envelope.Meta</importMapping>
+                            <importMapping>ServiceResponse=io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse</importMapping>
+                            <importMapping>Page=io.github.blueprintplatform.openapi.generics.contract.paging.Page</importMapping>
+                            <importMapping>Sort=io.github.blueprintplatform.openapi.generics.contract.paging.Sort</importMapping>
+                            <importMapping>SortDirection=io.github.blueprintplatform.openapi.generics.contract.paging.SortDirection</importMapping>
                         </importMappings>
 
                     </configuration>

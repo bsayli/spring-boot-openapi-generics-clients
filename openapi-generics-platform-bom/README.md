@@ -42,7 +42,7 @@ The BOM defines versions for:
 
 ### Platform Modules
 
-* `api-contract`
+* `openapi-generics-contract`
 
 ### Core Engines
 
@@ -70,7 +70,7 @@ Example (internal usage):
 <dependencyManagement>
   <dependencies>
     <dependency>
-      <groupId>io.github.bsayli</groupId>
+      <groupId>io.github.blueprintplatform</groupId>
       <artifactId>openapi-generics-platform-bom</artifactId>
       <version>0.8.x</version>
       <type>pom</type>
@@ -115,7 +115,7 @@ Within the platform:
 
 | Layer                      | Module                            |
 | -------------------------- | --------------------------------- |
-| Contract (Authority)       | `api-contract`                    |
+| Contract (Authority)       | `openapi-generics-contract`                    |
 | Projection (Server)        | `openapi-generics-server-starter` |
 | Generation (Client)        | `openapi-generics-java-codegen`   |
 | Alignment (Infrastructure) | `openapi-generics-platform-bom`   |

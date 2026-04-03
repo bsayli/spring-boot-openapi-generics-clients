@@ -57,7 +57,7 @@ Please evaluate and declare impact:
 
 If **yes**, briefly explain what is affected:
 
-* `api-contract` surface (e.g. `ServiceResponse<T>`, paging, error models)
+* `openapi-generics-contract` surface (e.g. `ServiceResponse<T>`, paging, error models)
 * OpenAPI schema output or naming
 * Vendor extension semantics (`x-api-wrapper`, `x-data-container`, …)
 * Generator or Mustache template behavior
@@ -76,7 +76,7 @@ If this PR touches **vendor extensions**, **templates**, or **generator behavior
 
 **Reference example:**
 Issue #7 — *Add Multi‑Language Fallbacks for `x-api-wrapper`*
-👉 [https://github.com/bsayli/spring-boot-openapi-generics-clients/issues/7](https://github.com/bsayli/spring-boot-openapi-generics-clients/issues/7)
+👉 [https://github.com/blueprint-platform/openapi-generics/issues/7](https://github.com/blueprint-platform/openapi-generics/issues/7)
 
 Link related issues or discussions where relevant.
 
@@ -90,7 +90,7 @@ Please confirm the following:
 * [ ] Build passes locally **from repository root**: `mvn -q -ntp clean verify`
 * [ ] Tests added/updated where appropriate
 * [ ] Docs updated if behavior or guarantees changed (`README.md`, `docs/`, adoption guides)
-* [ ] **Contract impact evaluated** (`api-contract` / OpenAPI / templates)
+* [ ] **Contract impact evaluated** (`openapi-generics-contract` / OpenAPI / templates)
 * [ ] Generated code treated as **disposable output** (changes target contracts, templates, or generators)
 * [ ] No accidental edits to generated code outside intended overlays
 * [ ] Linked issue or discussion (e.g. `Closes #7`)

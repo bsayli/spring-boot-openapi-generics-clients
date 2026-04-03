@@ -1,17 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.bsayli</groupId>
-    <artifactId>spring-boot-openapi-generics-clients</artifactId>
+    <groupId>io.github.blueprint-platform</groupId>
+    <artifactId>openapi-generics</artifactId>
     <version>0.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>spring-boot-openapi-generics-clients (aggregator)</name>
-    <description>Aggregator build for api-contract, customer-service, and customer-service-client.</description>
-    <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
+    <name>openapi-generics (aggregator)</name>
+    <description>
+        OpenAPI Generics platform aggregator. Defines contract, projection, and generation modules
+        for deterministic, generics-aware API lifecycle.
+    </description>
+    <url>https://github.com/blueprint-platform/openapi-generics</url>
 
     <licenses>
         <license>
@@ -22,9 +25,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
-        <connection>scm:git:https://github.com/bsayli/spring-boot-openapi-generics-clients.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:bsayli/spring-boot-openapi-generics-clients.git</developerConnection>
+        <url>https://github.com/blueprint-platform/openapi-generics</url>
+        <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -37,21 +40,22 @@
     </developers>
 
     <modules>
-        <!-- CORE CONTRACT -->
-        <module>api-contract</module>
+        <!-- CONTRACT (Authority Layer) -->
+        <module>openapi-generics-contract</module>
 
         <!-- PLATFORM BOM -->
         <module>openapi-generics-platform-bom</module>
 
-        <!-- SERVER SIDE (OpenAPI projection engine) -->
+        <!-- SERVER (OpenAPI projection layer) -->
         <module>openapi-generics-server-starter</module>
 
-        <!-- CODEGEN ENGINE -->
+        <!-- CODE GENERATION ENGINE -->
         <module>openapi-generics-java-codegen</module>
 
-        <!-- CODEGEN ORCHESTRATION (parent / plugin wiring) -->
+        <!-- CODEGEN ORCHESTRATION -->
         <module>openapi-generics-java-codegen-parent</module>
 
+        <!-- SAMPLE APPLICATIONS -->
         <module>samples</module>
     </modules>
 

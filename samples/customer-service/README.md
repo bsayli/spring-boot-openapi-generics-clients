@@ -41,7 +41,7 @@ Do this:
 
 ```xml
 <dependency>
-  <groupId>io.github.bsayli</groupId>
+  <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
 </dependency>
 ```
@@ -197,7 +197,7 @@ Generated client
 
 ## 🔗 Related Modules
 
-* **[api-contract](../../api-contract/README.md)**  
+* **[openapi-generics-contract](../../openapi-generics-contract/README.md)**  
   Canonical contract definitions (`ServiceResponse<T>`, `Page<T>`).
 
 * **[openapi-generics-server-starter](../../openapi-generics-server-starter/README.md)**  

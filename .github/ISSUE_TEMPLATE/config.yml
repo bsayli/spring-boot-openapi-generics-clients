@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: 💬 Start a discussion
-    url: https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions
+    url: https://github.com/blueprint-platform/openapi-generics/discussions
     about: For questions, design feedback, or sharing ideas

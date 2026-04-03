@@ -99,7 +99,7 @@ With:
 
 ```xml
 <dependency>
-  <groupId>io.github.bsayli</groupId>
+  <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
   <version>0.8.x</version>
 </dependency>
@@ -143,7 +143,7 @@ Rationale:
 
 This module intentionally does NOT:
 
-* define API contracts (handled by `api-contract`)
+* define API contracts (handled by `openapi-generics-contract`)
 * generate clients (handled by codegen layer)
 * require annotations or configuration
 * modify runtime HTTP behavior
@@ -194,7 +194,7 @@ Principle:
 
 | Module                            | Role                               |
 | --------------------------------- | ---------------------------------- |
-| `api-contract`                    | Authority (defines response model) |
+| `openapi-generics-contract`                    | Authority (defines response model) |
 | `openapi-generics-server-starter` | Projection (this module)           |
 | `openapi-generics-java-codegen`   | Client generation                  |
 

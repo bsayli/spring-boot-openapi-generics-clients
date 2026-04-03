@@ -46,7 +46,7 @@ Instead, it enforces:
 
 | Layer                          | Role                       |
 | ------------------------------ | -------------------------- |
-| Java Contract (`api-contract`) | **Authority (SSOT)**       |
+| Java Contract (`openapi-generics-contract`) | **Authority (SSOT)**       |
 | OpenAPI                        | Projection (metadata only) |
 | Generator                      | Enforcement layer          |
 | Templates                      | Rendering layer            |
@@ -228,9 +228,9 @@ openapi-generator → model.mustache
 Mapping is explicit:
 
 ```
-ServiceResponse → api-contract
-Meta → api-contract
-Page → api-contract
+ServiceResponse → openapi-generics-contract
+Meta → openapi-generics-contract
+Page → openapi-generics-contract
 ```
 
 Mechanism:

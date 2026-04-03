@@ -42,7 +42,7 @@ If you just want to use this in your own project:
 
 ```xml
 <parent>
-  <groupId>io.github.bsayli</groupId>
+  <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
   <version>0.8.0-SNAPSHOT</version>
 </parent>
@@ -154,7 +154,7 @@ This enables deterministic generation.
 
 ```xml
 <parent>
-  <groupId>io.github.bsayli</groupId>
+  <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
   <version>0.8.0-SNAPSHOT</version>
 </parent>
@@ -346,7 +346,7 @@ OpenAPI Generator plugin
 
 ## 🔗 Related Modules
 
-* **[api-contract](../../api-contract/README.md)**  
+* **[openapi-generics-contract](../../openapi-generics-contract/README.md)**  
   Canonical response contract (authority layer).
 
 * **[customer-service](../customer-service/README.md)**  

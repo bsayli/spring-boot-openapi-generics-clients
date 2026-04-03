@@ -89,7 +89,7 @@ are treated as **platform-owned**.
 
 Generated code:
 
-* references `api-contract`
+* references `openapi-generics-contract`
 * does NOT duplicate envelope types
 * remains deterministic and stable
 
@@ -196,7 +196,7 @@ Not:
 
 | Module                                 | Role                               |
 | -------------------------------------- | ---------------------------------- |
-| `api-contract`                         | Defines canonical models           |
+| `openapi-generics-contract`                         | Defines canonical models           |
 | `openapi-generics-server-starter`      | Produces OpenAPI projection        |
 | `openapi-generics-java-codegen`        | Enforces generation rules          |
 | `openapi-generics-java-codegen-parent` | Orchestrates build-time generation |

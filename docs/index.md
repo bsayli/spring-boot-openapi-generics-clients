@@ -56,7 +56,7 @@ Do this:
 
 ```xml
 <dependency>
-  <groupId>io.github.bsayli</groupId>
+  <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
 </dependency>
 ```
@@ -141,7 +141,7 @@ ServiceResponse<T>
 Defined in:
 
 ```text
-api-contract
+openapi-generics-contract
 ```
 
 Everything else is:
@@ -188,7 +188,7 @@ If you follow the rules:
 ## 🔄 Full lifecycle
 
 ```text
-[api-contract]              ← authority
+[openapi-generics-contract]              ← authority
         ↓
 [server]                    ← returns ServiceResponse<T>
         ↓
@@ -277,7 +277,7 @@ ServiceResponse<CustomerDto>
 
 | Component      | Responsibility           |
 | -------------- | ------------------------ |
-| api-contract   | defines truth            |
+| openapi-generics-contract   | defines truth            |
 | server-starter | OpenAPI projection       |
 | codegen-parent | generation orchestration |
 | client module  | consumption              |
@@ -307,7 +307,7 @@ Each guide focuses on **architectural integration steps**, remaining domain‑ag
 
 ## 🔗 References & External Links
 
-* 🌐 **GitHub Repository** — [spring-boot-openapi-generics-clients](https://github.com/bsayli/spring-boot-openapi-generics-clients)
+* 🌐 **GitHub Repository** — [openapi-generics](https://github.com/blueprint-platform/openapi-generics)
 * 📘 **Medium** — [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
 
 ## 🛡 License

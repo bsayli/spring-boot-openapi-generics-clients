@@ -18,9 +18,9 @@ ignore:
   - "**/generated-sources/**"
 
 flags:
-  api-contract:
+  openapi-generics-contract:
     paths:
-      - "api-contract/"
+      - "openapi-generics-contract/"
   customer-service:
     paths:
       - "customer-service/"

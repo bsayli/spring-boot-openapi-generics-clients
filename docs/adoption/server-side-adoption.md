@@ -41,7 +41,7 @@ Do this:
 
 ```xml
 <dependency>
-  <groupId>io.github.bsayli</groupId>
+  <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
 </dependency>
 ```
@@ -110,7 +110,7 @@ Only:
 
 ```xml
 <dependency>
-  <groupId>io.github.bsayli</groupId>
+  <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
 </dependency>
 ```

@@ -18,7 +18,7 @@ RUN useradd -r -u 10001 -g root -s /bin/false -d /app appuser && \
 
 LABEL org.opencontainers.image.title="customer-service" \
       org.opencontainers.image.description="Customer Service" \
-      org.opencontainers.image.source="https://github.com/bsayli/spring-boot-openapi-generics-clients" \
+      org.opencontainers.image.source="https://github.com/blueprint-platform/openapi-generics" \
       org.opencontainers.image.licenses="MIT"
 
 COPY --from=builder --chown=10001:0 /app/dependencies/ ./

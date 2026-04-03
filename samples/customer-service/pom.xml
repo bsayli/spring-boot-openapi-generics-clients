@@ -11,12 +11,12 @@
             <relativePath/>
         </parent>
 
-        <groupId>io.github.bsayli</groupId>
+        <groupId>io.github.blueprint-platform.samples</groupId>
         <artifactId>customer-service</artifactId>
         <version>0.8.0-SNAPSHOT</version>
         <name>customer-service</name>
-        <description>Spring Boot 3.5 + Springdoc (OpenAPI) for generics-aware client generation</description>
-        <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
+        <description>Spring Boot reference producer for the OpenAPI Generics platform</description>
+        <url>https://github.com/blueprint-platform/openapi-generics</url>
 
         <licenses>
             <license>
@@ -27,9 +27,9 @@
         </licenses>
 
         <scm>
-            <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
-            <connection>scm:git:https://github.com/bsayli/spring-boot-openapi-generics-clients.git</connection>
-            <developerConnection>scm:git:ssh://git@github.com:bsayli/spring-boot-openapi-generics-clients.git</developerConnection>
+            <url>https://github.com/blueprint-platform/openapi-generics</url>
+            <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
+            <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
             <tag>HEAD</tag>
         </scm>
 
@@ -57,7 +57,7 @@
         <dependencies>
 
             <dependency>
-                <groupId>io.github.bsayli</groupId>
+                <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-server-starter</artifactId>
                 <version>${openapi-generics-server-starter.version}</version>
             </dependency>
@@ -99,7 +99,7 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <configuration>
-                        <mainClass>io.github.bsayli.customerservice.CustomerServiceApplication</mainClass>
+                        <mainClass>io.github.blueprintplatform.samples.customerservice.CustomerServiceApplication</mainClass>
                         <layers>
                             <enabled>true</enabled>
                         </layers>

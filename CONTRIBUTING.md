@@ -78,7 +78,7 @@ Please search existing issues and discussions before opening a new one.
 This repository is a **multi‑module Maven aggregator**.
 At the repository root you have a parent `pom.xml` (`packaging=pom`) that defines the module order:
 
-* `api-contract`
+* `openapi-generics-contract`
 * `customer-service`
 * `customer-service-client`
 
@@ -103,7 +103,7 @@ mvn -q -ntp -pl customer-service -am clean verify
 mvn -q -ntp -pl customer-service-client -am clean verify
 ```
 
-> `-am` (**also-make**) ensures Maven builds `api-contract` first when required.
+> `-am` (**also-make**) ensures Maven builds `openapi-generics-contract` first when required.
 
 ### Run the server locally
 
@@ -118,7 +118,7 @@ mvn -q -ntp spring-boot:run
 ## Project layout
 
 ```
-/api-contract               # Shared contract: ServiceResponse<T>, Page<T>, Meta, Sort, RFC 9457 helpers
+/openapi-generics-contract               # Shared contract: ServiceResponse<T>, Page<T>, Meta, Sort, RFC 9457 helpers
 /customer-service           # Spring Boot API producer (publishes OpenAPI 3.1 spec)
 /customer-service-client    # OpenAPI-generated Java client (RestClient + Mustache overlays)
 /docs                       # Adoption guides & GitHub Pages sources
@@ -154,7 +154,7 @@ Use clear, descriptive prefixes to communicate intent:
 
 * `feature(client): support Page-only nested generics`
 * `bugfix(server): guard null composed schemas during introspection`
-* `docs(adoption): clarify api-contract ownership`
+* `docs(adoption): clarify openapi-generics-contract ownership`
 
 Favor **clarity over cleverness**; commits should be easy to review in isolation.
 
@@ -200,7 +200,7 @@ This section explains how the OpenAPI specification is produced and consumed, an
 
 The client module is **not self-contained**. It is designed to compile against a shared, pre-defined contract:
 
-* `ServiceResponse<T>` is provided by **`io.github.bsayli:api-contract`**
+* `ServiceResponse<T>` is provided by **`io.github.blueprintplatform:openapi-generics-contract`**
 * Nested generics are considered contract-aware **only** for:
 
   ```java
@@ -245,7 +245,7 @@ mvn -q -ntp -pl customer-service-client -am clean verify
 
 Building from the root ensures:
 
-* `api-contract` is built first
+* `openapi-generics-contract` is built first
 * the client compiles against the exact same contract version
 * no accidental divergence between modules
 
@@ -273,7 +273,7 @@ This is useful for documentation, reviews, or offline work.
 
 Client templates are intentionally minimal and declarative. Their behavior is defined as follows:
 
-* All success wrappers **extend** `ServiceResponse<T>` from `api-contract`
+* All success wrappers **extend** `ServiceResponse<T>` from `openapi-generics-contract`
 * Wrapper models are thin type binders; they do not redefine envelope fields
 * Nested generics are handled explicitly **only** for:
 

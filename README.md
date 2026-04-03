@@ -1,8 +1,8 @@
 # Spring Boot OpenAPI Generics — Contract Lifecycle Architecture for Type‑Safe API Boundaries
 
-[![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml)
-[![Release](https://img.shields.io/github/v/tag/bsayli/spring-boot-openapi-generics-clients?logo=github&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
-[![CodeQL](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/codeql.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/codeql.yml)
+[![Build](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/tag/bsayli/spring-boot-openapi-generics-clients?logo=github&label=release)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
+[![CodeQL](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml)
 [![codecov](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients/branch/main/graph/badge.svg)](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients)
 [![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
@@ -475,7 +475,7 @@ OpenAPI is treated as a **projection layer of contract semantics**, not as the a
 
 ## Modules
 
-* **[api-contract](api-contract/README.md)**
+* **[openapi-generics-contract](openapi-generics-contract/README.md)**
   Canonical response contract (authority layer). Defines `ServiceResponse<T>`, `Page<T>`, and shared semantics.
 
 * **[openapi-generics-server-starter](openapi-generics-server-starter/README.md)**
@@ -579,9 +579,9 @@ Architectural discussions, real‑world usage feedback, and evolution proposals 
 
 Please open an issue or start a discussion in the repository.
 
-👉 [Issues](https://github.com/bsayli/spring-boot-openapi-generics-clients/issues)
+👉 [Issues](https://github.com/blueprint-platform/openapi-generics/issues)
 
-👉 [Discussions](https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions)
+👉 [Discussions](https://github.com/blueprint-platform/openapi-generics/discussions)
 
 ---
 
