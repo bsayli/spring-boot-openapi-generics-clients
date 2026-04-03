@@ -85,18 +85,52 @@ The platform IS:
 
 ## 4. High-Level Platform Structure
 
-```
+```text
 spring-boot-openapi-generics-clients
 │
-├── api-contract
-├── openapi-generics-platform-bom
-├── openapi-generics-server-starter
-├── openapi-generics-java-codegen
-├── openapi-generics-java-codegen-parent
-├── customer-service (sample producer)
-├── customer-service-client (sample consumer)
-└── aggregator
+├── api-contract                         # Contract authority (SSOT)
+├── openapi-generics-platform-bom        # Version alignment (ecosystem boundary)
+├── openapi-generics-server-starter      # Server projection layer (runtime → OpenAPI)
+├── openapi-generics-java-codegen        # Generator engine (OpenAPI → code)
+├── openapi-generics-java-codegen-parent # Build-time orchestration (plugin + templates)
+│
+├── samples                              # Reference implementations (non-authoritative)
+│   ├── customer-service                 # Sample producer (contract → OpenAPI)
+│   └── customer-service-client          # Sample consumer (OpenAPI → client usage)
+│
+└── pom.xml                              # Root aggregator
 ```
+
+---
+
+### Structural Intent
+
+The platform is deliberately split into two domains:
+
+```text
+Platform (authoritative)
+   ├── Contract
+   ├── Server (projection)
+   ├── Generator (enforcement)
+   └── BOM (distribution)
+
+Samples (demonstration only)
+   ├── Producer example
+   └── Consumer example
+```
+
+---
+
+### Key Principle
+
+> Only the platform defines behavior. Samples only demonstrate usage.
+
+This ensures:
+
+* clear separation of concerns
+* no leakage of sample logic into platform layers
+* stable and evolvable architecture
+* deterministic build and runtime boundaries
 
 ---
 
