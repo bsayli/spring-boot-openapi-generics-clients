@@ -1,8 +1,5 @@
 # Spring Boot OpenAPI Generics — Contract Lifecycle Architecture for Type‑Safe API Boundaries
 
-> **OpenAPI shouldn’t generate your models.**  
-> It should preserve your contract.
-
 [![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/tag/bsayli/spring-boot-openapi-generics-clients?logo=github&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
 [![CodeQL](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/codeql.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/codeql.yml)
@@ -15,13 +12,18 @@
 <p align="center">
   <img src="docs/images/cover/cover.png" alt="Generics-Aware OpenAPI Contract Lifecycle" width="720"/>
   <br/>
+  <strong>
+    OpenAPI shouldn’t generate your models.<br/>
+    It should preserve your contract semantics.
+  </strong>
+  <br/>
   <em>
     Deterministic generic response contracts — published once, interpreted consistently,
     consumed safely across service boundaries.
   </em>
   <br/>
   <sub>
-    A contract-first approach to OpenAPI that preserves semantics across the entire lifecycle.
+    Contract-first OpenAPI with deterministic, generics-aware client generation.
   </sub>
 </p>
 
