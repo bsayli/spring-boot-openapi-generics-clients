@@ -1,12 +1,12 @@
-title: OpenAPI Generics Clients
-description: Type-safe OpenAPI clients with generics (Spring Boot + OpenAPI Generator)
+title: OpenAPI Generics
+description: Deterministic, generics-aware API platform (contract + server + codegen)
 
 remote_theme: just-the-docs/just-the-docs
 
 plugins:
   - jekyll-remote-theme
 
-baseurl: "/spring-boot-openapi-generics-clients"
+baseurl: "/openapi-generics"
 
 just_the_docs:
   custom_css:
