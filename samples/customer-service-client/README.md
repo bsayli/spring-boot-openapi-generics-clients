@@ -2,6 +2,12 @@
 
 > **How to generate and integrate a generics-aware OpenAPI client into your own Spring Boot application**
 
+[![Java 21](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.21.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../LICENSE)
+
+
 ---
 
 ## 📑 Table of Contents
@@ -340,10 +346,17 @@ OpenAPI Generator plugin
 
 ## 🔗 Related Modules
 
-* `api-contract` → canonical models
-* `customer-service` → producer example
-* `openapi-generics-java-codegen-parent` → orchestration
-* `openapi-generics-java-codegen` → generator logic
+* **[api-contract](../../api-contract/README.md)**  
+  Canonical response contract (authority layer).
+
+* **[customer-service](../customer-service/README.md)**  
+  Sample producer demonstrating contract-first API exposure.
+
+* **[openapi-generics-java-codegen-parent](../../openapi-generics-java-codegen-parent/README.md)**  
+  Build-time orchestration layer.
+
+* **[openapi-generics-java-codegen](../../openapi-generics-java-codegen/README.md)**  
+  Custom generator enforcing contract-aware client generation.
 
 ---
 

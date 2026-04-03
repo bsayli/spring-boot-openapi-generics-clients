@@ -1,3 +1,28 @@
+# customer-service
+
+> **How to expose a Spring Boot API that generates a clean, type-safe client (contract-first + generics-aware OpenAPI)**
+
+[![Java 21](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../LICENSE)
+
+---
+
+## 📑 Table of Contents
+
+- [🚀 Start here (what you actually want)](#-start-here-what-you-actually-want)
+- [⚠️ Rules (do NOT break these)](#-rules-do-not-break-these)
+  - [1. Only constrain the envelope — payload is yours](#1-only-constrain-the-envelope--payload-is-yours)
+  - [2. Do NOT replace the envelope (this is the only restriction)](#2-do-not-replace-the-envelope-this-is-the-only-restriction)
+  - [3. Do NOT wrap errors](#3-do-not-wrap-errors)
+  - [4. Do NOT customize OpenAPI manually](#4-do-not-customize-openapi-manually)
+- [🧠 What is happening under the hood (short version)](#-what-is-happening-under-the-hood-short-version)
+- [🔄 Full pipeline (important)](#-full-pipeline-important)
+- [🔗 Related Modules](#-related-modules)
+- [🧪 Verify quickly](#-verify-quickly)
+- [🌐 OpenAPI endpoints](#-openapi-endpoints)
+- [🚫 What this project is NOT](#-what-this-project-is-not)
+- [🛡️ License](#-license)
 ---
 
 ## 🚀 Start here (what you actually want)
@@ -167,6 +192,22 @@ openapi-generics-java-codegen-parent
    ↓
 Generated client
 ```
+
+---
+
+## 🔗 Related Modules
+
+* **[api-contract](../../api-contract/README.md)**  
+  Canonical contract definitions (`ServiceResponse<T>`, `Page<T>`).
+
+* **[openapi-generics-server-starter](../../openapi-generics-server-starter/README.md)**  
+  Projection layer used in this module.
+
+* **[openapi-generics-java-codegen-parent](../../openapi-generics-java-codegen-parent/README.md)**  
+  Client generation orchestration.
+
+* **[customer-service-client](../customer-service-client/README.md)**  
+  Consumer example showing how the generated client is used.
 
 ---
 

@@ -1,12 +1,15 @@
 # Spring Boot OpenAPI Generics — Contract Lifecycle Architecture for Type‑Safe API Boundaries
 
+> **OpenAPI shouldn’t generate your models.**  
+> It should preserve your contract.
+
 [![Build](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/build.yml)
-[![Release](https://img.shields.io/github/v/tag/bsayli/spring-boot-openapi-generics-clients?logo=github\&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
+[![Release](https://img.shields.io/github/v/tag/bsayli/spring-boot-openapi-generics-clients?logo=github&label=release)](https://github.com/bsayli/spring-boot-openapi-generics-clients/releases/latest)
 [![CodeQL](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/codeql.yml/badge.svg)](https://github.com/bsayli/spring-boot-openapi-generics-clients/actions/workflows/codeql.yml)
 [![codecov](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients/branch/main/graph/badge.svg)](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients)
 [![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.12-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.21.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <p align="center">
@@ -16,6 +19,10 @@
     Deterministic generic response contracts — published once, interpreted consistently,
     consumed safely across service boundaries.
   </em>
+  <br/>
+  <sub>
+    A contract-first approach to OpenAPI that preserves semantics across the entire lifecycle.
+  </sub>
 </p>
 
 ---
@@ -23,6 +30,7 @@
 ## 📑 Table of Contents
 
 - 🧭 [Architectural Thesis](#architectural-thesis)
+- ⚡ [Quick Start](#-quick-start-2-minutes)
 - 🧩 [What This Repository Is (and Is Not)](#what-this-repository-is-and-is-not)
 - 🔁 [Contract Lifecycle Model](#contract-lifecycle-model)
 - 🚨 [The Problem](#the-problem)
@@ -34,7 +42,7 @@
 - 🔎 [Proof — Generated Client Models (Before / After)](#proof-generated-client-models-before--after)
 - 🧠 [Design Guarantees](#design-guarantees)
 - 📦 [Modules](#modules)
-- ⚡ [Quick Start](#quick-start)
+- 🧠 [Architecture](#-architecture)
 - 📘 [Adoption Guides](#adoption-guides)
 - 🔗 [References](#references)
 - 🤝 [Contributing](#contributing)
@@ -58,8 +66,6 @@ This repository demonstrates a different architectural stance:
 
 It presents a cohesive **contract lifecycle architecture** where a single canonical response model is:
 
-This repository demonstrates that approach through a minimal but end-to-end reference implementation.
-
 * defined once as a shared runtime abstraction
 * published deterministically through an OpenAPI specification
 * interpreted semantically during client generation
@@ -73,6 +79,107 @@ This repository demonstrates that approach through a minimal but end-to-end refe
 > For the architectural reasoning and real-world context behind it:
 >
 > - [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+
+---
+
+## ⚡ Quick Start (2 minutes)
+
+This repository demonstrates a **contract-first, generics-aware API lifecycle**.
+
+The fastest way to understand it is to:
+
+1. run the producer service
+2. inspect the generated OpenAPI
+3. generate a client
+4. observe contract preservation end-to-end
+
+---
+
+### 1. Run the sample producer
+
+```bash
+cd samples/customer-service
+mvn clean package
+java -jar target/customer-service-*.jar
+```
+
+Verify the API is running:
+
+* Swagger UI: [http://localhost:8084/customer-service/swagger-ui/index.html](http://localhost:8084/customer-service/swagger-ui/index.html)
+* OpenAPI: [http://localhost:8084/customer-service/v3/api-docs.yaml](http://localhost:8084/customer-service/v3/api-docs.yaml)
+
+---
+
+### 2. Observe the contract shape
+
+Call a sample endpoint:
+
+```bash
+curl http://localhost:8084/customer-service/v1/customers/1
+```
+
+You should see a canonical envelope:
+
+```json
+{
+  "data": { ... },
+  "meta": { ... }
+}
+```
+
+This structure is defined by the **shared contract**, not by OpenAPI.
+
+---
+
+### 3. Generate the client
+
+```bash
+cd samples/customer-service-client
+
+curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
+  -o src/main/resources/customer-api-docs.yaml
+
+mvn clean install
+```
+
+---
+
+### 4. Inspect generated sources
+
+Generated code:
+
+```
+target/generated-sources/openapi/src/gen/java
+```
+
+Key observation:
+
+```java
+public class ServiceResponsePageCustomerDto
+    extends ServiceResponse<Page<CustomerDto>> {}
+```
+
+✔ No duplicated envelope
+✔ Generics preserved
+✔ Contract reused
+
+---
+
+### What just happened?
+
+```text
+Java Contract
+   ↓
+Server (projection)
+   ↓
+OpenAPI (projection artifact)
+   ↓
+Generator (enforcement)
+   ↓
+Client (contract-aligned)
+```
+
+You have just executed the **entire contract lifecycle** in under 2 minutes.
 
 ---
 
@@ -181,20 +288,69 @@ Everything revolves around a single stable abstraction:
 ServiceResponse<T>
 ```
 
+This abstraction is treated as a **contract boundary**, not a convenience wrapper.
+
 ---
 
 ## Canonical Contract Scope
 
-The shared contract module defines deterministic guarantees for supported response shapes.
+The shared contract module defines deterministic guarantees for a **specific subset of response shapes**.
 
-| Shape                      | Supported | Rationale                               |
-| -------------------------- | --------- | --------------------------------------- |
-| `ServiceResponse<T>`       | ✅         | canonical success envelope              |
-| `ServiceResponse<Page<T>>` | ✅         | deterministic nested generic support    |
-| `ServiceResponse<List<T>>` | ⚠️        |  treated as non-contract-aware shape (generator default behavior) |
-| Arbitrary nested generics  | ❌         | outside intentional architectural scope |
+These are the shapes the platform **actively understands and preserves end-to-end**.
 
-This constrained design prioritizes **schema stability and long‑term evolvability** over exhaustive generic coverage.
+| Shape                      | Behavior                 | Description                                       |
+| -------------------------- | ------------------------ | ------------------------------------------------- |
+| `ServiceResponse<T>`       | Contract-aware           | Canonical success envelope                        |
+| `ServiceResponse<Page<T>>` | Contract-aware           | Deterministic nested generic support              |
+| `ServiceResponse<List<T>>` | Default OpenAPI behavior | Treated as a regular schema (no special handling) |
+| Arbitrary nested generics  | Default OpenAPI behavior | No contract-level guarantees                      |
+
+---
+
+### Important framing
+
+```text
+Contract-aware shapes → explicitly handled by the platform
+Other shapes         → transparently passed through OpenAPI
+```
+
+Nothing is “forbidden”.
+
+However, only contract-aware shapes benefit from:
+
+* deterministic schema generation
+* stable naming
+* guaranteed client alignment
+
+---
+
+### Design intent
+
+The platform does NOT try to model all possible generic combinations.
+
+Instead, it focuses on a **small, explicit surface** that can be:
+
+* deterministic
+* predictable
+* safe to evolve over time
+
+Everything outside that surface is still valid — just not part of the
+**contract-aware guarantee set**.
+
+---
+
+### Mental model
+
+```text
+Use anything you want → OpenAPI will work
+Use contract-aware shapes → platform guarantees stability
+```
+
+This keeps the system:
+
+* flexible for developers
+* strict where it matters (integration boundaries)
+* simple to reason about long-term
 
 ---
 
@@ -324,44 +480,79 @@ OpenAPI is treated as a **projection layer of contract semantics**, not as the a
 ## Modules
 
 * **[api-contract](api-contract/README.md)**
-  Framework‑agnostic canonical response contract including pagination primitives and error extensions.
+  Canonical response contract (authority layer). Defines `ServiceResponse<T>`, `Page<T>`, and shared semantics.
 
-* **[customer-service](customer-service/README.md)**
-  Spring Boot API producer publishing a generics‑aware deterministic OpenAPI specification.
+* **[openapi-generics-server-starter](openapi-generics-server-starter/README.md)**
+  Server-side projection layer. Converts contract → deterministic OpenAPI.
 
-* **[customer-service-client](customer-service-client/README.md)**
-  Generated Java client demonstrating semantic contract preservation through thin wrapper inheritance.
+* **[openapi-generics-java-codegen](openapi-generics-java-codegen/README.md)**
+  Custom generator enforcing contract-aware client generation.
 
-Together these modules form a **producer–consumer symmetry pattern** for type‑safe API integration.
+* **[openapi-generics-java-codegen-parent](openapi-generics-java-codegen-parent/README.md)**
+  Build-time orchestration layer. Wires generator, templates, and mappings.
+
+* **[customer-service](samples/customer-service/README.md)**
+  Sample producer. Demonstrates correct contract-first API exposure.
+
+* **[customer-service-client](samples/customer-service-client/README.md)**
+  Sample consumer. Demonstrates contract-aligned client usage.
 
 ---
 
-## Quick Start
+## 🧠 Architecture
 
-### Run the producer service
+The platform is structured as a **deterministic contract lifecycle** spanning three core layers:
 
+* **[Platform Architecture](docs/architecture/platform.md)**
+  End-to-end system model covering authority → projection → generation → consumption.
+
+* **[Server Architecture](docs/architecture/server.md)**
+  Runtime projection pipeline transforming contract semantics into a deterministic OpenAPI specification.
+
+* **[Client Architecture](docs/architecture/client.md)**
+  Build-time generation pipeline producing contract-aligned clients from the OpenAPI projection.
+
+* **[Error Handling Strategy](docs/architecture/error-handling.md)**
+  RFC 9457-based canonical error model (runtime-first, protocol-driven, OpenAPI-independent).
+
+---
+
+### Mental model
+
+```text
+Contract (SSOT)
+   ↓
+Server (projection)
+   ↓
+OpenAPI (projection artifact)
+   ↓
+Generator (enforcement)
+   ↓
+Client (consumption)
 ```
-cd customer-service
-mvn clean package
-java -jar target/customer-service-*.jar
-```
 
-### Regenerate the client after contract changes
+---
 
-```
-cd customer-service-client
-curl -s http://localhost:8084/customer-service/v3/api-docs.yaml \
-  -o src/main/resources/customer-api-docs.yaml
+### Key principle
 
-mvn clean install
-```
+> Each layer **transforms** the contract but never **redefines** it.
 
-Generated sources are written to:
+---
 
-```
-customer-service-client/target/generated-sources/openapi/src/gen/java
-```
+### Reading guide
 
+* Start with **Platform Architecture** to understand the system as a whole
+* Dive into **Server Architecture** for runtime behavior and projection logic
+* Explore **Client Architecture** for generation and build-time guarantees
+* Review **Error Handling Strategy** for cross-cutting failure semantics
+
+This separation keeps the system:
+
+* **deterministic** — same input produces the same output
+* **explicit** — no hidden behavior or inference
+* **bounded** — only well-defined shapes receive contract-level guarantees
+* **evolvable** — each layer can change without breaking contract identity
+  
 ---
 
 ## Adoption Guides
@@ -392,7 +583,7 @@ Architectural discussions, real‑world usage feedback, and evolution proposals 
 
 Please open an issue or start a discussion in the repository.
 
-👉 [issues](https://github.com/bsayli/spring-boot-openapi-generics-clients/issues)
+👉 [Issues](https://github.com/bsayli/spring-boot-openapi-generics-clients/issues)
 
 👉 [Discussions](https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions)
 
