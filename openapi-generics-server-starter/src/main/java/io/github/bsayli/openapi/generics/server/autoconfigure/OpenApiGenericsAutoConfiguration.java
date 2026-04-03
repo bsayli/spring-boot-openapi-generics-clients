@@ -6,7 +6,7 @@ import io.github.bsayli.openapi.generics.server.core.pipeline.OpenApiPipelineOrc
 import io.github.bsayli.openapi.generics.server.core.schema.WrapperSchemaEnricher;
 import io.github.bsayli.openapi.generics.server.core.schema.WrapperSchemaProcessor;
 import io.github.bsayli.openapi.generics.server.core.schema.base.BaseSchemaRegistrar;
-import io.github.bsayli.openapi.generics.server.core.schema.base.BaseSchemaIgnoreMarker;
+import io.github.bsayli.openapi.generics.server.core.schema.base.SchemaGenerationControlMarker;
 import io.github.bsayli.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.github.bsayli.openapi.generics.server.mvc.MvcResponseTypeDiscoveryStrategy;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -26,9 +26,9 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * <h2>Architecture</h2>
  *
  * <ul>
- *   <li>No multiple customizers</li>
- *   <li>No ordering hacks</li>
- *   <li>Single entry point → {@link OpenApiPipelineOrchestrator}</li>
+ *   <li>No multiple customizers
+ *   <li>No ordering hacks
+ *   <li>Single entry point → {@link OpenApiPipelineOrchestrator}
  * </ul>
  *
  * <h2>Pipeline Flow</h2>
@@ -44,26 +44,26 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * <h2>Key Responsibilities</h2>
  *
  * <ul>
- *   <li>Registers infrastructure beans required for OpenAPI transformation</li>
- *   <li>Ensures pipeline components are replaceable via {@code @ConditionalOnMissingBean}</li>
- *   <li>Provides a single Springdoc integration point</li>
+ *   <li>Registers infrastructure beans required for OpenAPI transformation
+ *   <li>Ensures pipeline components are replaceable via {@code @ConditionalOnMissingBean}
+ *   <li>Provides a single Springdoc integration point
  * </ul>
  *
  * <h2>Design Guarantees</h2>
  *
  * <ul>
- *   <li><b>Deterministic</b> → single execution path</li>
- *   <li><b>Fail-fast</b> → validation enforced at the end</li>
- *   <li><b>Extensible</b> → replaceable components</li>
- *   <li><b>Non-intrusive</b> → backs off when user overrides beans</li>
+ *   <li><b>Deterministic</b> → single execution path
+ *   <li><b>Fail-fast</b> → validation enforced at the end
+ *   <li><b>Extensible</b> → replaceable components
+ *   <li><b>Non-intrusive</b> → backs off when user overrides beans
  * </ul>
  *
  * <h2>Important</h2>
  *
  * <ul>
- *   <li>This class performs <b>dependency wiring only</b></li>
- *   <li>Execution logic resides in {@link OpenApiPipelineOrchestrator}</li>
- *   <li>{@link BaseSchemaIgnoreMarker} is injected into the pipeline but executed there</li>
+ *   <li>This class performs <b>dependency wiring only</b>
+ *   <li>Execution logic resides in {@link OpenApiPipelineOrchestrator}
+ *   <li>{@link SchemaGenerationControlMarker} is injected into the pipeline but executed there
  * </ul>
  */
 @AutoConfiguration
@@ -101,8 +101,8 @@ public class OpenApiGenericsAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public BaseSchemaIgnoreMarker baseSchemaIgnoreMarker() {
-    return new BaseSchemaIgnoreMarker();
+  public SchemaGenerationControlMarker schemaGenerationControlMarker() {
+    return new SchemaGenerationControlMarker();
   }
 
   @Bean
@@ -133,20 +133,20 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public OpenApiPipelineOrchestrator openApiPipelineOrchestrator(
-          BaseSchemaRegistrar baseSchemaRegistrar,
-          BaseSchemaIgnoreMarker baseSchemaIgnoreMarker,
-          ResponseTypeDiscoveryStrategy discoveryStrategy,
-          ResponseTypeIntrospector introspector,
-          WrapperSchemaProcessor wrapperSchemaProcessor,
-          OpenApiContractGuard contractGuard) {
+      BaseSchemaRegistrar baseSchemaRegistrar,
+      SchemaGenerationControlMarker schemaGenerationControlMarker,
+      ResponseTypeDiscoveryStrategy discoveryStrategy,
+      ResponseTypeIntrospector introspector,
+      WrapperSchemaProcessor wrapperSchemaProcessor,
+      OpenApiContractGuard contractGuard) {
 
     return new OpenApiPipelineOrchestrator(
-            baseSchemaRegistrar,
-            baseSchemaIgnoreMarker,
-            discoveryStrategy,
-            introspector,
-            wrapperSchemaProcessor,
-            contractGuard);
+        baseSchemaRegistrar,
+        schemaGenerationControlMarker,
+        discoveryStrategy,
+        introspector,
+        wrapperSchemaProcessor,
+        contractGuard);
   }
 
   // -------------------------------------------------------------------------

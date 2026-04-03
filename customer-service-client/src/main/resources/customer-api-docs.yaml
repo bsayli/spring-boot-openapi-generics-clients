@@ -241,6 +241,7 @@ components:
           type: boolean
         hasPrev:
           type: boolean
+      x-ignore-model: true
     ServiceResponsePageCustomerDto:
       allOf:
         - $ref: "#/components/schemas/ServiceResponse"

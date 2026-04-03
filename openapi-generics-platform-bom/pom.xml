@@ -1,0 +1,64 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.bsayli</groupId>
+    <artifactId>openapi-generics-platform-bom</artifactId>
+    <version>0.8.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>openapi-generics-platform-bom</name>
+    <description>
+        Internal platform BOM for OpenAPI Generics.
+        Provides version alignment across modules and tooling.
+        Not intended for direct consumer use.
+    </description>
+
+    <properties>
+        <!-- platform modules -->
+        <api-contract.version>0.7.7</api-contract.version>
+
+        <!-- platform engines -->
+        <openapi-generator.version>7.21.0</openapi-generator.version>
+
+        <!-- integration engines (affect behavior) -->
+        <springdoc.version>2.8.16</springdoc.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <!-- core contract (shared domain) -->
+            <dependency>
+                <groupId>io.github.bsayli</groupId>
+                <artifactId>api-contract</artifactId>
+                <version>${api-contract.version}</version>
+            </dependency>
+
+            <!-- openapi generator (codegen engine - deterministic) -->
+            <dependency>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-core</artifactId>
+                <version>${openapi-generator.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator</artifactId>
+                <version>${openapi-generator.version}</version>
+            </dependency>
+
+            <!-- springdoc (server-side OpenAPI engine - affects runtime behavior) -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-common</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+</project>

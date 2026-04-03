@@ -1,317 +1,78 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>io.github.bsayli</groupId>
-        <artifactId>spring-boot-openapi-generics-clients</artifactId>
-        <version>0.8.0-SNAPSHOT</version>
-    </parent>
-
+    <groupId>io.github.bsayli</groupId>
     <artifactId>openapi-generics-java-codegen</artifactId>
-    <packaging>pom</packaging>
+    <version>0.8.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <name>openapi-generics-java-codegen</name>
-    <description>Java engine for generics-aware OpenAPI client generation</description>
-
-    <!-- ====================================================== -->
-    <!-- PROPERTIES -->
-    <!-- ====================================================== -->
+    <description>
+        Generics-aware OpenAPI Generator extension providing contract-aligned
+        metadata enrichment and deterministic model suppression.
+    </description>
 
     <properties>
-
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <!-- versions -->
-        <openapi.generator.version>7.21.0</openapi.generator.version>
-
-        <!-- plugins -->
-        <spotless-maven-plugin.version>3.3.0</spotless-maven-plugin.version>
         <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
-        <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
-        <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
-        <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
-        <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
-
-        <!-- template system -->
-        <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
-
-        <!-- generator defaults -->
-        <openapi.generator.output>${project.build.directory}/generated-sources/openapi</openapi.generator.output>
-        <openapi.generator.sourceFolder>src/gen/java</openapi.generator.sourceFolder>
-
-        <!-- derived -->
-        <openapi.generated.sources>${openapi.generator.output}/${openapi.generator.sourceFolder}</openapi.generated.sources>
-        <openapi.generator.ignoreFile>${project.build.directory}/openapi-ignore/.openapi-generator-ignore</openapi.generator.ignoreFile>
-
+        <slf4j-api.version>2.0.17</slf4j-api.version>
     </properties>
 
-    <!-- ====================================================== -->
-    <!-- PLUGIN MANAGEMENT -->
-    <!-- ====================================================== -->
+    <dependencies>
+
+        <!-- compile-time API -->
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>openapi-generator-core</artifactId>
+        </dependency>
+
+        <!-- runtime engine (provided externally by plugin/parent build) -->
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>openapi-generator</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- logging API only -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+    </dependencies>
+
+    <!-- ✅ BOM = single source of truth -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.github.bsayli</groupId>
+                <artifactId>openapi-generics-platform-bom</artifactId>
+                <version>0.8.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
-        <pluginManagement>
-            <plugins>
-
-                <!-- EXTRACT TEMPLATE -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>${maven.dependency.plugin.version}</version>
-
-                    <executions>
-                        <execution>
-                            <id>extract-openapi-model-template</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>unpack</goal>
-                            </goals>
-
-                            <configuration>
-                                <artifactItems>
-                                    <artifactItem>
-                                        <groupId>org.openapitools</groupId>
-                                        <artifactId>openapi-generator</artifactId>
-                                        <version>${openapi.generator.version}</version>
-                                        <type>jar</type>
-                                        <overWrite>true</overWrite>
-                                        <includes>**/Java/model.mustache</includes>
-                                        <outputDirectory>${openapi.templates.effective}</outputDirectory>
-                                    </artifactItem>
-                                </artifactItems>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <!-- PATCH -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <version>${maven-antrun-plugin.version}</version>
-
-                    <executions>
-                        <execution>
-                            <id>patch-openapi-model-template</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-
-                            <configuration>
-                                <target>
-
-                                    <replaceregexp
-                                            byline="false"
-                                            flags="s"
-                                            file="${openapi.templates.effective}/Java/model.mustache"
-                                            match="\{\{#models\}\}\s*\{\{#model\}\}\s*\{\{#isEnum\}\}"
-                                            replace="{{#models}}{{#model}}{{#vendorExtensions.x-api-wrapper}}{{>api_wrapper}}{{/vendorExtensions.x-api-wrapper}}{{^vendorExtensions.x-api-wrapper}}{{#isEnum}}"/>
-
-                                    <replaceregexp
-                                            byline="false"
-                                            flags="s"
-                                            file="${openapi.templates.effective}/Java/model.mustache"
-                                            match="\{\{\/isEnum\}\}\s*\{\{\/model\}\}\s*\{\{\/models\}\}"
-                                            replace="{{/isEnum}}{{/vendorExtensions.x-api-wrapper}}{{/model}}{{/models}}"/>
-
-                                    <loadfile property="patchedModelTemplate"
-                                              srcFile="${openapi.templates.effective}/Java/model.mustache"/>
-
-                                    <condition property="wrapperPatchMissing">
-                                        <not>
-                                            <contains string="${patchedModelTemplate}"
-                                                      substring="vendorExtensions.x-api-wrapper"/>
-                                        </not>
-                                    </condition>
-
-                                    <fail message="OpenAPI template patch FAILED — upstream model.mustache structure changed."
-                                          if="wrapperPatchMissing"/>
-
-                                </target>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <!-- TEMPLATE OVERLAY -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>${maven.resources.plugin.version}</version>
-
-                    <executions>
-                        <execution>
-                            <id>overlay-local-templates</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-
-                            <configuration>
-                                <outputDirectory>${openapi.templates.effective}/Java</outputDirectory>
-
-                                <resources>
-                                    <resource>
-                                        <directory>${project.parent.basedir}/src/main/resources/openapi-templates</directory>
-                                        <filtering>false</filtering>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-
-                        <execution>
-                            <id>generate-openapi-ignore</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${project.build.directory}/openapi-ignore</outputDirectory>
-                                <resources>
-                                    <resource>
-                                        <directory>src/main/resources/openapi-ignore</directory>
-                                        <includes>
-                                            <include>.openapi-generator-ignore</include>
-                                        </includes>
-                                        <filtering>false</filtering>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.openapitools</groupId>
-                    <artifactId>openapi-generator-maven-plugin</artifactId>
-                    <version>${openapi.generator.version}</version>
-
-                    <configuration>
-
-                        <!-- ENGINE CORE -->
-                        <generatorName>java</generatorName>
-
-                        <output>${openapi.generator.output}</output>
-
-                        <templateDirectory>${openapi.templates.effective}/Java</templateDirectory>
-
-                        <configOptions>
-                            <sourceFolder>${openapi.generator.sourceFolder}</sourceFolder>
-                        </configOptions>
-
-                        <!-- GENERICS CONTRACT -->
-                        <additionalProperties>
-                            <additionalProperty>apiContractEnvelope=io.github.bsayli.apicontract.envelope</additionalProperty>
-                            <additionalProperty>apiContractPage=io.github.bsayli.apicontract.paging</additionalProperty>
-                        </additionalProperties>
-
-                        <importMappings>
-                            <importMapping>Meta=io.github.bsayli.apicontract.envelope.Meta</importMapping>
-                            <importMapping>ServiceResponse=io.github.bsayli.apicontract.envelope.ServiceResponse</importMapping>
-                            <importMapping>Page=io.github.bsayli.apicontract.paging.Page</importMapping>
-                            <importMapping>Sort=io.github.bsayli.apicontract.paging.Sort</importMapping>
-                            <importMapping>SortDirection=io.github.bsayli.apicontract.paging.SortDirection</importMapping>
-                        </importMappings>
-
-                        <ignoreFileOverride>${openapi.generator.ignoreFile}</ignoreFileOverride>
-
-                    </configuration>
-                </plugin>
-
-                <!-- GENERATED SOURCES -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>${build.helper.plugin.version}</version>
-
-                    <executions>
-                        <execution>
-                            <id>add-generated-sources</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>add-source</goal>
-                            </goals>
-
-                            <configuration>
-                                <sources>
-                                    <source>${openapi.generated.sources}</source>
-                                </sources>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <!-- CLEAN GENERATED IMPORTS -->
-                <plugin>
-                    <groupId>com.diffplug.spotless</groupId>
-                    <artifactId>spotless-maven-plugin</artifactId>
-                    <version>${spotless-maven-plugin.version}</version>
-
-                    <configuration>
-                        <java>
-                            <includes>
-                                <include>${openapi.generated.sources}/**/*.java</include>
-                            </includes>
-                            <removeUnusedImports>
-                                <engine>cleanthat-javaparser-unnecessaryimport</engine>
-                            </removeUnusedImports>
-                        </java>
-                    </configuration>
-
-                    <executions>
-                        <execution>
-                            <id>spotless-apply-generated</id>
-                            <phase>process-sources</phase>
-                            <goals>
-                                <goal>apply</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
-            </plugins>
-        </pluginManagement>
-
         <plugins>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <release>${java.version}</release>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
             </plugin>
 
         </plugins>
-
     </build>
 
 </project>

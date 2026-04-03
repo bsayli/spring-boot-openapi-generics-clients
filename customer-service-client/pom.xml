@@ -6,9 +6,9 @@
 
     <parent>
         <groupId>io.github.bsayli</groupId>
-        <artifactId>openapi-generics-java-codegen</artifactId>
+        <artifactId>openapi-generics-java-codegen-parent</artifactId>
         <version>0.8.0-SNAPSHOT</version>
-        <relativePath>../openapi-generics-java-codegen/pom.xml</relativePath>
+        <relativePath/>
     </parent>
 
     <groupId>io.github.bsayli</groupId>
@@ -46,8 +46,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <api-contract.version>0.7.7</api-contract.version>
-
         <java.version>21</java.version>
         <spring-boot.version>3.5.13</spring-boot.version>
         <openapi.generator.version>7.21.0</openapi.generator.version>
@@ -68,12 +66,6 @@
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>io.github.bsayli</groupId>
-            <artifactId>api-contract</artifactId>
-            <version>${api-contract.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -178,6 +170,7 @@
                         </goals>
 
                         <configuration>
+
                             <inputSpec>${project.basedir}/src/main/resources/customer-api-docs.yaml</inputSpec>
 
                             <library>restclient</library>
@@ -205,7 +198,9 @@
                             <generateApiTests>false</generateApiTests>
                             <generateModelDocumentation>false</generateModelDocumentation>
                             <generateModelTests>false</generateModelTests>
+
                         </configuration>
+
                     </execution>
                 </executions>
             </plugin>

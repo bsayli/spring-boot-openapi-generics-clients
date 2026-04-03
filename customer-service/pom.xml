@@ -45,9 +45,12 @@
             <java.version>21</java.version>
             <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
             <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+            <openapi-generics-server-starter.version>0.8.0-SNAPSHOT</openapi-generics-server-starter.version>
+            <springdoc-openapi-starter.version>2.8.16</springdoc-openapi-starter.version>
             <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-            <openapi-generics-bom.version>0.8.0-SNAPSHOT</openapi-generics-bom.version>
             <commons-lang3.version>3.20.0</commons-lang3.version>
+
             <argLine/>
         </properties>
 
@@ -56,6 +59,7 @@
             <dependency>
                 <groupId>io.github.bsayli</groupId>
                 <artifactId>openapi-generics-server-starter</artifactId>
+                <version>${openapi-generics-server-starter.version}</version>
             </dependency>
 
             <dependency>
@@ -71,6 +75,7 @@
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc-openapi-starter.version}</version>
             </dependency>
 
             <dependency>
@@ -86,18 +91,6 @@
             </dependency>
 
         </dependencies>
-
-        <dependencyManagement>
-            <dependencies>
-                <dependency>
-                    <groupId>io.github.bsayli</groupId>
-                    <artifactId>openapi-generics-bom</artifactId>
-                    <version>${openapi-generics-bom.version}</version>
-                    <type>pom</type>
-                    <scope>import</scope>
-                </dependency>
-            </dependencies>
-        </dependencyManagement>
 
         <build>
             <plugins>
