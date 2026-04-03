@@ -37,13 +37,22 @@
     </developers>
 
     <modules>
+        <!-- CORE CONTRACT -->
         <module>api-contract</module>
+
+        <!-- PLATFORM BOM -->
         <module>openapi-generics-platform-bom</module>
+
+        <!-- SERVER SIDE (OpenAPI projection engine) -->
         <module>openapi-generics-server-starter</module>
-        <module>customer-service</module>
+
+        <!-- CODEGEN ENGINE -->
         <module>openapi-generics-java-codegen</module>
+
+        <!-- CODEGEN ORCHESTRATION (parent / plugin wiring) -->
         <module>openapi-generics-java-codegen-parent</module>
-        <module>customer-service-client</module>
+
+        <module>samples</module>
     </modules>
 
 </project>

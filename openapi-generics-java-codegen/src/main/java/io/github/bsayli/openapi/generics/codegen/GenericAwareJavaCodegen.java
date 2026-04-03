@@ -140,7 +140,7 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
      */
     @Override
     public String getName() {
-        return "java-contract";
+        return "java-generics-contract";
     }
 
     // ================================

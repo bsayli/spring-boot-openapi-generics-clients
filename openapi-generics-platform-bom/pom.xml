@@ -19,7 +19,7 @@
 
     <properties>
         <!-- platform modules -->
-        <api-contract.version>0.7.7</api-contract.version>
+        <api-contract.version>0.8.0-SNAPSHOT</api-contract.version>
 
         <!-- platform engines -->
         <openapi-generator.version>7.21.0</openapi-generator.version>

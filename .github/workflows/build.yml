@@ -35,38 +35,50 @@ jobs:
       - name: Build all modules (tests + coverage)
         run: mvn -B -q -ntp clean verify
 
+      # -----------------------------
+      # 📦 Generated Client Sources
+      # -----------------------------
       - name: Upload generated client sources
         uses: actions/upload-artifact@v4
         with:
           name: generated-client-sources
-          path: customer-service-client/target/generated-sources/openapi/src/gen/java
+          path: samples/customer-service-client/target/generated-sources/openapi/src/gen/java
           if-no-files-found: warn
           retention-days: 7
 
+      # -----------------------------
+      # 📄 OpenAPI Spec
+      # -----------------------------
       - name: Upload OpenAPI spec (YAML)
         uses: actions/upload-artifact@v4
         with:
           name: customer-api-docs
-          path: customer-service-client/target/classes/customer-api-docs.yaml
+          path: samples/customer-service-client/target/classes/customer-api-docs.yaml
           if-no-files-found: warn
           retention-days: 7
 
+      # -----------------------------
+      # 📊 Coverage - customer-service
+      # -----------------------------
       - name: Upload coverage (customer-service)
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: |
-            customer-service/target/site/jacoco*/jacoco.xml
+            samples/customer-service/target/site/jacoco*/jacoco.xml
           flags: customer-service
           name: customer-service
           fail_ci_if_error: false
 
+      # -----------------------------
+      # 📊 Coverage - customer-service-client
+      # -----------------------------
       - name: Upload coverage (customer-service-client)
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: |
-            customer-service-client/target/site/jacoco*/jacoco.xml
+            samples/customer-service-client/target/site/jacoco*/jacoco.xml
           flags: customer-service-client
           name: customer-service-client
           fail_ci_if_error: false

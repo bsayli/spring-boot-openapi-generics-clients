@@ -1,83 +1,136 @@
 # api-contract
 
-> **Canonical API response and pagination contract for server–client ecosystems**
+> **Canonical API response contract (Authority Layer) for server–client ecosystems**
 
-`api-contract` is a **framework-agnostic Java library** that defines a stable,
-reusable response envelope and pagination model for distributed systems.
+`api-contract` is a **framework-agnostic Java library** that defines the
+**authoritative response model** used across the OpenAPI Generics platform.
 
-It provides a **single, authoritative contract** that can be shared across:
+It provides a **single source of truth (SSOT)** for response semantics shared by:
 
-* backend services
-* generated API clients
-* integration adapters
+* backend services (producers)
+* OpenAPI projection layer (server starter)
+* generated API clients (codegen)
 * consumer applications
 
 The goal is simple:
 
-> Define response semantics **once** and reuse them everywhere.
+> Define response semantics **once**, project them everywhere, and never duplicate them.
+
+---
+
+## Table of Contents
+
+1. [Why This Library Exists](#-why-this-library-exists)
+2. [Architectural Positioning (Critical)](#-architectural-positioning-critical)
+3. [Design Philosophy](#-design-philosophy)
+4. [Core Concepts](#-core-concepts)
+5. [Relationship with the Platform](#-relationship-with-the-platform)
+6. [Explicit Non-Goals](#-explicit-non-goals)
+7. [Dependency](#-dependency)
+8. [Versioning Strategy](#-versioning-strategy)
+9. [When Should You Use This?](#-when-should-you-use-this)
+10. [Design Trade-offs](#-design-trade-offs)
+11. [Failure Philosophy](#-failure-philosophy)
+12. [Mental Model](#-mental-model)
+13. [Summary](#-summary)
 
 ---
 
 ## 🎯 Why This Library Exists
 
-Modern HTTP APIs almost always wrap payloads with additional metadata:
+Modern HTTP APIs almost always wrap payloads with metadata:
 
 * timestamps
-* pagination context
-* sorting information
+* pagination
+* sorting
 * structured error extensions
 
-In many systems, these wrappers are:
+In most systems, these wrappers are:
 
-* duplicated per service
+* duplicated across services
 * re-generated in clients
-* inconsistently evolved over time
+* inconsistently evolved
 
 This leads to:
 
 * schema drift
 * duplicated DTO hierarchies
-* brittle client contracts
-* unclear ownership of response shape
+* brittle clients
+* unclear ownership
 
-`api-contract` addresses this by introducing a **shared response contract**
-that both producers and consumers can depend on directly.
+`api-contract` eliminates this by introducing a **shared, authoritative contract**
+that both producers and consumers depend on directly.
+
+---
+
+## 🧠 Architectural Positioning (Critical)
+
+Within the platform, this module is:
+
+| Layer         | Role                                |
+| ------------- | ----------------------------------- |
+| **Authority** | `api-contract` (this module)        |
+| Projection    | server starter (OpenAPI generation) |
+| Consumption   | code generation + clients           |
+
+Key rule:
+
+> OpenAPI is a projection. This library is the authority.
+
+Implications:
+
+* OpenAPI MUST NOT redefine these models
+* generators MUST NOT re-generate them
+* clients MUST reuse them directly
 
 ---
 
 ## 🧠 Design Philosophy
 
-This library follows several explicit architectural principles:
+### Single Source of Truth
 
-### Single source of truth
+The response envelope is:
 
-The response envelope is **not generated**, **not copied**, and **not redefined**.
-It is defined once and reused directly.
+* not generated
+* not copied
+* not redefined
 
-### Contract before tooling
+It is defined once and reused everywhere.
 
-OpenAPI generators, frameworks, and transport layers are considered
-**implementation concerns**.
-The response model itself is treated as a **domain contract**.
+---
 
-### Framework neutrality
+### Contract Before Tooling
 
-The module intentionally avoids dependencies on:
+Frameworks and generators are **implementation concerns**.
 
-* Spring / Jakarta / HTTP abstractions
+The response model is treated as a **domain contract**.
+
+---
+
+### Framework Neutrality
+
+No dependency on:
+
+* Spring
+* Jakarta Web
 * OpenAPI annotations
-* serialization frameworks beyond minimal JSON hints
 
-This allows the contract to remain:
+Only minimal JSON annotations are used.
 
-* stable
+Result:
+
 * portable
+* stable
 * long-lived
 
-### Predictable evolution
+---
 
-The contract is designed for **additive change**.
-Optional fields may be introduced without forcing ecosystem-wide rewrites.
+### Predictable Evolution
+
+The contract evolves **additively**:
+
+* new fields → optional
+* no breaking rewrites
 
 ---
 
@@ -85,16 +138,14 @@ Optional fields may be introduced without forcing ecosystem-wide rewrites.
 
 ### Canonical Success Envelope
 
-All successful responses share the same structure:
-
 ```java
 ServiceResponse<T>
 ```
 
-This envelope provides:
+Structure:
 
-* a generic payload (`data`)
-* request-level metadata (`meta`)
+* `data` → payload
+* `meta` → contextual metadata
 
 Example:
 
@@ -102,94 +153,124 @@ Example:
 return ServiceResponse.of(customerDto);
 ```
 
-The metadata component is always initialized and safe to consume.
-
 ---
 
 ### Response Metadata
 
-`Meta` represents contextual information attached to every response.
+`Meta` contains contextual information:
 
-Typical use cases include:
+* server time
+* sorting
+* future extensibility
 
-* server timestamps
-* sorting descriptors
-* future extensibility points (trace identifiers, locale hints, etc.)
+Design:
 
-The metadata model is intentionally **minimal and extensible**.
+* minimal
+* extensible
+* always present
 
 ---
 
 ### Pagination Contract
 
-`Page<T>` provides a language-agnostic container for paged results.
+```java
+Page<T>
+```
 
-It standardizes:
+Standardizes:
 
 * page index
 * page size
-* total element count
+* total elements
 * navigation flags
 
-This library explicitly recognizes the common nested response shape:
+Supported canonical shape:
 
 ```java
 ServiceResponse<Page<T>>
 ```
 
-Other nested generic combinations remain outside the contract’s guarantees.
+Out of scope:
 
-This scoped approach helps maintain:
+* nested generics
+* arbitrary collections
 
-* deterministic schema modeling
-* generator-safe evolution
-* predictable client typing
+Rationale:
+
+* deterministic schema generation
+* stable client typing
 
 ---
 
 ### Sorting Descriptor
 
-Sorting information is modeled as a simple value object:
-
 ```java
 Sort(field, direction)
 ```
 
-This avoids framework-specific pagination constructs while preserving intent.
+Simple, framework-neutral sorting model.
 
 ---
 
 ### Error Extensions (RFC 9457)
 
-The library provides structured extension types intended to be embedded
-inside `application/problem+json` responses.
-
-These include:
+Provides:
 
 * `ProblemExtensions`
 * `ErrorItem`
 
-They are designed to be:
+Used inside:
 
-* forward-compatible
-* transport-agnostic
-* safe for cross-service reuse
+```
+application/problem+json
+```
 
-The library does **not** implement HTTP error handling itself.
+This module does NOT implement error handling.
+
+---
+
+## 🔗 Relationship with the Platform
+
+This module is intentionally **independent but central**.
+
+### Used by Server Layer
+
+* server starter reads these types
+* projects them into OpenAPI schemas
+
+---
+
+### Used by Codegen Layer
+
+* generator maps schemas back to these classes
+* prevents model duplication
+
+---
+
+### Used by Clients
+
+* generated clients extend these types
+* ensures type consistency
+
+---
+
+### Key Guarantee
+
+> The same contract type flows through server → OpenAPI → client unchanged.
 
 ---
 
 ## 🚫 Explicit Non-Goals
 
-`api-contract` deliberately does **not**:
+This module does NOT:
 
-* publish OpenAPI specifications
-* implement HTTP controllers or filters
-* perform validation logic
-* generate client SDKs
-* enforce transport-layer policies
+* generate OpenAPI
+* implement controllers
+* handle HTTP transport
+* perform validation
+* generate clients
 
-Those responsibilities belong to higher-level modules or frameworks.
+Those belong to other layers.
 
 ---
 
@@ -199,48 +280,111 @@ Those responsibilities belong to higher-level modules or frameworks.
 <dependency>
   <groupId>io.github.bsayli</groupId>
   <artifactId>api-contract</artifactId>
-  <version>0.7.7</version>
+  <version>0.8.0</version>
 </dependency>
 ```
 
-Typical usage:
+Usage:
 
-* **service modules** → compile scope
-* **generated clients** → compile or provided scope
+* server → compile
+* client → compile / provided
 
 ---
 
 ## 🔐 Versioning Strategy
 
-This project is currently **pre-1.0**.
+Current state: **pre-1.0**
 
-This implies:
+Meaning:
 
-* APIs may evolve
-* binary compatibility is considered but not strictly guaranteed
-* contract changes are intentional and documented
+* API may evolve
+* breaking changes possible but controlled
 
-When upgrading, it is recommended to:
+### Important Rule
 
-> Align server and client modules to the same contract version.
+> Server and client should use the same contract version.
 
 ---
 
-## 🧩 Intended Usage Contexts
+## 🧩 When Should You Use This?
 
-This library is particularly useful in systems that must share a **single, stable response contract across server and generated clients**.
+Use this module if:
 
-Especially when server and generated clients must share the same response semantics.
+* you expose typed REST APIs
+* you generate clients from OpenAPI
+* you want zero duplication of response wrappers
+* you treat response shape as architecture (not implementation detail)
 
-Typical scenarios include systems that:
+---
 
-* expose typed REST APIs
-* rely on OpenAPI-driven client generation
-* maintain multiple consumer services
-* aim to minimize contract duplication
-* treat response structure as a long-term architectural decision
+## ⚖️ Design Trade-offs
 
-It can also be adopted incrementally in existing codebases.
+### Limited Scope
+
+Only specific generic shapes supported.
+
+Gain:
+
+* determinism
+
+---
+
+### No Framework Integration
+
+No Spring shortcuts.
+
+Gain:
+
+* long-term stability
+
+---
+
+### No Runtime Behavior
+
+Only data structures.
+
+Gain:
+
+* predictability
+
+---
+
+## 💥 Failure Philosophy
+
+This module avoids hidden behavior.
+
+If something breaks:
+
+> it should break loudly in upper layers (server/codegen)
+
+---
+
+## 🧠 Mental Model
+
+Think of this module as:
+
+> The canonical API language shared across your system
+
+Not:
+
+* a utility library
+* a DTO collection
+
+---
+
+## 🧾 Summary
+
+`api-contract` is:
+
+* the **authority layer** of the platform
+* the **single source of truth** for response semantics
+* a **framework-agnostic contract module**
+
+Its responsibility is strictly:
+
+> Define response structure once and enable deterministic reuse across all layers
+
+Nothing more.
 
 ---
 
@@ -248,11 +392,8 @@ It can also be adopted incrementally in existing codebases.
 
 MIT License.
 
-This library defines **contracts, not runtime behavior**.
-Once adopted, these contracts become part of your system’s public surface.
-
 ---
 
 **Maintained by:**
 **Barış Saylı**
-[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)
+GitHub · Medium · LinkedIn

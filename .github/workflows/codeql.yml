@@ -22,6 +22,11 @@ jobs:
     name: Analyze (Java)
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [java-kotlin]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,13 +40,22 @@ jobs:
           distribution: "temurin"
           cache: maven
 
+      # -----------------------------
+      # 🔍 Initialize CodeQL
+      # -----------------------------
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: java-kotlin
+          languages: ${{ matrix.language }}
 
+      # -----------------------------
+      # 🏗 Build (full reactor incl. samples)
+      # -----------------------------
       - name: Build (Maven reactor)
-        run: mvn -B -q -ntp -DskipTests clean package
+        run: mvn -B -ntp -DskipTests clean package
 
+      # -----------------------------
+      # 🔎 Analyze
+      # -----------------------------
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

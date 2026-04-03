@@ -1,5 +1,15 @@
 # ProblemDetail-Centric Error Handling Strategy
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Principles](#core-principles)
+3. [Architectural Model](#architectural-model)
+4. [Key Design Decisions](#key-design-decisions)
+5. [Trade-offs](#trade-offs)
+6. [When This Approach Fits Best](#when-this-approach-fits-best)
+7. [Summary](#summary)
+
 ## Overview
 
 This document defines the architectural approach for error handling across services using **RFC 9457 Problem Details** as the single canonical error model.

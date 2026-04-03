@@ -208,7 +208,7 @@
                     <configuration>
 
                         <!-- ENGINE CORE -->
-                        <generatorName>java-contract</generatorName>
+                        <generatorName>java-generics-contract</generatorName>
 
                         <output>${openapi.generator.output}</output>
 
