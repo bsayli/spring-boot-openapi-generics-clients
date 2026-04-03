@@ -1,56 +1,51 @@
-############################
-# Compiled / binary files
-############################
-*.class
-*.dll
-*.exe
-*.o
-*.so
-*.com
+# =========================
+# Build output
+# =========================
+target/
+build/
+bin/
 
-############################
-# Archives / packaged files
-############################
+# =========================
+# Compiled classes
+# =========================
+*.class
+
+# =========================
+# Packages (archives)
+# =========================
 *.7z
 *.dmg
 *.gz
 *.iso
-*.jar
 *.rar
 *.tar
 *.zip
 
-############################
-# Logs / databases
-############################
+# =========================
+# Logs / DB
+# =========================
 *.log
 *.sql
 *.sqlite
 
-############################
-# OS generated files
-############################
+# =========================
+# OS files
+# =========================
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
 Thumbs.db
-ehthumbs.db
 
-############################
-# Build outputs
-############################
-target/
-build/
-bin/
-generated-sources/
-generated-classes/
+# =========================
+# IDE
+# =========================
+.idea/
+*.iml
+.classpath
+.project
+.settings/
 
-############################
+# =========================
 # Maven
-############################
-.mvn/
+# =========================
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -60,15 +55,14 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 
-############################
-# IDEs
-############################
-.idea/
-.project
-.classpath
-.settings/
+# keep maven wrapper
+!.mvn/wrapper/
 
-############################
-# Misc
-############################
-HELP.md
+# =========================
+# Generated sources
+# =========================
+generated-sources/
+generated-classes/
+
+# allow samples if needed
+!samples/**/generated-sources/
