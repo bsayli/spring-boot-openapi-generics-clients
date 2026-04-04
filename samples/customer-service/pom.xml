@@ -49,8 +49,6 @@
             <openapi-generics-server-starter.version>0.8.0-SNAPSHOT</openapi-generics-server-starter.version>
             <springdoc-openapi-starter.version>2.8.16</springdoc-openapi-starter.version>
             <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-            <commons-lang3.version>3.20.0</commons-lang3.version>
-
             <argLine/>
         </properties>
 

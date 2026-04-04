@@ -1,17 +1,19 @@
 # openapi-generics-server — Architecture & Internals (0.8.x)
 
-This document explains **how the server starter works at runtime** and clarifies its **architectural role inside the platform**.
+This document explains **how the server starter operates at runtime** and clarifies its **exact architectural role inside the platform**.
 
-It is the implementation-level counterpart of `ARCHITECTURE.md`, updated to reflect the current design decisions and boundaries.
+It is the implementation-level counterpart of the platform architecture documentation, focusing on **execution model, pipeline design, and invariants**.
+
+The goal is not to describe features, but to make **behavior predictable and explainable**.
 
 ---
 
 ## What changed in this version?
 
-This revision makes the following explicit:
+This revision makes several implicit design decisions explicit:
 
-* OpenAPI is a **projection layer**, not an authority
-* The system is a **deterministic compiler**, not an enhancer
+* OpenAPI is a **projection layer**, never an authority
+* The system behaves as a **deterministic compiler**, not an enhancer
 * Vendor extensions form an **internal DSL (generation protocol)**
 * Wrapper schemas are **authoritatively reconstructed**, never patched
 * The pipeline is a **single execution unit**, not a distributed lifecycle
@@ -46,18 +48,20 @@ OpenApiCustomizer → OpenApiPipelineOrchestrator::run
 
 Execution flow:
 
-1. Springdoc builds base OpenAPI model
+1. Springdoc builds the base OpenAPI model
 2. Customizer is invoked
-3. Pipeline executes once per OpenAPI instance
+3. Pipeline executes exactly once per OpenAPI instance
 
 Execution guard:
 
 * identity-based tracking
-* prevents duplicate execution
+* prevents duplicate execution across customizers
 
 ### Invariant
 
 > The pipeline runs exactly once per OpenAPI document
+
+No incremental updates. No re-entry. No distributed mutation.
 
 ---
 
@@ -77,11 +81,13 @@ Execution guard:
 
 > OpenAPI MUST be a lossless, deterministic projection of the contract.
 
-### Implication
+### Implications
 
 * OpenAPI cannot introduce new semantics
 * OpenAPI cannot override contract meaning
 * OpenAPI cannot become authoritative
+
+This boundary is enforced, not assumed.
 
 ---
 
@@ -108,7 +114,7 @@ Each stage is:
 
 * defines execution order
 * enforces single execution path
-* contains NO schema logic
+* contains **no schema logic**
 
 ---
 
@@ -122,10 +128,10 @@ Responsibility:
 
 Schemas:
 
-* ServiceResponse
-* ServiceResponseVoid
-* Meta
-* Sort
+* `ServiceResponse`
+* `ServiceResponseVoid`
+* `Meta`
+* `Sort`
 
 Design:
 
@@ -166,8 +172,8 @@ Responsibility:
 
 Supported shapes:
 
-* ServiceResponse<T>
-* ServiceResponse<Page<T>>
+* `ServiceResponse<T>`
+* `ServiceResponse<Page<T>>`
 
 Rejected:
 
@@ -178,6 +184,8 @@ Rejected:
 ### Key Rule
 
 > Only explicitly supported shapes are processed. Everything else is ignored.
+
+This is a deliberate constraint to preserve determinism.
 
 ---
 
@@ -190,7 +198,7 @@ Responsibility:
 Behavior:
 
 * ALWAYS rebuilds schema
-* replaces existing schema
+* replaces any existing schema definition
 
 ### Critical Design Rule
 
@@ -237,6 +245,8 @@ Failure:
 
 * immediate exception
 
+No fallback. No recovery.
+
 ---
 
 ## 5. Type System Strategy
@@ -245,20 +255,20 @@ The system intentionally supports a **restricted generic subset**.
 
 ### Supported
 
-* ServiceResponse<T>
-* ServiceResponse<Page<T>>
+* `ServiceResponse<T>`
+* `ServiceResponse<Page<T>>`
 
 ### Rejected
 
 * nested generics
-* List<T>
-* Map<K,V>
+* `List<T>` as root
+* `Map<K,V>`
 
 ### Rationale
 
-* deterministic naming
+* deterministic schema naming
 * stable code generation
-* bounded complexity
+* bounded complexity surface
 
 ---
 
@@ -275,11 +285,16 @@ Structure:
 1. base schema reference
 2. data override
 
-### Rule
+### Rules
 
-* no mutation
+* no mutation of existing schemas
 * no partial merge
 * no inheritance tricks
+
+### Outcome
+
+* consistent structure
+* predictable code generation
 
 ---
 
@@ -287,11 +302,11 @@ Structure:
 
 Extensions:
 
-* x-api-wrapper
-* x-api-wrapper-datatype
-* x-data-container
-* x-data-item
-* x-ignore-model
+* `x-api-wrapper`
+* `x-api-wrapper-datatype`
+* `x-data-container`
+* `x-data-item`
+* `x-ignore-model`
 
 ### Interpretation
 
@@ -299,10 +314,13 @@ These extensions form a:
 
 > **flat, deterministic DSL between server and code generator**
 
+They carry **semantic intent without redefining types**.
+
 ### Important
 
 * NOT public API
 * MUST remain stable
+* MUST remain minimal
 
 ---
 
@@ -317,7 +335,7 @@ The system guarantees:
 Mechanisms:
 
 * single pipeline entry
-* LinkedHashSet ordering
+* controlled collection ordering (e.g. `LinkedHashSet`)
 * no distributed hooks
 
 ---
@@ -328,15 +346,17 @@ Extension points:
 
 ### Discovery Strategy
 
-* support additional frameworks
+* enables support for additional frameworks
 
-### Enricher
+### Enricher / Processor
 
-* support new container types
+* enables support for additional container types
 
 ### Rule
 
-> Extensions MUST preserve determinism.
+> Extensions MUST preserve determinism and contract semantics.
+
+Any extension that introduces ambiguity is invalid.
 
 ---
 
@@ -352,21 +372,21 @@ Extension points:
 ### Authoritative Overwrite
 
 * gain: correctness
-* loss: backward compatibility
+* loss: backward compatibility for ad-hoc schemas
 
 ---
 
-### No Reflection
+### No Reflection-Based Inference
 
 * gain: predictability
-* loss: dynamic capability
+* loss: dynamic adaptability
 
 ---
 
 ### Generator Decoupling
 
-* gain: modularity
-* loss: convenience
+* gain: modular architecture
+* loss: tighter coordination required via extensions
 
 ---
 
@@ -375,6 +395,7 @@ Extension points:
 Behavior:
 
 * invalid contract → fail immediately
+* invalid projection → fail immediately
 
 No:
 

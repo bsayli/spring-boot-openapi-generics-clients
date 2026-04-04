@@ -2,11 +2,13 @@
 
 This document defines the **complete architectural model of the OpenAPI Generics Platform**.
 
-It unifies:
+It describes how **contract, projection, and generation** operate as a single deterministic system.
+
+The platform unifies:
 
 * server-side projection (runtime → OpenAPI)
 * client-side generation (OpenAPI → Java client)
-* shared contract authority
+* shared contract authority (SSOT)
 
 This document is the **top-level architecture reference**.
 
@@ -34,6 +36,7 @@ This document is the **top-level architecture reference**.
 18. [Evolution Strategy](#18-evolution-strategy)
 19. [Mental Model](#19-mental-model)
 20. [Final Summary](#20-final-summary)
+
 ---
 
 ## 1. Vision
@@ -41,8 +44,15 @@ This document is the **top-level architecture reference**.
 Provide a **deterministic, contract-first API platform** where:
 
 * Java contract is the single source of truth
-* OpenAPI is a lossless projection
+* OpenAPI is a **lossless projection**, not an authority
 * clients are generated without redefining models
+
+This directly addresses common failure modes in API ecosystems:
+
+* duplicated DTO hierarchies
+* schema drift between server and client
+* unstable client regeneration
+* generator-specific coupling
 
 Goals:
 
@@ -50,7 +60,7 @@ Goals:
 * enforce schema stability
 * guarantee deterministic generation
 * hide generator complexity from users
-* enable zero-config adoption
+* enable near zero-configuration adoption
 
 ---
 
@@ -66,6 +76,8 @@ The platform IS:
 
 > A contract-first, deterministic projection and generation system
 
+It treats OpenAPI as a **transport format**, not a modeling authority.
+
 ---
 
 ## 3. System Boundaries (Authority vs Projection vs Consumption)
@@ -77,28 +89,34 @@ The platform IS:
 | Generator | Enforcement (OpenAPI → code)   | Build-time         |
 | Client    | Consumption                    | Generated          |
 
-### Rule
+### Core Rule
 
 > Authority MUST NOT exist outside the contract layer.
+
+### Implication
+
+* no schema ownership in OpenAPI
+* no model ownership in generator
+* no duplication in clients
 
 ---
 
 ## 4. High-Level Platform Structure
 
 ```text
-spring-boot-openapi-generics-clients
+openapi-generics
 │
 ├── openapi-generics-contract                         # Contract authority (SSOT)
-├── openapi-generics-platform-bom        # Version alignment (ecosystem boundary)
-├── openapi-generics-server-starter      # Server projection layer (runtime → OpenAPI)
-├── openapi-generics-java-codegen        # Generator engine (OpenAPI → code)
-├── openapi-generics-java-codegen-parent # Build-time orchestration (plugin + templates)
+├── openapi-generics-platform-bom                    # Version alignment (ecosystem boundary)
+├── openapi-generics-server-starter                  # Server projection layer (runtime → OpenAPI)
+├── openapi-generics-java-codegen                    # Generator engine (OpenAPI → code)
+├── openapi-generics-java-codegen-parent             # Build-time orchestration (plugin + templates)
 │
-├── samples                              # Reference implementations (non-authoritative)
-│   ├── customer-service                 # Sample producer (contract → OpenAPI)
-│   └── customer-service-client          # Sample consumer (OpenAPI → client usage)
+├── samples                                          # Reference implementations (non-authoritative)
+│   ├── customer-service                             # Sample producer (contract → OpenAPI)
+│   └── customer-service-client                      # Sample consumer (OpenAPI → client usage)
 │
-└── pom.xml                              # Root aggregator
+└── pom.xml                                          # Root aggregator
 ```
 
 ---
@@ -119,18 +137,15 @@ Samples (demonstration only)
    └── Consumer example
 ```
 
----
-
 ### Key Principle
 
 > Only the platform defines behavior. Samples only demonstrate usage.
 
-This ensures:
+This separation ensures:
 
-* clear separation of concerns
-* no leakage of sample logic into platform layers
-* stable and evolvable architecture
-* deterministic build and runtime boundaries
+* no leakage of sample logic into core modules
+* stable architectural boundaries
+* controlled evolution of platform behavior
 
 ---
 
@@ -152,6 +167,8 @@ Generated Java Client
 
 > Each layer transforms — none reinterpret.
 
+Every step is a **mechanical transformation**, not a semantic rewrite.
+
 ---
 
 ## 6. Core Architectural Principles
@@ -159,20 +176,28 @@ Generated Java Client
 ### 6.1 Contract First
 
 * contract defines semantics
-* everything else is derived
+* all downstream artifacts are derived
+
+---
 
 ### 6.2 Determinism
 
 * same input → same output
-* no implicit behavior
+* no ordering dependency
+* no hidden behavior
+
+---
 
 ### 6.3 Explicitness
 
-* no inference beyond defined rules
+* no implicit inference beyond defined rules
+* all transformations are controlled
+
+---
 
 ### 6.4 Separation of Concerns
 
-* runtime vs build-time are isolated
+* runtime (server) and build-time (generation) are strictly isolated
 
 ---
 
@@ -180,7 +205,7 @@ Generated Java Client
 
 Owned by: `openapi-generics-contract`
 
-Defines:
+Defines canonical types:
 
 * `ServiceResponse<T>`
 * `Meta`
@@ -192,7 +217,8 @@ Defines:
 
 ### Implication
 
-* no duplication in clients
+* clients reuse contract classes directly
+* no duplicated model graphs
 * no schema drift
 
 ---
@@ -206,16 +232,16 @@ Transforms:
 ### Model
 
 * pipeline-based
-* single execution
-* deterministic
+* single-pass execution
+* deterministic output
 
 ### Responsibilities
 
-* discover response types
-* introspect contract shapes
+* discover controller return types
+* resolve contract shapes
 * generate wrapper schemas
 * inject vendor extensions
-* enforce invariants
+* enforce projection invariants
 
 ---
 
@@ -228,15 +254,15 @@ Transforms:
 ### Model
 
 * build-time execution
-* template-driven
-* generator-controlled
+* template-driven generation
+* generator-controlled behavior
 
 ### Responsibilities
 
-* suppress contract models
-* generate thin wrappers
-* inject generics
-* reuse contract classes
+* suppress contract-owned models
+* generate thin wrapper classes
+* inject generics correctly
+* reuse contract classes via import mappings
 
 ---
 
@@ -256,7 +282,9 @@ Generated Sources
 
 ### Key Property
 
-> Users do not configure the system — they inherit it.
+> Users do not assemble the pipeline — they inherit it.
+
+This removes configuration variance across projects.
 
 ---
 
@@ -264,20 +292,20 @@ Generated Sources
 
 ### BOM
 
-* version alignment
-* ecosystem boundary
+* defines version alignment
+* establishes ecosystem boundary
 
 ### Server Starter
 
-* runtime integration
+* integrates projection at runtime
 
 ### Codegen Parent
 
-* build-time orchestration
+* orchestrates build-time generation
 
 ### Contract
 
-* shared semantic layer
+* provides shared semantic layer
 
 ---
 
@@ -287,29 +315,31 @@ The platform guarantees:
 
 * stable OpenAPI output
 * stable client generation
-* no ordering dependency
+* reproducible builds
 
 Mechanisms:
 
 * single pipeline execution
 * explicit mappings
-* template control
+* controlled template system
 
 ---
 
 ## 13. Vendor Extensions as Cross-Layer Protocol
 
-Extensions:
+Key extensions:
 
-* x-api-wrapper
-* x-api-wrapper-datatype
-* x-data-container
-* x-data-item
-* x-ignore-model
+* `x-api-wrapper`
+* `x-api-wrapper-datatype`
+* `x-data-container`
+* `x-data-item`
+* `x-ignore-model`
 
 ### Role
 
-> Internal protocol between server and generator
+> Internal protocol between projection and generation layers
+
+They carry **semantic intent across boundaries without redefining models**.
 
 ---
 
@@ -317,56 +347,82 @@ Extensions:
 
 Supported:
 
-* ServiceResponse<T>
-* ServiceResponse<Page<T>>
+* `ServiceResponse<T>`
+* `ServiceResponse<Page<T>>`
 
 Not supported:
 
 * nested generics
-* collections
+* arbitrary collections
 * maps
 
-### Reason
+### Rationale
 
-* determinism
 * bounded complexity
+* deterministic schema generation
+* stable client typing
 
 ---
 
 ## 15. Developer Experience Model
 
-### Server
+### Server Side
 
 User:
 
-* adds starter
-* returns ServiceResponse
+* adds starter dependency
+* returns `ServiceResponse<T>`
 
-Everything else is automatic.
+System:
 
-### Client
+* generates OpenAPI automatically
+
+---
+
+### Client Side
 
 User:
 
-* inherits parent
-* provides spec
+* inherits parent POM
+* provides OpenAPI spec
 * runs build
+
+System:
+
+* generates contract-aligned client
 
 ---
 
 ## 16. Design Trade-offs
 
-### Restricted flexibility
+### Restricted Flexibility
 
-* ensures predictability
+Users cannot arbitrarily customize generation.
 
-### Template patching
+Gain:
 
-* risk vs control
+* predictability
+* consistency
 
-### No generator fork
+---
 
-* stability vs control
+### Template Patching
+
+Relies on upstream template structure.
+
+Trade-off:
+
+* higher control vs upstream coupling
+
+---
+
+### No Generator Fork
+
+Uses official OpenAPI Generator.
+
+Trade-off:
+
+* stability vs deep customization
 
 ---
 
@@ -374,27 +430,31 @@ User:
 
 System behavior:
 
-* invalid contract → fail
-* invalid projection → fail
+* invalid contract → fail fast
+* invalid projection → fail fast
 
 No:
 
 * silent fallback
-* partial output
+* partial generation
+
+### Principle
+
+> Incorrect output is worse than no output
 
 ---
 
 ## 18. Evolution Strategy
 
-Future extensions:
+Potential extensions:
 
 * reactive support
 * validation tooling
-* multi-language generation
+* multi-language client generation
 
 ### Rule
 
-> Extensions must preserve determinism
+> All evolution must preserve determinism and contract authority
 
 ---
 
@@ -402,12 +462,12 @@ Future extensions:
 
 Think of the platform as:
 
-> A deterministic compiler pipeline across runtime and build-time
+> A deterministic compiler pipeline spanning runtime and build-time
 
 Not:
 
 * a helper library
-* a template tweak
+* a set of templates
 
 ---
 
@@ -420,7 +480,7 @@ The platform is:
 * pipeline-driven
 * build-time enforced
 
-Its responsibility is:
+Its responsibility is strictly:
 
 > Ensure contract semantics flow unchanged from server to client
 

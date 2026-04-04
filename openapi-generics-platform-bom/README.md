@@ -2,9 +2,9 @@
 
 > Internal dependency alignment for the OpenAPI Generics platform
 
-`openapi-generics-platform-bom` is a **Bill of Materials (BOM)** that provides **version alignment** across all platform modules and engines.
+`openapi-generics-platform-bom` is a **Bill of Materials (BOM)** that provides **strict version alignment** across all platform modules and engines.
 
-It ensures that the ecosystem operates in a **deterministic, compatible, and reproducible configuration**.
+It ensures the platform runs as a **single, coherent system**—not a collection of independently versioned parts.
 
 ---
 
@@ -25,20 +25,28 @@ It ensures that the ecosystem operates in a **deterministic, compatible, and rep
 
 ## 🎯 Purpose
 
+OpenAPI Generics is a **multi-layered system**:
+
+* contract (authority)
+* projection (server)
+* generation (client)
+
+Each layer depends on shared engines and must remain compatible.
+
 This BOM exists to:
 
-* centralize version management across platform modules
-* ensure compatibility between server, contract, and codegen layers
-* eliminate dependency drift
-* guarantee deterministic builds
+* centralize version management across all layers
+* eliminate cross-module version drift
+* ensure compatibility between contract, projection, and generation
+* guarantee deterministic and reproducible builds
 
-It is part of the platform’s **infrastructure layer**, not its public API.
+> Without alignment, the system degrades. With alignment, it behaves predictably.
 
 ---
 
 ## 🧠 What It Controls
 
-The BOM defines versions for:
+The BOM defines versions for the **minimum set of components required for consistency**.
 
 ### Platform Modules
 
@@ -50,17 +58,19 @@ The BOM defines versions for:
 
 ### Integration Engines
 
-* Springdoc (OpenAPI runtime integration)
+* Springdoc (OpenAPI runtime projection)
+
+Only **version-critical dependencies** are included.
 
 ---
 
 ## ⚙️ How It Is Used
 
-This BOM is **not intended to be used directly by end users**.
+This BOM is **consumed indirectly**.
 
-Instead, it is:
+It is:
 
-* imported internally by platform modules
+* imported by platform modules
 * used by parent POMs
 * propagated transitively to consumers
 
@@ -80,18 +90,24 @@ Example (internal usage):
 </dependencyManagement>
 ```
 
+End users typically never interact with it directly.
+
 ---
 
 ## 🚫 Not Intended For Direct Consumption
 
-Consumers of the platform should **not** import this BOM manually.
+Consumers of the platform should **not import this BOM manually**.
 
 Instead:
 
-* use `openapi-generics-server-starter` for server-side usage
+* use `openapi-generics-server-starter` for server-side integration
 * use `openapi-generics-java-codegen-parent` for client generation
 
-These modules already manage dependency alignment internally.
+These entry points already:
+
+* import this BOM
+* enforce compatible versions
+* expose only the necessary configuration surface
 
 ---
 
@@ -99,13 +115,17 @@ These modules already manage dependency alignment internally.
 
 Without a BOM:
 
-* generator version mismatches may occur
-* Springdoc behavior may drift
-* contract compatibility may break
+* generator versions can diverge across projects
+* Springdoc behavior may become inconsistent
+* contract compatibility can silently break
 
 With the BOM:
 
-> All platform components operate on a **single, controlled version set**
+* all modules share a **single version baseline**
+* builds become reproducible
+* integration behavior becomes predictable
+
+> Version alignment is what makes the platform behave as a system.
 
 ---
 
@@ -115,34 +135,49 @@ Within the platform:
 
 | Layer                      | Module                            |
 | -------------------------- | --------------------------------- |
-| Contract (Authority)       | `openapi-generics-contract`                    |
+| Contract (Authority)       | `openapi-generics-contract`       |
 | Projection (Server)        | `openapi-generics-server-starter` |
 | Generation (Client)        | `openapi-generics-java-codegen`   |
 | Alignment (Infrastructure) | `openapi-generics-platform-bom`   |
 
 This module exists purely to:
 
-> stabilize the platform dependency graph
+> stabilize the platform dependency graph across all layers
+
+It contains **no runtime behavior** and **no API surface**.
 
 ---
 
 ## ⚠️ Design Constraints
 
-The BOM must:
+The BOM is intentionally constrained.
+
+It must:
 
 * remain minimal
-* only include version-critical dependencies
+* include only version-critical dependencies
 * avoid leaking unnecessary transitive dependencies
+* stay aligned with platform module versions
+
+This prevents the BOM from becoming a hidden source of complexity.
 
 ---
 
 ## 🔄 Versioning Strategy
 
-The BOM version tracks platform compatibility.
+The BOM version represents a **coherent platform snapshot**.
 
 Recommendation:
 
-> All platform modules should use the **same BOM version**
+> All platform modules should use the **same BOM version**.
+
+This ensures:
+
+* contract compatibility
+* generator compatibility
+* projection consistency
+
+Mixing versions breaks these guarantees.
 
 ---
 
@@ -152,11 +187,13 @@ Think of this module as:
 
 > The version control layer of the platform
 
+It defines **what versions are allowed to exist together**.
+
 Not:
 
-* a runtime component
+* a runtime dependency
 * a feature module
-* a user-facing dependency
+* a user-facing API
 
 ---
 
@@ -167,5 +204,5 @@ MIT License
 ---
 
 **Maintained by:**
-Barış Saylı
-[https://github.com/bsayli](https://github.com/bsayli)
+**Barış Saylı**
+[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)

@@ -218,12 +218,6 @@
                             <sourceFolder>${openapi.generator.sourceFolder}</sourceFolder>
                         </configOptions>
 
-                        <!-- GENERICS CONTRACT -->
-                        <additionalProperties>
-                            <additionalProperty>apiContractEnvelope=io.github.blueprintplatform.openapi.generics.contract.envelope</additionalProperty>
-                            <additionalProperty>apiContractPage=io.github.blueprintplatform.openapi.generics.contract.paging</additionalProperty>
-                        </additionalProperties>
-
                         <importMappings>
                             <importMapping>Meta=io.github.blueprintplatform.openapi.generics.contract.envelope.Meta</importMapping>
                             <importMapping>ServiceResponse=io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse</importMapping>

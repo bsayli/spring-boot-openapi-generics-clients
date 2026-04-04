@@ -7,7 +7,11 @@ nav_order: 1
 
 # Server-Side Adoption — Contract-First OpenAPI Publication
 
-> A **practical, minimal, and deterministic** guide for publishing a **generics-aware OpenAPI** from a Spring Boot (WebMVC) service.
+> Publish a **deterministic, generics-aware OpenAPI** from Spring Boot with **one contract and zero duplication**.
+
+A **practical, minimal, and deterministic** guide for exposing a **contract-aligned OpenAPI** from a Spring Boot (WebMVC) service.
+
+This guide is intentionally **action-oriented**: you implement a small set of rules, and the platform guarantees the rest.
 
 ---
 
@@ -31,9 +35,9 @@ nav_order: 1
 
 You want:
 
-* deterministic OpenAPI
+* deterministic OpenAPI output
 * no envelope duplication
-* generics preserved in clients
+* generics preserved in generated clients
 
 Do this:
 
@@ -65,21 +69,23 @@ Done.
 
 ## 🎯 What the server is responsible for
 
-The server has **one job only**:
+The server has **exactly one responsibility**:
 
 > Publish a **correct, deterministic projection** of the runtime contract.
 
-It does NOT:
+It does **not**:
 
 * generate clients
 * define alternative response models
-* optimize for generators
+* adapt for specific generators
 
-It only:
+It only performs:
 
 ```text
 Contract → OpenAPI (projection)
 ```
+
+Everything else (generation, typing, reuse) happens downstream.
 
 ---
 
@@ -98,15 +104,17 @@ ServiceResponse<T>
 ServiceResponse<Page<T>>
 ```
 
-Everything else is built around this.
+This constraint is what enables:
+
+* deterministic schema generation
+* stable naming
+* type-safe client reconstruction
 
 ---
 
 ## 📦 Minimal dependencies
 
-You do NOT need complex setup.
-
-Only:
+No custom configuration is required.
 
 ```xml
 <dependency>
@@ -118,11 +126,13 @@ Only:
 Assumes:
 
 * Spring Boot (WebMVC)
-* Springdoc enabled
+* Springdoc enabled (default `/v3/api-docs`)
 
 ---
 
 ## ✍️ What you actually write
+
+You write **only your domain contract**.
 
 ### Controller example
 
@@ -133,7 +143,7 @@ public ResponseEntity<ServiceResponse<CustomerDto>> getCustomer(...) {
 }
 ```
 
-### Pagination
+### Pagination example
 
 ```java
 @GetMapping
@@ -145,38 +155,40 @@ public ResponseEntity<ServiceResponse<Page<CustomerDto>>> getCustomers(...) {
 That’s it.
 
 No annotations.
-No schema config.
-No wrappers.
+No schema configuration.
+No wrapper DTOs.
 
 ---
 
 ## 🧠 What gets published to OpenAPI
 
-From this:
+From this runtime type:
 
 ```java
 ServiceResponse<CustomerDto>
 ```
 
-You get:
+The system produces a deterministic schema:
 
 ```text
 ServiceResponseCustomerDto
 ```
 
-With:
+Characteristics:
 
-* deterministic naming
-* `allOf` composition
-* vendor extensions for codegen
+* stable, predictable naming
+* `allOf`-based composition
+* vendor extensions for downstream generation (e.g. `x-api-wrapper`)
 
 Important:
 
-> OpenAPI is a projection — not the source of truth.
+> OpenAPI is a **projection artifact** — not the source of truth.
 
 ---
 
 ## ⚠️ Rules (do NOT break these)
+
+These are **architectural constraints**, not conventions.
 
 ### 1. Only constrain the envelope
 
@@ -197,6 +209,8 @@ ApiResponse
 PagedResult
 ```
 
+Replacing the envelope breaks cross-layer consistency and determinism.
+
 ---
 
 ### 3. Payload is completely free
@@ -209,7 +223,7 @@ ServiceResponse<CustomerDeleteResponse>
 ServiceResponse<Anything>
 ```
 
-The platform does NOT care about `T`.
+The system constrains structure — not domain models.
 
 ---
 
@@ -218,6 +232,8 @@ The platform does NOT care about `T`.
 ```text
 ProblemDetail (RFC 9457)
 ```
+
+Errors are handled as a protocol, separate from success responses.
 
 ---
 
@@ -229,19 +245,19 @@ No:
 * custom annotations
 * overrides
 
-Everything is handled by the starter.
+The starter owns the projection.
 
 ---
 
 ## 🔍 Quick verification
 
-Run:
+Run a request:
 
 ```bash
 curl http://localhost:8084/.../v1/.../1
 ```
 
-Expected:
+Expected shape:
 
 ```json
 {
@@ -250,10 +266,10 @@ Expected:
 }
 ```
 
-If this shape is correct:
+If this is correct, then:
 
 ```text
-Server → OpenAPI → Client will be correct
+Server → OpenAPI → Client will remain consistent
 ```
 
 ---
@@ -262,24 +278,24 @@ Server → OpenAPI → Client will be correct
 
 Think of the server as:
 
-> A compiler from runtime contract → OpenAPI
+> A deterministic compiler from runtime contract → OpenAPI
 
-NOT:
+Not:
 
 * a schema designer
-* a generator config layer
+* a generator configuration layer
 
 ---
 
 ## 🚫 What this guide does NOT cover
 
-This guide intentionally does NOT cover:
+This guide intentionally excludes:
 
 * client generation
 * template customization
 * generator internals
 
-Those belong to the **client-side adoption**.
+These belong to the **client-side adoption guide**.
 
 ---
 
@@ -293,7 +309,11 @@ Add the starter
 Do nothing else
 ```
 
-Everything else is handled by the platform.
+The platform handles:
+
+* OpenAPI projection
+* schema stability
+* downstream compatibility
 
 ---
 

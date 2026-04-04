@@ -2,7 +2,14 @@
 
 > Generics-aware OpenAPI Generator extension for contract-aligned Java clients
 
-`openapi-generics-java-codegen` is a **custom OpenAPI Generator extension** that enforces **contract-first client generation** by preventing duplication of platform-owned models and enabling deterministic wrapper generation.
+`openapi-generics-java-codegen` is a **custom OpenAPI Generator extension** that enforces **contract-first client generation**.
+
+It does not try to be smarter than your contract.
+It ensures the generator **does not break it**.
+
+The role of this module is strict:
+
+> Prevent OpenAPI Generator from redefining platform-owned models and enforce contract-aligned output.
 
 It is a **build-time component** and is typically used via `openapi-generics-java-codegen-parent`.
 
@@ -17,17 +24,25 @@ It is a **build-time component** and is typically used via `openapi-generics-jav
 5. [Template Integration](#-template-integration)
 6. [How It Is Used](#-how-it-is-used)
 7. [Not Intended For Direct Use](#-not-intended-for-direct-use)
-8. [Determinism Guarantees](#-determinism-guarantees)
-9. [Design Constraints](#-design-constraints)
-10. [Mental Model](#-mental-model)
-11. [Related Modules](#-related-modules)
-12. [License](#-license)
-
+8. [Compatibility Matrix](#-compatibility-matrix)
+9. [Determinism Guarantees](#-determinism-guarantees)
+10. [Design Constraints](#-design-constraints)
+11. [Mental Model](#-mental-model)
+12. [Related Modules](#-related-modules)
+13. [License](#-license)
 ---
 
 ## 🎯 Purpose
 
-This module ensures that generated clients:
+Default OpenAPI Generator behavior:
+
+* regenerates response envelopes per endpoint
+* flattens or loses generic semantics
+* creates model drift between server and client
+
+This module prevents that.
+
+It ensures that generated clients:
 
 * reuse canonical contract types (`ServiceResponse`, `Meta`, `Page`, etc.)
 * do NOT regenerate platform-owned models
@@ -41,10 +56,14 @@ It acts as an **enforcement layer** between OpenAPI and generated Java code.
 
 > OpenAPI is a projection — not the source of truth
 
-This generator enforces that:
+This generator enforces that rule at build time:
 
 * platform-owned models must NOT be generated
-* OpenAPI metadata must be interpreted, not re-materialized
+* OpenAPI metadata must be interpreted, not materialized
+
+If OpenAPI contains structure that already exists in the contract:
+
+> it is mapped back — not regenerated
 
 ---
 
@@ -91,6 +110,7 @@ Generated code:
 
 * references `openapi-generics-contract`
 * does NOT duplicate envelope types
+* preserves generic semantics (`ServiceResponse<T>`, `Page<T>`)
 * remains deterministic and stable
 
 ---
@@ -151,13 +171,32 @@ Instead:
 
 ---
 
+## 🔗 Compatibility Matrix
+
+This module is tested with the following versions:
+
+| Component            | Version |
+|---------------------|---------|
+| Java                | 21      |
+| OpenAPI Generator   | 7.x     |
+
+Notes:
+
+* `restclient` library is available starting from **OpenAPI Generator 7.6.0**
+* If you use `restclient`, you must use **7.6.0 or newer**
+* This module is designed to work across the **OpenAPI Generator 7.x series**
+* This is a **build-time module** — no runtime dependency on Spring
+
+---
+
 ## 🔒 Determinism Guarantees
 
 This generator ensures:
 
-* no duplication of contract models
-* stable model graph
-* consistent generation output
+* ✔ No duplication of contract models
+* ✔ Stable model graph
+* ✔ Consistent generation output
+* ✔ Preservation of generic semantics
 
 Mechanisms:
 
@@ -183,7 +222,7 @@ It is NOT a general-purpose generator.
 
 Think of this module as:
 
-> A filter + enforcement layer inside OpenAPI Generator
+> A guardrail inside OpenAPI Generator that prevents contract drift
 
 Not:
 
@@ -196,7 +235,7 @@ Not:
 
 | Module                                 | Role                               |
 | -------------------------------------- | ---------------------------------- |
-| `openapi-generics-contract`                         | Defines canonical models           |
+| `openapi-generics-contract`            | Defines canonical models           |
 | `openapi-generics-server-starter`      | Produces OpenAPI projection        |
 | `openapi-generics-java-codegen`        | Enforces generation rules          |
 | `openapi-generics-java-codegen-parent` | Orchestrates build-time generation |
@@ -210,5 +249,5 @@ MIT License
 ---
 
 **Maintained by:**
-Barış Saylı
-[https://github.com/bsayli](https://github.com/bsayli)
+**Barış Saylı**
+[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)

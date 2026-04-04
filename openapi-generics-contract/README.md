@@ -5,12 +5,8 @@
 `openapi-generics-contract` is a **framework-agnostic Java library** that defines the
 **authoritative response model** used across the OpenAPI Generics platform.
 
-It provides a **single source of truth (SSOT)** for response semantics shared by:
-
-* backend services (producers)
-* OpenAPI projection layer (server starter)
-* code generation layer (generator)
-* consumer applications (clients)
+It is the only place where response semantics are defined.
+Everything else in the system either **projects**, **interprets**, or **consumes** this model.
 
 The goal is simple:
 
@@ -39,34 +35,33 @@ The goal is simple:
 
 ## 🎯 Why This Module Exists
 
-Modern HTTP APIs almost always wrap payloads with metadata:
+Most HTTP APIs converge on the same shape:
 
-* timestamps
-* pagination
-* sorting
+* payload wrapped with metadata
+* pagination and sorting structures
 * structured error extensions
 
-In most systems, these wrappers are:
+But in practice, these are often:
 
 * duplicated across services
-* re-generated in clients
-* inconsistently evolved
+* regenerated in clients
+* inconsistently evolved over time
 
-This leads to:
+This creates long-term problems:
 
-* schema drift
+* schema drift between producer and consumer
 * duplicated DTO hierarchies
-* brittle clients
-* unclear ownership
+* fragile client regeneration
+* unclear ownership of the API contract
 
-`openapi-generics-contract` eliminates this by introducing a **shared, authoritative contract**
+`openapi-generics-contract` addresses this by introducing a **single, shared contract**
 that both producers and consumers depend on directly.
 
 ---
 
 ## 🧠 Architectural Positioning (Critical)
 
-Within the platform, this module is:
+Within the platform, this module is the **authority layer**:
 
 | Layer         | Role                                |
 | ------------- | ----------------------------------- |
@@ -84,6 +79,8 @@ Within the platform, this module is:
 * OpenAPI MUST NOT redefine these models
 * generators MUST NOT re-generate them
 * clients MUST reuse them directly
+
+If this boundary is violated, contract drift is reintroduced.
 
 ---
 
@@ -282,9 +279,9 @@ Those responsibilities belong to other platform layers.
 
 ```xml
 <dependency>
-  <groupId>io.github.blueprint-platform</groupId>
-  <artifactId>openapi-generics-contract</artifactId>
-  <version>0.8.0</version>
+    <groupId>io.github.blueprint-platform</groupId>
+    <artifactId>openapi-generics-contract</artifactId>
+    <version>0.8.0</version>
 </dependency>
 ```
 
@@ -402,5 +399,5 @@ MIT License.
 ---
 
 **Maintained by:**
-Barış Saylı
-GitHub · Medium · LinkedIn
+**Barış Saylı**
+[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)

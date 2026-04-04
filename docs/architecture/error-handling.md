@@ -12,15 +12,19 @@
 
 ## Overview
 
-This document defines the architectural approach for error handling across services using **RFC 9457 Problem Details** as the single canonical error model.
+This document defines a **runtime-first error handling strategy** based on **RFC 9457 Problem Details** as the **single canonical error model**.
 
-The design intentionally separates:
+The goal is simple:
 
-* Runtime truth (backend error model)
-* Specification (OpenAPI)
-* Client interpretation (language-specific adapters)
+> Define errors once at runtime, propagate them consistently, and avoid re-defining them in schemas or generated code.
 
-This avoids duplication, drift, and ambiguity while preserving flexibility across heterogeneous clients.
+The design explicitly separates concerns:
+
+* **Runtime truth** → backend error model
+* **Specification** → OpenAPI (success only)
+* **Client interpretation** → language-specific adapters
+
+This prevents duplication, eliminates drift, and keeps error semantics stable across services and clients.
 
 ---
 
@@ -38,11 +42,11 @@ Error = ProblemDetail (canonical runtime model)
 * No parallel error representations
 * No OpenAPI-generated error classes
 
-This ensures:
+This guarantees:
 
-* Determinism
-* Zero duplication
-* No drift between spec and runtime
+* deterministic behavior
+* zero duplication
+* no divergence between runtime and clients
 
 ---
 
@@ -56,7 +60,7 @@ Standard RFC 9457 fields:
 * `detail`
 * `instance`
 
-Custom domain semantics are expressed via:
+Domain semantics are expressed via extensions:
 
 * `errorCode`
 * `extensions.errors[]` (structured error details)
@@ -80,24 +84,24 @@ Custom domain semantics are expressed via:
 }
 ```
 
-These extensions represent the **actual business error contract**.
+These extensions carry the **actual business error contract**.
 
 ---
 
 ### 3. OpenAPI is NOT the Error Authority
 
-OpenAPI is intentionally limited to **success responses only**.
+OpenAPI intentionally describes **success responses only**.
 
 ```text
-OpenAPI → success contract only
+OpenAPI → success contract
 Error → runtime protocol (ProblemDetail)
 ```
 
 Rationale:
 
-* Avoid duplicate schema definitions
-* Prevent divergence between spec and runtime
-* Eliminate generated DTO conflicts (e.g. multiple ProblemDetail classes)
+* avoids duplicate schema definitions
+* prevents spec/runtime divergence
+* eliminates generated DTO conflicts
 
 ---
 
@@ -105,23 +109,23 @@ Rationale:
 
 #### Backend (Java)
 
-* Fully typed error handling
-* Centralized adapter layer
+* fully typed error handling
+* centralized adapter layer
 * `ProblemDetail → ApiProblemException`
 
 Capabilities:
 
-* Fallback handling (non-JSON, empty body, unparsable payloads)
-* Structured extraction (`errorCode`, `ErrorItem`)
-* Domain-level exception mapping
+* fallback handling (non-JSON, empty body, unparsable payloads)
+* structured extraction (`errorCode`, `ErrorItem`)
+* domain-level exception mapping
 
 ---
 
 #### Frontend (TypeScript / Web Clients)
 
-Frontend clients do **not rely on OpenAPI for error typing**.
+Frontend clients **do not rely on OpenAPI for error typing**.
 
-Instead, a lightweight interpretation layer is provided.
+Instead, a lightweight interpretation layer is used.
 
 ##### Type Definition
 
@@ -168,9 +172,9 @@ export function parseProblem(error: any): ProblemDetail | null {
 
 This enables:
 
-* Type-safe error handling
-* Zero coupling to OpenAPI
-* Alignment with backend runtime behavior
+* type-safe error handling
+* zero coupling to OpenAPI
+* alignment with backend runtime behavior
 
 ---
 
@@ -179,16 +183,18 @@ This enables:
 ```text
 Backend
   ↓
-ProblemDetail (truth)
+ProblemDetail (runtime truth)
 
 OpenAPI
   ↓
 Success client (generated)
 
-Custom TS Layer
+Client Adapter Layer
   ↓
-Error understanding
+Error interpretation
 ```
+
+Each layer has a single responsibility and does not redefine the others.
 
 ---
 
@@ -196,29 +202,29 @@ Error understanding
 
 ### No Error Schema in OpenAPI
 
-Rejected because:
+Rejected because it:
 
-* Causes duplication
-* Leads to drift
-* Produces conflicting generated classes
-* Breaks canonical model
+* duplicates the runtime model
+* introduces drift
+* creates conflicting generated classes
+* breaks canonical error ownership
 
 ---
 
 ### No Generated Error DTOs
 
-All generated error models are avoided.
+Generated error models are intentionally avoided.
 
 Instead:
 
-* Runtime model is parsed directly
-* Language-specific adapters interpret it
+* runtime payload is parsed directly
+* adapters interpret it per language
 
 ---
 
 ### Protocol over Schema
 
-Errors are treated as **protocol-level constructs**, not schema-defined entities.
+Errors are treated as **protocol-level constructs**, not schema entities.
 
 ```text
 Error = protocol (ProblemDetail)
@@ -231,35 +237,37 @@ Success = schema (OpenAPI)
 
 ### Advantages
 
-* Single canonical error model
-* No duplication or drift
-* Clean separation of concerns
-* Strong backend guarantees
-* Flexible multi-language support
+* single canonical error model
+* no duplication or drift
+* clear separation of concerns
+* strong backend guarantees
+* flexible multi-language support
 
 ---
 
 ### Costs
 
-* OpenAPI does not fully describe errors
-* Frontend requires minimal parsing layer
-* Consumers must be aware of ProblemDetail semantics
+* OpenAPI does not describe errors
+* frontend requires a small parsing layer
+* consumers must understand ProblemDetail semantics
 
 ---
 
 ## When This Approach Fits Best
 
-* Microservice ecosystems with strong backend contracts
-* Platform-oriented architectures
-* Teams prioritizing correctness over convenience
-* Systems using Spring ProblemDetail natively
+* microservice ecosystems with shared error semantics
+* platform-oriented architectures
+* systems prioritizing correctness over convenience
+* Spring-based services using ProblemDetail
 
 ---
 
 ## Summary
 
-This strategy embraces a **runtime-first, protocol-driven error model** while keeping OpenAPI minimal and focused.
+This strategy adopts a **runtime-first, protocol-driven error model** while keeping OpenAPI focused on success contracts.
 
-It deliberately avoids duplication and treats error handling as a cross-cutting concern handled via lightweight client adapters rather than schema expansion.
+It avoids duplication, preserves a single source of truth, and enables consistent behavior across services and clients.
 
-The result is a clean, scalable, and deterministic system that remains flexible across languages and client types.
+> Errors are defined once, transported as-is, and interpreted where needed.
+
+The result is a system that is **deterministic, explicit, and evolvable**.

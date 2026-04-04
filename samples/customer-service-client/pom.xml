@@ -14,7 +14,6 @@
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>customer-service-client</artifactId>
     <name>customer-service-client</name>
-    <version>0.8.0-SNAPSHOT</version>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
     <url>https://github.com/blueprint-platform/openapi-generics</url>
@@ -48,7 +47,7 @@
 
         <java.version>21</java.version>
         <spring-boot.version>3.5.13</spring-boot.version>
-        <openapi.generator.version>7.21.0</openapi.generator.version>
+        <openapi-generator.version>7.21.0</openapi-generator.version>
 
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
@@ -61,7 +60,6 @@
         <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
         <logback.version>1.5.32</logback.version>
-        <jackson.version>2.21.1</jackson.version>
         <argLine/>
     </properties>
 
@@ -175,29 +173,15 @@
 
                             <library>restclient</library>
 
-                            <output>${openapi.generator.output}</output>
-
                             <apiPackage>io.github.blueprintplatform.samples.customerservice.client.generated.api</apiPackage>
                             <modelPackage>io.github.blueprintplatform.samples.customerservice.client.generated.dto</modelPackage>
                             <invokerPackage>io.github.blueprintplatform.samples.customerservice.client.generated.invoker</invokerPackage>
 
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>
-                                <useJakartaEe>true</useJakartaEe>
                                 <serializationLibrary>jackson</serializationLibrary>
-                                <dateLibrary>java8</dateLibrary>
-                                <useBeanValidation>true</useBeanValidation>
                                 <openApiNullable>false</openApiNullable>
                             </configOptions>
-
-                            <cleanupOutput>true</cleanupOutput>
-                            <skipValidateSpec>false</skipValidateSpec>
-
-                            <generateSupportingFiles>true</generateSupportingFiles>
-                            <generateApiDocumentation>false</generateApiDocumentation>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelDocumentation>false</generateModelDocumentation>
-                            <generateModelTests>false</generateModelTests>
 
                         </configuration>
 

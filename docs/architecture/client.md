@@ -2,6 +2,8 @@
 
 This document explains the **client-side architecture, build pipeline, and usage model** of the generics-aware OpenAPI system.
 
+It focuses on how OpenAPI is transformed into a **contract-aligned Java client** without redefining models or losing type semantics.
+
 It covers:
 
 * `openapi-generics-java-codegen`
@@ -28,33 +30,47 @@ It covers:
 13. [Failure Philosophy](#13-failure-philosophy)
 14. [Mental Model](#14-mental-model)
 15. [Summary](#15-summary)
+
 ---
 
 ## 1. System Overview
 
-The client system is a **build-time transformation pipeline** that produces contract-aligned Java clients from OpenAPI.
+The client system is a **build-time transformation pipeline** that produces **contract-aligned Java clients** from OpenAPI.
 
-It is NOT a standard OpenAPI codegen usage.
+This is not conventional OpenAPI usage.
 
-Instead, it enforces:
+Instead of treating OpenAPI as a model source, the system treats it as a **projection artifact carrying structural intent**.
 
-> Contract-first architecture with deterministic projection
+It enforces:
+
+> Contract-first client generation with deterministic output
+
+Result:
+
+* no duplicated envelope models
+* generics preserved end-to-end
+* stable regeneration across builds
 
 ---
 
 ## 2. Architectural Positioning (Authority vs Projection)
 
-| Layer                          | Role                       |
-| ------------------------------ | -------------------------- |
+| Layer                                       | Role                       |
+| ------------------------------------------- | -------------------------- |
 | Java Contract (`openapi-generics-contract`) | **Authority (SSOT)**       |
-| OpenAPI                        | Projection (metadata only) |
-| Generator                      | Enforcement layer          |
-| Templates                      | Rendering layer            |
-| Client Code                    | Projection output          |
+| OpenAPI                                     | Projection (metadata only) |
+| Generator                                   | Enforcement layer          |
+| Templates                                   | Rendering layer            |
+| Client Code                                 | Projection output          |
 
-Key rule:
+### Core Rule
 
 > OpenAPI must NOT redefine platform-owned types.
+
+### Implication
+
+* contract types are reused, not generated
+* OpenAPI carries structure, not ownership
 
 ---
 
@@ -70,10 +86,10 @@ Template Patch + Overlay
 Generated Client (contract-aligned)
 ```
 
-Important:
+### Important
 
-* OpenAPI is NOT used as a model source
-* OpenAPI is used as a **structural signal**
+* OpenAPI is NOT a model authority
+* OpenAPI acts as a **structural signal for generation**
 
 ---
 
@@ -93,14 +109,14 @@ Responsibility:
 
 Responsibility:
 
-* orchestrate build pipeline
+* orchestrate the build pipeline
 * inject templates
-* bind generator
-* standardize configuration
+* bind custom generator
+* standardize generation behavior
 
-Critical role:
+### Critical role
 
-> This module is the **actual product surface**
+> This module is the **primary integration surface for users**
 
 ---
 
@@ -112,49 +128,54 @@ Custom generator:
 GenericAwareJavaCodegen extends JavaClientCodegen
 ```
 
-### Key behavior
+### Core behavior
 
 #### Phase 1 — MARK
 
 * detect `x-ignore-model`
-* collect ignored model names
+* collect platform-owned models
 
 #### Phase 2 — LOCAL FILTER
 
-* remove models from template processing
+* remove ignored models from current processing
 
 #### Phase 3 — GLOBAL REMOVE
 
-* remove models from generation graph
+* remove models from entire generation graph
 
 ---
 
-### Design outcome
+### Design Outcome
 
 > Models can exist in OpenAPI but are not generated
 
 This enables:
 
-* reference usage
-* zero duplication of contract models
+* reference integrity
+* zero duplication
+* consistent contract reuse
 
 ---
 
 ## 6. Template System (`api_wrapper.mustache`)
 
-Core template:
+Core template structure:
 
 ```
 public class {{classname}} extends ServiceResponse<...>
 ```
 
-Behavior:
+### Behavior
 
 * wraps generated models
 * injects generics
-* reuses contract types
+* binds to contract types
 
-### Container-aware generation
+---
+
+### Container-Aware Generation
+
+Supports:
 
 ```
 Page<T> vs T
@@ -167,7 +188,7 @@ via:
 
 ---
 
-### Design principle
+### Design Principle
 
 > Generate structure, reuse behavior
 
@@ -175,7 +196,7 @@ via:
 
 ## 7. Parent POM as Build Orchestrator
 
-The parent POM wires everything together.
+The parent POM wires the entire system.
 
 User action:
 
@@ -185,13 +206,13 @@ User action:
 </parent>
 ```
 
-Result:
+### Result
 
-* generator is injected
-* templates are patched
-* contract mappings are applied
+* custom generator is injected
+* templates are patched and applied
+* contract mappings are configured
 
-No manual setup required.
+No manual wiring required.
 
 ---
 
@@ -206,11 +227,11 @@ openapi-generator → model.mustache
 ### Step 2 — Patch
 
 * inject `api_wrapper` hook
-* enforce structure
+* enforce wrapper structure
 
 ### Step 3 — Overlay
 
-* add custom templates
+* add custom templates (`api_wrapper.mustache`)
 
 ### Step 4 — Execute generator
 
@@ -218,14 +239,14 @@ openapi-generator → model.mustache
 
 ### Safety
 
-* patch validation exists
-* build fails if upstream template changes
+* patch validation enforced
+* build fails if upstream template structure changes
 
 ---
 
 ## 9. Contract Mapping Strategy
 
-Mapping is explicit:
+Mappings are explicit:
 
 ```
 ServiceResponse → openapi-generics-contract
@@ -233,10 +254,10 @@ Meta → openapi-generics-contract
 Page → openapi-generics-contract
 ```
 
-Mechanism:
+### Mechanism
 
 * `importMappings`
-* `additionalProperties`
+* controlled template usage
 
 ---
 
@@ -244,8 +265,8 @@ Mechanism:
 
 Generated code:
 
-* references contract
-* does NOT re-generate it
+* references contract classes
+* does NOT regenerate them
 
 ---
 
@@ -257,63 +278,52 @@ The system guarantees:
 * no runtime variation
 * no implicit behavior
 
-Mechanisms:
+### Mechanisms
 
-* controlled pipeline
+* controlled pipeline execution
 * fixed template structure
-* explicit mappings
+* explicit mapping rules
 
 ---
 
 ## 11. Usage Model (Consumer Perspective)
 
-### Minimal setup
+### Minimal Setup
 
-1. Add parent:
-
-```
-<parent>
-  openapi-generics-java-codegen-parent
-</parent>
-```
-
-2. Configure plugin:
-
-```
-openapi-generator-maven-plugin
-```
-
+1. Inherit parent POM
+2. Configure OpenAPI Generator plugin
 3. Provide OpenAPI spec
 
 ---
 
-### What user gets
+### What the User Gets
 
 * contract-aligned client
 * generics-safe wrappers
-* zero duplication
+* no duplicated models
 
 ---
 
 ## 12. Design Trade-offs
 
-### Limited flexibility
+### Limited Flexibility
 
-* only supported shapes allowed
+* only supported shapes are allowed
 * prevents ambiguity
 
 ---
 
-### Template patching
+### Template Patching
 
-* fragile vs upstream
-* mitigated with fail-fast
+* depends on upstream structure
+* mitigated via fail-fast checks
 
 ---
 
-### No model generation for core types
+### No Core Model Generation
 
 * requires contract dependency
+* eliminates duplication
 
 ---
 
@@ -329,6 +339,10 @@ No:
 * silent fallback
 * partial generation
 
+### Principle
+
+> Incorrect output is worse than no output
+
 ---
 
 ## 14. Mental Model
@@ -337,7 +351,7 @@ Think of the system as:
 
 > A deterministic compiler from OpenAPI projection to contract-aligned Java client
 
-NOT:
+Not:
 
 * a generic OpenAPI generator
 * a template tweak layer

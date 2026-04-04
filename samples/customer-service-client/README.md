@@ -1,42 +1,41 @@
 # customer-service-client
 
-> **How to generate and integrate a generics-aware OpenAPI client into your own Spring Boot application**
+> **Reference integration: generating and using a contract-aligned, generics-aware OpenAPI client in a Spring Boot application**
 
 [![Java 21](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.21.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../LICENSE)
-
 
 ---
 
 ## 📑 Table of Contents
 
-- 🚀 [TL;DR (Start Here)](#-tldr-start-here)
-- 🎯 [What this module is](#-what-this-module-is)
-- ❗ [The Problem (Why this exists)](#-the-problem-why-this-exists)
-- 💡 [The Approach](#-the-approach)
-- 🧠 [How to Use in Your Own Project (Step-by-Step)](#-how-to-use-in-your-own-project-step-by-step)
-    - [Step 1 — Add parent (REQUIRED)](#step-1--add-parent-required)
-    - [Step 2 — Provide OpenAPI spec](#step-2--provide-openapi-spec)
-    - [Step 3 — Configure generator](#step-3--configure-generator)
-    - [Step 4 — Build](#step-4--build)
-    - [Step 5 — Integrate (IMPORTANT)](#step-5--integrate-important)
-- 🧩 [Adapter Pattern (Recommended)](#-adapter-pattern-recommended)
-- 🌐 [HTTP Client Setup (Production Ready)](#-http-client-setup-production-ready)
-- ⚖️ [Error Handling Model](#-error-handling-model)
-- 🧬 [Supported Contract Scope](#-supported-contract-scope)
-- 🏗️ [What Actually Controls Generation](#-what-actually-controls-generation)
-- 🔗 [Related Modules](#-related-modules)
-- 🧪 [Testing](#-testing)
-- 🛡️ [License](#-license)
-- 🧾 [Final Note](#-final-note)
+* 🚀 [TL;DR (Start Here)](#-tldr-start-here)
+* 🎯 [What this module is](#-what-this-module-is)
+* ❗ [The Problem (Why this exists)](#-the-problem-why-this-exists)
+* 💡 [The Approach](#-the-approach)
+* 🧠 [How to Use in Your Own Project (Step-by-Step)](#-how-to-use-in-your-own-project-step-by-step)
+  * [Step 1 — Add parent (REQUIRED)](#step-1--add-parent-required)
+  * [Step 2 — Provide OpenAPI spec](#step-2--provide-openapi-spec)
+  * [Step 3 — Configure generator](#step-3--configure-generator)
+  * [Step 4 — Build](#step-4--build)
+  * [Step 5 — Integrate (IMPORTANT)](#step-5--integrate-important)
+* 🧩 [Adapter Pattern (Recommended)](#-adapter-pattern-recommended)
+* 🌐 [HTTP Client Setup (Production Ready)](#-http-client-setup-production-ready)
+* ⚖️ [Error Handling Model](#-error-handling-model)
+* 🧬 [Supported Contract Scope](#-supported-contract-scope)
+* 🏗️ [What Actually Controls Generation](#-what-actually-controls-generation)
+* 🔗 [Related Modules](#-related-modules)
+* 🧪 [Testing](#-testing)
+* 🛡️ [License](#-license)
+* 🧾 [Final Note](#-final-note)
 
 ---
 
 ## 🚀 TL;DR (Start Here)
 
-If you just want to use this in your own project:
+If you just want a working, correct client:
 
 ### 1. Inherit the parent
 
@@ -51,7 +50,7 @@ If you just want to use this in your own project:
 ### 2. Add your OpenAPI spec
 
 ```text
-src/main/resources/my-api.yaml
+src/main/resources/your-api-docs.yaml
 ```
 
 ### 3. Configure generator (minimal)
@@ -63,17 +62,34 @@ src/main/resources/my-api.yaml
 
   <executions>
     <execution>
+      <id>generate-client</id>
+      <phase>generate-sources</phase>
       <goals>
         <goal>generate</goal>
       </goals>
+
       <configuration>
-        <inputSpec>${project.basedir}/src/main/resources/my-api.yaml</inputSpec>
-        <library>restclient</library>
+
+        <inputSpec>${project.basedir}/src/main/resources/your-api-docs.yaml</inputSpec>
+
+        <library>your-library-choice</library>
+        <apiPackage>your.api.package</apiPackage>
+        <modelPackage>your.model.package</modelPackage>
+        <invokerPackage>your.invoker.package</invokerPackage>
+
+        <configOptions>
+          <useSpringBoot3>true</useSpringBoot3>
+          <serializationLibrary>your-choice</serializationLibrary>
+          <openApiNullable>false</openApiNullable>
+        </configOptions>
+
       </configuration>
+
     </execution>
   </executions>
 </plugin>
 ```
+
 
 ### 4. Generate client
 
@@ -81,11 +97,56 @@ src/main/resources/my-api.yaml
 mvn clean install
 ```
 
-### 5. Use generated API
+### 5. Use it via adapter
+
+The generated client should never be used directly from application code.
+
+Instead, introduce a thin adapter that:
+
+* defines a stable interface for your application
+* delegates to generated APIs
+* keeps contract types (`ServiceResponse<T>`) intact
+
+Minimal usage looks like:
 
 ```java
-MyApi api = ...
+customerClient.getCustomer(id);
 ```
+
+Under the hood, this is backed by an adapter layer:
+
+```java
+public interface CustomerClientAdapter {
+  ServiceResponse<CustomerDto> getCustomer(Integer customerId);
+}
+```
+
+```java
+@Service
+public class CustomerClientAdapterImpl implements CustomerClientAdapter {
+
+  private final CustomerControllerApi api;
+
+  public CustomerClientAdapterImpl(CustomerControllerApi api) {
+    this.api = api;
+  }
+
+  @Override
+  public ServiceResponse<CustomerDto> getCustomer(Integer customerId) {
+    return api.getCustomer(customerId);
+  }
+}
+```
+
+Key idea:
+
+> The adapter owns the integration boundary. Generated code stays behind it.
+
+Implication:
+
+* you can regenerate clients safely
+* your application remains stable
+* contract types flow through unchanged
 
 ---
 
@@ -97,38 +158,40 @@ It shows how to:
 
 * generate a client from a generics-aware OpenAPI spec
 * preserve `ServiceResponse<T>` semantics
-* integrate the generated client into a real Spring Boot app
+* integrate the generated client safely into a Spring Boot application
 
 > This is not a reusable SDK.
-> This is a **working integration blueprint**.
+> This is a **correct integration model**.
 
 ---
 
 ## ❗ The Problem (Why this exists)
 
-Standard OpenAPI client generation:
+Default OpenAPI client generation:
 
 * duplicates envelope models
 * loses generic type semantics
-* produces unstable code across versions
-* couples business logic to generated classes
+* produces unstable outputs across builds
+* leaks generated models into application code
 
 Result:
 
-* fragile integrations
-* regeneration pain
-* poor type safety
+* regeneration breaks
+* type safety degrades
+* contract drifts between server and client
 
 ---
 
 ## 💡 The Approach
 
-This project demonstrates a **contract-aligned generation + integration model**:
+OpenAPI is treated as transport — not as the contract.
+
+This module demonstrates a **contract-aligned generation model**:
 
 ```text
-OpenAPI (with semantics)
+OpenAPI (projection)
         ↓
-Controlled code generation
+Controlled build pipeline
         ↓
 Thin wrapper models
         ↓
@@ -137,12 +200,12 @@ Adapter boundary
 Application usage
 ```
 
-Key ideas:
+Key principles:
 
-* contract types are reused (not generated)
-* wrappers are generated as thin inheritance
-* generated code is isolated behind an adapter
-* runtime behavior is explicitly configured
+* contract types are reused — not generated
+* wrappers are structural — not behavioral
+* generation is deterministic
+* application code is isolated from generated code
 
 ---
 
@@ -150,7 +213,7 @@ Key ideas:
 
 ### Step 1 — Add parent (REQUIRED)
 
-This enables deterministic generation.
+This activates the generation system.
 
 ```xml
 <parent>
@@ -164,16 +227,13 @@ This enables deterministic generation.
 
 ### Step 2 — Provide OpenAPI spec
 
-Place your spec:
-
 ```text
-src/main/resources/my-api.yaml
+src/main/resources/your-api-docs.yaml
 ```
 
-Important:
+The spec must:
 
-* must include vendor extensions (`x-api-wrapper` etc.)
-* must be produced by compatible server (or manually aligned)
+* must be produced by a compatible server (vendor extensions are required)
 
 ---
 
@@ -188,15 +248,29 @@ Minimal configuration only:
 
   <executions>
     <execution>
+      <id>generate-client</id>
       <phase>generate-sources</phase>
       <goals>
         <goal>generate</goal>
       </goals>
 
       <configuration>
-        <inputSpec>${project.basedir}/src/main/resources/my-api.yaml</inputSpec>
-        <library>restclient</library>
+
+        <inputSpec>${project.basedir}/src/main/resources/your-api-docs.yaml</inputSpec>
+
+        <library>your-library-choice</library>
+        <apiPackage>your.api.package</apiPackage>
+        <modelPackage>your.model.package</modelPackage>
+        <invokerPackage>your.invoker.package</invokerPackage>
+
+        <configOptions>
+          <useSpringBoot3>true</useSpringBoot3>
+          <serializationLibrary>your-choice</serializationLibrary>
+          <openApiNullable>false</openApiNullable>
+        </configOptions>
+
       </configuration>
+
     </execution>
   </executions>
 </plugin>
@@ -204,8 +278,8 @@ Minimal configuration only:
 
 Do NOT configure:
 
-* templates
 * generatorName
+* templates
 * importMappings
 
 These are controlled by the parent.
@@ -228,9 +302,7 @@ target/generated-sources/openapi/src/gen/java
 
 ### Step 5 — Integrate (IMPORTANT)
 
-Do NOT use generated APIs directly.
-
-Instead:
+Never expose generated APIs directly.
 
 ```text
 Application → Adapter → Generated API
@@ -240,10 +312,12 @@ Application → Adapter → Generated API
 
 ## 🧩 Adapter Pattern (Recommended)
 
-### Why?
+### Why
 
-Generated code changes.
-Your application should not.
+Generated code is replaceable.
+Your application should not be.
+
+The adapter is the stability boundary of your system.
 
 ---
 
@@ -281,30 +355,30 @@ This module demonstrates:
 * Apache HttpClient 5
 * connection pooling
 * timeouts
-* no retries
-* custom error handling
+* explicit behavior (no hidden retries)
 
-You can reuse or simplify this setup depending on your needs.
+You may simplify or replace this depending on your environment.
 
 ---
 
 ## ⚖️ Error Handling Model
 
-Errors use **ProblemDetail (RFC 9457)**.
+Errors follow a runtime protocol:
+
+```text
+ProblemDetail (RFC 9457)
+```
 
 Behavior:
 
-* server returns structured error
-* client parses it
-* wrapped into `ApiProblemException`
+* parsed into structured objects
+* surfaced via `ApiProblemException`
 
-Fallbacks:
+Fallbacks handled:
 
-* empty body
-* non-JSON
-* unparsable
-
-All produce deterministic error objects.
+* empty response
+* invalid JSON
+* unexpected formats
 
 ---
 
@@ -315,24 +389,26 @@ Supported:
 * `ServiceResponse<T>`
 * `ServiceResponse<Page<T>>`
 
-Not supported:
+Out of scope:
 
 * arbitrary nested generics
 * maps
-* complex wrappers
+* custom wrappers
 
-This is intentional for determinism.
+Reason:
+
+> determinism over flexibility
 
 ---
 
 ## 🏗️ What Actually Controls Generation
 
-Important mental model:
+Mental model:
 
 ```text
-Parent (behavior)
-+ Templates (logic)
-+ Plugin (execution)
+Parent (orchestration)
++ Templates (structure)
++ Generator (rules)
 + Spec (input)
 ```
 
@@ -346,17 +422,17 @@ OpenAPI Generator plugin
 
 ## 🔗 Related Modules
 
-* **[openapi-generics-contract](../../openapi-generics-contract/README.md)**  
-  Canonical response contract (authority layer).
+* **[openapi-generics-contract](../../openapi-generics-contract/README.md)**
+  Canonical response contract.
 
-* **[customer-service](../customer-service/README.md)**  
-  Sample producer demonstrating contract-first API exposure.
+* **[customer-service](../customer-service/README.md)**
+  Producer reference.
 
-* **[openapi-generics-java-codegen-parent](../../openapi-generics-java-codegen-parent/README.md)**  
-  Build-time orchestration layer.
+* **[openapi-generics-java-codegen-parent](../../openapi-generics-java-codegen-parent/README.md)**
+  Build-time orchestration.
 
-* **[openapi-generics-java-codegen](../../openapi-generics-java-codegen/README.md)**  
-  Custom generator enforcing contract-aware client generation.
+* **[openapi-generics-java-codegen](../../openapi-generics-java-codegen/README.md)**
+  Generator enforcement layer.
 
 ---
 
@@ -376,8 +452,14 @@ MIT License
 
 ## 🧾 Final Note
 
-This module is not about "generating clients".
+This module is not about generating clients.
 
 It is about:
 
-> Generating **correct, stable, contract-aligned clients** and integrating them safely into real applications.
+> Generating **deterministic, contract-aligned clients** and integrating them safely.
+
+---
+
+**Maintained by:**
+**Barış Saylı**
+[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)

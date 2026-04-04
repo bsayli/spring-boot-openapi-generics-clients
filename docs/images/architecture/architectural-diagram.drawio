@@ -1,4 +1,4 @@
-<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1">
   <diagram id="arch1" name="OpenAPI Generics Architecture (Domain-Agnostic)">
     <mxGraphModel dx="1257" dy="748" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
       <root>
@@ -7,7 +7,7 @@
         <mxCell id="laneProducer" parent="1" style="swimlane;rounded=1;strokeColor=#1e293b;fillColor=#0b1220;fontColor=#e5e7eb;horizontal=1;startSize=28;" value="API Producer (Server)" vertex="1">
           <mxGeometry height="500" width="520" x="40" y="80" as="geometry" />
         </mxCell>
-        <mxCell id="srv" parent="laneProducer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0ea5a4;strokeColor=#0b6261;fontColor=#062c2b" value="service-api (example)&lt;br&gt;&lt;b&gt;Spring Boot 3.5.12 + Springdoc 2.8.16&lt;/b&gt;" vertex="1">
+        <mxCell id="srv" parent="laneProducer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0ea5a4;strokeColor=#0b6261;fontColor=#062c2b" value="service-api (example)&lt;br&gt;&lt;b&gt;Spring Boot 3.5.x + Springdoc 2.8.x&lt;/b&gt;" vertex="1">
           <mxGeometry height="80" width="480" x="20" y="40" as="geometry" />
         </mxCell>
         <mxCell id="SINfS5sGlvs2-EreDV72-1" edge="1" parent="laneProducer" source="contract" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="customizer">
@@ -34,7 +34,7 @@
         <mxCell id="laneBuild" parent="1" style="swimlane;rounded=1;strokeColor=#1e293b;fillColor=#0b1220;fontColor=#e5e7eb;horizontal=1;startSize=28;" value="Code Generation" vertex="1">
           <mxGeometry height="500" width="520" x="580" y="80" as="geometry" />
         </mxCell>
-        <mxCell id="generator" parent="laneBuild" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#93c5fd;strokeColor=#2563eb;fontColor=#111827" value="&lt;b&gt;OpenAPI Generator 7.21.0&lt;/b&gt;&lt;br&gt;&lt;b&gt;java / restclient&lt;/b&gt;" vertex="1">
+        <mxCell id="generator" parent="laneBuild" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#93c5fd;strokeColor=#2563eb;fontColor=#111827" value="&lt;b&gt;OpenAPI Generator 7.x&lt;/b&gt;&lt;br&gt;&lt;b&gt;java / restclient&lt;/b&gt;" vertex="1">
           <mxGeometry height="80" width="460" x="30" y="40" as="geometry" />
         </mxCell>
         <mxCell id="templates" parent="laneBuild" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4f46e5;fontColor=#111827" value="Mustache overlay&lt;br&gt;&lt;b&gt;model.mustache&lt;/b&gt; (+ wrapper partials)&lt;br&gt;→ emit thin wrappers bound to openapi-generics-contract" vertex="1">
@@ -84,7 +84,7 @@
         <mxCell id="e9" edge="1" parent="laneConsumer" source="consumer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;" target="meta">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#334155;fontColor=#0f172a" value="&lt;div&gt;Legend&lt;/div&gt;&lt;div&gt;• Canonical contract: ServiceResponse&amp;lt;T&amp;gt; (from openapi-generics-contract)&lt;/div&gt;&lt;div&gt;• Nested generics allowed only for: ServiceResponse&amp;lt;Page&amp;lt;T&amp;gt;&amp;gt;&lt;/div&gt;&lt;div&gt;• Vendor extensions: x-api-wrapper, x-api-wrapper-datatype, x-data-container, x-data-item, x-class-extra-annotation&lt;/div&gt;" vertex="1">
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#334155;fontColor=#0f172a" value="&lt;div&gt;Legend&lt;/div&gt;&lt;div&gt;• Canonical contract: ServiceResponse&amp;lt;T&amp;gt; (from openapi-generics-contract)&lt;/div&gt;&lt;div&gt;• Nested generics allowed only for: ServiceResponse&amp;lt;Page&amp;lt;T&amp;gt;&amp;gt;&lt;/div&gt;&lt;div&gt;• Vendor extensions: x-api-wrapper, x-api-wrapper-datatype, x-data-container, x-data-item, x-class-extra-annotation, x-ignore-model&lt;/div&gt;" vertex="1">
           <mxGeometry height="90" width="1600" x="40" y="600" as="geometry" />
         </mxCell>
         <mxCell id="e3" edge="1" parent="1" source="spec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#94a3b8;endArrow=block;endFill=1;" target="generator">
