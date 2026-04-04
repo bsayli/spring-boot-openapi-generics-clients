@@ -28,11 +28,17 @@ jobs:
         language: [java-kotlin]
 
     steps:
+      # -----------------------------
+      # 📥 Checkout
+      # -----------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # -----------------------------
+      # ☕ JDK
+      # -----------------------------
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -49,10 +55,16 @@ jobs:
           languages: ${{ matrix.language }}
 
       # -----------------------------
-      # 🏗 Build (full reactor incl. samples)
+      # 🏗 Build core (publishable modules)
       # -----------------------------
-      - name: Build (Maven reactor)
+      - name: Build core modules
         run: mvn -B -ntp -DskipTests clean package
+
+      # -----------------------------
+      # 🧪 Build samples (runtime coverage)
+      # -----------------------------
+      - name: Build samples
+        run: mvn -B -ntp -DskipTests -f samples/pom.xml clean package
 
       # -----------------------------
       # 🔎 Analyze

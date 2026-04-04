@@ -1,9 +1,9 @@
 # Spring Boot OpenAPI Generics — Preserve Your API Contract End-to-End
 
 [![Build](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml)
-[![Release](https://img.shields.io/github/v/tag/bsayli/spring-boot-openapi-generics-clients?logo=github\&label=release)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
+[![Release](https://img.shields.io/github/v/tag/blueprint-platform/openapi-generics?logo=github\&label=release)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
 [![CodeQL](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml)
-[![codecov](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients/branch/main/graph/badge.svg)](https://codecov.io/gh/bsayli/spring-boot-openapi-generics-clients)
+[![codecov](https://codecov.io/gh/blueprint-platform/openapi-generics/branch/main/graph/badge.svg)](https://codecov.io/gh/blueprint-platform/openapi-generics)
 [![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
 [![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
@@ -461,7 +461,7 @@ public class ServiceResponsePageCustomerDto
 ## References
 
 - 📘 **Adoption Guide (GitHub Pages)**  
-  [Spring Boot OpenAPI Generics — Adoption Guide](https://bsayli.github.io/spring-boot-openapi-generics-clients/)
+  [Spring Boot OpenAPI Generics — Adoption Guide](https://blueprint-platform.github.io/openapi-generics/)
 
 - ✍️ **Medium Article**  
   [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
@@ -477,9 +477,9 @@ Architectural discussions, real‑world usage feedback, and evolution proposals 
 
 Please open an issue or start a discussion in the repository.
 
-👉 [Issues](https://github.com/bsayli/spring-boot-openapi-generics-clients/issues)
+👉 [Issues](https://github.com/blueprint-platform/openapi-generics/issues)
 
-👉 [Discussions](https://github.com/bsayli/spring-boot-openapi-generics-clients/discussions)
+👉 [Discussions](https://github.com/blueprint-platform/openapi-generics/discussions)
 
 ---
 

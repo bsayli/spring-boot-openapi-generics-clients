@@ -18,12 +18,6 @@ ignore:
   - "**/generated-sources/**"
 
 flags:
-  openapi-generics-contract:
+  samples:
     paths:
-      - "openapi-generics-contract/"
-  customer-service:
-    paths:
-      - "customer-service/"
-  customer-service-client:
-    paths:
-      - "customer-service-client/"
+      - "samples/"

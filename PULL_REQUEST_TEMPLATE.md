@@ -1,9 +1,14 @@
 # 🧩 Pull Request Template
 
-Thank you for contributing to **spring-boot-openapi-generics-clients**! 🙌
-This repository is **contract‑driven** and **generator‑sensitive** — small changes can affect **server–client alignment**, **generated code**, and **long‑term guarantees**.
+Thank you for contributing to **openapi-generics**! 🙌
+This repository is **contract‑first**, **projection‑driven**, and **generator‑sensitive** — small changes can affect:
 
-This template is intentionally strict. It helps reviewers reason about **contract impact first**, implementation second.
+* Contract semantics
+* OpenAPI projection output
+* Generated client behavior
+* Long-term determinism guarantees
+
+This template is intentionally strict. It ensures reviewers evaluate **contract impact first**, implementation second.
 
 ---
 
@@ -20,102 +25,122 @@ This template is intentionally strict. It helps reviewers reason about **contrac
 
 ## 📦 Changes
 
-List the **essential** changes only:
+List only **essential changes**:
 
-* Added / removed / refactored modules or files
-* Updated OpenAPI schema enrichment or vendor extensions
-* Modified Mustache templates or generator configuration
-* Updated documentation or adoption guides
+* Contract updates (`ServiceResponse<T>`, paging, error model)
+* OpenAPI projection / schema generation changes
+* Vendor extensions (`x-*`) behavior
+* Generator or template changes
+* Build / CI / docs updates
 
-Avoid implementation noise — reviewers will read the diff.
+Avoid implementation noise — reviewers will inspect the diff.
 
 ---
 
 ## 🧠 Outcome / Impact
 
-Describe the **practical impact** of this change:
+Describe the **practical impact**:
 
-- Improves API contract consistency or clarity
-- Reduces duplicated or unstable generated code
-- Improves server–client alignment
-- Clarifies how generics and paging are handled
-- Improves CI reliability, test coverage, or build determinism
+* Improves contract clarity or correctness
+* Improves projection determinism
+* Reduces duplicated or unstable generated models
+* Improves server–client alignment
+* Improves generator behavior across languages
+* Improves CI reliability or build determinism
 
-> If this PR introduces any observable change  
-> (such as generated code shape, OpenAPI schema output, or client behavior),  
-> please describe it explicitly so reviewers can assess the impact.
+> If this PR changes observable output (OpenAPI schema, generated code, runtime behavior),
+> describe it explicitly.
 
 ---
 
 ## 🔐 Contract Awareness
 
-This project treats **contracts as first‑class artifacts**.
-
-Please evaluate and declare impact:
+This project treats **contracts as the single source of truth**.
 
 **Contract impact:** `yes / no`
 
-If **yes**, briefly explain what is affected:
+If **yes**, specify what is affected:
 
-* `openapi-generics-contract` surface (e.g. `ServiceResponse<T>`, paging, error models)
+* Contract surface (`ServiceResponse<T>`, `Page<T>`, `Meta`, error model)
 * OpenAPI schema output or naming
-* Vendor extension semantics (`x-api-wrapper`, `x-data-container`, …)
-* Generator or Mustache template behavior
+* Vendor extension semantics
+* Generator or template behavior
 
-> 💡 If you are unsure, default to **yes** and explain. Reviewers will help assess.
+> 💡 If unsure → mark **yes** and explain.
 
 ---
 
 ## 🌍 Multi‑Language Considerations (if applicable)
 
-If this PR touches **vendor extensions**, **templates**, or **generator behavior**, clarify:
+If this PR touches projection or generation:
 
-* Does this change affect **non‑Java generators** (TypeScript, Kotlin, etc.)?
-* Are vendor extensions **safe to ignore** or **no‑op** in other languages?
-* Does this reduce or introduce duplicated models in other ecosystems?
+* Does it affect **non‑Java generators**?
+* Are vendor extensions **safe / no‑op** outside Java?
+* Does it reduce or introduce duplicated models?
 
-**Reference example:**
-Issue #7 — *Add Multi‑Language Fallbacks for `x-api-wrapper`*
-👉 [https://github.com/blueprint-platform/openapi-generics/issues/7](https://github.com/blueprint-platform/openapi-generics/issues/7)
+Reference related issues if relevant.
 
-Link related issues or discussions where relevant.
+---
+
+## 🧱 Affected Layer (choose all that apply)
+
+* [ ] Contract (`openapi-generics-contract`)
+* [ ] Projection (`openapi-generics-server-starter`)
+* [ ] Generator (`openapi-generics-java-codegen`)
+* [ ] Generator Parent (`openapi-generics-java-codegen-parent`)
+* [ ] Build / CI
+* [ ] Documentation
+
+---
+
+## 🔄 Dependency Path Impact (if relevant)
+
+Indicate which flow is affected:
+
+**Server path:**
+
+```
+server-starter → contract
+```
+
+**Client path:**
+
+```
+codegen-parent → codegen → contract
+```
 
 ---
 
 ## ✅ Checklist
 
-Please confirm the following:
-
 * [ ] Scope is minimal and focused
-* [ ] Build passes locally **from repository root**: `mvn -q -ntp clean verify`
-* [ ] Tests added/updated where appropriate
-* [ ] Docs updated if behavior or guarantees changed (`README.md`, `docs/`, adoption guides)
-* [ ] **Contract impact evaluated** (`openapi-generics-contract` / OpenAPI / templates)
-* [ ] Generated code treated as **disposable output** (changes target contracts, templates, or generators)
-* [ ] No accidental edits to generated code outside intended overlays
-* [ ] Linked issue or discussion (e.g. `Closes #7`)
+* [ ] Build passes: `mvn -q -ntp clean verify`
+* [ ] Tests added/updated if needed
+* [ ] Docs updated if behavior changed
+* [ ] Contract impact evaluated
+* [ ] No direct edits to generated code
+* [ ] Changes applied at correct layer (contract / projection / generator)
+* [ ] Linked issue or discussion (if applicable)
 
 ---
 
 ## 🧾 Metadata
 
-**Type:** `feature` / `bugfix` / `docs` / `refactor` / `chore` / `test` / `ci`
-**Related Issue / Discussion:** (optional) `#number`
-**Target Release:** (optional) e.g. `v0.7.8`
+* **Type:** feature / bugfix / docs / refactor / chore / test / ci
+* **Related Issue:** (optional)
+* **Target Release:** (optional)
 
 ---
 
-> 💡 **Tips for a smooth review**
->
-> * Prefer small PRs with a single architectural intent
-> * Avoid touching generated sources unless explicitly required
-> * If contract impact is unclear, open a **Discussion** before implementation
->
-> **Good PR titles:**
->
-> * `feature(client): support Page-only nested generics`
-> * `bugfix(server): prevent schema drift on composed responses`
-> * `docs(adoption): clarify single-contract semantics`
+## 💡 Review Tips
 
-This template reflects the project’s core principle:
-**contracts are defined at generation time — not corrected downstream.**
+* Prefer small, focused PRs
+* Never patch generated output
+* Fix issues at the correct abstraction layer
+* Open a Discussion if contract impact is unclear
+
+---
+
+**Core principle:**
+
+> Contracts are defined at generation time — not corrected downstream.

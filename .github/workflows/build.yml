@@ -32,8 +32,17 @@ jobs:
           distribution: "temurin"
           cache: maven
 
-      - name: Build all modules (tests + coverage)
+      # -----------------------------
+      # 🔧 Core modules (publishable)
+      # -----------------------------
+      - name: Build core modules
         run: mvn -B -q -ntp clean verify
+
+      # -----------------------------
+      # 🧪 Samples (tests + coverage)
+      # -----------------------------
+      - name: Build samples (tests + coverage)
+        run: mvn -B -q -ntp -f samples/pom.xml clean verify
 
       # -----------------------------
       # 📦 Generated Client Sources
@@ -58,27 +67,14 @@ jobs:
           retention-days: 7
 
       # -----------------------------
-      # 📊 Coverage - customer-service
+      # 📊 Coverage (samples only)
       # -----------------------------
-      - name: Upload coverage (customer-service)
+      - name: Upload coverage (samples)
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: |
-            samples/customer-service/target/site/jacoco*/jacoco.xml
-          flags: customer-service
-          name: customer-service
-          fail_ci_if_error: false
-
-      # -----------------------------
-      # 📊 Coverage - customer-service-client
-      # -----------------------------
-      - name: Upload coverage (customer-service-client)
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: |
-            samples/customer-service-client/target/site/jacoco*/jacoco.xml
-          flags: customer-service-client
-          name: customer-service-client
+            samples/**/target/site/jacoco*/jacoco.xml
+          flags: samples
+          name: samples
           fail_ci_if_error: false
