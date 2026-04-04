@@ -1,3 +1,8 @@
+---
+title: ProblemDetail-Centric Error Handling Strategy
+nav_exclude: true
+---
+
 # ProblemDetail-Centric Error Handling Strategy
 
 ## Table of Contents

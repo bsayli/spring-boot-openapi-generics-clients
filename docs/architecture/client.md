@@ -1,3 +1,8 @@
+---
+title: openapi-generics-java-client — Architecture & Usage (0.8.x)
+nav_exclude: true
+---
+
 # openapi-generics-java-client — Architecture & Usage (0.8.x)
 
 This document explains the **client-side architecture, build pipeline, and usage model** of the generics-aware OpenAPI system.

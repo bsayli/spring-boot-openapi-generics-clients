@@ -1,3 +1,8 @@
+---
+title: openapi-generics-platform — Architecture (0.8.x)
+nav_exclude: true
+---
+
 # openapi-generics-platform — Architecture (0.8.x)
 
 This document defines the **complete architectural model of the OpenAPI Generics Platform**.
