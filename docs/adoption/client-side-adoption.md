@@ -5,280 +5,472 @@ parent: Adoption Guides
 nav_order: 2
 ---
 
-# Client‑Side Adoption — Contract Lifecycle Interpretation Stage
+# Client-Side Adoption — Contract-First Client Integration
 
-This guide explains the **client‑side interpretation stage** of the contract lifecycle architecture.
+> Generate a Java client that **preserves contract semantics exactly as published** — no duplication, no reinterpretation, no drift.
 
-At this stage, a consumer application **interprets a server‑published OpenAPI contract** and integrates a generated client in a way that:
+This is **not a typical OpenAPI client setup**.
 
-* preserves the **canonical response envelope semantics**
-* avoids duplicating shared contract models
-* keeps regeneration safe and architecturally governed
+It defines a **controlled build-time system** where:
 
-The examples are intentionally **domain‑agnostic**.
-They describe *how to integrate the mechanism*, not how to model a specific business domain.
+* OpenAPI is treated as input (not authority)
+* the contract is preserved (not regenerated)
+* and the output is deterministic across environments
+
+This guide defines the **correct client-side integration model** for the platform.
+
+It focuses on three things only:
+
+* consuming OpenAPI as input
+* executing a controlled build pipeline
+* using the generated client safely
+
+Everything else is intentionally handled by the platform.
 
 ---
 
 ## 📑 Table of Contents
 
-* [🎯 Architectural Goals](#-architectural-goals)
-* [🧭 Lifecycle Responsibility of the Client](#-lifecycle-responsibility-of-the-client)
-* [✅ Prerequisites](#-prerequisites)
-* [🚀 Client Generation Flow](#-client-generation-flow)
-* [🧹 Preventing Contract Duplication](#-preventing-contract-duplication)
-* [🧩 Thin Wrapper Generation Strategy](#-thin-wrapper-generation-strategy)
-* [🧠 Contract Semantics Interpretation](#-contract-semantics-interpretation)
-* [⚠️ Error Handling (RFC 9457)](#-error-handling-rfc-9457)
-* [⚙️ Spring Boot Integration](#-spring-boot-integration)
-* [🧩 Adapter Boundary Pattern](#-adapter-boundary-pattern)
-* [🧪 Example Usage](#-example-usage)
-* [🧭 Suggested Folder Structure](#-suggested-folder-structure)
-* [🎯 Architectural Outcome](#-architectural-outcome)
+* [⚡ 60-second quick start](#-60-second-quick-start)
+* [🎯 What the client actually does](#-what-the-client-actually-does)
+* [📥 Input: OpenAPI (not your contract)](#-input-openapi-not-your-contract)
+* [📦 Minimal setup](#-minimal-setup)
+* [🏗 Build pipeline (what really happens)](#-build-pipeline-what-really-happens)
+* [🧠 Output: what gets generated](#-output-what-gets-generated)
+* [🚀 Usage: how the client enters your system](#-usage-how-the-client-enters-your-system)
+* [🧱 Adapter boundary (strongly recommended)](#-adapter-boundary-strongly-recommended)
+* [🔍 Quick verification](#-quick-verification)
+* [⚠️ Error handling](#-error-handling)
+* [🧠 Mental model](#-mental-model)
+* [🧾 Summary](#-summary)
 
 ---
 
-## 🎯 Architectural Goals
+## ⚡ 60-second quick start
 
-After adopting this approach, your consumer application will:
+You want:
 
-* interpret a **server‑published canonical success envelope** without redefining it
-* generate **thin wrapper models** bound to shared runtime contract types
-* preserve deterministic nested generics for **`ServiceResponse<Page<T>>`**
-* propagate structured errors using **RFC 9457 Problem Details**
-* isolate generated transport code behind **stable application‑owned boundaries**
+* a type-safe client
+* zero duplicated models
+* preserved `ServiceResponse<T>` semantics
 
-The client does not redefine contract semantics.
-It **interprets and operationalizes** what the server explicitly guarantees.
+Do this:
 
----
+### 1) Inherit the parent
 
-## 🧭 Lifecycle Responsibility of the Client
-
-Within the contract lifecycle architecture, the client has a clearly scoped responsibility.
-
-It must:
-
-* consume the OpenAPI document as a **semantic projection of server contracts**
-* bind generated models to the **shared canonical contract artifact**
-* avoid introducing parallel response envelope implementations
-* isolate generated APIs from core application logic
-
-This separation ensures:
-
-> **Client regeneration remains safe because contract identity is preserved outside generated code.**
-
----
-
-## ✅ Prerequisites
-
-Before integrating the generated client, ensure the following:
-
-* Java 21+
-* Maven 3.9+
-* Access to a running service exposing `/v3/api-docs.yaml`
-* Availability of the shared contract dependency:
-
-```
-io.github.bsayli:api-contract
+```xml
+<parent>
+  <groupId>io.github.blueprintplatform</groupId>
+  <artifactId>openapi-generics-java-codegen-parent</artifactId>
+</parent>
 ```
 
-The shared contract must be resolvable **at build time**.
+### 2) Provide OpenAPI
 
----
-
-## 🚀 Client Generation Flow
-
-The client integration pipeline follows a deterministic sequence.
-
-1. **Retrieve the OpenAPI contract projection** published by the producer service.
-
-```bash
-curl -s http://<service-host>/<base-path>/v3/api-docs.yaml \
-  -o src/main/resources/api-docs.yaml
+```text
+/v3/api-docs.yaml
 ```
 
-2. **Generate and compile client sources** using the configured OpenAPI Generator build.
+### 3) Build
 
 ```bash
 mvn clean install
 ```
 
-3. **Verify semantic binding of generated wrappers**:
+That’s it.
 
-Generated models should:
+---
 
-* extend `ServiceResponse<T>` from `api-contract`
-* preserve nested generics for pagination wrappers
-* avoid redefining envelope or paging types
+## 🎯 What the client actually does
 
-Generated sources appear under:
+The client has **one responsibility**:
 
-```
-target/generated-sources/openapi/src/gen/java
+> Convert an OpenAPI document into a **contract-aligned Java client** without redefining anything.
+
+It does **not**:
+
+* design models
+* interpret business semantics
+* introduce abstractions
+
+It only executes a deterministic transformation:
+
+```text
+OpenAPI → deterministic Java client
 ```
 
 ---
 
-## 🧹 Preventing Contract Duplication
+## 📥 Input: OpenAPI (not your contract)
 
-Because both producer and consumer share the canonical contract module,
-client generation must **not recreate envelope or paging DTOs**.
-
-Configure `.openapi-generator-ignore` accordingly:
+Client generation always starts from an **existing OpenAPI document**.
 
 ```bash
-**/generated/dto/ServiceResponse*.java
-**/generated/dto/Page*.java
-**/generated/dto/Meta.java
-**/generated/dto/Sort*.java
+curl http://localhost:8084/.../v3/api-docs.yaml -o api.yaml
 ```
 
-This ensures a **single runtime contract identity** across modules.
+Critical distinction:
+
+> OpenAPI is **input metadata**, not the contract itself.
+
+Implication:
+
+* structure comes from OpenAPI
+* semantics come from shared contract types
 
 ---
 
-## 🧩 Thin Wrapper Generation Strategy
+## 📦 Minimal setup
 
-Client templates should generate **inheritance‑based wrapper models** that bind OpenAPI schema information to shared runtime abstractions.
-
-Typical generated structures:
-
-```
-ServiceResponseFooDto extends ServiceResponse<FooDto>
-ServiceResponsePageFooDto extends ServiceResponse<Page<FooDto>>
-```
-
-These wrappers:
-
-* introduce no envelope fields
-* introduce no serialization behaviour
-* only provide **type‑safe semantic binding**
-
-Template overlays must therefore remain **minimal and declarative**.
+You need **two things only**. Responsibilities are strictly separated.
 
 ---
 
-## 🧠 Contract Semantics Interpretation
+### 1. Build-time orchestration (MANDATORY)
 
-Client generation remains deterministic because the contract defines
-**a consciously limited generic support scope**.
+```xml
+<parent>
+  <groupId>io.github.blueprintplatform</groupId>
+  <artifactId>openapi-generics-java-codegen-parent</artifactId>
+  <version>0.8.1</version>
+</parent>
+```
 
-Contract‑aware shapes:
+This is the **entry point of the system**.
 
-* `ServiceResponse<T>`
-* `ServiceResponse<Page<T>>`
+It provides everything required for generation:
 
-All other generic compositions follow **default generator behaviour**.
+* generator binding (`java-generics-contract`)
+* template pipeline (extract → patch → overlay)
+* contract-aware import mappings
+* deterministic execution model
+* generated sources registration
 
-This design:
+Important:
 
-* stabilizes schema naming
-* limits template complexity
-* reduces long‑term integration risk
+> You do NOT add or configure internal dependencies. The parent already wires the system.
 
-The client therefore interprets contract guarantees rather than attempting to generalize all generic forms.
+> This includes the contract dependency.
+
+If it is needed, it is already managed by the parent/BOM — not by you.
 
 ---
 
-## ⚠️ Error Handling (RFC 9457)
+### 2. OpenAPI Generator plugin (USER INPUT ONLY)
 
-Failure responses are modeled using **RFC 9457 Problem Details** and surfaced as a single structured runtime exception.
+Minimal working configuration:
 
-Example handling pattern:
+```xml
+<plugin>
+  <groupId>org.openapitools</groupId>
+  <artifactId>openapi-generator-maven-plugin</artifactId>
+
+  <executions>
+    <execution>
+      <id>generate-client</id>
+      <phase>generate-sources</phase>
+      <goals>
+        <goal>generate</goal>
+      </goals>
+
+      <configuration>
+
+        <inputSpec>${project.basedir}/src/main/resources/your-api-docs.yaml</inputSpec>
+
+        <library>your-library-choice</library>
+
+        <apiPackage>your.api.package</apiPackage>
+        <modelPackage>your.model.package</modelPackage>
+        <invokerPackage>your.invoker.package</invokerPackage>
+
+        <configOptions>
+          <useSpringBoot3>true</useSpringBoot3>
+          <serializationLibrary>your-choice</serializationLibrary>
+          <openApiNullable>false</openApiNullable>
+        </configOptions>
+
+      </configuration>
+
+    </execution>
+  </executions>
+</plugin>
+```
+
+What you control here:
+
+* input OpenAPI spec
+* HTTP client (`library`)
+* package structure
+* serialization strategy
+
+What you do NOT control:
+
+* generator internals
+* template system
+* contract mappings
+
+---
+
+## 🏗 Build pipeline (what really happens)
+
+This system is **not configuration-driven**.
+It is a **controlled execution pipeline**.
+
+Full pipeline:
+
+```text
+OpenAPI spec (input)
+   ↓
+Parent POM (orchestration)
+   ↓
+Template extraction (upstream)
+   ↓
+Template patch (api_wrapper injection)
+   ↓
+Template overlay (custom templates)
+   ↓
+Custom generator (java-generics-contract)
+   ↓
+Generated sources (contract-aligned)
+```
+
+Important:
+
+> Each step is fixed and ordered. No user-defined hooks exist in this pipeline.
+
+---
+
+### What the platform enforces
+
+The build guarantees:
+
+* contract models are NOT generated
+* wrapper classes are generated deterministically
+* generics are preserved (`ServiceResponse<T>`, `Page<T>`)
+* OpenAPI is interpreted — not materialized as independent models
+
+---
+
+### Generated sources integration
+
+Generated code is automatically:
+
+* written to `target/generated-sources/openapi`
+* added to the Maven compilation lifecycle
+
+No manual configuration is required.
+
+---
+
+## 🧠 Configuration boundaries
+
+The system is intentionally split into **two control zones**.
+
+---
+
+### User-controlled (safe)
+
+```xml
+<inputSpec>...</inputSpec>
+<library>...</library>
+<apiPackage>...</apiPackage>
+<modelPackage>...</modelPackage>
+<invokerPackage>...</invokerPackage>
+<openapi-generator.version>...</openapi-generator.version>
+```
+
+These control:
+
+* input specification
+* HTTP transport layer
+* package structure
+* generator version
+
+---
+
+### Platform-controlled (DO NOT override)
+
+The parent already provides:
+
+* generator name (`java-generics-contract`)
+* template directory
+* import mappings
+* template patching pipeline
+* model suppression rules
+
+These ensure:
+
+* contract preservation (`ServiceResponse<T>`, `Page<T>`)
+* deterministic wrapper generation
+* zero duplication of platform models
+
+---
+
+### Critical rule
+
+> If you override platform-controlled settings, you leave the contract-safe execution path.
+
+---
+
+## 🚫 What users should NOT do
+
+Do NOT:
+
+* add internal platform dependencies manually
+* override templates
+* change generator name
+* modify import mappings
+* inject custom model logic
+
+Reason:
+
+> The system is intentionally controlled to guarantee determinism and contract alignment.
+
+
+## 🧠 Output: what gets generated
+
+From OpenAPI schema:
+
+```text
+ServiceResponseCustomerDto
+```
+
+Generated code:
+
+```java
+class ServiceResponseCustomerDto extends ServiceResponse<CustomerDto>
+```
+
+Properties:
+
+* thin wrappers only
+* no duplicated envelopes
+* direct reuse of contract types
+
+Important:
+
+> The wrapper exists only to rebind generics — it does not introduce new structure.
+
+Implication:
+
+* no additional fields are created
+* no behavior is added
+* no contract semantics are modified
+
+The generated layer is purely structural — it restores type information that OpenAPI cannot represent directly.
+
+---
+
+## 🚀 Usage: how the client enters your system
+
+Generated sources:
+
+```text
+target/generated-sources/openapi
+```
+
+Usage:
+
+```java
+ServiceResponse<CustomerDto>
+```
+
+At this point:
+
+No additional mapping layer is required for correctness.
+
+* type system is preserved
+* contract is intact
+* client is aligned with producer
+
+---
+
+## 🧱 Adapter boundary (strongly recommended)
+
+Do not expose generated APIs directly.
+
+Define a boundary:
+
+```java
+public interface CustomerClient {
+  ServiceResponse<CustomerDto> getCustomer(Long id);
+}
+```
+
+Purpose:
+
+* isolate generation details
+* protect domain logic
+* enable safe evolution
+
+---
+
+## 🔍 Quick verification
+
+After generation:
+
+* wrappers extend contract types
+* no duplicate envelope classes exist
+* generics are preserved
+
+If true:
+
+```text
+Client is correctly aligned
+```
+
+---
+
+## ⚠️ Error handling
+
+Errors are not generated models.
+
+They follow a runtime protocol:
+
+```text
+ProblemDetail (RFC 9457)
+```
+
+Example:
 
 ```java
 try {
-  adapter.getResource(id);
+  client.call();
 } catch (ApiProblemException ex) {
-  ProblemDetail pd = ex.getProblem();
-  log.warn("API error status={} title={}", ex.getStatus(), pd.getTitle());
-}
-```
-
-This establishes a clear semantic separation:
-
-* success → canonical `{ data, meta }` envelope
-* failure → standardized problem contract
-
----
-
-## ⚙️ Spring Boot Integration
-
-A minimal `RestClient` status handler aligns runtime behaviour with published error semantics.
-
-```java
-@Configuration
-public class ApiClientConfig {
-
-  @Bean
-  RestClientCustomizer problemDetailHandler(ObjectMapper om) {
-    return builder -> builder.defaultStatusHandler(
-        HttpStatusCode::isError,
-        (req, res) -> {
-          ProblemDetail pd = ProblemDetailSupport.extract(om, res);
-          throw new ApiProblemException(pd, res.getStatusCode().value());
-        });
-  }
+  var pd = ex.getProblem();
 }
 ```
 
 ---
 
-## 🧩 Adapter Boundary Pattern
+## 🧠 Mental model
 
-Generated APIs should never leak into core business layers.
+Think of the client as:
 
-Introduce an application‑owned adapter interface to create a **stable integration boundary**.
+> A deterministic build-time compiler
+> that maps OpenAPI → contract-aligned Java code
 
-```java
-public interface ResourceClientAdapter {
-  ServiceResponse<FooDto> getFoo(Long id);
-  ServiceResponse<Page<FooDto>> listFoos();
-}
-```
+Not:
 
-Adapters absorb regeneration churn and protect domain logic.
+* a DTO generator
+* a modeling tool
 
 ---
 
-## 🧪 Example Usage
+## 🧾 Summary
 
-```java
-var response = adapter.getFoo(42L);
-var dto = response.getData();
-var serverTime = response.getMeta().serverTime();
+```text
+Input   = OpenAPI
+Process = controlled build pipeline
+Output  = thin wrappers over contract
 ```
+
+The system works because:
+
+* contract is never regenerated
+* generation is deterministic
+* boundaries are strictly enforced
 
 ---
 
-## 🧭 Suggested Folder Structure
-
-```
-client-module/
-  adapter/
-  adapter/config/
-  adapter/support/
-  common/problem/
-  src/main/resources/
-    openapi-templates/
-    api-docs.yaml
-  .openapi-generator-ignore
-```
-
-This layout keeps **transport concerns isolated** and simplifies reuse across services.
-
----
-
-## 🎯 Architectural Outcome
-
-After completing client‑side adoption:
-
-* generated models remain **contract‑bound and regeneration‑safe**
-* response envelope identity is preserved across system boundaries
-* pagination semantics remain structurally consistent
-* error handling aligns with standardized HTTP problem contracts
-
-The client now participates as the **semantic interpretation stage** of the contract lifecycle.
-
-Integration behaviour becomes predictable because runtime abstractions remain independent from generation tooling.
+🛡 MIT License

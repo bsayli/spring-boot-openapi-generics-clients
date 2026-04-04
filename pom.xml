@@ -1,17 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.bsayli</groupId>
-    <artifactId>spring-boot-openapi-generics-clients</artifactId>
-    <version>0.7.9</version>
+    <groupId>io.github.blueprint-platform</groupId>
+    <artifactId>openapi-generics</artifactId>
+    <version>0.8.1</version>
     <packaging>pom</packaging>
 
-    <name>spring-boot-openapi-generics-clients (aggregator)</name>
-    <description>Aggregator build for api-contract, customer-service, and customer-service-client.</description>
-    <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
+    <name>openapi-generics (aggregator)</name>
+    <description>
+        OpenAPI Generics platform aggregator. Defines contract, projection, and generation modules
+        for deterministic, generics-aware API lifecycle.
+    </description>
+    <url>https://github.com/blueprint-platform/openapi-generics</url>
 
     <licenses>
         <license>
@@ -22,9 +25,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/bsayli/spring-boot-openapi-generics-clients</url>
-        <connection>scm:git:https://github.com/bsayli/spring-boot-openapi-generics-clients.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:bsayli/spring-boot-openapi-generics-clients.git</developerConnection>
+        <url>https://github.com/blueprint-platform/openapi-generics</url>
+        <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -36,10 +39,77 @@
         </developer>
     </developers>
 
+    <!-- CENTRAL PUBLISH TARGET -->
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://central.sonatype.com/api/v1/publisher</url>
+        </repository>
+    </distributionManagement>
+
+    <!-- COMMON PROPERTIES -->
+    <properties>
+        <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
+        <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+        <gpg.keyname>3F8AA661C1DBE5CD</gpg.keyname>
+    </properties>
+
+    <!-- MODULES -->
     <modules>
-        <module>api-contract</module>
-        <module>customer-service</module>
-        <module>customer-service-client</module>
+        <module>openapi-generics-contract</module>
+        <module>openapi-generics-platform-bom</module>
+        <module>openapi-generics-server-starter</module>
+        <module>openapi-generics-java-codegen</module>
+        <module>openapi-generics-java-codegen-parent</module>
     </modules>
+
+    <!-- CENTRAL PUBLISH PROFILE -->
+    <profiles>
+        <profile>
+            <id>central-publish</id>
+
+            <build>
+                <plugins>
+
+                    <!-- SIGN -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven-gpg-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <keyname>${gpg.keyname}</keyname>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+
+                    <!-- CENTRAL PUBLISH -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central-publishing-maven-plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>false</autoPublish>
+                        </configuration>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

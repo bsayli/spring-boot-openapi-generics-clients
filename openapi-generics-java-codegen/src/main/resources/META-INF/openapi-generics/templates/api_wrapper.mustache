@@ -1,0 +1,9 @@
+{{#vendorExtensions.x-data-container}}
+import io.github.blueprintplatform.openapi.generics.contract.paging.{{vendorExtensions.x-data-container}};
+{{/vendorExtensions.x-data-container}}
+
+{{#vendorExtensions.x-class-extra-annotation}}
+{{{vendorExtensions.x-class-extra-annotation}}}
+{{/vendorExtensions.x-class-extra-annotation}}
+public class {{classname}} extends ServiceResponse<{{#vendorExtensions.x-data-container}}{{vendorExtensions.x-data-container}}<{{vendorExtensions.x-data-item}}>{{/vendorExtensions.x-data-container}}{{^vendorExtensions.x-data-container}}{{vendorExtensions.x-api-wrapper-datatype}}{{/vendorExtensions.x-data-container}}> {
+}

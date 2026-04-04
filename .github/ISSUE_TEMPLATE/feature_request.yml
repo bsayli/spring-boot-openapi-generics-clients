@@ -7,26 +7,30 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping evolve **spring-boot-openapi-generics-clients**!  
+        Thanks for helping evolve **openapi-generics**!  
         Please share your idea and reasoning below.
+
   - type: textarea
     id: problem
     attributes:
       label: "Is your feature request related to a problem?"
       description: "Describe what limitation or gap you're facing."
       placeholder: "I'm always frustrated when I have to manually mark generic containers for registration..."
+
   - type: textarea
     id: solution
     attributes:
       label: "Describe the solution you'd like"
       description: "Describe the change or new capability you'd like to see."
       placeholder: "Automatically detect Page<T> and Slice<T> containers without configuration."
+
   - type: textarea
     id: alternatives
     attributes:
       label: "Describe alternatives you've considered"
       description: "Mention any workarounds or similar ideas."
       placeholder: "I've tried extending AutoWrapperSchemaCustomizer manually, but it’s verbose."
+
   - type: textarea
     id: additional
     attributes:
