@@ -7,18 +7,41 @@
 
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-java-codegen-parent</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.8.0</version>
     <packaging>pom</packaging>
 
     <name>openapi-generics-java-codegen-parent</name>
     <description>Parent POM for deterministic, generics-aware OpenAPI client generation. Provides build-time orchestration and standardized generator configuration.</description>
+    <url>https://github.com/blueprint-platform/openapi-generics</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/blueprint-platform/openapi-generics</url>
+        <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>bsayli</id>
+            <name>Baris Sayli</name>
+            <url>https://github.com/bsayli</url>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <openapi-generics-java-codegen.version>0.8.0-SNAPSHOT</openapi-generics-java-codegen.version>
-
+        <openapi-generics-java-codegen.version>0.8.0</openapi-generics-java-codegen.version>
         <openapi-generator.version>7.21.0</openapi-generator.version>
 
         <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
@@ -27,14 +50,12 @@
         <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
         <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
 
-        <!-- template system -->
-        <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
+        <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
 
-        <!-- generator defaults -->
+        <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
         <openapi.generator.output>${project.build.directory}/generated-sources/openapi</openapi.generator.output>
         <openapi.generator.sourceFolder>src/gen/java</openapi.generator.sourceFolder>
 
-        <!-- derived -->
         <openapi.generated.sources>${openapi.generator.output}/${openapi.generator.sourceFolder}</openapi.generated.sources>
         <openapi.templates.codegen>${project.build.directory}/codegen-templates</openapi.templates.codegen>
     </properties>
@@ -51,13 +72,12 @@
             <dependency>
                 <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-platform-bom</artifactId>
-                <version>0.8.0-SNAPSHOT</version>
+                <version>0.8.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
 
     <build>
         <pluginManagement>
@@ -279,6 +299,32 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- ✅ FLATTEN -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${flatten-maven-plugin.version}</version>
+                <configuration>
+                    <flattenMode>ossrh</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten-clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

@@ -6,7 +6,7 @@
 
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.8.0</version>
     <packaging>pom</packaging>
 
     <name>openapi-generics (aggregator)</name>
@@ -39,24 +39,78 @@
         </developer>
     </developers>
 
+    <!-- CENTRAL PUBLISH TARGET -->
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://central.sonatype.com/api/v1/publisher</url>
+        </repository>
+    </distributionManagement>
+
+    <!-- COMMON PROPERTIES -->
+    <properties>
+        <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
+        <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+        <gpg.keyname>3F8AA661C1DBE5CD</gpg.keyname>
+    </properties>
+
+    <!-- MODULES -->
     <modules>
-        <!-- CONTRACT (Authority Layer) -->
         <module>openapi-generics-contract</module>
-
-        <!-- PLATFORM BOM -->
         <module>openapi-generics-platform-bom</module>
-
-        <!-- SERVER (OpenAPI projection layer) -->
         <module>openapi-generics-server-starter</module>
-
-        <!-- CODE GENERATION ENGINE -->
         <module>openapi-generics-java-codegen</module>
-
-        <!-- CODEGEN ORCHESTRATION -->
         <module>openapi-generics-java-codegen-parent</module>
-
-        <!-- SAMPLE APPLICATIONS -->
         <module>samples</module>
     </modules>
+
+    <!-- CENTRAL PUBLISH PROFILE -->
+    <profiles>
+        <profile>
+            <id>central-publish</id>
+
+            <build>
+                <plugins>
+
+                    <!-- SIGN -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven-gpg-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <keyname>${gpg.keyname}</keyname>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+
+                    <!-- CENTRAL PUBLISH -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central-publishing-maven-plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>false</autoPublish>
+                        </configuration>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

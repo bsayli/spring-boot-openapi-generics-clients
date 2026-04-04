@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * 1. Base Schema Registration   → ensure canonical envelope schemas exist
  * 2. Discovery                 → collect response types from runtime
  * 3. Introspection             → extract contract-aware type references
- * 4. Wrapper Processing        → generate wrapper schemas (ServiceResponse<T>, etc.)
+ * 4. Wrapper Processing        → generate wrapper schemas (ServiceResponse&lt;T&gt;, etc.)
  * 5. Ignore Marking            → mark infrastructure schemas as non-generatable
  * 6. Validation                → enforce contract correctness (fail-fast)
  * </pre>
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * <ul>
  *   <li>{@link BaseSchemaRegistrar} → creates canonical base schemas
- *   <li>{@link WrapperSchemaProcessor} → composes generic-aware wrappers
+ *   <li>{@link WrapperSchemaProcessor} → composes generics-aware wrappers
  *   <li>{@link SchemaGenerationControlMarker} → controls generation policy (not structure)
  *   <li>{@link OpenApiContractGuard} → validates final contract integrity
  * </ul>
@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
  * <h2>Important</h2>
  *
  * <ul>
- *   <li>This class coordinates execution, it does not implement schema logic
+ *   <li>This class coordinates execution and does not implement schema logic
  *   <li>All schema-related behavior is delegated to dedicated components
  *   <li>Ignore marking is applied <b>after schema creation</b> but <b>before validation</b>
  * </ul>
@@ -117,7 +117,7 @@ public class OpenApiPipelineOrchestrator {
         refs.forEach(ref -> wrapperSchemaProcessor.process(openApi, ref));
         log.debug("Processed {} wrapper schemas", refs.size());
 
-    // 5. Ignore marking (generation control layer)
+    // 5. Ignore marking
     schemaGenerationControlMarker.mark(openApi);
         log.debug("Applied ignore markers to base schemas");
 
@@ -127,16 +127,14 @@ public class OpenApiPipelineOrchestrator {
         log.debug("OpenAPI pipeline completed successfully");
     }
 
-    // -------------------------------------------------------------------------
-    // Discovery + Introspection
-    // -------------------------------------------------------------------------
-
-    /**
-     * Discovers and extracts contract-aware schema reference names.
-     *
-     * <p>This method represents the combined discovery + introspection stage.
-     */
-    private Set<String> discoverRefs() {
+  /**
+   * Discovers and extracts contract-aware schema reference names.
+   *
+   * <p>This method represents the combined discovery + introspection stage.
+   *
+   * @return discovered schema reference names derived from contract types
+   */
+  private Set<String> discoverRefs() {
         Set<String> discoveredRefs = new LinkedHashSet<>();
 
         discoveryStrategy

@@ -9,25 +9,25 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 
 /**
- * Factory responsible for creating contract-aware OpenAPI wrapper schemas for {@code
- * ServiceResponse<T>} based response types.
+ * Factory responsible for creating contract-aware OpenAPI wrapper schemas
+ * for {@code ServiceResponse<T>} based response types.
  *
  * <p>This factory is the <b>single authoritative source</b> of wrapper schema structure.
  *
  * <h2>Key Responsibilities</h2>
  *
  * <ul>
- *   <li>Create wrapper schemas using {@code allOf} composition
- *   <li>Attach required vendor extensions for contract semantics
+ *   <li>Create wrapper schemas using {@code allOf} composition</li>
+ *   <li>Attach required vendor extensions for contract semantics</li>
  * </ul>
  *
  * <h2>Design Principles</h2>
  *
  * <ul>
- *   <li><b>Single source of truth</b> → wrapper structure is defined only here
- *   <li><b>Deterministic</b> → same input produces identical schema
- *   <li><b>No duplication</b> → reuses canonical {@code ServiceResponse}
- *   <li><b>No patching</b> → schemas are always created, never modified
+ *   <li><b>Single source of truth</b> → wrapper structure is defined only here</li>
+ *   <li><b>Deterministic</b> → same input produces identical schema</li>
+ *   <li><b>No duplication</b> → reuses canonical {@code ServiceResponse}</li>
+ *   <li><b>No patching</b> → schemas are always created, never modified</li>
  * </ul>
  *
  * <h2>Composition Model</h2>
@@ -45,17 +45,17 @@ import java.util.List;
  * <h2>Vendor Extensions</h2>
  *
  * <ul>
- *   <li>{@code x-api-wrapper} → marks schema as wrapper
- *   <li>{@code x-api-wrapper-datatype} → underlying data type
- *   <li>{@code x-class-extra-annotation} → optional generator hint
+ *   <li>{@code x-api-wrapper} → marks schema as wrapper</li>
+ *   <li>{@code x-api-wrapper-datatype} → underlying data type</li>
+ *   <li>{@code x-class-extra-annotation} → optional generator hint</li>
  * </ul>
  *
  * <h2>Important</h2>
  *
  * <ul>
- *   <li>This class is responsible for <b>creation only</b>
- *   <li>It does NOT inspect or modify existing schemas
- *   <li>It assumes full ownership of wrapper schema structure
+ *   <li>This class is responsible for <b>creation only</b></li>
+ *   <li>It does NOT inspect or modify existing schemas</li>
+ *   <li>It assumes full ownership of wrapper schema structure</li>
  * </ul>
  *
  * <h2>Architectural Note</h2>
@@ -69,9 +69,9 @@ import java.util.List;
  * <p>This aligns with the pipeline design:
  *
  * <ul>
- *   <li>No merge
- *   <li>No partial fixes
- *   <li>Only deterministic reconstruction
+ *   <li>No merge</li>
+ *   <li>No partial fixes</li>
+ *   <li>Only deterministic reconstruction</li>
  * </ul>
  */
 public final class ServiceResponseSchemaFactory {
@@ -80,7 +80,12 @@ public final class ServiceResponseSchemaFactory {
 
   private ServiceResponseSchemaFactory() {}
 
-  /** Creates a wrapper schema without additional class annotations. */
+  /**
+   * Creates a wrapper schema without additional class annotations.
+   *
+   * @param dataRefName name of the concrete data schema
+   * @return composed OpenAPI schema
+   */
   public static Schema<?> createComposedWrapper(String dataRefName) {
     return createComposedWrapper(dataRefName, null);
   }
@@ -125,12 +130,22 @@ public final class ServiceResponseSchemaFactory {
     return schema;
   }
 
-  /** Builds a safe OpenAPI $ref string. */
+  /**
+   * Builds a safe OpenAPI {@code $ref} string.
+   *
+   * @param schemaName schema name
+   * @return reference string
+   */
   private static String buildRef(String schemaName) {
     return SCHEMA_PREFIX + schemaName;
   }
 
-  /** Lightweight null/blank check without Spring dependency. */
+  /**
+   * Lightweight null/blank check without external dependencies.
+   *
+   * @param value input string
+   * @return true if text is present
+   */
   private static boolean hasText(String value) {
     return value != null && !value.isBlank();
   }

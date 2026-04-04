@@ -12,8 +12,8 @@ import java.util.Map;
 /**
  * Registers canonical base schemas required by the contract-aware response model.
  *
- * <p>This component is responsible for ensuring that foundational envelope schemas
- * exist before wrapper composition begins.
+ * <p>This component ensures that foundational envelope schemas exist before wrapper
+ * composition begins.
  *
  * <h2>Responsibilities</h2>
  *
@@ -32,15 +32,7 @@ import java.util.Map;
  *   <li><b>Contract-aligned</b> → schema names derived from contract classes</li>
  * </ul>
  *
- * <h2>Why OpenAPI instead of Map?</h2>
- *
- * <ul>
- *   <li>Encapsulates schema access logic</li>
- *   <li>Prevents callers from dealing with null components</li>
- *   <li>Aligns with higher-level orchestration APIs</li>
- * </ul>
- *
- * <p>This class contains no framework dependencies and operates purely on the OpenAPI model.
+ * <p>This class operates purely on the OpenAPI model and contains no framework dependencies.
  */
 public class BaseSchemaRegistrar {
 
@@ -55,13 +47,13 @@ public class BaseSchemaRegistrar {
 
     private static final List<String> SORT_DIRECTIONS = List.of("asc", "desc");
 
+
     /**
      * Registers base schemas into the given OpenAPI document.
      *
-     * <p>This method guarantees that all required base schemas are present
-     * before wrapper schema generation begins.
+     * <p>Ensures all required base schemas are present before wrapper schema generation begins.
      *
-     * @param openApi OpenAPI document (must not be null)
+     * @param openApi OpenAPI document (must not be {@code null})
      */
     public void register(OpenAPI openApi) {
 
@@ -79,6 +71,11 @@ public class BaseSchemaRegistrar {
     // Base schema registrations
     // -------------------------------------------------------------------------
 
+    /**
+     * Registers {@code Sort} schema if absent.
+     *
+     * @param schemas schema registry map
+     */
     private void registerSort(Map<String, Schema> schemas) {
         schemas.computeIfAbsent(
                 SchemaNames.SORT,
@@ -88,6 +85,11 @@ public class BaseSchemaRegistrar {
                                 .addProperty(DIRECTION, new StringSchema()._enum(SORT_DIRECTIONS)));
     }
 
+    /**
+     * Registers {@code Meta} schema if absent.
+     *
+     * @param schemas schema registry map
+     */
     private void registerMeta(Map<String, Schema> schemas) {
         schemas.computeIfAbsent(
                 SchemaNames.META,
@@ -96,9 +98,15 @@ public class BaseSchemaRegistrar {
                                 .addProperty(SERVER_TIME, new StringSchema().format(FORMAT_DATE_TIME))
                                 .addProperty(
                                         SORT,
-                                        new ArraySchema().items(new Schema<>().$ref(ref(SchemaNames.SORT)))));
+                                        new ArraySchema()
+                                                .items(new Schema<>().$ref(ref(SchemaNames.SORT)))));
     }
 
+    /**
+     * Registers {@code ServiceResponse} base schema if absent.
+     *
+     * @param schemas schema registry map
+     */
     private void registerServiceResponse(Map<String, Schema> schemas) {
         schemas.computeIfAbsent(
                 SchemaNames.SERVICE_RESPONSE,
@@ -116,6 +124,11 @@ public class BaseSchemaRegistrar {
                 });
     }
 
+    /**
+     * Registers {@code ServiceResponseVoid} schema if absent.
+     *
+     * @param schemas schema registry map
+     */
     private void registerServiceResponseVoid(Map<String, Schema> schemas) {
         schemas.computeIfAbsent(
                 SchemaNames.SERVICE_RESPONSE_VOID,
@@ -137,6 +150,11 @@ public class BaseSchemaRegistrar {
     // Helpers
     // -------------------------------------------------------------------------
 
+    /**
+     * Ensures {@link Components} and schema map exist on the OpenAPI instance.
+     *
+     * @param openApi OpenAPI document
+     */
     private void ensureComponents(OpenAPI openApi) {
         if (openApi.getComponents() == null) {
             openApi.setComponents(new Components());
@@ -147,6 +165,12 @@ public class BaseSchemaRegistrar {
         }
     }
 
+    /**
+     * Builds a schema reference path.
+     *
+     * @param schemaName target schema name
+     * @return reference string (e.g. {@code #/components/schemas/SchemaName})
+     */
     private String ref(String schemaName) {
         return COMPONENTS_SCHEMAS + schemaName;
     }

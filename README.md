@@ -26,6 +26,7 @@
 ## 📑 Table of Contents
 
 * 🧭 [Architectural Thesis](#architectural-thesis)
+* ⚡ [Real Usage (What you actually do)](#-real-usage-what-you-actually-do-in-your-project)
 * ⚡ [Quick Start](#-quick-start-2-minutes)
 * 🧩 [What This Repository Is (and Is Not)](#what-this-repository-is-and-is-not)
 * 🔁 [Contract Lifecycle Model](#contract-lifecycle-model)
@@ -75,9 +76,45 @@ The result is simple but important:
 
 ---
 
+## ⚡ Real Usage (What you actually do in your project)
+
+You do **NOT** copy anything from this repository.
+
+You only add the required building blocks:
+
+### Server (producer)
+
+Add the starter:
+
+```xml
+<dependency>
+  <groupId>io.github.blueprintplatform</groupId>
+  <artifactId>openapi-generics-server-starter</artifactId>
+  <version>0.8.x</version>
+</dependency>
+```
+
+### Client (consumer)
+
+Inherit the parent:
+
+```xml
+<parent>
+  <groupId>io.github.blueprintplatform</groupId>
+  <artifactId>openapi-generics-java-codegen-parent</artifactId>
+  <version>0.8.x</version>
+</parent>
+```
+
+That’s it.
+
+Everything else in this repository is a **reference implementation of this setup**.
+
+---
+
 ## ⚡ Quick Start (2 minutes)
 
-> Requires Spring Boot 3.4+ and OpenAPI Generator 7.x  
+> Requires Spring Boot 3.4+ and OpenAPI Generator 7.x
 > See module documentation for compatibility details.
 
 This repository demonstrates a **contract-first, generics-aware API lifecycle**.
@@ -143,9 +180,9 @@ public class ServiceResponsePageCustomerDto
     extends ServiceResponse<Page<CustomerDto>> {}
 ```
 
-- ✔ No duplicated envelope
-- ✔ Generics preserved
-- ✔ Contract reused
+* ✔ No duplicated envelope
+* ✔ Generics preserved
+* ✔ Contract reused
 
 ---
 
@@ -162,6 +199,26 @@ Generator (enforcement)
    ↓
 Client (contract-aligned)
 ```
+
+---
+
+### 🧠 How this maps to real usage
+
+```text
+Add dependency (server)
+   ↓
+Add parent (client)
+   ↓
+Run your service
+   ↓
+Generate client
+```
+
+There is no manual model copying.
+There is no schema tweaking.
+There is no duplication.
+
+> The entire system works by aligning build-time and runtime around a single contract.
 
 ---
 

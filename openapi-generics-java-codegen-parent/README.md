@@ -238,7 +238,7 @@ Ensures generated code is compiled as part of the project lifecycle.
 <parent>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.8.0-SNAPSHOT</version>
+  <version>0.8.0</version>
 </parent>
 ```
 
