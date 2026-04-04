@@ -1,4 +1,4 @@
-# Spring Boot OpenAPI Generics — Preserve Your API Contract End-to-End
+# OpenAPI Generics for Spring Boot — Keep Your API Contract Intact End-to-End
 
 [![Build](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/tag/blueprint-platform/openapi-generics?logo=github\&label=release)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
@@ -39,6 +39,7 @@
 * 🔎 [Proof — Generated Client Models (Before / After)](#proof--generated-client-models-before--after)
 * 🧠 [Design Guarantees](#design-guarantees)
 * 📦 [Modules](#modules)
+* 📦 [Maven Central](#-maven-central)
 * 🧠 [Architecture](#-architecture)
 * 📘 [Adoption Guides](#adoption-guides)
 * 🔗 [References](#references)
@@ -433,6 +434,36 @@ public class ServiceResponsePageCustomerDto
 
 * **[customer-service-client](samples/customer-service-client/README.md)**
   Consumer example
+
+---
+
+## 📦 Maven Central
+
+All platform modules are published to Maven Central and can be used directly as dependencies.
+
+**Group ID:**
+
+```
+io.github.blueprint-platform
+```
+
+**Version:**
+
+```
+0.8.x
+```
+
+### Available Artifacts
+
+* `openapi-generics`
+* `openapi-generics-contract`
+* `openapi-generics-server-starter`
+* `openapi-generics-java-codegen`
+* `openapi-generics-java-codegen-parent`
+* `openapi-generics-platform-bom`
+
+🔎 Search on Maven Central:
+[https://search.maven.org/](https://search.maven.org/)
 
 ---
 
