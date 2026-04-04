@@ -8,7 +8,7 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics</artifactId>
-        <version>0.8.0</version>
+        <version>0.8.1</version>
     </parent>
 
     <artifactId>openapi-generics-server-starter</artifactId>
@@ -62,7 +62,7 @@
             <dependency>
                 <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-platform-bom</artifactId>
-                <version>0.8.0</version>
+                <version>0.8.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

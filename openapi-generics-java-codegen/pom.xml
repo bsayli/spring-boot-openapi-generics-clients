@@ -4,9 +4,13 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.blueprint-platform</groupId>
+    <parent>
+        <groupId>io.github.blueprint-platform</groupId>
+        <artifactId>openapi-generics</artifactId>
+        <version>0.8.1</version>
+    </parent>
+
     <artifactId>openapi-generics-java-codegen</artifactId>
-    <version>0.8.0</version>
     <packaging>jar</packaging>
 
     <name>openapi-generics-java-codegen</name>
@@ -78,7 +82,7 @@
             <dependency>
                 <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-platform-bom</artifactId>
-                <version>0.8.0</version>
+                <version>0.8.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

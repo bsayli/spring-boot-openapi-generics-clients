@@ -8,7 +8,7 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics</artifactId>
-        <version>0.8.0</version>
+        <version>0.8.1</version>
     </parent>
 
     <artifactId>openapi-generics-platform-bom</artifactId>
@@ -44,7 +44,7 @@
     </developers>
 
     <properties>
-        <openapi.generics.contract.version>0.8.0</openapi.generics.contract.version>
+        <openapi.generics.contract.version>0.8.1</openapi.generics.contract.version>
         <openapi.generator.version>7.21.0</openapi.generator.version>
         <springdoc.version>2.8.16</springdoc.version>
     </properties>

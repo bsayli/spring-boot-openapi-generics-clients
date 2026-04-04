@@ -5,9 +5,13 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.blueprint-platform</groupId>
+    <parent>
+        <groupId>io.github.blueprint-platform</groupId>
+        <artifactId>openapi-generics</artifactId>
+        <version>0.8.1</version>
+    </parent>
+
     <artifactId>openapi-generics-java-codegen-parent</artifactId>
-    <version>0.8.0</version>
     <packaging>pom</packaging>
 
     <name>openapi-generics-java-codegen-parent</name>
@@ -41,7 +45,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <openapi-generics-java-codegen.version>0.8.0</openapi-generics-java-codegen.version>
+        <openapi-generics-java-codegen.version>0.8.1</openapi-generics-java-codegen.version>
         <openapi-generator.version>7.21.0</openapi-generator.version>
 
         <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
@@ -72,7 +76,7 @@
             <dependency>
                 <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-platform-bom</artifactId>
-                <version>0.8.0</version>
+                <version>0.8.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
