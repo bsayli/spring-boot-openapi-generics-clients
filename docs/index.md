@@ -130,7 +130,7 @@ The exact same contract type flows from server to client.
 ### Before (default OpenAPI behavior)
 
 <p align="center">
-  <img src="/openapi-generics/docs/images/proof/generated-client-wrapper-before.png" width="700"/>
+  <img src="docs/images/proof/generated-client-wrapper-before.png" width="700"/>
 </p>
 
 * duplicated envelope per endpoint
@@ -142,7 +142,7 @@ The exact same contract type flows from server to client.
 ### After (contract-aligned generation)
 
 <p align="center">
-  <img src="/openapi-generics/docs/images/proof/generated-client-wrapper-after.png" width="700"/>
+  <img src="docs/images/proof/generated-client-wrapper-after.png" width="700"/>
 </p>
 
 ```java

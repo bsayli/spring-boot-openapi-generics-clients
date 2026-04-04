@@ -46,6 +46,8 @@ Thumbs.db
 # =========================
 # Maven
 # =========================
+# Maven flattened pom
+.flattened-pom.xml
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
