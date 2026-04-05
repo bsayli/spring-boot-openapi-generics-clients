@@ -4,8 +4,8 @@
 [![Release](https://img.shields.io/github/v/release/blueprint-platform/openapi-generics?label=release&logo=github)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
 [![CodeQL](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml)
 [![codecov](https://codecov.io/gh/blueprint-platform/openapi-generics/branch/main/graph/badge.svg)](https://codecov.io/gh/blueprint-platform/openapi-generics)
-[![Java](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-17%2B-red?logo=openjdk)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.x%20%7C%203.5.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
 [![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -109,14 +109,15 @@ Inherit the parent:
 
 That’s it.
 
-Everything else in this repository is a **reference implementation of this setup**.
+Everything else in this repository is a **reference implementation of this setup**.  
+For detailed setup and advanced usage, see the [Adoption Guides](#adoption-guides).
 
 ---
 
 ## ⚡ Quick Start (2 minutes)
 
-> Requires Spring Boot 3.4+ and OpenAPI Generator 7.x
-> See module documentation for compatibility details.
+> Requires Java 17+, Spring Boot 3.4.x / 3.5.x, and OpenAPI Generator 7.x  
+> See module documentation for full compatibility details.
 
 This repository demonstrates a **contract-first, generics-aware API lifecycle**.
 

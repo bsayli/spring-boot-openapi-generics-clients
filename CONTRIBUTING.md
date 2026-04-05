@@ -7,8 +7,8 @@ This repository provides a **contract-first, generics-aware OpenAPI platform**, 
 
 Built with:
 
-* Java 21
-* Spring Boot 3.5.x
+* Java 17+
+* Spring Boot 3.4.x, 3.5.x
 * OpenAPI Generator 7.x
 
 > Be kind. Be constructive. See our [Code of Conduct](./CODE_OF_CONDUCT.md).
@@ -76,7 +76,7 @@ git checkout -b feature/scope-short-title
 
 ### Prerequisites
 
-* Java 21
+* Java 17+ (21 recommended)
 * Maven 3.9+
 
 ### Build (core platform)
@@ -136,6 +136,8 @@ Notes:
 ---
 
 ## Architecture principles (important)
+
+> These are not guidelines — they are invariants.
 
 This project follows strict boundaries:
 

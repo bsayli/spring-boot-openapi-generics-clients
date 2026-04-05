@@ -15,10 +15,11 @@ nav_order: 1
 
 - [Why this exists](#why-this-exists)
 - [What you actually do](#what-you-actually-do)
-- [⚡ Quick Start](#-quick-start)
+- [Quick Start](#-quick-start)
     - [1. Server (producer)](#1-server-producer)
     - [2. Client (consumer)](#2-client-consumer)
 - [Result](#result)
+- [Compatibility Matrix](#-compatibility-matrix)
 - [Proof — Generated Client (Before vs After)](#proof--generated-client-before-vs-after)
     - [Before (default OpenAPI behavior)](#before-default-openapi-behavior)
     - [After (contract-aligned generation)](#after-contract-aligned-generation)
@@ -29,7 +30,7 @@ nav_order: 1
 - [Why this matters](#why-this-matters)
 - [Mental model](#mental-model)
 - [Next steps](#next-steps)
-- [🔗 References & External Links](#-references--external-links)
+- [References & External Links](#-references--external-links)
 - [Final note](#final-note)
 
 ---
@@ -122,6 +123,26 @@ The exact same contract type flows from server to client.
 * no duplicated models
 * generics preserved end-to-end
 * contract types reused (not regenerated)
+
+---
+
+## 🔧 Compatibility Matrix
+
+This platform is designed for a **stable, production-proven stack**.
+
+### Runtime (Server)
+
+| Component           | Supported Versions        |
+|--------------------|--------------------------|
+| Java               | 17+                      |
+| Spring Boot        | 3.4.x, 3.5.x             |
+| springdoc-openapi  | 2.8.x (WebMvc starter)   |
+
+### Build-time (Client Generation)
+
+| Component           | Supported Versions |
+|--------------------|-------------------|
+| OpenAPI Generator  | 7.x               |
 
 ---
 
