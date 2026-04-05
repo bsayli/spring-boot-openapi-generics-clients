@@ -43,7 +43,7 @@ If you just want a working, correct client:
 <parent>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.8.1</version>
+  <version>0.8.2</version>
 </parent>
 ```
 
@@ -219,7 +219,7 @@ This activates the generation system.
 <parent>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.8.1</version>
+  <version>0.8.2</version>
 </parent>
 ```
 

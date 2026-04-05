@@ -13,7 +13,7 @@
 
         <groupId>io.github.blueprint-platform.samples</groupId>
         <artifactId>customer-service</artifactId>
-        <version>0.8.1</version>
+        <version>0.8.2</version>
         <name>customer-service</name>
         <description>Spring Boot reference producer for the OpenAPI Generics platform</description>
         <url>https://github.com/blueprint-platform/openapi-generics</url>
@@ -30,7 +30,7 @@
             <url>https://github.com/blueprint-platform/openapi-generics</url>
             <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
             <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-            <tag>HEAD</tag>
+            <tag>v0.8.2</tag>
         </scm>
 
         <developers>
@@ -46,7 +46,7 @@
             <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
             <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-            <openapi-generics-server-starter.version>0.8.1</openapi-generics-server-starter.version>
+            <openapi-generics-server-starter.version>0.8.2</openapi-generics-server-starter.version>
             <springdoc-openapi-starter.version>2.8.16</springdoc-openapi-starter.version>
             <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
             <argLine/>

@@ -132,7 +132,7 @@ You need **two things only**. Responsibilities are strictly separated.
 <parent>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.8.1</version>
+  <version>0.8.2</version>
 </parent>
 ```
 

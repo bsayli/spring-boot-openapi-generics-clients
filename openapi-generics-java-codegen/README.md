@@ -175,10 +175,10 @@ Instead:
 
 This module is tested with the following versions:
 
-| Component            | Version |
-|---------------------|---------|
-| Java                | 21      |
-| OpenAPI Generator   | 7.x     |
+| Component          | Supported Versions |
+|--------------------|-------------------|
+| Java              | 17+               |
+| OpenAPI Generator | 7.x               |
 
 Notes:
 

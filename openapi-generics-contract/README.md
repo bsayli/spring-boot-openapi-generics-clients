@@ -24,12 +24,13 @@ The goal is simple:
 5. [Relationship with the Platform](#-relationship-with-the-platform)
 6. [Explicit Non-Goals](#-explicit-non-goals)
 7. [Dependency](#-dependency)
-8. [Versioning Strategy](#-versioning-strategy)
-9. [When Should You Use This?](#-when-should-you-use-this)
-10. [Design Trade-offs](#-design-trade-offs)
-11. [Failure Philosophy](#-failure-philosophy)
-12. [Mental Model](#-mental-model)
-13. [Summary](#-summary)
+8. [Compatibility Matrix](#-compatibility-matrix)
+9. [Versioning Strategy](#-versioning-strategy)
+10. [When Should You Use This?](#-when-should-you-use-this)
+11. [Design Trade-offs](#-design-trade-offs)
+12. [Failure Philosophy](#-failure-philosophy)
+13. [Mental Model](#-mental-model)
+14. [Summary](#-summary)
 
 ---
 
@@ -281,7 +282,7 @@ Those responsibilities belong to other platform layers.
 <dependency>
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-contract</artifactId>
-    <version>0.8.1</version>
+    <version>0.8.2</version>
 </dependency>
 ```
 
@@ -289,6 +290,14 @@ Usage:
 
 * server → compile
 * client → compile / provided
+
+---
+
+## 🔧 Compatibility Matrix
+
+| Component | Supported Versions |
+|----------|-------------------|
+| Java     | 17+               |
 
 ---
 

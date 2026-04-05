@@ -238,7 +238,7 @@ Ensures generated code is compiled as part of the project lifecycle.
 <parent>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.8.1</version>
+  <version>0.8.2</version>
 </parent>
 ```
 
@@ -370,8 +370,8 @@ These ensure:
 This module is tested with the following baseline:
 
 | Component         | Version |
-| ----------------- | ------- |
-| Java              | 21      |
+| ----------------- |---------|
+| Java              | 17+     |
 | OpenAPI Generator | 7.x     |
 
 Notes:

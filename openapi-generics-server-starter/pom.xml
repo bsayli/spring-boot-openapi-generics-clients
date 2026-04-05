@@ -8,7 +8,7 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics</artifactId>
-        <version>0.8.1</version>
+        <version>0.8.2</version>
     </parent>
 
     <artifactId>openapi-generics-server-starter</artifactId>
@@ -33,7 +33,7 @@
         <url>https://github.com/blueprint-platform/openapi-generics</url>
         <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v0.8.2</tag>
     </scm>
 
     <developers>
@@ -45,8 +45,9 @@
     </developers>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <spring-boot.version>3.5.13</spring-boot.version>
         <spring-webmvc.version>6.2.17</spring-webmvc.version>
@@ -62,7 +63,7 @@
             <dependency>
                 <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-platform-bom</artifactId>
-                <version>0.8.1</version>
+                <version>0.8.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -6,7 +6,7 @@
 
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics</artifactId>
-    <version>0.8.1</version>
+    <version>0.8.2</version>
     <packaging>pom</packaging>
 
     <name>openapi-generics (aggregator)</name>
@@ -28,7 +28,7 @@
         <url>https://github.com/blueprint-platform/openapi-generics</url>
         <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v0.8.2</tag>
     </scm>
 
     <developers>

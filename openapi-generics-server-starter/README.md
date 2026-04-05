@@ -110,12 +110,13 @@ No loss of generic semantics.
 
 ## 🔧 Compatibility Matrix
 
-| Component           | Supported Versions        |
-|--------------------|--------------------------|
-| Java               | 21                       |
-| Spring Boot        | 3.4.x, 3.5.x             |
-| springdoc-openapi  | 2.8.x (WebMvc starter)   |
+This module is designed to work with the following baseline while remaining forward-compatible within the same major ecosystem.
 
+| Component           | Supported Versions              |
+|--------------------|--------------------------------|
+| Java               | 17+                            |
+| Spring Boot        | 3.4.x, 3.5.x                   |
+| springdoc-openapi  | 2.8.x (WebMvc starter)         |
 ---
 
 ## 🚀 Usage (Zero Configuration)
