@@ -351,9 +351,9 @@ Focus remains on:
 ## System Architecture Overview
 
 <p align="center">
-  <img src="docs/images/architecture/openapi-generics-architecture.png"
-       alt="Contract Lifecycle Architecture"
-       width="900"/>
+  <img src="docs/images/architecture/openapi-generics-architecture.svg"
+       alt="OpenAPI Generics contract-first architecture flow"
+       style="max-width:900px; width:100%;"/>
 </p>
 
 ```
