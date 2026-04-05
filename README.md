@@ -351,20 +351,39 @@ Focus remains on:
 ## System Architecture Overview
 
 <p align="center">
-  <img src="docs/images/architecture/architectural-diagram.png"
+  <img src="docs/images/architecture/openapi-generics-architecture.png"
        alt="Contract Lifecycle Architecture"
        width="900"/>
 </p>
 
 ```
-[Producer]
+Contract (SSOT)
    ↓
-OpenAPI (projection)
+Projection (runtime)
    ↓
-Generated Client
+OpenAPI (projection artifact)
    ↓
-Application (adapter)
+Generation (enforced)
+   ↓
+Client (contract-aligned)
+   ↓
+Application (adapter boundary)
 ```
+
+This system is a **deterministic contract pipeline**.
+
+* **Contract defines semantics** → (`ServiceResponse<T>`, `Meta`, `Page<T>`)
+* **Server projects** → OpenAPI is produced without redefining the model
+* **OpenAPI carries structure** → not ownership
+* **Generator enforces** → prevents duplication and preserves generics
+* **Client reuses contract** → thin wrappers only
+* **Application stays isolated** → no generator coupling
+
+> Each layer transforms the contract — none reinterpret it
+
+**Key idea:**
+
+> OpenAPI is not the source of truth. It is a projection of the contract.
 
 ---
 

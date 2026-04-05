@@ -123,10 +123,10 @@ No custom configuration is required.
 </dependency>
 ```
 
-Assumes:
+Requires:
 
 * Spring Boot (WebMVC)
-* Springdoc enabled (default `/v3/api-docs`)
+* An OpenAPI endpoint at `/v3/api-docs` (e.g. via springdoc-openapi)
 
 ---
 
@@ -154,9 +154,9 @@ public ResponseEntity<ServiceResponse<Page<CustomerDto>>> getCustomers(...) {
 
 That’s it.
 
-No annotations.
-No schema configuration.
-No wrapper DTOs.
+- No annotations
+- No schema configuration
+- No wrapper DTOs
 
 ---
 
@@ -180,13 +180,11 @@ Characteristics:
 * `allOf`-based composition
 * vendor extensions for downstream generation (e.g. `x-api-wrapper`)
 
-Important:
-
 > OpenAPI is a **projection artifact** — not the source of truth.
 
 ---
 
-## ⚠️ Rules (do NOT break these)
+## ⚠️ Rules
 
 These are **architectural constraints**, not conventions.
 

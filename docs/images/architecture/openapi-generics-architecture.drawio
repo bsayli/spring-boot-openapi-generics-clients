@@ -1,0 +1,79 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1">
+  <diagram name="OpenAPI Generics — Contract Architecture (Final)" id="0">
+    <mxGraphModel dx="1257" dy="748" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="authority" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#0f6e56;fontColor=#085041;fontSize=13;verticalAlign=middle;arcSize=4;" value="&lt;b&gt;Authority layer — single source of truth&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:11px&#39;&gt;openapi-generics-contract · ServiceResponse&amp;lt;T&amp;gt; · Meta · Page&amp;lt;T&amp;gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="880" x="80" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="proj_header" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8def8;strokeColor=#534AB7;fontColor=#3C3489;fontSize=13;verticalAlign=middle;arcSize=4;" value="&lt;b&gt;Projection phase&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:11px&#39;&gt;Spring Boot + springdoc customizer&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="400" x="80" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="vendor_ext" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;verticalAlign=middle;arcSize=4;" value="&lt;b&gt;Internal DSL (generation protocol)&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:11px&#39;&gt;x-api-wrapper · x-data-container · x-ignore-model&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="400" x="80" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="openapi_spec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#BA7517;fontColor=#633806;fontSize=13;verticalAlign=middle;arcSize=4;" value="&lt;b&gt;OpenAPI 3.1 spec&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:11px&#39;&gt;projection artifact — not authority&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="300" x="130" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="enf_header" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#185FA5;fontColor=#0C447C;fontSize=13;verticalAlign=middle;arcSize=4;" value="&lt;b&gt;Enforcement phase&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:11px&#39;&gt;codegen-parent · java-generics-contract generator&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="400" x="560" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="template_pipe" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;verticalAlign=middle;arcSize=4;" value="&lt;b&gt;Template pipeline&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:11px&#39;&gt;extract → patch → overlay&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="400" x="560" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="gen_client" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#185FA5;fontColor=#0C447C;fontSize=13;verticalAlign=middle;arcSize=4;" value="&lt;b&gt;Generated client&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:11px&#39;&gt;thin wrappers · generics preserved · contract reused&lt;br&gt;no duplication · no drift&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="400" x="560" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="adapter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;verticalAlign=middle;arcSize=4;" value="&lt;b&gt;Adapter boundary&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:11px&#39;&gt;stability boundary (anti-corruption)&lt;br&gt;isolates generated client&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="400" x="80" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="application" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;verticalAlign=middle;arcSize=4;" value="&lt;b&gt;Application&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:11px&#39;&gt;uses contract types only · no generator coupling&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="400" x="560" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="output" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#0f6e56;fontColor=#085041;fontSize=13;verticalAlign=middle;arcSize=4;" value="&lt;b&gt;{ data, meta }&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:11px&#39;&gt;deterministic contract output · end-to-end&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="480" x="230" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=11;fontColor=#666666;fontStyle=2;" value="Each layer transforms the contract — none reinterpret it&lt;br&gt;&lt;b&gt;OpenAPI is a projection — not a source of truth&lt;/b&gt;" vertex="1">
+          <mxGeometry height="40" width="880" x="80" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="2" edge="1" parent="1" source="authority" style="endArrow=block;strokeColor=#888888;strokeWidth=1.5;" target="proj_header">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="3" edge="1" parent="1" source="authority" style="endArrow=block;strokeColor=#888888;strokeWidth=1.5;" target="enf_header">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4" edge="1" parent="1" source="proj_header" style="endArrow=block;strokeColor=#888888;" target="vendor_ext">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5" edge="1" parent="1" source="vendor_ext" style="endArrow=block;strokeColor=#888888;" target="openapi_spec">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6" edge="1" parent="1" source="openapi_spec" style="endArrow=block;strokeColor=#BA7517;dashed=1;" target="enf_header">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7" edge="1" parent="1" source="enf_header" style="endArrow=block;strokeColor=#888888;" target="template_pipe">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8" edge="1" parent="1" source="template_pipe" style="endArrow=block;strokeColor=#888888;" target="gen_client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="9" edge="1" parent="1" source="gen_client" style="endArrow=block;strokeColor=#888888;" target="application">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="10" edge="1" parent="1" source="proj_header" style="endArrow=block;strokeColor=#888888;" target="adapter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="11" edge="1" parent="1" source="adapter" style="endArrow=block;strokeColor=#888888;" target="application">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="12" edge="1" parent="1" source="adapter" style="endArrow=block;strokeColor=#0f6e56;" target="output">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="13" edge="1" parent="1" source="application" style="endArrow=block;strokeColor=#0f6e56;" target="output">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

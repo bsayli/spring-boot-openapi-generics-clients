@@ -128,8 +128,6 @@ The exact same contract type flows from server to client.
 
 ## 🔧 Compatibility Matrix
 
-This platform is designed for a **stable, production-proven stack**.
-
 ### Runtime (Server)
 
 | Component           | Supported Versions        |

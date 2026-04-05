@@ -122,7 +122,7 @@ Implication:
 
 ## 📦 Minimal setup
 
-You need **two things only**. Responsibilities are strictly separated.
+You provide exactly two inputs. Everything else is handled by the platform.
 
 ---
 
@@ -146,11 +146,9 @@ It provides everything required for generation:
 * deterministic execution model
 * generated sources registration
 
-Important:
+You do NOT add or configure internal dependencies. The parent already wires the system.
 
-> You do NOT add or configure internal dependencies. The parent already wires the system.
-
-> This includes the contract dependency.
+This includes the contract dependency.
 
 If it is needed, it is already managed by the parent/BOM — not by you.
 
@@ -158,7 +156,16 @@ If it is needed, it is already managed by the parent/BOM — not by you.
 
 ### 2. OpenAPI Generator plugin (USER INPUT ONLY)
 
-Minimal working configuration:
+Provide:
+
+* input OpenAPI spec
+* desired HTTP client (`library`)
+* package structure
+
+Expand the example below if you need a full configuration.
+
+<details>
+<summary>Example configuration</summary>
 
 ```xml
 <plugin>
@@ -195,6 +202,10 @@ Minimal working configuration:
   </executions>
 </plugin>
 ```
+
+</details>
+
+---
 
 What you control here:
 
@@ -233,8 +244,6 @@ Custom generator (java-generics-contract)
    ↓
 Generated sources (contract-aligned)
 ```
-
-Important:
 
 > Each step is fixed and ordered. No user-defined hooks exist in this pipeline.
 
@@ -346,8 +355,6 @@ Properties:
 * thin wrappers only
 * no duplicated envelopes
 * direct reuse of contract types
-
-Important:
 
 > The wrapper exists only to rebind generics — it does not introduce new structure.
 
