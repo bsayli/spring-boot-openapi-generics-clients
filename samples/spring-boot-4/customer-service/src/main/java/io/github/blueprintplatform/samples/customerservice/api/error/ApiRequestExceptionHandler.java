@@ -54,14 +54,14 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
   private static final String KEY_PROBLEM_DETAIL_PARAM_INVALID = "request.param.invalid";
 
   private static final String KEY_PROBLEM_TITLE_VALIDATION_FAILED =
-          "problem.title.validation_failed";
+      "problem.title.validation_failed";
   private static final String KEY_PROBLEM_DETAIL_VALIDATION_FAILED =
-          "problem.detail.validation_failed";
+      "problem.detail.validation_failed";
 
   private static final String KEY_PROBLEM_TITLE_METHOD_NOT_ALLOWED =
-          "problem.title.method_not_allowed";
+      "problem.title.method_not_allowed";
   private static final String KEY_PROBLEM_DETAIL_METHOD_NOT_ALLOWED =
-          "problem.detail.method_not_allowed";
+      "problem.detail.method_not_allowed";
 
   private static final String KEY_ENDPOINT_NOT_FOUND = "request.endpoint.not_found";
   private static final String KEY_METHOD_NOT_SUPPORTED = "request.method.not_supported";
@@ -71,7 +71,7 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
   private static final String KEY_REQUEST_BODY_INVALID = "request.body.invalid";
   private static final String KEY_REQUEST_BODY_FIELD_UNRECOGNIZED =
-          "request.body.field.unrecognized";
+      "request.body.field.unrecognized";
   private static final String KEY_REQUEST_BODY_INVALID_FORMAT = "request.body.invalid_format";
 
   private static final String ERROR_CODE_METHOD_NOT_ALLOWED = "METHOD_NOT_ALLOWED";
@@ -85,14 +85,15 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @Override
-  protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-                                                                          HttpHeaders headers,
-                                                                          HttpStatusCode status,
-                                                                          WebRequest request) {
+  protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(
+      MethodArgumentNotValidException ex,
+      HttpHeaders headers,
+      HttpStatusCode status,
+      WebRequest request) {
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
 
     List<ErrorItem> errors =
-            ex.getBindingResult().getFieldErrors().stream().map(this::toErrorItem).toList();
+        ex.getBindingResult().getFieldErrors().stream().map(this::toErrorItem).toList();
 
     ProblemDetail pd = buildValidationProblem(req);
     attachErrors(pd, VALIDATION_FAILED, errors);
@@ -100,10 +101,9 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
   }
 
-
   @ExceptionHandler(ConstraintViolationException.class)
   public ProblemDetail handleConstraintViolation(
-          ConstraintViolationException ex, HttpServletRequest req) {
+      ConstraintViolationException ex, HttpServletRequest req) {
 
     List<ErrorItem> errors = ex.getConstraintViolations().stream().map(this::toErrorItem).toList();
 
@@ -123,10 +123,10 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Override
   protected @Nullable ResponseEntity<Object> handleHttpMessageNotReadable(
-          HttpMessageNotReadableException ex,
-          HttpHeaders headers,
-          HttpStatusCode status,
-          WebRequest request) {
+      HttpMessageNotReadableException ex,
+      HttpHeaders headers,
+      HttpStatusCode status,
+      WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
     Throwable cause = ex.getCause();
@@ -144,86 +144,83 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
     ProblemDetail pd = buildBadRequestBodyProblem(req);
     attachErrors(
-            pd,
-            BAD_REQUEST,
-            List.of(
-                    error(
-                            BAD_REQUEST,
-                            messageResolver.getMessage(KEY_REQUEST_BODY_INVALID),
-                            null,
-                            null,
-                            null)));
+        pd,
+        BAD_REQUEST,
+        List.of(
+            error(
+                BAD_REQUEST,
+                messageResolver.getMessage(KEY_REQUEST_BODY_INVALID),
+                null,
+                null,
+                null)));
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
   }
 
   @Override
   protected @Nullable ResponseEntity<Object> handleNoResourceFoundException(
-          NoResourceFoundException ex,
-          HttpHeaders headers,
-          HttpStatusCode status,
-          WebRequest request) {
+      NoResourceFoundException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
 
     log.warn("Endpoint not found: {}", ex.getResourcePath());
 
     ProblemDetail pd =
-            baseProblem(
-                    type(TYPE_NOT_FOUND),
-                    HttpStatus.NOT_FOUND,
-                    messageResolver.getMessage(KEY_PROBLEM_TITLE_NOT_FOUND),
-                    messageResolver.getMessage(KEY_PROBLEM_DETAIL_NOT_FOUND),
-                    req);
+        baseProblem(
+            type(TYPE_NOT_FOUND),
+            HttpStatus.NOT_FOUND,
+            messageResolver.getMessage(KEY_PROBLEM_TITLE_NOT_FOUND),
+            messageResolver.getMessage(KEY_PROBLEM_DETAIL_NOT_FOUND),
+            req);
 
     attachErrors(
-            pd,
-            NOT_FOUND,
-            List.of(
-                    error(
-                            NOT_FOUND, messageResolver.getMessage(KEY_ENDPOINT_NOT_FOUND), null, null, null)));
+        pd,
+        NOT_FOUND,
+        List.of(
+            error(
+                NOT_FOUND, messageResolver.getMessage(KEY_ENDPOINT_NOT_FOUND), null, null, null)));
 
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(pd);
   }
 
   @Override
   protected @Nullable ResponseEntity<Object> handleHttpRequestMethodNotSupported(
-          HttpRequestMethodNotSupportedException ex,
-          HttpHeaders headers,
-          HttpStatusCode status,
-          WebRequest request) {
+      HttpRequestMethodNotSupportedException ex,
+      HttpHeaders headers,
+      HttpStatusCode status,
+      WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
     String method = ex.getMethod();
 
     ProblemDetail pd =
-            baseProblem(
-                    type(TYPE_METHOD_NOT_ALLOWED),
-                    HttpStatus.METHOD_NOT_ALLOWED,
-                    messageResolver.getMessage(KEY_PROBLEM_TITLE_METHOD_NOT_ALLOWED),
-                    messageResolver.getMessage(KEY_PROBLEM_DETAIL_METHOD_NOT_ALLOWED),
-                    req);
+        baseProblem(
+            type(TYPE_METHOD_NOT_ALLOWED),
+            HttpStatus.METHOD_NOT_ALLOWED,
+            messageResolver.getMessage(KEY_PROBLEM_TITLE_METHOD_NOT_ALLOWED),
+            messageResolver.getMessage(KEY_PROBLEM_DETAIL_METHOD_NOT_ALLOWED),
+            req);
 
     attachErrors(
-            pd,
-            ERROR_CODE_METHOD_NOT_ALLOWED,
-            List.of(
-                    error(
-                            ERROR_CODE_METHOD_NOT_ALLOWED,
-                            messageResolver.getMessage(KEY_METHOD_NOT_SUPPORTED, method),
-                            null,
-                            null,
-                            null)));
+        pd,
+        ERROR_CODE_METHOD_NOT_ALLOWED,
+        List.of(
+            error(
+                ERROR_CODE_METHOD_NOT_ALLOWED,
+                messageResolver.getMessage(KEY_METHOD_NOT_SUPPORTED, method),
+                null,
+                null,
+                null)));
 
     return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(pd);
   }
 
   @Override
   protected @Nullable ResponseEntity<Object> handleMissingServletRequestParameter(
-          MissingServletRequestParameterException ex,
-          HttpHeaders headers,
-          HttpStatusCode status,
-          WebRequest request) {
+      MissingServletRequestParameterException ex,
+      HttpHeaders headers,
+      HttpStatusCode status,
+      WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
     String param = ex.getParameterName();
@@ -231,25 +228,25 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
     ProblemDetail pd = buildBadRequestParamProblem(req);
 
     attachErrors(
-            pd,
-            BAD_REQUEST,
-            List.of(
-                    error(
-                            BAD_REQUEST,
-                            messageResolver.getMessage(KEY_PARAM_REQUIRED_MISSING, param),
-                            param,
-                            null,
-                            null)));
+        pd,
+        BAD_REQUEST,
+        List.of(
+            error(
+                BAD_REQUEST,
+                messageResolver.getMessage(KEY_PARAM_REQUIRED_MISSING, param),
+                param,
+                null,
+                null)));
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
   }
 
   @Override
   protected @Nullable ResponseEntity<Object> handleServletRequestBindingException(
-          ServletRequestBindingException ex,
-          HttpHeaders headers,
-          HttpStatusCode status,
-          WebRequest request) {
+      ServletRequestBindingException ex,
+      HttpHeaders headers,
+      HttpStatusCode status,
+      WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
     ProblemDetail pd = buildBadRequestParamProblem(req);
@@ -258,148 +255,145 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
       String header = missingHeaderEx.getHeaderName();
 
       attachErrors(
-              pd,
-              BAD_REQUEST,
-              List.of(
-                      error(
-                              BAD_REQUEST,
-                              messageResolver.getMessage(KEY_HEADER_REQUIRED_MISSING, header),
-                              header,
-                              null,
-                              null)));
+          pd,
+          BAD_REQUEST,
+          List.of(
+              error(
+                  BAD_REQUEST,
+                  messageResolver.getMessage(KEY_HEADER_REQUIRED_MISSING, header),
+                  header,
+                  null,
+                  null)));
 
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
     }
 
     attachErrors(
-            pd,
-            BAD_REQUEST,
-            List.of(
-                    error(
-                            BAD_REQUEST,
-                            messageResolver.getMessage(KEY_PROBLEM_DETAIL_PARAM_INVALID),
-                            null,
-                            null,
-                            null)));
+        pd,
+        BAD_REQUEST,
+        List.of(
+            error(
+                BAD_REQUEST,
+                messageResolver.getMessage(KEY_PROBLEM_DETAIL_PARAM_INVALID),
+                null,
+                null,
+                null)));
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
   }
 
   @Override
   protected @Nullable ResponseEntity<Object> handleTypeMismatch(
-          TypeMismatchException ex,
-          HttpHeaders headers,
-          HttpStatusCode status,
-          WebRequest request) {
+      TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
 
     String paramName =
-            ex instanceof MethodArgumentTypeMismatchException matme ? matme.getName() : null;
+        ex instanceof MethodArgumentTypeMismatchException matme ? matme.getName() : null;
 
     String expected =
-            Optional.ofNullable(ex.getRequiredType())
-                    .map(Class::getSimpleName)
-                    .orElse(FALLBACK_UNKNOWN);
+        Optional.ofNullable(ex.getRequiredType())
+            .map(Class::getSimpleName)
+            .orElse(FALLBACK_UNKNOWN);
 
     ProblemDetail pd = buildBadRequestParamProblem(req);
 
     attachErrors(
-            pd,
-            BAD_REQUEST,
-            List.of(
-                    error(
-                            BAD_REQUEST,
-                            messageResolver.getMessage(KEY_PARAM_TYPE_MISMATCH, expected),
-                            paramName,
-                            null,
-                            null)));
+        pd,
+        BAD_REQUEST,
+        List.of(
+            error(
+                BAD_REQUEST,
+                messageResolver.getMessage(KEY_PARAM_TYPE_MISMATCH, expected),
+                paramName,
+                null,
+                null)));
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
   }
 
   private ResponseEntity<Object> handleInvalidFormat(
-          InvalidFormatException ex, HttpServletRequest req) {
+      InvalidFormatException ex, HttpServletRequest req) {
     String expectedType = expectedTypeName(ex);
     String actualValue = safeValue(ex.getValue());
 
     List<ErrorItem> errors =
-            ex.getPath().stream()
-                    .map(
-                            ref ->
-                                    error(
-                                            BAD_REQUEST,
-                                            messageResolver.getMessage(
-                                                    KEY_REQUEST_BODY_INVALID_FORMAT, expectedType, actualValue),
-                                            ref.getFieldName(),
-                                            null,
-                                            null))
-                    .toList();
+        ex.getPath().stream()
+            .map(
+                ref ->
+                    error(
+                        BAD_REQUEST,
+                        messageResolver.getMessage(
+                            KEY_REQUEST_BODY_INVALID_FORMAT, expectedType, actualValue),
+                        ref.getFieldName(),
+                        null,
+                        null))
+            .toList();
 
     ProblemDetail pd = buildBadRequestBodyProblem(req);
 
     attachErrors(
-            pd,
-            BAD_REQUEST,
-            errors.isEmpty()
-                    ? List.of(
-                    error(
-                            BAD_REQUEST,
-                            messageResolver.getMessage(KEY_REQUEST_BODY_INVALID),
-                            null,
-                            null,
-                            null))
-                    : errors);
+        pd,
+        BAD_REQUEST,
+        errors.isEmpty()
+            ? List.of(
+                error(
+                    BAD_REQUEST,
+                    messageResolver.getMessage(KEY_REQUEST_BODY_INVALID),
+                    null,
+                    null,
+                    null))
+            : errors);
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
   }
 
   private ResponseEntity<Object> handleUnrecognized(
-          UnrecognizedPropertyException ex, HttpServletRequest req) {
+      UnrecognizedPropertyException ex, HttpServletRequest req) {
     String field = ex.getPropertyName();
     log.warn("Unrecognized field: '{}' (known: {})", field, ex.getKnownPropertyIds());
 
     ProblemDetail pd = buildBadRequestBodyProblem(req);
 
     attachErrors(
-            pd,
-            BAD_REQUEST,
-            List.of(
-                    error(
-                            BAD_REQUEST,
-                            messageResolver.getMessage(KEY_REQUEST_BODY_FIELD_UNRECOGNIZED, field),
-                            field,
-                            null,
-                            null)));
+        pd,
+        BAD_REQUEST,
+        List.of(
+            error(
+                BAD_REQUEST,
+                messageResolver.getMessage(KEY_REQUEST_BODY_FIELD_UNRECOGNIZED, field),
+                field,
+                null,
+                null)));
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
   }
 
   private ProblemDetail buildValidationProblem(HttpServletRequest req) {
     return baseProblem(
-            type(TYPE_VALIDATION_FAILED),
-            HttpStatus.BAD_REQUEST,
-            messageResolver.getMessage(KEY_PROBLEM_TITLE_VALIDATION_FAILED),
-            messageResolver.getMessage(KEY_PROBLEM_DETAIL_VALIDATION_FAILED),
-            req);
+        type(TYPE_VALIDATION_FAILED),
+        HttpStatus.BAD_REQUEST,
+        messageResolver.getMessage(KEY_PROBLEM_TITLE_VALIDATION_FAILED),
+        messageResolver.getMessage(KEY_PROBLEM_DETAIL_VALIDATION_FAILED),
+        req);
   }
 
   private ProblemDetail buildBadRequestParamProblem(HttpServletRequest req) {
     return baseProblem(
-            type(TYPE_BAD_REQUEST),
-            HttpStatus.BAD_REQUEST,
-            messageResolver.getMessage(KEY_PROBLEM_TITLE_BAD_REQUEST),
-            messageResolver.getMessage(KEY_PROBLEM_DETAIL_PARAM_INVALID),
-            req);
+        type(TYPE_BAD_REQUEST),
+        HttpStatus.BAD_REQUEST,
+        messageResolver.getMessage(KEY_PROBLEM_TITLE_BAD_REQUEST),
+        messageResolver.getMessage(KEY_PROBLEM_DETAIL_PARAM_INVALID),
+        req);
   }
 
   private ProblemDetail buildBadRequestBodyProblem(HttpServletRequest req) {
     return baseProblem(
-            type(TYPE_BAD_REQUEST),
-            HttpStatus.BAD_REQUEST,
-            messageResolver.getMessage(KEY_PROBLEM_TITLE_BAD_REQUEST),
-            messageResolver.getMessage(KEY_PROBLEM_DETAIL_BAD_REQUEST),
-            req);
+        type(TYPE_BAD_REQUEST),
+        HttpStatus.BAD_REQUEST,
+        messageResolver.getMessage(KEY_PROBLEM_TITLE_BAD_REQUEST),
+        messageResolver.getMessage(KEY_PROBLEM_DETAIL_BAD_REQUEST),
+        req);
   }
 
   private ErrorItem toErrorItem(FieldError fe) {
@@ -413,9 +407,9 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
     String resolvedTemplate = resolveMessageOrKey(v.getMessageTemplate(), null);
     String message =
-            looksLikeMessageKeyTemplate(v.getMessageTemplate())
-                    ? resolvedTemplate
-                    : resolveMessageOrKey(v.getMessage(), FALLBACK_INVALID);
+        looksLikeMessageKeyTemplate(v.getMessageTemplate())
+            ? resolvedTemplate
+            : resolveMessageOrKey(v.getMessage(), FALLBACK_INVALID);
 
     return error(VALIDATION_FAILED, message, field, null, null);
   }
@@ -448,8 +442,8 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
   private String expectedTypeName(InvalidFormatException ex) {
     return Optional.ofNullable(ex.getTargetType())
-            .map(Class::getSimpleName)
-            .orElse(FALLBACK_UNKNOWN);
+        .map(Class::getSimpleName)
+        .orElse(FALLBACK_UNKNOWN);
   }
 
   private String safeValue(Object v) {

@@ -5,7 +5,6 @@ import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.contract.paging.SortDirection;
 import io.github.blueprintplatform.samples.customerservice.client.customer.CustomerSortField;
 import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerCreateRequest;
-import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDeleteResponse;
 import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto;
 import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerUpdateRequest;
 
@@ -27,5 +26,5 @@ public interface CustomerClientAdapter {
 
   ServiceResponse<CustomerDto> updateCustomer(Integer customerId, CustomerUpdateRequest request);
 
-  ServiceResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId);
+  ServiceResponse<Void> deleteCustomer(Integer customerId);
 }

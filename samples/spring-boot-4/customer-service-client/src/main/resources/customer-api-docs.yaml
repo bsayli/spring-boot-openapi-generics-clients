@@ -65,8 +65,8 @@ paths:
             format: int32
             minimum: 1
       responses:
-        "200":
-          description: OK
+        "204":
+          description: Customer deleted
   /customers:
     get:
       tags:

@@ -43,8 +43,7 @@ class CustomerClientErrorIT {
   }
 
   @Test
-  @DisplayName(
-      "GET /customers/{id} -> 404 Problem => throws ApiProblemException with parsed body")
+  @DisplayName("GET /customers/{id} -> 404 Problem => throws ApiProblemException with parsed body")
   void getCustomer_404_problem() {
     var problem =
         """

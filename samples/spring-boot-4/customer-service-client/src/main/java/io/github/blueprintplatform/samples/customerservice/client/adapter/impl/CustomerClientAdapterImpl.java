@@ -7,7 +7,6 @@ import io.github.blueprintplatform.samples.customerservice.client.adapter.Custom
 import io.github.blueprintplatform.samples.customerservice.client.customer.CustomerSortField;
 import io.github.blueprintplatform.samples.customerservice.client.generated.api.CustomerControllerApi;
 import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerCreateRequest;
-import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDeleteResponse;
 import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto;
 import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerUpdateRequest;
 import org.springframework.stereotype.Service;
@@ -61,7 +60,8 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
   }
 
   @Override
-  public ServiceResponse<CustomerDeleteResponse> deleteCustomer(Integer customerId) {
-    return api.deleteCustomer(customerId);
+  public ServiceResponse<Void> deleteCustomer(Integer customerId) {
+    api.deleteCustomer(customerId);
+    return ServiceResponse.of(null);
   }
 }

@@ -2,6 +2,7 @@ package io.github.blueprintplatform.samples.customerservice.client.adapter.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.Meta;
@@ -142,25 +143,16 @@ class CustomerClientAdapterImplTest {
   }
 
   @Test
-  @DisplayName("deleteCustomer -> returns CustomerDeleteResponse (data + meta)")
-  void deleteCustomer_delegates_and_returnsDeletePayload() {
-    var payload = new CustomerDeleteResponse().customerId(7);
+  @DisplayName("deleteCustomer -> returns empty ServiceResponse")
+  void deleteCustomer_delegates_and_wrapsVoidResponse() {
 
-    var serverOdt = OffsetDateTime.parse("2025-05-03T08:00:00Z");
-    var wrapper = new ServiceResponseCustomerDeleteResponse();
-    wrapper.setData(payload);
-    wrapper.setMeta(new Meta(serverOdt.toInstant(), List.of()));
+    doNothing().when(api).deleteCustomer(any());
 
-    when(api.deleteCustomer(any())).thenReturn(wrapper);
-
-    ServiceResponse<CustomerDeleteResponse> res = adapter.deleteCustomer(7);
+    ServiceResponse<Void> res = adapter.deleteCustomer(7);
 
     assertNotNull(res);
-    assertNotNull(res.getData());
-    assertEquals(7, res.getData().getCustomerId());
-
+    assertNull(res.getData());
     assertNotNull(res.getMeta());
-    assertEquals(serverOdt.toInstant(), res.getMeta().serverTime());
   }
 
   @Test

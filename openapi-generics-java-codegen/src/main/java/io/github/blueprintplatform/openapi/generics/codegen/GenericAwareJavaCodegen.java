@@ -7,19 +7,20 @@ import org.openapitools.codegen.languages.JavaClientCodegen;
 import org.openapitools.codegen.model.ModelsMap;
 
 /**
- * Custom Java generator that integrates external contract models and
- * generic response wrappers into OpenAPI generation.
+ * Custom Java generator that integrates external contract models and generic response wrappers into
+ * OpenAPI generation.
  *
- * <p>Responsibilities:</p>
+ * <p>Responsibilities:
+ *
  * <ul>
- *   <li>Register externally provided models (contract-first approach)</li>
- *   <li>Exclude those models from generation</li>
- *   <li>Inject required imports into wrapper models via vendor extensions</li>
- *   <li>Keep generated code free of invalid/self imports</li>
+ *   <li>Register externally provided models (contract-first approach)
+ *   <li>Exclude those models from generation
+ *   <li>Inject required imports into wrapper models via vendor extensions
+ *   <li>Keep generated code free of invalid/self imports
  * </ul>
  *
- * <p>Design note: This class only orchestrates the flow. Actual decisions
- * (ignore, import resolution) are delegated to dedicated components.</p>
+ * <p>Design note: This class only orchestrates the flow. Actual decisions (ignore, import
+ * resolution) are delegated to dedicated components.
  */
 public class GenericAwareJavaCodegen extends JavaClientCodegen {
 
@@ -27,18 +28,14 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
   private final ModelIgnoreDecider ignoreDecider = new ModelIgnoreDecider(registry);
   private final ExternalImportResolver importResolver = new ExternalImportResolver(registry);
 
-  /**
-   * Registers external model mappings from additionalProperties.
-   */
+  /** Registers external model mappings from additionalProperties. */
   @Override
   public void processOpts() {
     super.processOpts();
     registry.register(additionalProperties);
   }
 
-  /**
-   * Marks models that should be ignored and cleans their imports.
-   */
+  /** Marks models that should be ignored and cleans their imports. */
   @Override
   public CodegenModel fromModel(String name, Schema model) {
     CodegenModel cm = super.fromModel(name, model);
@@ -51,9 +48,7 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     return cm;
   }
 
-  /**
-   * Removes ignored models and injects external imports into wrapper models.
-   */
+  /** Removes ignored models and injects external imports into wrapper models. */
   @Override
   public ModelsMap postProcessModels(ModelsMap modelsMap) {
     ModelsMap result = super.postProcessModels(modelsMap);
@@ -62,24 +57,28 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
       return result;
     }
 
-    result.getModels().removeIf(m -> {
-      CodegenModel model = m.getModel();
-      return model != null && ignoreDecider.isIgnored(model.name);
-    });
+    result
+        .getModels()
+        .removeIf(
+            m -> {
+              CodegenModel model = m.getModel();
+              return model != null && ignoreDecider.isIgnored(model.name);
+            });
 
-    result.getModels().forEach(m -> {
-      CodegenModel model = m.getModel();
-      if (model != null) {
-        importResolver.apply(model);
-      }
-    });
+    result
+        .getModels()
+        .forEach(
+            m -> {
+              CodegenModel model = m.getModel();
+              if (model != null) {
+                importResolver.apply(model);
+              }
+            });
 
     return result;
   }
 
-  /**
-   * Ensures ignored models are fully removed from the generation graph.
-   */
+  /** Ensures ignored models are fully removed from the generation graph. */
   @Override
   public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> allModels) {
     Map<String, ModelsMap> result = super.postProcessAllModels(allModels);
@@ -93,9 +92,7 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     return "java-generics-contract";
   }
 
-  /**
-   * Removes imports that reference ignored models.
-   */
+  /** Removes imports that reference ignored models. */
   private void cleanImports(CodegenModel model) {
     if (model.imports == null || model.imports.isEmpty()) return;
     model.imports.removeIf(ignoreDecider::isIgnored);

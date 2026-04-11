@@ -106,7 +106,7 @@ class CustomerClientAdapterImplTest {
     when(api.getCustomers(any(), any(), any(), any(), any(), any())).thenReturn(wrapper);
 
     ServiceResponse<Page<CustomerDto>> res =
-            adapter.getCustomers(null, null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC);
+        adapter.getCustomers(null, null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC);
 
     assertNotNull(res);
     assertNotNull(res.getData());

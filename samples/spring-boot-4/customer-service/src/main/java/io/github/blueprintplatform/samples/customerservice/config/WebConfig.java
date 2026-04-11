@@ -29,13 +29,8 @@ public class WebConfig implements WebMvcConfigurer {
   @Override
   public void configureApiVersioning(ApiVersionConfigurer configurer) {
     configurer
-            .useVersionResolver(
-                    new ApiOnlyVersionResolver(
-                            API_VERSION_HEADER,
-                            contextPath,
-                            apiBasePath
-                    )
-            )
-            .setVersionRequired(false);
+        .useVersionResolver(
+            new ApiOnlyVersionResolver(API_VERSION_HEADER, contextPath, apiBasePath))
+        .setVersionRequired(false);
   }
 }

@@ -182,9 +182,7 @@ class CustomerClientIT {
   void deleteCustomer_shouldReturn200() {
 
     server.enqueue(
-            new MockResponse()
-                    .setResponseCode(200)
-                    .addHeader("Content-Type", "application/json"));
+        new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json"));
 
     assertDoesNotThrow(() -> api.deleteCustomer(1));
   }

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.client.RestClient;
 import tools.jackson.databind.ObjectMapper;
@@ -179,32 +178,15 @@ class CustomerClientIT {
   }
 
   @Test
-  @DisplayName("DELETE /customers/{id} -> 200 OK + maps {data, meta}")
-  void deleteCustomer_shouldReturn200_andMapBody() {
-    var body =
-        """
-            {
-              "data": { "customerId": 1 },
-              "meta": { "serverTime": "2025-01-05T08:00:00Z", "sort": [] }
-            }
-            """;
+  @DisplayName("DELETE /customers/{id} -> 200 OK (no body expected)")
+  void deleteCustomer_shouldReturn200() {
 
     server.enqueue(
-        new MockResponse()
-            .setResponseCode(200)
-            .addHeader("Content-Type", "application/json")
-            .setBody(body));
+        new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json"));
 
-    var resp = api.deleteCustomer(1);
-
-    assertNotNull(resp);
-    assertNotNull(resp.getData());
-    assertEquals(1, resp.getData().getCustomerId());
-
-    assertNotNull(resp.getMeta());
-    assertNotNull(resp.getMeta().serverTime());
+    assertDoesNotThrow(() -> api.deleteCustomer(1));
   }
-
+  
   @Configuration
   static class TestBeans {
 
