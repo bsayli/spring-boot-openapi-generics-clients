@@ -148,7 +148,7 @@ Verify the API is running:
 ### 2. Observe the contract shape
 
 ```bash
-curl http://localhost:8084/customer-service/v1/customers/1
+curl http://localhost:8084/customer-service/customers/1
 ```
 
 ```json

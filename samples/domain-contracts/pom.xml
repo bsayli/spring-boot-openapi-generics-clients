@@ -1,0 +1,46 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Parent -->
+    <parent>
+        <groupId>io.github.blueprint-platform.samples</groupId>
+        <artifactId>samples</artifactId>
+        <version>0.8.3</version>
+    </parent>
+
+    <!-- Artifact -->
+    <artifactId>domain-contracts</artifactId>
+    <packaging>pom</packaging>
+
+    <name>domain-contracts</name>
+    <description>Domain-based shared contracts (modular structure for microservices)</description>
+
+    <!-- Properties -->
+    <properties>
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- Modules -->
+    <modules>
+        <module>customer-contract</module>
+    </modules>
+
+    <!-- Build -->
+    <build>
+        <plugins>
+            <!-- Compiler (shared across all contracts) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>${java.version}</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -7,7 +7,7 @@
 
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>samples</artifactId>
-    <version>0.8.2</version>
+    <version>0.8.3</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -15,8 +15,11 @@
     </properties>
 
     <modules>
-        <module>customer-service</module>
-        <module>customer-service-client</module>
+        <module>domain-contracts</module>
+        <module>spring-boot-3/customer-service</module>
+        <module>spring-boot-3/customer-service-client</module>
+        <module>spring-boot-4/customer-service</module>
+        <module>spring-boot-4/customer-service-client</module>
     </modules>
 
 </project>

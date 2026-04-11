@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics</artifactId>
-        <version>0.8.2</version>
+        <version>0.8.3</version>
     </parent>
 
     <artifactId>openapi-generics-java-codegen</artifactId>
@@ -32,7 +32,7 @@
         <url>https://github.com/blueprint-platform/openapi-generics</url>
         <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-        <tag>v0.8.2</tag>
+        <tag>v0.8.3</tag>
     </scm>
 
     <developers>
@@ -83,7 +83,7 @@
             <dependency>
                 <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-platform-bom</artifactId>
-                <version>0.8.2</version>
+                <version>0.8.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

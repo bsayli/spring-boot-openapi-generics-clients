@@ -132,7 +132,7 @@ You provide exactly two inputs. Everything else is handled by the platform.
 <parent>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.8.2</version>
+  <version>0.8.3</version>
 </parent>
 ```
 

@@ -282,7 +282,7 @@ Those responsibilities belong to other platform layers.
 <dependency>
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-contract</artifactId>
-    <version>0.8.2</version>
+    <version>0.8.3</version>
 </dependency>
 ```
 

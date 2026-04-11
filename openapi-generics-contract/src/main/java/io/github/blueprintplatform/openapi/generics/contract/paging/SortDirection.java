@@ -1,7 +1,5 @@
 package io.github.blueprintplatform.openapi.generics.contract.paging;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
 /**
  * Supported sorting directions.
  */
@@ -39,7 +37,6 @@ public enum SortDirection {
    *
    * @return serialized direction value
    */
-  @JsonValue
   public String value() {
     return value;
   }

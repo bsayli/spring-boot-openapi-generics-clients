@@ -1,157 +1,103 @@
 package io.github.blueprintplatform.openapi.generics.codegen;
 
 import io.swagger.v3.oas.models.media.Schema;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import org.openapitools.codegen.CodegenModel;
 import org.openapitools.codegen.languages.JavaClientCodegen;
 import org.openapitools.codegen.model.ModelsMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * A custom OpenAPI Generator that introduces awareness of platform-level generic models.
+ * Custom Java generator that integrates external contract models and
+ * generic response wrappers into OpenAPI generation.
  *
- * <p>Models marked with {@code x-ignore-model: true} are:
- *
+ * <p>Responsibilities:</p>
  * <ul>
- *   <li>Detected during {@link #fromModel(String, Schema)} phase</li>
- *   <li>Filtered out locally in {@link #postProcessModels(ModelsMap)}</li>
- *   <li>Completely removed from the global model graph in {@link #postProcessAllModels(Map)}</li>
+ *   <li>Register externally provided models (contract-first approach)</li>
+ *   <li>Exclude those models from generation</li>
+ *   <li>Inject required imports into wrapper models via vendor extensions</li>
+ *   <li>Keep generated code free of invalid/self imports</li>
  * </ul>
  *
- * <p>This ensures that:
- *
- * <ul>
- *   <li>Platform-owned generic types (e.g. ServiceResponse, Meta, Sort) are not generated</li>
- *   <li>But still usable as referenced types in composed/generated models</li>
- * </ul>
- *
- * <p><b>Design Principle:</b><br>
- * Java contract is the authority, OpenAPI is a projection. This generator enforces that
- * projection must not re-materialize platform-owned types.
+ * <p>Design note: This class only orchestrates the flow. Actual decisions
+ * (ignore, import resolution) are delegated to dedicated components.</p>
  */
 public class GenericAwareJavaCodegen extends JavaClientCodegen {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(GenericAwareJavaCodegen.class);
+  private final ExternalModelRegistry registry = new ExternalModelRegistry();
+  private final ModelIgnoreDecider ignoreDecider = new ModelIgnoreDecider(registry);
+  private final ExternalImportResolver importResolver = new ExternalImportResolver(registry);
 
-    /**
-     * Vendor extension key used in OpenAPI schemas to mark models as non-generatable.
-     */
-    private static final String EXT_IGNORE_MODEL = "x-ignore-model";
+  /**
+   * Registers external model mappings from additionalProperties.
+   */
+  @Override
+  public void processOpts() {
+    super.processOpts();
+    registry.register(additionalProperties);
+  }
 
-    /**
-     * Holds model names that should be excluded from generation.
-     */
-    private final Set<String> ignoredModels = new HashSet<>();
+  /**
+   * Marks models that should be ignored and cleans their imports.
+   */
+  @Override
+  public CodegenModel fromModel(String name, Schema model) {
+    CodegenModel cm = super.fromModel(name, model);
 
-    // ================================
-    // PHASE 1 — MARK
-    // ================================
-
-    /**
-     * Intercepts model creation and marks models that should be ignored.
-     *
-     * <p>This phase does NOT remove models yet. It only records intent.
-     */
-    @Override
-    public CodegenModel fromModel(String name, Schema model) {
-
-        CodegenModel codegenModel = super.fromModel(name, model);
-
-        Map<String, Object> extensions =
-                (model != null) ? model.getExtensions() : null;
-
-        if (isIgnoredModel(extensions)) {
-            ignoredModels.add(name);
-            log.debug("Marked model as ignored: {}", name);
-        }
-
-        if (codegenModel.imports != null && !codegenModel.imports.isEmpty()) {
-            codegenModel.imports.removeIf(this::shouldIgnore);
-        }
-
-        return codegenModel;
+    if (ignoreDecider.shouldIgnore(name, model)) {
+      ignoreDecider.markIgnored(name);
     }
 
-    // ================================
-    // PHASE 2 — LOCAL FILTER
-    // ================================
+    cleanImports(cm);
+    return cm;
+  }
 
-    /**
-     * Removes ignored models from the current processing batch.
-     *
-     * <p>This prevents template-level generation for those models.
-     */
-    @Override
-    public ModelsMap postProcessModels(ModelsMap modelsMap) {
+  /**
+   * Removes ignored models and injects external imports into wrapper models.
+   */
+  @Override
+  public ModelsMap postProcessModels(ModelsMap modelsMap) {
+    ModelsMap result = super.postProcessModels(modelsMap);
 
-        ModelsMap result = super.postProcessModels(modelsMap);
-
-        if (result == null || result.getModels() == null) {
-            return result;
-        }
-
-        result.getModels().removeIf(modelMap -> {
-            CodegenModel model = modelMap.getModel();
-            return model != null && shouldIgnore(model.name);
-        });
-
-        return result;
+    if (result == null || result.getModels() == null) {
+      return result;
     }
 
-    // ================================
-    // PHASE 3 — GLOBAL REMOVE (CRITICAL)
-    // ================================
+    result.getModels().removeIf(m -> {
+      CodegenModel model = m.getModel();
+      return model != null && ignoreDecider.isIgnored(model.name);
+    });
 
-    /**
-     * Completely removes ignored models from the global model map.
-     *
-     * <p>This is the critical phase which ensures:
-     * <ul>
-     *   <li>No file generation</li>
-     *   <li>No downstream references treated as generatable models</li>
-     * </ul>
-     */
-    @Override
-    public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> allModels) {
+    result.getModels().forEach(m -> {
+      CodegenModel model = m.getModel();
+      if (model != null) {
+        importResolver.apply(model);
+      }
+    });
 
-        Map<String, ModelsMap> result = super.postProcessAllModels(allModels);
+    return result;
+  }
 
-        Iterator<Map.Entry<String, ModelsMap>> iterator = result.entrySet().iterator();
+  /**
+   * Ensures ignored models are fully removed from the generation graph.
+   */
+  @Override
+  public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> allModels) {
+    Map<String, ModelsMap> result = super.postProcessAllModels(allModels);
 
-        while (iterator.hasNext()) {
-            Map.Entry<String, ModelsMap> entry = iterator.next();
+    result.entrySet().removeIf(e -> ignoreDecider.isIgnored(e.getKey()));
+    return result;
+  }
 
-            if (shouldIgnore(entry.getKey())) {
-                log.debug("Removed model from generation graph: {}", entry.getKey());
-                iterator.remove();
-            }
-        }
+  @Override
+  public String getName() {
+    return "java-generics-contract";
+  }
 
-        return result;
-    }
-
-    /**
-     * Name of the custom generator.
-     */
-    @Override
-    public String getName() {
-        return "java-generics-contract";
-    }
-
-    // ================================
-    // INTERNAL HELPERS
-    // ================================
-
-    private boolean isIgnoredModel(Map<String, Object> extensions) {
-        return extensions != null && Boolean.TRUE.equals(extensions.get(EXT_IGNORE_MODEL));
-    }
-
-    private boolean shouldIgnore(String modelName) {
-        return ignoredModels.contains(modelName);
-    }
+  /**
+   * Removes imports that reference ignored models.
+   */
+  private void cleanImports(CodegenModel model) {
+    if (model.imports == null || model.imports.isEmpty()) return;
+    model.imports.removeIf(ignoreDecider::isIgnored);
+  }
 }

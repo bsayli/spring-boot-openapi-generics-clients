@@ -1,0 +1,40 @@
+server:
+  port: ${APP_PORT:8085}
+  servlet:
+    context-path: /customer-service
+
+spring:
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+  mvc:
+    problemdetails:
+      enabled: true
+  application:
+    name: customer-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  web:
+    error:
+      include-message: always
+      include-binding-errors: always
+      include-stacktrace: never
+      include-exception: false
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    io.github.blueprintplatform: DEBUG
+
+app:
+  openapi:
+    version: @project.version@
+    base-url: "http://localhost:${server.port}${server.servlet.context-path:}"
+    wrapper:
+      # Optional: extra annotation for generated client models
+      # class-extra-annotation: "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)"
+
+springdoc:
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

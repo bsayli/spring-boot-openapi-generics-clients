@@ -1,14 +1,11 @@
 package io.github.blueprintplatform.openapi.generics.contract.paging;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 /**
  * Sorting descriptor included in response metadata.
  *
  * @param field field name used for sorting
  * @param direction sorting direction
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record Sort(String field, SortDirection direction) {
 
   /**

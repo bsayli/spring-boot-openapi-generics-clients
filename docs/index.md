@@ -80,7 +80,7 @@ Add the dependency:
 <dependency>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>0.8.2</version>
+  <version>0.8.3</version>
 </dependency>
 ```
 
@@ -100,7 +100,7 @@ Inherit the parent:
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.8.2</version>
+  <version>0.8.3</version>
 </parent>
 ```
 

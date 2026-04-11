@@ -1,6 +1,5 @@
 package io.github.blueprintplatform.openapi.generics.contract.error;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 
 /**
@@ -8,7 +7,6 @@ import java.util.List;
  *
  * @param errors structured error details attached to the problem response
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record ProblemExtensions(List<ErrorItem> errors) {
 
   /**
