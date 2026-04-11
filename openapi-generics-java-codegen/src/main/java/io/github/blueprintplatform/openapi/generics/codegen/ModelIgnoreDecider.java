@@ -4,6 +4,8 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Decides whether a model should be excluded from generation.
@@ -19,6 +21,8 @@ import java.util.Set;
  */
 public class ModelIgnoreDecider {
 
+  private static final Logger log = LoggerFactory.getLogger(ModelIgnoreDecider.class);
+
   private static final String EXT_IGNORE_MODEL = "x-ignore-model";
 
   private final Set<String> ignored = new HashSet<>();
@@ -30,12 +34,22 @@ public class ModelIgnoreDecider {
 
   /** Evaluates ignore rules for a model. */
   public boolean shouldIgnore(String name, Schema model) {
-    return isIgnoredByExtension(model) || registry.isExternal(name);
+    boolean byExtension = isIgnoredByExtension(model);
+    boolean byExternal = registry.isExternal(name);
+
+    if (byExtension) {
+      log.debug("Model ignored by extension (x-ignore-model): {}", name);
+    } else if (byExternal) {
+      log.debug("Model ignored as external model: {}", name);
+    }
+
+    return byExtension || byExternal;
   }
 
   /** Marks model as ignored. */
   public void markIgnored(String name) {
     ignored.add(name);
+    log.debug("Marked model as ignored: {}", name);
   }
 
   /**

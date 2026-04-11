@@ -5,6 +5,8 @@ import java.util.Map;
 import org.openapitools.codegen.CodegenModel;
 import org.openapitools.codegen.languages.JavaClientCodegen;
 import org.openapitools.codegen.model.ModelsMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Custom Java generator that integrates external contract models and generic response wrappers into
@@ -24,6 +26,9 @@ import org.openapitools.codegen.model.ModelsMap;
  */
 public class GenericAwareJavaCodegen extends JavaClientCodegen {
 
+  private static final Logger log =
+          LoggerFactory.getLogger(GenericAwareJavaCodegen.class);
+
   private final ExternalModelRegistry registry = new ExternalModelRegistry();
   private final ModelIgnoreDecider ignoreDecider = new ModelIgnoreDecider(registry);
   private final ExternalImportResolver importResolver = new ExternalImportResolver(registry);
@@ -33,6 +38,8 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
   public void processOpts() {
     super.processOpts();
     registry.register(additionalProperties);
+
+    log.debug("Generic-aware codegen initialized with external model registry");
   }
 
   /** Marks models that should be ignored and cleans their imports. */
@@ -57,23 +64,31 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
       return result;
     }
 
-    result
-        .getModels()
-        .removeIf(
-            m -> {
-              CodegenModel model = m.getModel();
-              return model != null && ignoreDecider.isIgnored(model.name);
-            });
+    int before = result.getModels().size();
 
     result
-        .getModels()
-        .forEach(
-            m -> {
-              CodegenModel model = m.getModel();
-              if (model != null) {
-                importResolver.apply(model);
-              }
-            });
+            .getModels()
+            .removeIf(
+                    m -> {
+                      CodegenModel model = m.getModel();
+                      return model != null && ignoreDecider.isIgnored(model.name);
+                    });
+
+    int after = result.getModels().size();
+
+    if (before != after) {
+      log.debug("Filtered ignored models: {} -> {}", before, after);
+    }
+
+    result
+            .getModels()
+            .forEach(
+                    m -> {
+                      CodegenModel model = m.getModel();
+                      if (model != null) {
+                        importResolver.apply(model);
+                      }
+                    });
 
     return result;
   }
@@ -83,7 +98,16 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
   public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> allModels) {
     Map<String, ModelsMap> result = super.postProcessAllModels(allModels);
 
+    int before = result.size();
+
     result.entrySet().removeIf(e -> ignoreDecider.isIgnored(e.getKey()));
+
+    int after = result.size();
+
+    if (before != after) {
+      log.debug("Removed ignored models from global model graph: {} -> {}", before, after);
+    }
+
     return result;
   }
 

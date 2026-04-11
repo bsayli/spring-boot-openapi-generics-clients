@@ -62,6 +62,7 @@
 
         <openapi.generated.sources>${openapi.generator.output}/${openapi.generator.sourceFolder}</openapi.generated.sources>
         <openapi.templates.codegen>${project.build.directory}/codegen-templates</openapi.templates.codegen>
+        <openapi.generics.skip>false</openapi.generics.skip>
     </properties>
 
     <dependencies>
@@ -102,6 +103,7 @@
                             </goals>
 
                             <configuration>
+                                <skip>${openapi.generics.skip}</skip>
                                 <artifactItems>
                                     <artifactItem>
                                         <groupId>org.openapitools</groupId>
@@ -123,6 +125,7 @@
                             </goals>
 
                             <configuration>
+                                <skip>${openapi.generics.skip}</skip>
                                 <artifactItems>
                                     <artifactItem>
                                         <groupId>io.github.blueprint-platform</groupId>
@@ -142,8 +145,19 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
                     <version>${maven-antrun-plugin.version}</version>
-
                     <executions>
+                        <execution>
+                            <id>ensure-template-dir</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <target>
+                                    <mkdir dir="${openapi.templates.effective}/Java"/>
+                                </target>
+                            </configuration>
+                        </execution>
                         <execution>
                             <id>patch-openapi-model-template</id>
                             <phase>generate-sources</phase>
@@ -152,6 +166,7 @@
                             </goals>
 
                             <configuration>
+                                <skip>${openapi.generics.skip}</skip>
                                 <target>
 
                                     <replaceregexp
@@ -202,6 +217,7 @@
                             </goals>
 
                             <configuration>
+                                <skip>${openapi.generics.skip}</skip>
                                 <outputDirectory>${openapi.templates.effective}/Java</outputDirectory>
 
                                 <resources>
@@ -230,9 +246,6 @@
                     </dependencies>
 
                     <configuration>
-
-                        <!-- ENGINE CORE -->
-                        <generatorName>java-generics-contract</generatorName>
 
                         <output>${openapi.generator.output}</output>
 

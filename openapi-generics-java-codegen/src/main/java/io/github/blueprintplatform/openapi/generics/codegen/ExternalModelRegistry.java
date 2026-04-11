@@ -2,6 +2,8 @@ package io.github.blueprintplatform.openapi.generics.codegen;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Holds mappings between OpenAPI model names and external Java types (FQCN).
@@ -16,6 +18,8 @@ import java.util.Map;
  */
 public class ExternalModelRegistry {
 
+  private static final Logger log = LoggerFactory.getLogger(ExternalModelRegistry.class);
+
   private static final String PREFIX = "openapiGenerics.externalModel.";
 
   private final Map<String, String> externalModels = new HashMap<>();
@@ -25,7 +29,11 @@ public class ExternalModelRegistry {
     for (Map.Entry<String, Object> e : additionalProperties.entrySet()) {
       if (e.getKey().startsWith(PREFIX)) {
         String modelName = e.getKey().substring(PREFIX.length());
-        externalModels.put(modelName, String.valueOf(e.getValue()));
+        String fqcn = String.valueOf(e.getValue());
+
+        externalModels.put(modelName, fqcn);
+
+        log.debug("Registered external model: {} -> {}", modelName, fqcn);
       }
     }
   }

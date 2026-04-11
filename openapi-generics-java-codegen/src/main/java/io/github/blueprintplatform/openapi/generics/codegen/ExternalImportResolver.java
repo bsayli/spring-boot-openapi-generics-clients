@@ -3,6 +3,8 @@ package io.github.blueprintplatform.openapi.generics.codegen;
 import java.util.Map;
 import java.util.Optional;
 import org.openapitools.codegen.CodegenModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Resolves external model types and injects their imports into vendorExtensions.
@@ -20,6 +22,8 @@ import org.openapitools.codegen.CodegenModel;
  * </ul>
  */
 public class ExternalImportResolver {
+
+  private static final Logger log = LoggerFactory.getLogger(ExternalImportResolver.class);
 
   private static final String EXT_API_WRAPPER = "x-api-wrapper";
   private static final String EXT_DATA_ITEM = "x-data-item";
@@ -40,14 +44,24 @@ public class ExternalImportResolver {
     if (ve == null) return;
 
     Optional<String> typeOpt =
-        extract(ve, EXT_DATA_ITEM).or(() -> extract(ve, EXT_WRAPPER_DATATYPE));
+            extract(ve, EXT_DATA_ITEM).or(() -> extract(ve, EXT_WRAPPER_DATATYPE));
 
-    if (typeOpt.isEmpty()) return;
+    if (typeOpt.isEmpty()) {
+      log.debug("Wrapper model has no resolvable inner type: {}", model.name);
+      return;
+    }
 
-    String fqcn = registry.getFqcn(typeOpt.get());
-    if (fqcn == null) return;
+    String type = typeOpt.get();
+    String fqcn = registry.getFqcn(type);
+
+    if (fqcn == null) {
+      log.debug("No external mapping found for type: {} (model: {})", type, model.name);
+      return;
+    }
 
     ve.put(EXT_EXTRA_IMPORTS, fqcn);
+
+    log.debug("External import applied: {} -> {}", type, fqcn);
   }
 
   private boolean isWrapperModel(CodegenModel model) {

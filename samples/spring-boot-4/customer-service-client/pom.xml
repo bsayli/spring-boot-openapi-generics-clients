@@ -168,7 +168,7 @@
                         </goals>
 
                         <configuration>
-
+                            <generatorName>java-generics-contract</generatorName>
                             <inputSpec>${project.basedir}/src/main/resources/customer-api-docs.yaml</inputSpec>
 
                             <library>restclient</library>
