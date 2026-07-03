@@ -2,10 +2,10 @@ openapi: 3.1.0
 info:
   title: BYOE Response Type Coverage API
   description: |
-    Type coverage sample validating OpenAPI projection, generated client reconstruction,
-    and runtime deserialization for custom response envelopes.
+    Type coverage sample for user-owned response envelopes.
 
-    Verified response shapes include:
+    Verifies OpenAPI projection, generated client reconstruction, and runtime
+    deserialization for:
 
     - ApiResponse<T>
     - ApiResponse<List<T>>
@@ -14,13 +14,12 @@ info:
     - ApiResponse<Paging<T>>
     - ApiResponse<Window<T>>
 
-    Demonstrates Bring Your Own Envelope (BYOE) and Bring Your Own Container (BYOC)
-    support by reconstructing both built-in and application-defined generic response
-    contracts across OpenAPI projection, generated clients, and runtime deserialization.
+    Demonstrates Bring Your Own Envelope (BYOE) with built-in and
+    application-defined generic containers.
   version: 1.2.1-SNAPSHOT
 servers:
 - url: http://localhost:8076/type-coverage/byoe-response
-  description: Local BYOE/BYOC response type coverage producer
+  description: Local BYOE response type coverage producer
 paths:
   /types/windows/summaries:
     get:

@@ -1,14 +1,22 @@
 openapi: 3.1.0
 info:
   title: ServiceResponse Type Coverage API
-  description: "Type coverage sample validating contract projection and client reconstruction\
-    \ for ServiceResponse<T>, ServiceResponse<List<T>>, ServiceResponse<Set<T>>, and\
-    \ ServiceResponse<Page<T>>."
+  description: |
+    Type coverage sample for the built-in ServiceResponse<T> contract.
+
+    Verifies OpenAPI projection, generated client reconstruction, and runtime
+    deserialization for:
+
+    - ServiceResponse<T>
+    - ServiceResponse<List<T>>
+    - ServiceResponse<Set<T>>
+    - ServiceResponse<Page<T>>
+
+    Covers scalar, value, enum, DTO, list, set, and paged payload types.
   version: 1.2.1-SNAPSHOT
 servers:
 - url: http://localhost:8074/type-coverage/service-response
-  description: Local producer for generic response contract projection and container
-    coverage validation.
+  description: Local ServiceResponse type coverage producer
 paths:
   /types/values/uuid:
     get:
