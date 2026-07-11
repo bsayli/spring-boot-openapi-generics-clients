@@ -25,6 +25,13 @@ app:
     version: @project.version@
     base-url: "http://localhost:${server.port}${server.servlet.context-path:}"
 
+openapi-generics:
+  containers:
+    - type: io.github.blueprintplatform.samples.typecoverage.contract.Window
+      item-property: items
+    - type: io.github.blueprintplatform.samples.typecoverage.contract.Batch
+      item-property: elements
+
 springdoc:
   default-consumes-media-type: application/json
   default-produces-media-type: application/json

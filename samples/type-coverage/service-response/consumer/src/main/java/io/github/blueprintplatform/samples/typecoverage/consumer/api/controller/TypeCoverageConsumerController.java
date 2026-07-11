@@ -7,17 +7,20 @@ import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.Cov
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeProfileDto;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeSummaryDto;
 import io.github.blueprintplatform.samples.typecoverage.consumer.service.TypeCoverageConsumerService;
+import io.github.blueprintplatform.samples.typecoverage.contract.Batch;
+import io.github.blueprintplatform.samples.typecoverage.contract.Window;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/types", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -112,5 +115,25 @@ public class TypeCoverageConsumerController {
   @GetMapping("/sets/statuses")
   public ResponseEntity<ServiceResponse<Set<CoverageStatus>>> setStatuses() {
     return ResponseEntity.ok(service.setStatuses());
+  }
+
+  @GetMapping("/windows/summaries")
+  public ResponseEntity<ServiceResponse<Window<TypeSummaryDto>>> windowSummaries() {
+    return ResponseEntity.ok(service.windowSummaries());
+  }
+
+  @GetMapping("/windows/statuses")
+  public ResponseEntity<ServiceResponse<Window<CoverageStatus>>> windowStatuses() {
+    return ResponseEntity.ok(service.windowStatuses());
+  }
+
+  @GetMapping("/batches/summaries")
+  public ResponseEntity<ServiceResponse<Batch<TypeSummaryDto>>> batchSummaries() {
+    return ResponseEntity.ok(service.batchSummaries());
+  }
+
+  @GetMapping("/batches/statuses")
+  public ResponseEntity<ServiceResponse<Batch<CoverageStatus>>> batchStatuses() {
+    return ResponseEntity.ok(service.batchStatuses());
   }
 }

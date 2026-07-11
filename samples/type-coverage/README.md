@@ -1,14 +1,20 @@
 # type-coverage
 
-Focused end-to-end validation samples for OpenAPI Generics.
+Focused end-to-end validation samples for **OpenAPI Generics**.
 
-Unlike the Spring Boot integration samples, the projects in this directory are not intended to demonstrate application architecture, business workflows, or framework usage patterns.
+Unlike the Spring Boot integration samples, the projects in this
+directory are not intended to demonstrate application architecture,
+business workflows, or framework usage patterns.
 
-Their purpose is to provide deterministic validation environments for verifying the core OpenAPI Generics pipeline and preventing regressions across future releases.
+Their purpose is to provide deterministic validation environments for
+verifying the core OpenAPI Generics pipeline and preventing regressions
+across future releases.
 
-The samples validate that generic response contracts can move through the complete lifecycle without losing their original contract shape:
+The samples validate that generic response contracts move through the
+complete lifecycle while preserving both **contract ownership** and
+**generic type identity**.
 
-```text
+``` text
 Producer
     ↓
 OpenAPI Projection
@@ -18,153 +24,159 @@ Generated Client
 Consumer Runtime
 ```
 
----
+------------------------------------------------------------------------
 
-## Table of Contents
+# Table of Contents
 
-- [Purpose](#purpose)
-- [Available Samples](#available-samples)
-- [Sample Boundaries](#sample-boundaries)
-- [Validation Scope](#validation-scope)
-- [Regression Role](#regression-role)
-- [Mental Model](#mental-model)
+-   Purpose
+-   Available Samples
+-   Sample Boundaries
+-   Validation Scope
+-   Regression Role
+-   Mental Model
 
----
+------------------------------------------------------------------------
 
-## Purpose
+# Purpose
 
-The `type-coverage` samples exist to verify contract preservation across the OpenAPI Generics pipeline.
+The `type-coverage` suite exists to verify that OpenAPI Generics
+preserves Java contract semantics throughout the entire pipeline.
 
-They focus on:
+It focuses on:
 
-- OpenAPI projection correctness
-- vendor extension processing
-- generated client reconstruction
-- runtime deserialization
-- consumer-side type compatibility
-- regression protection across future releases
+-   OpenAPI projection correctness
+-   vendor extension generation
+-   generated client reconstruction
+-   runtime deserialization
+-   consumer-side type compatibility
+-   contract ownership preservation
+-   regression protection across future releases
 
-The focus is not endpoint functionality.
+The objective is not endpoint functionality.
 
-The focus is preserving type fidelity from producer contract to consumer usage.
+The objective is deterministic verification of generic contract
+fidelity.
 
----
+------------------------------------------------------------------------
 
-## Available Samples
+# Available Samples
 
-| Sample                                           | Purpose                                                                                 |
-|--------------------------------------------------|-----------------------------------------------------------------------------------------|
-| [`service-response`](service-response/README.md) | Validates the canonical platform-provided `ServiceResponse<T>` envelope.                |
-| [`byoe-response`](byoe-response/README.md)       | Validates Bring Your Own Envelope support using a user-owned `ApiResponse<T>` contract. |
+  ----------------------------------------------------------------------------------------
+Sample                                             Purpose
+  -------------------------------------------------- -------------------------------------
+[`service-response`](service-response/README.md)   Validates the built-in
+`ServiceResponse<T>` envelope with
+both platform-provided and
+application-owned generic containers.
 
-Each sample contains its own producer, generated client, and consumer modules.
+[`byoe-response`](byoe-response/README.md)         Validates Bring Your Own Envelope
+(BYOE) using a user-owned
+`ApiResponse<T>` contract together
+with application-owned generic
+containers.
+  ----------------------------------------------------------------------------------------
 
-For the full validation matrix, endpoint list, and smoke-test commands, see the individual sample documentation.
+Each sample contains its own producer, generated client and consumer.
 
----
+------------------------------------------------------------------------
 
-## Sample Boundaries
+# Sample Boundaries
 
-The two samples are related, but they do not validate the exact same response-shape matrix.
+## service-response
 
-### `service-response`
+Validates the platform envelope:
 
-The `service-response` sample validates the canonical OpenAPI Generics envelope:
-
-```java
+``` java
 ServiceResponse<T>
 ```
 
-It covers the built-in supported response shapes:
+Coverage includes:
 
-```java
+``` java
 ServiceResponse<T>
 ServiceResponse<List<T>>
 ServiceResponse<Set<T>>
 ServiceResponse<Page<T>>
+ServiceResponse<Window<T>>
+ServiceResponse<Batch<T>>
 ```
 
-This sample is the baseline validation path for the platform-provided contract.
+This sample demonstrates that application-owned generic containers can
+be reconstructed while continuing to use the built-in platform envelope.
 
-It does not validate application-owned generic containers such as `Paging<T>` or `Window<T>`.
+------------------------------------------------------------------------
 
-### `byoe-response`
+## byoe-response
 
-The `byoe-response` sample validates a completely user-owned response envelope:
+Validates a completely application-owned envelope:
 
-```java
+``` java
 ApiResponse<T>
 ```
 
-It covers BYOE reconstruction for built-in shapes:
+Coverage includes:
 
-```java
+``` java
 ApiResponse<T>
 ApiResponse<List<T>>
 ApiResponse<Set<T>>
 ApiResponse<Page<T>>
-```
-
-It also validates OpenAPI Generics 1.2 application-defined generic container support through user-owned container payloads such as:
-
-```java
 ApiResponse<Paging<T>>
 ApiResponse<Window<T>>
 ```
 
-This sample proves that OpenAPI Generics can preserve generic contract semantics even when the response envelope and nested generic containers are owned by the application.
+This sample proves that both the envelope and nested generic containers
+may be owned by the application while preserving generic semantics
+end-to-end.
 
----
+------------------------------------------------------------------------
 
-## Validation Scope
+# Validation Scope
 
-Across the available samples, the type-coverage suite verifies:
+Across the suite, the samples verify:
 
-- generic envelope reconstruction
-- scalar payload handling
-- value payload handling
-- enum payload handling
-- DTO payload handling
-- collection payload reconstruction
-- built-in `Page<T>` reconstruction
-- BYOE envelope reconstruction
-- application-owned generic container reconstruction in BYOE flows
-- ignored model handling
-- external model handling
-- generated client type safety
-- runtime deserialization behavior
-- consumer compatibility
+-   generic envelope reconstruction
+-   scalar payload handling
+-   value payload handling
+-   enum payload handling
+-   DTO payload handling
+-   collection reconstruction
+-   platform container reconstruction
+-   application-owned generic container reconstruction
+-   BYOE reconstruction
+-   ignored model handling
+-   external model handling
+-   generated client type safety
+-   runtime deserialization
+-   producer → client → consumer compatibility
 
-The exact covered shapes differ by sample.
+Each sample intentionally validates a different contract ownership
+model.
 
-Use the sample-specific README files for detailed coverage.
+------------------------------------------------------------------------
 
----
+# Regression Role
 
-## Regression Role
+These projects act as executable regression suites.
 
-These samples act as executable regression suites.
+They are intended to detect regressions in:
 
-They are intended to detect failures in:
+-   response introspection
+-   OpenAPI metadata generation
+-   vendor extension consistency
+-   generic wrapper reconstruction
+-   generated Java typing
+-   generated-source hygiene
+-   runtime deserialization
+-   end-to-end producer → client → consumer compatibility
 
-- response introspection
-- OpenAPI metadata generation
-- vendor extension consistency
-- generic wrapper reconstruction
-- generated Java client typing
-- generated-source hygiene
-- runtime deserialization
-- producer → client → consumer compatibility
+before such regressions reach production integrations.
 
-before such failures reach real integration projects.
+------------------------------------------------------------------------
 
----
+# Mental Model
 
-## Mental Model
-
-OpenAPI Generics preserves contract intent across the full lifecycle.
-
-```text
+``` text
 Original Java Contract
           ↓
 OpenAPI Projection
@@ -176,21 +188,21 @@ Consumer Runtime
 Same Contract Shape
 ```
 
-For the platform envelope, this means:
+Platform envelope example:
 
-```text
-ServiceResponse<Page<TypeSummaryDto>>
+``` text
+ServiceResponse<Window<TypeSummaryDto>>
           ↓
 OpenAPI Projection
           ↓
 Generated Client
           ↓
-ServiceResponse<Page<TypeSummaryDto>>
+ServiceResponse<Window<TypeSummaryDto>>
 ```
 
-For a BYOE envelope with an application-owned generic container, this means:
+BYOE example:
 
-```text
+``` text
 ApiResponse<Paging<TypeSummaryDto>>
           ↓
 OpenAPI Projection
@@ -200,6 +212,7 @@ Generated Client
 ApiResponse<Paging<TypeSummaryDto>>
 ```
 
-A successful type-coverage sample proves that the consumer receives the same generic contract shape that originally existed in the producer.
-
-This directory exists to continuously verify that guarantee.
+The purpose of the type-coverage suite is to continuously verify that
+**generic contract shape is preserved**, regardless of whether the
+envelope or nested generic containers are platform-provided or
+application-owned.

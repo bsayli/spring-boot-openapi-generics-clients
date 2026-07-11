@@ -11,13 +11,43 @@ info:
     - ServiceResponse<List<T>>
     - ServiceResponse<Set<T>>
     - ServiceResponse<Page<T>>
+    - ServiceResponse<Window<T>>
+    - ServiceResponse<Batch<T>>
 
-    Covers scalar, value, enum, DTO, list, set, and paged payload types.
+    Covers scalar, value, enum, DTO, list, set, paged, cursor-based window,
+    and batch-oriented payload types.
+
+    Demonstrates the built-in ServiceResponse<T> envelope with both
+    platform-provided and application-owned generic containers.
   version: 1.2.1-SNAPSHOT
 servers:
 - url: http://localhost:8074/type-coverage/service-response
   description: Local ServiceResponse type coverage producer
 paths:
+  /types/windows/summaries:
+    get:
+      tags:
+      - window-payload-controller
+      operationId: windowSummaries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseWindowTypeSummaryDto"
+  /types/windows/statuses:
+    get:
+      tags:
+      - window-payload-controller
+      operationId: windowStatuses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseWindowCoverageStatus"
   /types/values/uuid:
     get:
       tags:
@@ -222,8 +252,38 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseListCoverageStatus"
+  /types/batches/summaries:
+    get:
+      tags:
+      - batch-payload-controller
+      operationId: batchSummaries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseBatchTypeSummaryDto"
+  /types/batches/statuses:
+    get:
+      tags:
+      - batch-payload-controller
+      operationId: batchStatuses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseBatchCoverageStatus"
 components:
   schemas:
+    CoverageStatus:
+      type: string
+      enum:
+      - ACTIVE
+      - PASSIVE
+      - EXPERIMENTAL
     Meta:
       type: object
       properties:
@@ -235,16 +295,18 @@ components:
           items:
             $ref: "#/components/schemas/Sort"
       x-ignore-model: true
-    ServiceResponseUUID:
+    ServiceResponseWindowTypeSummaryDto:
       type: object
       properties:
         data:
-          type: string
-          format: uuid
+          $ref: "#/components/schemas/WindowTypeSummaryDto"
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
-      x-api-wrapper-datatype: UUID
+      x-api-wrapper-datatype: WindowTypeSummaryDto
+      x-data-container: Window
+      x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Window
+      x-data-item: TypeSummaryDto
     Sort:
       type: object
       properties:
@@ -256,12 +318,62 @@ components:
           - ASC
           - DESC
       x-ignore-model: true
-    CoverageStatus:
-      type: string
-      enum:
-      - ACTIVE
-      - PASSIVE
-      - EXPERIMENTAL
+    TypeSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        status:
+          $ref: "#/components/schemas/CoverageStatus"
+    WindowTypeSummaryDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeSummaryDto"
+        nextCursor:
+          type: string
+        hasNext:
+          type: boolean
+      x-ignore-model: true
+    ServiceResponseWindowCoverageStatus:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/WindowCoverageStatus"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: WindowCoverageStatus
+      x-data-container: Window
+      x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Window
+      x-data-item: CoverageStatus
+    WindowCoverageStatus:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoverageStatus"
+        nextCursor:
+          type: string
+        hasNext:
+          type: boolean
+      x-ignore-model: true
+    ServiceResponseUUID:
+      type: object
+      properties:
+        data:
+          type: string
+          format: uuid
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: UUID
     ServiceResponseCoverageStatus:
       type: object
       properties:
@@ -306,16 +418,6 @@ components:
       x-data-container: Set
       x-data-container-type: java.util.Set
       x-data-item: TypeSummaryDto
-    TypeSummaryDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        code:
-          type: string
-        status:
-          $ref: "#/components/schemas/CoverageStatus"
     ServiceResponseSetCoverageStatus:
       type: object
       properties:
@@ -540,4 +642,54 @@ components:
       x-api-wrapper-datatype: ListCoverageStatus
       x-data-container: List
       x-data-container-type: java.util.List
+      x-data-item: CoverageStatus
+    BatchTypeSummaryDto:
+      type: object
+      properties:
+        elements:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeSummaryDto"
+        sequence:
+          type: integer
+          format: int64
+        complete:
+          type: boolean
+      x-ignore-model: true
+    ServiceResponseBatchTypeSummaryDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/BatchTypeSummaryDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: BatchTypeSummaryDto
+      x-data-container: Batch
+      x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Batch
+      x-data-item: TypeSummaryDto
+    BatchCoverageStatus:
+      type: object
+      properties:
+        elements:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoverageStatus"
+        sequence:
+          type: integer
+          format: int64
+        complete:
+          type: boolean
+      x-ignore-model: true
+    ServiceResponseBatchCoverageStatus:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/BatchCoverageStatus"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: BatchCoverageStatus
+      x-data-container: Batch
+      x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Batch
       x-data-item: CoverageStatus

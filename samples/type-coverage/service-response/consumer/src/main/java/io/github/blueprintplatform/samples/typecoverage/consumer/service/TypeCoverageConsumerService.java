@@ -6,6 +6,8 @@ import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.Add
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.CoverageStatus;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeProfileDto;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeSummaryDto;
+import io.github.blueprintplatform.samples.typecoverage.contract.Batch;
+import io.github.blueprintplatform.samples.typecoverage.contract.Window;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -48,4 +50,12 @@ public interface TypeCoverageConsumerService {
   ServiceResponse<Set<TypeSummaryDto>> setSummaries();
 
   ServiceResponse<Set<CoverageStatus>> setStatuses();
+
+  ServiceResponse<Window<TypeSummaryDto>> windowSummaries();
+
+  ServiceResponse<Window<CoverageStatus>> windowStatuses();
+
+  ServiceResponse<Batch<TypeSummaryDto>> batchSummaries();
+
+  ServiceResponse<Batch<CoverageStatus>> batchStatuses();
 }

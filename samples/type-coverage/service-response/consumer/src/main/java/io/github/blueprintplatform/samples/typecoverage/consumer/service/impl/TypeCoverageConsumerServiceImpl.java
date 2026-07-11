@@ -8,13 +8,16 @@ import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.Cov
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeProfileDto;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeSummaryDto;
 import io.github.blueprintplatform.samples.typecoverage.consumer.service.TypeCoverageConsumerService;
+import io.github.blueprintplatform.samples.typecoverage.contract.Batch;
+import io.github.blueprintplatform.samples.typecoverage.contract.Window;
+import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.springframework.stereotype.Service;
 
 @Service
 public class TypeCoverageConsumerServiceImpl implements TypeCoverageConsumerService {
@@ -108,5 +111,25 @@ public class TypeCoverageConsumerServiceImpl implements TypeCoverageConsumerServ
   @Override
   public ServiceResponse<Set<CoverageStatus>> setStatuses() {
     return adapter.setStatuses();
+  }
+
+  @Override
+  public ServiceResponse<Window<TypeSummaryDto>> windowSummaries() {
+    return adapter.windowSummaries();
+  }
+
+  @Override
+  public ServiceResponse<Window<CoverageStatus>> windowStatuses() {
+    return adapter.windowStatuses();
+  }
+
+  @Override
+  public ServiceResponse<Batch<TypeSummaryDto>> batchSummaries() {
+    return adapter.batchSummaries();
+  }
+
+  @Override
+  public ServiceResponse<Batch<CoverageStatus>> batchStatuses() {
+    return adapter.batchStatuses();
   }
 }

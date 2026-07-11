@@ -17,7 +17,7 @@ public class TypeCoverageApiClientConfig {
 
   @Bean
   ApiClient typeCoverageApiClient(
-      RestClient typeCoverageRestClient, @Value("${type-coverage.api.base-url}") String baseUrl) {
+          RestClient typeCoverageRestClient, @Value("${type-coverage.api.base-url}") String baseUrl) {
     return new ApiClient(typeCoverageRestClient).setBasePath(baseUrl);
   }
 
@@ -49,5 +49,15 @@ public class TypeCoverageApiClientConfig {
   @Bean
   SetPayloadControllerApi setPayloadControllerApi(ApiClient typeCoverageApiClient) {
     return new SetPayloadControllerApi(typeCoverageApiClient);
+  }
+
+  @Bean
+  WindowPayloadControllerApi windowPayloadControllerApi(ApiClient typeCoverageApiClient) {
+    return new WindowPayloadControllerApi(typeCoverageApiClient);
+  }
+
+  @Bean
+  BatchPayloadControllerApi batchPayloadControllerApi(ApiClient typeCoverageApiClient) {
+    return new BatchPayloadControllerApi(typeCoverageApiClient);
   }
 }
