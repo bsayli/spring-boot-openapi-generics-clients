@@ -283,3 +283,9 @@ See the full [Compatibility & Support Policy](compatibility.md).
 - [GitHub Issues](https://github.com/blueprint-platform/openapi-generics/issues)
 
 OpenAPI Generics is released under the MIT License.
+
+<!-- Scarf tracking pixel - Docs Home -->
+<img referrerpolicy="no-referrer-when-downgrade"
+src="https://static.scarf.sh/a.png?x-pxid=6d755e89-9777-4da0-9e21-018c95a2755d&page=docs-home"
+width="1" height="1" alt=""
+style="display:none;" />

@@ -620,3 +620,10 @@ MIT — see [LICENSE](LICENSE)
 
 **Barış Saylı**
 [GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)
+
+
+<!-- Scarf tracking pixel - README -->
+<img referrerpolicy="no-referrer-when-downgrade"
+src="https://static.scarf.sh/a.png?x-pxid=c623cace-dbdd-4882-96c2-ade255cfad1b&page=README.md"
+width="1" height="1" alt=""
+style="display:none;" />
