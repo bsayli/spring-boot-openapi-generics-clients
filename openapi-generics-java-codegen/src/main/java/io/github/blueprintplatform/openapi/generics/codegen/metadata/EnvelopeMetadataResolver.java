@@ -1,32 +1,18 @@
 package io.github.blueprintplatform.openapi.generics.codegen.metadata;
 
-import io.github.blueprintplatform.openapi.generics.codegen.contract.CodegenProperties;
 import io.github.blueprintplatform.openapi.generics.codegen.contract.CodegenVendorExtensions;
-import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import java.util.Map;
 import org.openapitools.codegen.CodegenModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Resolves envelope identity from canonical OpenAPI wrapper metadata and derives the template
+ * metadata required for Java wrapper reconstruction.
+ */
 public class EnvelopeMetadataResolver {
 
   private static final Logger log = LoggerFactory.getLogger(EnvelopeMetadataResolver.class);
-
-  private String envelopeImport = ServiceResponse.class.getCanonicalName();
-  private String envelopeType = ServiceResponse.class.getSimpleName();
-
-  public void register(Map<String, Object> additionalProperties) {
-    Object configured = additionalProperties.get(CodegenProperties.ENVELOPE);
-
-    if (!(configured instanceof String fqcn) || fqcn.isBlank()) {
-      return;
-    }
-
-    envelopeImport = fqcn.trim();
-    envelopeType = extractSimpleName(envelopeImport);
-
-    log.debug("Configured envelope metadata: {} -> {}", envelopeImport, envelopeType);
-  }
 
   public void apply(CodegenModel model) {
     if (!isWrapperModel(model)) {
@@ -35,9 +21,8 @@ public class EnvelopeMetadataResolver {
 
     Map<String, Object> vendorExtensions = model.getVendorExtensions();
 
-    if (vendorExtensions == null) {
-      return;
-    }
+    String envelopeImport = (String) vendorExtensions.get(CodegenVendorExtensions.API_WRAPPER_TYPE);
+    String envelopeType = extractSimpleName(envelopeImport);
 
     vendorExtensions.put(CodegenVendorExtensions.ENVELOPE_IMPORT, envelopeImport);
     vendorExtensions.put(CodegenVendorExtensions.ENVELOPE_TYPE, envelopeType);

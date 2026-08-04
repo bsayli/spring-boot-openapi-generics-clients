@@ -26,6 +26,8 @@ public final class WrapperSchemaMetadataApplier {
     }
 
     wrapper.addExtension(VendorExtensions.API_WRAPPER, Boolean.TRUE);
+    wrapper.addExtension(
+        VendorExtensions.API_WRAPPER_TYPE, descriptor.envelopeType().getCanonicalName());
     wrapper.addExtension(VendorExtensions.API_WRAPPER_DATATYPE, descriptor.dataRefName());
 
     return wrapper;

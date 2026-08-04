@@ -1,9 +1,15 @@
 package io.github.blueprintplatform.openapi.generics.codegen;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.blueprintplatform.openapi.generics.codegen.contract.CodegenVendorExtensions;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +23,9 @@ import org.openapitools.codegen.model.ModelsMap;
 @Tag("unit")
 @DisplayName("Smoke Test: GenericAwareJavaCodegen")
 class GenericAwareJavaCodegenTest {
+
+  private static final String SERVICE_RESPONSE_TYPE =
+      "io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse";
 
   @Test
   @DisplayName("processOpts + fromModel + postProcessModels -> should filter external model")
@@ -35,26 +44,12 @@ class GenericAwareJavaCodegenTest {
     CodegenModel externalModel = codegen.fromModel("CustomerDto", externalSchema);
     CodegenModel normalModel = codegen.fromModel("OrderDto", normalSchema);
 
-    ModelMap mm1 = new ModelMap();
-    mm1.setModel(externalModel);
-
-    ModelMap mm2 = new ModelMap();
-    mm2.setModel(normalModel);
-
-    ModelsMap modelsMap = new ModelsMap();
-
-    // FIX: mutable list
-    List<ModelMap> modelList = new ArrayList<>();
-    modelList.add(mm1);
-    modelList.add(mm2);
-
-    modelsMap.setModels(modelList);
+    ModelsMap modelsMap = modelsMap(externalModel, normalModel);
 
     ModelsMap result = codegen.postProcessModels(modelsMap);
 
     assertNotNull(result);
     assertNotNull(result.getModels());
-
     assertEquals(1, result.getModels().size());
     assertEquals("OrderDto", result.getModels().get(0).getModel().name);
   }
@@ -73,12 +68,12 @@ class GenericAwareJavaCodegenTest {
     Schema<?> schema = new Schema<>();
 
     CodegenModel model = codegen.fromModel("CustomerDto", schema);
-
-    model.imports = new java.util.HashSet<>(List.of("CustomerDto", "OtherDto"));
+    model.imports = new HashSet<>(List.of("CustomerDto", "OtherDto"));
 
     CodegenModel processed = codegen.fromModel("CustomerDto", schema);
 
     assertNotNull(processed);
+
     if (processed.imports != null) {
       assertFalse(processed.imports.contains("CustomerDto"));
     }
@@ -95,53 +90,73 @@ class GenericAwareJavaCodegenTest {
 
     codegen.processOpts();
 
-    CodegenModel wrapperModel = new CodegenModel();
-    wrapperModel.name = "ServiceResponseCustomerDto";
-    wrapperModel.vendorExtensions.put("x-api-wrapper", true);
-    wrapperModel.vendorExtensions.put("x-data-item", "CustomerDto");
+    CodegenModel wrapperModel = wrapperModel("ServiceResponseCustomerDto", SERVICE_RESPONSE_TYPE);
+    wrapperModel.vendorExtensions.put(CodegenVendorExtensions.DATA_ITEM, "CustomerDto");
 
-    ModelMap mm = new ModelMap();
-    mm.setModel(wrapperModel);
-
-    ModelsMap modelsMap = new ModelsMap();
-    List<ModelMap> modelList = new ArrayList<>();
-    modelList.add(mm);
-    modelsMap.setModels(modelList);
-
-    ModelsMap result = codegen.postProcessModels(modelsMap);
+    ModelsMap result = codegen.postProcessModels(modelsMap(wrapperModel));
 
     CodegenModel processed = result.getModels().get(0).getModel();
 
-    assertEquals("io.example.CustomerDto", processed.vendorExtensions.get("x-extra-imports"));
+    assertEquals(
+        "io.example.CustomerDto",
+        processed.vendorExtensions.get(CodegenVendorExtensions.EXTRA_IMPORTS));
+    assertEquals(
+        SERVICE_RESPONSE_TYPE,
+        processed.vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_IMPORT));
+    assertEquals(
+        "ServiceResponse", processed.vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_TYPE));
   }
 
   @Test
-  @DisplayName("postProcessModels -> should inject envelope metadata into wrapper model")
-  void shouldInjectEnvelopeMetadata_intoWrapperModel() {
+  @DisplayName("postProcessModels -> should derive envelope metadata from wrapper schema metadata")
+  void shouldDeriveEnvelopeMetadata_fromWrapperSchemaMetadata() {
     GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
-
-    codegen.additionalProperties().put("openapi-generics.envelope", "io.example.ApiResponse");
-
     codegen.processOpts();
 
-    CodegenModel wrapperModel = new CodegenModel();
-    wrapperModel.name = "ApiResponseCustomerDto";
-    wrapperModel.vendorExtensions.put("x-api-wrapper", true);
+    CodegenModel wrapperModel =
+        wrapperModel("ApiResponseCustomerDto", "io.example.contract.ApiResponse");
 
-    ModelMap mm = new ModelMap();
-    mm.setModel(wrapperModel);
-
-    ModelsMap modelsMap = new ModelsMap();
-    List<ModelMap> modelList = new ArrayList<>();
-    modelList.add(mm);
-    modelsMap.setModels(modelList);
-
-    ModelsMap result = codegen.postProcessModels(modelsMap);
+    ModelsMap result = codegen.postProcessModels(modelsMap(wrapperModel));
 
     CodegenModel processed = result.getModels().get(0).getModel();
 
-    assertEquals("io.example.ApiResponse", processed.vendorExtensions.get("x-envelope-import"));
-    assertEquals("ApiResponse", processed.vendorExtensions.get("x-envelope-type"));
+    assertEquals(
+        "io.example.contract.ApiResponse",
+        processed.vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_IMPORT));
+    assertEquals(
+        "ApiResponse", processed.vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_TYPE));
+  }
+
+  @Test
+  @DisplayName("postProcessModels -> should support multiple envelope identities")
+  void shouldSupportMultipleEnvelopeIdentities() {
+    GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
+    codegen.processOpts();
+
+    CodegenModel serviceResponse =
+        wrapperModel("ServiceResponseCustomerDto", SERVICE_RESPONSE_TYPE);
+
+    CodegenModel apiResponse =
+        wrapperModel("ApiResponseOrderDto", "io.example.contract.ApiResponse");
+
+    ModelsMap result = codegen.postProcessModels(modelsMap(serviceResponse, apiResponse));
+
+    CodegenModel processedServiceResponse = result.getModels().get(0).getModel();
+    CodegenModel processedApiResponse = result.getModels().get(1).getModel();
+
+    assertEquals(
+        SERVICE_RESPONSE_TYPE,
+        processedServiceResponse.vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_IMPORT));
+    assertEquals(
+        "ServiceResponse",
+        processedServiceResponse.vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_TYPE));
+
+    assertEquals(
+        "io.example.contract.ApiResponse",
+        processedApiResponse.vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_IMPORT));
+    assertEquals(
+        "ApiResponse",
+        processedApiResponse.vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_TYPE));
   }
 
   @Test
@@ -155,11 +170,8 @@ class GenericAwareJavaCodegenTest {
 
     codegen.processOpts();
 
-    Schema<?> externalSchema = new Schema<>();
-    Schema<?> normalSchema = new Schema<>();
-
-    codegen.fromModel("CustomerDto", externalSchema);
-    codegen.fromModel("OrderDto", normalSchema);
+    codegen.fromModel("CustomerDto", new Schema<>());
+    codegen.fromModel("OrderDto", new Schema<>());
 
     ModelsMap externalModels = new ModelsMap();
     externalModels.setModels(new ArrayList<>());
@@ -196,22 +208,35 @@ class GenericAwareJavaCodegenTest {
     CodegenModel model = new CodegenModel();
     model.name = "OrderDto";
 
-    ModelMap mm = new ModelMap();
-    mm.setModel(model);
-
-    ModelsMap modelsMap = new ModelsMap();
-    modelsMap.setModels(new ArrayList<>());
-    List<ModelMap> modelList = new ArrayList<>();
-    modelList.add(mm);
-    modelsMap.setModels(modelList);
-
-    ModelsMap result = codegen.postProcessModels(modelsMap);
+    ModelsMap result = codegen.postProcessModels(modelsMap(model));
 
     CodegenModel processed = result.getModels().get(0).getModel();
 
     assertNotNull(processed);
-    assertNull(processed.vendorExtensions.get("x-extra-imports"));
-    assertNull(processed.vendorExtensions.get("x-envelope-import"));
-    assertNull(processed.vendorExtensions.get("x-envelope-type"));
+    assertNull(processed.vendorExtensions.get(CodegenVendorExtensions.EXTRA_IMPORTS));
+    assertNull(processed.vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_IMPORT));
+    assertNull(processed.vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_TYPE));
+  }
+
+  private CodegenModel wrapperModel(String name, String wrapperType) {
+    CodegenModel model = new CodegenModel();
+    model.name = name;
+    model.vendorExtensions.put(CodegenVendorExtensions.API_WRAPPER, Boolean.TRUE);
+    model.vendorExtensions.put(CodegenVendorExtensions.API_WRAPPER_TYPE, wrapperType);
+    return model;
+  }
+
+  private ModelsMap modelsMap(CodegenModel... models) {
+    List<ModelMap> modelMaps = new ArrayList<>();
+
+    for (CodegenModel model : models) {
+      ModelMap modelMap = new ModelMap();
+      modelMap.setModel(model);
+      modelMaps.add(modelMap);
+    }
+
+    ModelsMap modelsMap = new ModelsMap();
+    modelsMap.setModels(modelMaps);
+    return modelsMap;
   }
 }

@@ -1,7 +1,10 @@
 package io.github.blueprintplatform.openapi.generics.codegen.metadata;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import io.github.blueprintplatform.openapi.generics.codegen.contract.CodegenVendorExtensions;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -13,64 +16,90 @@ import org.openapitools.codegen.CodegenModel;
 @DisplayName("Unit Test: EnvelopeMetadataResolver")
 class EnvelopeMetadataResolverTest {
 
+  private final EnvelopeMetadataResolver resolver = new EnvelopeMetadataResolver();
+
   @Test
-  @DisplayName("register -> should use default envelope when property is missing")
-  void register_shouldUseDefault_whenNotConfigured() {
-    EnvelopeMetadataResolver resolver = new EnvelopeMetadataResolver();
+  @DisplayName("apply -> should derive built-in envelope metadata from wrapper type")
+  void apply_shouldDeriveBuiltInEnvelopeMetadata_fromWrapperType() {
+    CodegenModel model =
+        wrapperModel(
+            "ServiceResponseCustomerDto",
+            "io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse");
 
-    resolver.register(Map.of());
-
-    CodegenModel model = wrapperModel();
     resolver.apply(model);
 
-    Map<String, Object> ve = model.getVendorExtensions();
+    Map<String, Object> vendorExtensions = model.getVendorExtensions();
 
     assertEquals(
         "io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse",
-        ve.get("x-envelope-import"));
-    assertEquals("ServiceResponse", ve.get("x-envelope-type"));
+        vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_IMPORT));
+    assertEquals("ServiceResponse", vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_TYPE));
   }
 
   @Test
-  @DisplayName("register -> should override envelope when configured")
-  void register_shouldOverrideEnvelope_whenConfigured() {
-    EnvelopeMetadataResolver resolver = new EnvelopeMetadataResolver();
+  @DisplayName("apply -> should derive custom envelope metadata from wrapper type")
+  void apply_shouldDeriveCustomEnvelopeMetadata_fromWrapperType() {
+    CodegenModel model = wrapperModel("ApiResponseCustomerDto", "io.example.contract.ApiResponse");
 
-    resolver.register(Map.of("openapi-generics.envelope", "com.example.ApiResponse"));
-
-    CodegenModel model = wrapperModel();
     resolver.apply(model);
 
-    Map<String, Object> ve = model.getVendorExtensions();
+    Map<String, Object> vendorExtensions = model.getVendorExtensions();
 
-    assertEquals("com.example.ApiResponse", ve.get("x-envelope-import"));
-    assertEquals("ApiResponse", ve.get("x-envelope-type"));
+    assertEquals(
+        "io.example.contract.ApiResponse",
+        vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_IMPORT));
+    assertEquals("ApiResponse", vendorExtensions.get(CodegenVendorExtensions.ENVELOPE_TYPE));
+  }
+
+  @Test
+  @DisplayName("apply -> should resolve envelope metadata independently for each wrapper model")
+  void apply_shouldResolveEnvelopeMetadataIndependently_forEachWrapperModel() {
+    CodegenModel serviceResponse =
+        wrapperModel(
+            "ServiceResponseCustomerDto",
+            "io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse");
+
+    CodegenModel apiResponse =
+        wrapperModel("ApiResponseOrderDto", "io.example.contract.ApiResponse");
+
+    resolver.apply(serviceResponse);
+    resolver.apply(apiResponse);
+
+    assertEquals(
+        "io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse",
+        serviceResponse.getVendorExtensions().get(CodegenVendorExtensions.ENVELOPE_IMPORT));
+    assertEquals(
+        "ServiceResponse",
+        serviceResponse.getVendorExtensions().get(CodegenVendorExtensions.ENVELOPE_TYPE));
+
+    assertEquals(
+        "io.example.contract.ApiResponse",
+        apiResponse.getVendorExtensions().get(CodegenVendorExtensions.ENVELOPE_IMPORT));
+    assertEquals(
+        "ApiResponse",
+        apiResponse.getVendorExtensions().get(CodegenVendorExtensions.ENVELOPE_TYPE));
   }
 
   @Test
   @DisplayName("apply -> should not modify non-wrapper models")
   void apply_shouldSkip_whenNotWrapper() {
-    EnvelopeMetadataResolver resolver = new EnvelopeMetadataResolver();
-
-    resolver.register(Map.of("openapi-generics.envelope", "com.example.ApiResponse"));
-
     CodegenModel model = new CodegenModel();
+    model.name = "CustomerDto";
     model.vendorExtensions = new HashMap<>();
+    model.vendorExtensions.put(
+        CodegenVendorExtensions.API_WRAPPER_TYPE, "io.example.contract.ApiResponse");
 
     resolver.apply(model);
 
-    assertFalse(model.vendorExtensions.containsKey("x-envelope-import"));
-    assertFalse(model.vendorExtensions.containsKey("x-envelope-type"));
+    assertFalse(model.vendorExtensions.containsKey(CodegenVendorExtensions.ENVELOPE_IMPORT));
+    assertFalse(model.vendorExtensions.containsKey(CodegenVendorExtensions.ENVELOPE_TYPE));
   }
 
   @Test
-  @DisplayName("apply -> should handle null vendorExtensions safely")
+  @DisplayName("apply -> should handle null vendor extensions safely")
   void apply_shouldSkip_whenVendorExtensionsNull() {
-    EnvelopeMetadataResolver resolver = new EnvelopeMetadataResolver();
-
-    resolver.register(Map.of("openapi-generics.envelope", "com.example.ApiResponse"));
-
-    CodegenModel model = wrapperModel();
+    CodegenModel model = new CodegenModel();
+    model.name = "CustomerDto";
     model.vendorExtensions = null;
 
     resolver.apply(model);
@@ -78,28 +107,12 @@ class EnvelopeMetadataResolverTest {
     assertNull(model.vendorExtensions);
   }
 
-  @Test
-  @DisplayName("register -> should ignore blank configuration")
-  void register_shouldIgnoreBlankValue() {
-    EnvelopeMetadataResolver resolver = new EnvelopeMetadataResolver();
-
-    resolver.register(Map.of("openapi-generics.envelope", "   "));
-
-    CodegenModel model = wrapperModel();
-    resolver.apply(model);
-
-    Map<String, Object> ve = model.getVendorExtensions();
-
-    assertEquals(
-        "io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse",
-        ve.get("x-envelope-import"));
-    assertEquals("ServiceResponse", ve.get("x-envelope-type"));
-  }
-
-  private CodegenModel wrapperModel() {
+  private CodegenModel wrapperModel(String name, String wrapperType) {
     CodegenModel model = new CodegenModel();
+    model.name = name;
     model.vendorExtensions = new HashMap<>();
-    model.vendorExtensions.put("x-api-wrapper", true);
+    model.vendorExtensions.put(CodegenVendorExtensions.API_WRAPPER, Boolean.TRUE);
+    model.vendorExtensions.put(CodegenVendorExtensions.API_WRAPPER_TYPE, wrapperType);
     return model;
   }
 }

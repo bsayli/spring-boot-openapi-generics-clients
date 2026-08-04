@@ -159,7 +159,6 @@
 
                             <!--
                               Optional contract alignment:
-                              - openapi-generics.envelope is used only for BYOE.
                               - openapi-generics.response-contract.* is used only for BYOC.
                             -->
                             <additionalProperties>

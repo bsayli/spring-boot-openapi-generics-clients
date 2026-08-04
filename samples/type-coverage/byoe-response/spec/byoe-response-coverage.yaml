@@ -298,6 +298,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: WindowTypeSummaryDto
       x-data-container: Window
       x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Window
@@ -345,6 +346,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: WindowCoverageStatus
       x-data-container: Window
       x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Window
@@ -377,6 +379,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: UUID
     ApiResponseCoverageStatus:
       type: object
@@ -393,6 +396,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: CoverageStatus
     ApiResponseOffsetDateTime:
       type: object
@@ -410,6 +414,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: OffsetDateTime
     ApiResponseLocalDate:
       type: object
@@ -427,6 +432,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: LocalDate
     ApiResponseSetTypeSummaryDto:
       type: object
@@ -446,6 +452,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: SetTypeSummaryDto
       x-data-container: Set
       x-data-container-type: java.util.Set
@@ -468,6 +475,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: SetCoverageStatus
       x-data-container: Set
       x-data-container-type: java.util.Set
@@ -487,6 +495,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: String
     ApiResponseLong:
       type: object
@@ -504,6 +513,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: Long
     ApiResponseInteger:
       type: object
@@ -521,6 +531,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: Integer
     ApiResponseBigDecimal:
       type: object
@@ -537,6 +548,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: BigDecimal
     ApiResponseBoolean:
       type: object
@@ -553,6 +565,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: Boolean
     ApiResponsePagingTypeSummaryDto:
       type: object
@@ -569,6 +582,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: PagingTypeSummaryDto
       x-data-container: Paging
       x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Paging
@@ -610,6 +624,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: PagingCoverageStatus
       x-data-container: Paging
       x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Paging
@@ -651,6 +666,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: PageTypeSummaryDto
       x-data-container: Page
       x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
@@ -694,6 +710,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: PageCoverageStatus
       x-data-container: Page
       x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
@@ -746,6 +763,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: TypeProfileDto
     TypeProfileDto:
       type: object
@@ -798,6 +816,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: AddressDto
     ApiResponseListTypeSummaryDto:
       type: object
@@ -816,6 +835,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: ListTypeSummaryDto
       x-data-container: List
       x-data-container-type: java.util.List
@@ -837,6 +857,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
       x-api-wrapper-datatype: ListCoverageStatus
       x-data-container: List
       x-data-container-type: java.util.List

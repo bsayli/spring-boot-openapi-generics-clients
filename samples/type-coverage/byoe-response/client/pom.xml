@@ -109,10 +109,6 @@
                                 <openApiNullable>false</openApiNullable>
                             </configOptions>
 
-                            <additionalProperties>
-                                <additionalProperty>openapi-generics.envelope=io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse</additionalProperty>
-                            </additionalProperties>
-
                             <cleanupOutput>true</cleanupOutput>
                             <skipValidateSpec>false</skipValidateSpec>
 

@@ -7,6 +7,19 @@ import org.openapitools.codegen.CodegenModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Resolves imports for application-owned response contract types used by generated wrapper models.
+ *
+ * <p>The resolver inspects canonical OpenAPI wrapper metadata to determine the effective inner
+ * contract type. It first prefers {@code x-data-item} for container-based responses and otherwise
+ * falls back to {@code x-api-wrapper-datatype} for direct payload responses.
+ *
+ * <p>When the resolved type is registered in the {@link ExternalModelRegistry}, its fully qualified
+ * Java type is published through {@code x-extra-imports} for consumption by the wrapper template.
+ *
+ * <p>Models that are not marked as wrapper schemas, do not expose a resolvable inner type, or do
+ * not have a matching external contract registration are left unchanged.
+ */
 public class ExternalImportResolver {
 
   private static final Logger log = LoggerFactory.getLogger(ExternalImportResolver.class);
@@ -51,6 +64,7 @@ public class ExternalImportResolver {
 
   private boolean isWrapperModel(CodegenModel model) {
     Map<String, Object> vendorExtensions = model.getVendorExtensions();
+
     return vendorExtensions != null
         && Boolean.TRUE.equals(vendorExtensions.get(CodegenVendorExtensions.API_WRAPPER));
   }

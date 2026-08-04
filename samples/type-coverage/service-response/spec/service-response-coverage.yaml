@@ -303,6 +303,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: WindowTypeSummaryDto
       x-data-container: Window
       x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Window
@@ -348,6 +349,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: WindowCoverageStatus
       x-data-container: Window
       x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Window
@@ -373,6 +375,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: UUID
     ServiceResponseCoverageStatus:
       type: object
@@ -382,6 +385,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: CoverageStatus
     ServiceResponseOffsetDateTime:
       type: object
@@ -392,6 +396,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: OffsetDateTime
     ServiceResponseLocalDate:
       type: object
@@ -402,6 +407,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: LocalDate
     ServiceResponseSetTypeSummaryDto:
       type: object
@@ -414,6 +420,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: SetTypeSummaryDto
       x-data-container: Set
       x-data-container-type: java.util.Set
@@ -429,6 +436,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: SetCoverageStatus
       x-data-container: Set
       x-data-container-type: java.util.Set
@@ -441,6 +449,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: String
     ServiceResponseLong:
       type: object
@@ -451,6 +460,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: Long
     ServiceResponseInteger:
       type: object
@@ -461,6 +471,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: Integer
     ServiceResponseBigDecimal:
       type: object
@@ -470,6 +481,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: BigDecimal
     ServiceResponseBoolean:
       type: object
@@ -479,6 +491,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: Boolean
     PageTypeSummaryDto:
       type: object
@@ -512,6 +525,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: PageTypeSummaryDto
       x-data-container: Page
       x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
@@ -548,6 +562,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: PageCoverageStatus
       x-data-container: Page
       x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
@@ -569,6 +584,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: TypeProfileDto
     TypeProfileDto:
       type: object
@@ -614,6 +630,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: AddressDto
     ServiceResponseListTypeSummaryDto:
       type: object
@@ -625,6 +642,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: ListTypeSummaryDto
       x-data-container: List
       x-data-container-type: java.util.List
@@ -639,6 +657,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: ListCoverageStatus
       x-data-container: List
       x-data-container-type: java.util.List
@@ -664,6 +683,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: BatchTypeSummaryDto
       x-data-container: Batch
       x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Batch
@@ -689,6 +709,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: BatchCoverageStatus
       x-data-container: Batch
       x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Batch

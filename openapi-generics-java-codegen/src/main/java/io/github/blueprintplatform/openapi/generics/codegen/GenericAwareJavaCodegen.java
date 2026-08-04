@@ -14,6 +14,23 @@ import org.openapitools.codegen.model.ModelsMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * OpenAPI Generator extension that reconstructs generic Java response contracts from canonical
+ * OpenAPI vendor metadata.
+ *
+ * <p>The generator extends the standard Java client generator with support for:
+ *
+ * <ul>
+ *   <li>excluding models marked as externally provided or infrastructure-owned
+ *   <li>injecting imports for application-owned contract types
+ *   <li>deriving envelope identity from {@code x-api-wrapper-type}
+ *   <li>preparing wrapper metadata consumed by the custom Java model templates
+ *   <li>removing ignored models and their imports from the generated model graph
+ * </ul>
+ *
+ * <p>Envelope identity is resolved independently for each wrapper schema, allowing a single OpenAPI
+ * document to describe multiple envelope contracts without client-side envelope configuration.
+ */
 public class GenericAwareJavaCodegen extends JavaClientCodegen {
 
   private static final Logger log = LoggerFactory.getLogger(GenericAwareJavaCodegen.class);
@@ -28,11 +45,10 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     super.processOpts();
 
     registry.register(additionalProperties);
-    envelopeResolver.register(additionalProperties);
 
     log.debug(
-        "Generic-aware codegen initialized with external model registry, envelope metadata, and"
-            + " container metadata");
+        "Generic-aware codegen initialized with external model registry and contract-driven"
+            + " metadata");
   }
 
   @Override

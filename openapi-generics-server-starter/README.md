@@ -83,12 +83,13 @@ The pipeline executes only while generating `/v3/api-docs` or `/v3/api-docs.yaml
 
 ## Generated Metadata
 
-The starter enriches wrapper schemas with metadata used during client generation.
+The starter enriches wrapper schemas with canonical metadata used for deterministic client reconstruction.
 
 Example:
 
 ```yaml
 x-api-wrapper: true
+x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
 x-api-wrapper-datatype: PageCustomerDto
 x-data-container: Page
 x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page

@@ -189,6 +189,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: CustomerDto
     Sort:
       type: object
@@ -247,6 +248,7 @@ components:
         meta:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
       x-api-wrapper-datatype: PageCustomerDto
       x-data-container: Page
       x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page

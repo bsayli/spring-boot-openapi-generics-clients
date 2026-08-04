@@ -7,8 +7,8 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.constant
  * generators to reconstruct higher-level abstractions such as:
  *
  * <ul>
- *   <li>{@code ServiceResponse<T>} (wrapper semantics)
- *   <li>{@code Page<T>} (container semantics)
+ *   <li>{@code ServiceResponse<T>} and application-owned envelopes (wrapper semantics)
+ *   <li>{@code Page<T>} and application-owned generic containers (container semantics)
  *   <li>{@code List<T>} and {@code Set<T>} (collection container semantics)
  * </ul>
  *
@@ -31,10 +31,12 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.constant
  * <h2>Design principles</h2>
  *
  * <ul>
- *   <li><b>Flat over hierarchical</b> → aligned with OpenAPI model
- *   <li><b>Deterministic</b> → same input produces same extensions
- *   <li><b>Single source of truth</b> → no duplication across classes
- *   <li><b>Preserve introspection results</b> → do not discard resolved Java container identity
+ *   <li><b>Flat over hierarchical</b> → aligned with the OpenAPI model
+ *   <li><b>Deterministic</b> → the same input produces the same extensions
+ *   <li><b>Single source of truth</b> → no duplicated semantic configuration
+ *   <li><b>Preserve introspection results</b> → retain resolved Java wrapper and container identity
+ *   <li><b>Self-describing contracts</b> → downstream generators derive generic type identity from
+ *       the OpenAPI document
  * </ul>
  *
  * <h2>Stability</h2>
@@ -42,7 +44,7 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.constant
  * <ul>
  *   <li>Changing any key is a <b>breaking change</b>
  *   <li>Adding a new key is a backward-compatible metadata enhancement
- *   <li>Must be versioned carefully
+ *   <li>Keys must be versioned carefully
  * </ul>
  *
  * <h2>Example</h2>
@@ -50,6 +52,7 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.constant
  * <pre>
  * ServiceResponsePageCustomerDto:
  *   x-api-wrapper: true
+ *   x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
  *   x-api-wrapper-datatype: PageCustomerDto
  *   x-data-container: Page
  *   x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
@@ -60,8 +63,8 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.constant
  *
  * <ul>
  *   <li>{@link #IGNORE_MODEL} disables model generation for a schema
- *   <li>Used for infrastructure / externally provided types
- *   <li>Schema remains in OpenAPI but is excluded from code generation
+ *   <li>Used for infrastructure or externally provided types
+ *   <li>The schema remains in OpenAPI but is excluded from code generation
  * </ul>
  *
  * <pre>
@@ -74,6 +77,8 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.constant
 public final class VendorExtensions {
 
   public static final String API_WRAPPER = "x-api-wrapper";
+
+  public static final String API_WRAPPER_TYPE = "x-api-wrapper-type";
 
   public static final String API_WRAPPER_DATATYPE = "x-api-wrapper-datatype";
 
