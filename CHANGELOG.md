@@ -10,6 +10,47 @@ This project follows a contract-first release discipline:
 
 ---
 
+## [Unreleased]
+
+### Patch release
+
+OpenAPI Generics 1.2.1 simplifies contract-driven wrapper reconstruction by making the generated OpenAPI document the single source of truth for envelope identity.
+
+This release removes redundant client-side envelope configuration, completes end-to-end validation for application-defined generic containers with the built-in `ServiceResponse<T>` envelope, and continues platform verification and dependency alignment without changing runtime behavior.
+
+### Added
+
+- Added the `x-api-wrapper-type` vendor extension to preserve the fully qualified Java envelope type in projected wrapper schemas.
+- Added contract-driven envelope reconstruction in the Java code generator based on `x-api-wrapper-type`.
+- Added end-to-end validation for application-defined generic containers used with the built-in `ServiceResponse<T>` envelope.
+- Expanded sample coverage for producer → OpenAPI → generated client → consumer validation using application-owned generic containers.
+
+### Changed
+
+- Removed the need for client-side `openapi-generics.envelope` configuration when using aligned 1.2.1 producer and codegen components.
+- Unified envelope reconstruction with the existing contract-driven metadata model used for generic containers.
+- Upgraded Spring Boot to **3.5.16**.
+- Upgraded OpenAPI Generator to **7.24.0**.
+- Updated codegen module and sample documentation to reflect the contract-driven envelope metadata model.
+
+### Quality & Verification
+
+- Added regression coverage for `x-api-wrapper-type` metadata generation and consumption.
+- Added verification that generated clients reconstruct wrapper inheritance without client-side envelope configuration.
+- Verified built-in `ServiceResponse<T>` and BYOE envelope generation using the same metadata-driven reconstruction pipeline.
+- Verified producer → OpenAPI → generated client → consumer flows after removing redundant client-side envelope configuration.
+
+### Compatibility
+
+- Fully backward compatible with all 1.2.0 runtime contracts.
+- Producer and codegen components are expected to be upgraded together as part of the 1.2.1 release line.
+- Java 17+
+- Spring Boot 3.x / 4.x
+- OpenAPI Generator 7.x
+- Maven-based client generation
+
+---
+
 ## [1.2.0] - 2026-06-27
 
 ### Minor release

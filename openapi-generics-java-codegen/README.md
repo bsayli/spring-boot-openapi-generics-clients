@@ -29,6 +29,7 @@ Its responsibility is:
 - [Wrapper Reconstruction](#wrapper-reconstruction)
 - [BYOE](#byoe)
 - [BYOC](#byoc)
+- [Wrapper Metadata](#wrapper-metadata)
 - [Container Metadata](#container-metadata)
 - [Model Filtering](#model-filtering)
 - [Out of Scope](#out-of-scope)
@@ -43,7 +44,7 @@ This module extends OpenAPI Generator’s Java client generation with OpenAPI Ge
 It:
 
 - detects wrapper schemas marked with `x-api-wrapper`
-- applies envelope metadata for default and BYOE envelopes
+- derives envelope metadata from OpenAPI wrapper metadata
 - reconstructs generic container payloads from OpenAPI metadata
 - imports container Java types through `x-data-container-type`
 - reuses externally owned DTOs through BYOC mappings
@@ -63,7 +64,7 @@ OpenAPI Models
       ↓
 Ignored / External Model Resolution
       ↓
-Envelope Metadata Enrichment
+Wrapper Metadata Resolution
       ↓
 Container Metadata Consumption
       ↓
@@ -74,7 +75,7 @@ Wrapper Reconstruction
 Generated Java Client
 ```
 
-The generator operates on OpenAPI model metadata and produces Java types that preserve the original contract shape.
+The generator operates entirely on OpenAPI metadata and reconstructs Java types that preserve the original generic contract shape.
 
 ---
 
@@ -114,21 +115,23 @@ public class ApiResponsePagingCustomerDto
 }
 ```
 
+The wrapper superclass is derived directly from the `x-api-wrapper-type` vendor extension.
+
 Generated wrappers intentionally contain no behavior. Their role is to bind generic parameters to contract-owned envelope and container types.
 
 ---
 
 ## BYOE
 
-BYOE is configured through generator additional properties:
+Bring Your Own Envelope (BYOE) is configured only on the producer side.
 
-```xml
-<additionalProperty>
-  openapi-generics.envelope=io.example.contract.ApiResponse
-</additionalProperty>
+During OpenAPI projection the producer publishes the resolved Java envelope identity as metadata:
+
+```yaml
+x-api-wrapper-type: io.example.contract.ApiResponse
 ```
 
-The generator applies the configured envelope as the wrapper superclass.
+The generator derives the wrapper superclass directly from this metadata.
 
 Default envelope:
 
@@ -142,7 +145,9 @@ Configured envelope example:
 ApiResponse<T>
 ```
 
-The envelope type must be available on the generated client classpath.
+No client-side envelope configuration is required.
+
+The envelope type simply needs to be available on the generated client's compile classpath.
 
 ---
 
@@ -166,6 +171,28 @@ This keeps DTO ownership outside generated code.
 
 ---
 
+## Wrapper Metadata
+
+Wrapper reconstruction is driven by canonical OpenAPI vendor extensions.
+
+Example:
+
+```yaml
+x-api-wrapper: true
+x-api-wrapper-type: io.example.contract.ApiResponse
+x-api-wrapper-datatype: PagingCustomerDto
+```
+
+The generator uses:
+
+- `x-api-wrapper` to identify projected wrapper schemas
+- `x-api-wrapper-type` as the fully qualified Java wrapper type
+- `x-api-wrapper-datatype` as the resolved generic payload type published by the producer
+
+The OpenAPI document is the single source of truth for wrapper identity.
+
+---
+
 ## Container Metadata
 
 Container reconstruction is driven by OpenAPI vendor extensions.
@@ -174,6 +201,7 @@ Built-in container example:
 
 ```yaml
 x-api-wrapper: true
+x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
 x-api-wrapper-datatype: PageCustomerDto
 x-data-container: Page
 x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
@@ -184,6 +212,7 @@ Application-defined container example:
 
 ```yaml
 x-api-wrapper: true
+x-api-wrapper-type: io.example.contract.ApiResponse
 x-api-wrapper-datatype: PagingCustomerDto
 x-data-container: Paging
 x-data-container-type: io.example.contract.Paging
@@ -243,6 +272,6 @@ Contract-Aware Java Generation
 Thin Wrapper Types
 ```
 
-This module does not try to generate more Java models.
+This module does not generate additional business models.
 
-It generates the minimum Java types required to preserve the original contract shape.
+It generates only the minimum Java wrapper types required to preserve the original generic contract defined by the OpenAPI document.
