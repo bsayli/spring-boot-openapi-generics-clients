@@ -25,8 +25,8 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>3.5.15</spring-boot.version>
-        <openapi-generator.version>7.23.0</openapi-generator.version>
+        <spring-boot.version>3.5.16</spring-boot.version>
+        <openapi-generator.version>7.24.0</openapi-generator.version>
         <service-response-contract.version>1.2.1-SNAPSHOT</service-response-contract.version>
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>

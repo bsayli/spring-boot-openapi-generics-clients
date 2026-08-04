@@ -28,7 +28,7 @@
     </scm>
 
     <properties>
-        <spring-boot.version>3.5.15</spring-boot.version>
+        <spring-boot.version>3.5.16</spring-boot.version>
         <jakarta.servlet-api.version>6.1.0</jakarta.servlet-api.version>
         <argLine/>
     </properties>

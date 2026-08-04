@@ -25,7 +25,7 @@
 
         <customer-contract.version>1.2.1-SNAPSHOT</customer-contract.version>
         <spring-boot.version>4.0.7</spring-boot.version>
-        <openapi-generator.version>7.23.0</openapi-generator.version>
+        <openapi-generator.version>7.24.0</openapi-generator.version>
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <mockwebserver.version>5.3.2</mockwebserver.version>
@@ -36,7 +36,7 @@
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
-        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
 
         <argLine/>
         <openapi.generics.skip>false</openapi.generics.skip>

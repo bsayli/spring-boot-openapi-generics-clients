@@ -71,7 +71,7 @@
         <!-- Test Plugins -->
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
-        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
 
         <!-- Format Plugins -->
         <spotless-maven-plugin.version>3.4.0</spotless-maven-plugin.version>
