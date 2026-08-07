@@ -51,6 +51,13 @@ jobs:
           fail_ci_if_error: false
           verbose: true
 
+      - name: Set up JDK 25 for samples
+        uses: actions/setup-java@v4
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          cache: maven
+
       - name: Build samples (end-to-end validation)
         run: mvn -B -ntp -f samples/pom.xml clean verify
 
