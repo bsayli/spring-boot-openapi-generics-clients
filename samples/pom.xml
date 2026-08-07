@@ -30,6 +30,7 @@
         <module>spring-boot-3</module>
         <module>spring-boot-4</module>
         <module>type-coverage</module>
+        <module>transport-coverage</module>
     </modules>
     <build>
         <pluginManagement>

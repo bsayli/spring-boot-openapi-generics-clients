@@ -16,7 +16,7 @@ This project follows a contract-first release discipline:
 
 OpenAPI Generics 1.2.1 simplifies contract-driven wrapper reconstruction by making the generated OpenAPI document the single source of truth for envelope identity.
 
-This release removes redundant client-side envelope configuration, completes end-to-end validation for application-defined generic containers with the built-in `ServiceResponse<T>` envelope, and continues platform verification and dependency alignment without changing runtime behavior.
+This release removes redundant client-side envelope configuration, completes end-to-end validation for application-defined generic containers with the built-in `ServiceResponse<T>` envelope, and expands platform verification across contract reconstruction, framework compatibility, and standard HTTP transport behavior without changing runtime behavior.
 
 ### Added
 
@@ -24,6 +24,7 @@ This release removes redundant client-side envelope configuration, completes end
 - Added contract-driven envelope reconstruction in the Java code generator based on `x-api-wrapper-type`.
 - Added end-to-end validation for application-defined generic containers used with the built-in `ServiceResponse<T>` envelope.
 - Expanded sample coverage for producer → OpenAPI → generated client → consumer validation using application-owned generic containers.
+- Added a dedicated `transport-coverage` sample for multipart upload, binary download, and form-urlencoded compatibility with the Java RestClient generator.
 
 ### Changed
 
@@ -44,6 +45,11 @@ This release removes redundant client-side envelope configuration, completes end
 - Added verification that generated clients reconstruct wrapper inheritance without client-side envelope configuration.
 - Verified built-in `ServiceResponse<T>` and BYOE envelope generation using the same metadata-driven reconstruction pipeline.
 - Verified producer → OpenAPI → generated client → consumer flows after removing redundant client-side envelope configuration.
+- Added transport regression coverage for `multipart/form-data`, `application/octet-stream`, and `application/x-www-form-urlencoded`.
+- Verified that standard OpenAPI Generator Java RestClient transport behavior remains intact while generic JSON response reconstruction is enabled.
+- Verified multipart file plus structured JSON part generation together with `ServiceResponse<T>` reconstruction.
+- Verified binary download generation using the standard Spring `Resource` abstraction without wrapper interference.
+- Verified form-urlencoded request generation together with generic response reconstruction.
 - Verified the Spring Boot 4 integration stack on Spring Boot 4.1.0, Springdoc 3.1.0, and Java 25 LTS.
 - Verified mixed Java baselines with Java 21 for Spring Boot 3 samples and Java 25 for Spring Boot 4 samples while published platform artifacts continue targeting Java 17+.
 

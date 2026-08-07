@@ -1,0 +1,161 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI Generics Transport Coverage API
+  description: |
+    Transport compatibility sample for OpenAPI Generics.
+
+    Verifies that standard OpenAPI Generator Java RestClient transport behavior coexists with
+    contract-aware ServiceResponse<T> reconstruction for multipart/form-data,
+    application/x-www-form-urlencoded, and application/octet-stream operations.
+  version: 1.2.1-SNAPSHOT
+servers:
+- url: http://localhost:8078/transport-coverage
+  description: Local transport coverage producer
+paths:
+  /transport/multipart:
+    post:
+      tags:
+      - multipart-transport-controller
+      operationId: upload
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                metadata:
+                  $ref: "#/components/schemas/UploadMetadataDto"
+              required:
+              - file
+              - metadata
+            encoding:
+              metadata:
+                contentType: application/json
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseUploadResultDto"
+  /transport/form:
+    post:
+      tags:
+      - form-transport-controller
+      operationId: register
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                category:
+                  type: string
+              required:
+              - category
+              - name
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseRegistrationResultDto"
+  /transport/binary/{documentId}:
+    get:
+      tags:
+      - binary-transport-controller
+      operationId: download
+      parameters:
+      - name: documentId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+components:
+  schemas:
+    UploadMetadataDto:
+      type: object
+      properties:
+        description:
+          type: string
+        category:
+          type: string
+    Meta:
+      type: object
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/Sort"
+      x-ignore-model: true
+    ServiceResponseUploadResultDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/UploadResultDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
+      x-api-wrapper-datatype: UploadResultDto
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+        direction:
+          type: string
+          enum:
+          - ASC
+          - DESC
+      x-ignore-model: true
+    UploadResultDto:
+      type: object
+      properties:
+        fileName:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+          format: int64
+        description:
+          type: string
+        category:
+          type: string
+    RegistrationResultDto:
+      type: object
+      properties:
+        registrationId:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+    ServiceResponseRegistrationResultDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/RegistrationResultDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
+      x-api-wrapper-datatype: RegistrationResultDto

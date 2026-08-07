@@ -190,12 +190,6 @@ cd producer
 mvn spring-boot:run
 ```
 
-Producer URL:
-
-```text
-http://localhost:8076/type-coverage/byoe-response
-```
-
 Swagger UI:
 
 ```text

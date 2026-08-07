@@ -1,0 +1,19 @@
+server:
+  port: ${APP_PORT:8079}
+  servlet:
+    context-path: /transport-coverage-consumer
+
+spring:
+  application:
+    name: transport-coverage-consumer
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+transport-coverage:
+  api:
+    base-url: ${TRANSPORT_COVERAGE_API_BASE_URL:http://localhost:8078/transport-coverage}
+
+logging:
+  level:
+    root: INFO
+    io.github.blueprintplatform: INFO
