@@ -30,6 +30,10 @@ This release removes redundant client-side envelope configuration, completes end
 - Removed the need for client-side `openapi-generics.envelope` configuration when using aligned 1.2.1 producer and codegen components.
 - Unified envelope reconstruction with the existing contract-driven metadata model used for generic containers.
 - Upgraded Spring Boot to **3.5.16**.
+- Upgraded the Spring Boot 4 sample baseline from **4.0.7** to **4.1.0**.
+- Upgraded Springdoc to **2.9.0** for the Spring Boot 3 platform line and **3.1.0** for Spring Boot 4 samples.
+- Updated Spring Boot 4 sample Docker images for the `jarmode=tools` layered extraction model introduced in Spring Boot 4.1.
+- Updated configuration property validation to use container-element `@Valid` semantics across supported Spring Boot lines.
 - Upgraded OpenAPI Generator to **7.24.0**.
 - Updated codegen module and sample documentation to reflect the contract-driven envelope metadata model.
 
@@ -39,6 +43,7 @@ This release removes redundant client-side envelope configuration, completes end
 - Added verification that generated clients reconstruct wrapper inheritance without client-side envelope configuration.
 - Verified built-in `ServiceResponse<T>` and BYOE envelope generation using the same metadata-driven reconstruction pipeline.
 - Verified producer → OpenAPI → generated client → consumer flows after removing redundant client-side envelope configuration.
+- Verified the Spring Boot 4 integration stack on Spring Boot 4.1.0 with Springdoc 3.1.0.
 
 ### Compatibility
 
