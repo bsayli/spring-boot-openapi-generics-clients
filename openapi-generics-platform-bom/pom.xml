@@ -29,7 +29,7 @@
     </scm>
 
     <properties>
-        <springdoc.version>2.8.17</springdoc.version>
+        <springdoc.version>2.9.0</springdoc.version>
     </properties>
 
     <dependencyManagement>

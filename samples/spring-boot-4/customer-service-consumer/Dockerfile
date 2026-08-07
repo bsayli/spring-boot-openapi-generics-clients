@@ -43,10 +43,13 @@ openapi-generics-java-codegen-parent \
         -name 'customer-service-consumer-*.jar' \
         ! -name '*.original' \
         | head -n 1)" && \
+    cp "$JAR" /workspace/application.jar && \
     mkdir -p /layers && \
-    cd /layers && \
-    java -Djarmode=layertools \
-        -jar "/workspace/$JAR" extract
+    java -Djarmode=tools \
+        -jar /workspace/application.jar \
+        extract \
+        --layers \
+        --destination /layers
 
 FROM eclipse-temurin:21.0.10_7-jre-noble
 WORKDIR /app
@@ -61,8 +64,8 @@ LABEL org.opencontainers.image.title="customer-service-consumer-sb4" \
       org.opencontainers.image.licenses="MIT"
 
 COPY --from=builder --chown=10001:0 /layers/dependencies/ ./
-COPY --from=builder --chown=10001:0 /layers/snapshot-dependencies/ ./
 COPY --from=builder --chown=10001:0 /layers/spring-boot-loader/ ./
+COPY --from=builder --chown=10001:0 /layers/snapshot-dependencies/ ./
 COPY --from=builder --chown=10001:0 /layers/application/ ./
 
 USER 10001
@@ -70,5 +73,6 @@ USER 10001
 ENV SPRING_PROFILES_ACTIVE=default
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+UseG1GC -Dfile.encoding=UTF-8"
 
-EXPOSE 8085
-ENTRYPOINT ["java","org.springframework.boot.loader.launch.JarLauncher"]
+EXPOSE 8095
+
+ENTRYPOINT ["java", "-jar", "application.jar"]
