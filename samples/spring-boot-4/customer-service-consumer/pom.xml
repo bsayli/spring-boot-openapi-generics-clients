@@ -23,7 +23,7 @@
     </description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <openapi-generics-server-starter.version>1.2.1-SNAPSHOT</openapi-generics-server-starter.version>
         <customer-service-client.version>1.2.1-SNAPSHOT</customer-service-client.version>
         <springdoc-openapi-starter.version>3.1.0</springdoc-openapi-starter.version>

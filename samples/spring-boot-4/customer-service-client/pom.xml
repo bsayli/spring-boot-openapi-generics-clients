@@ -20,7 +20,7 @@
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <customer-contract.version>1.2.1-SNAPSHOT</customer-contract.version>

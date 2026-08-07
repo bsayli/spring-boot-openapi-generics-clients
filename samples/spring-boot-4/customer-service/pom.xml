@@ -20,7 +20,7 @@
     <description>Spring Boot reference producer for the OpenAPI Generics platform</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <openapi-generics-server-starter.version>1.2.1-SNAPSHOT</openapi-generics-server-starter.version>
         <customer-contract.version>1.2.1-SNAPSHOT</customer-contract.version>
         <springdoc-openapi-starter.version>3.1.0</springdoc-openapi-starter.version>

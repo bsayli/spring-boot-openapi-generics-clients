@@ -1,4 +1,4 @@
-FROM maven:3.9.12-eclipse-temurin-21-noble AS builder
+FROM maven:3.9.16-eclipse-temurin-25 AS builder
 WORKDIR /workspace
 
 COPY pom.xml pom.xml
@@ -51,7 +51,7 @@ openapi-generics-java-codegen-parent \
         --layers \
         --destination /layers
 
-FROM eclipse-temurin:21.0.10_7-jre-noble
+FROM eclipse-temurin:25-jre-noble
 WORKDIR /app
 
 RUN useradd -r -u 10001 -g root -s /bin/false -d /app appuser && \
