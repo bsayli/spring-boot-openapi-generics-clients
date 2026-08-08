@@ -140,7 +140,7 @@ Generics preserved from producer to consumer.
 
 ### 1. Try it in 2 minutes
 
-Runnable end-to-end sample stacks are available under [samples](samples/), including Spring Boot 3, Spring Boot 4, dedicated type-coverage suites, and transport-compatibility coverage covering supported payload types, wrapper shapes, and generic response patterns.
+Runnable end-to-end sample stacks are available under [samples](samples/), including Spring Boot 3 and Spring Boot 4 reference stacks, dedicated generic type-coverage suites, and independent transport-compatibility coverage for standard OpenAPI Generator behaviors.
 
 ```text
 samples
@@ -247,7 +247,7 @@ The project demonstrates:
 
 ## What's New in 1.2.1
 
-OpenAPI Generics 1.2.1 strengthens the contract-driven reconstruction pipeline by allowing the projected OpenAPI document to carry the metadata required to reconstruct the original Java contract deterministically.
+OpenAPI Generics 1.2.1 completes the contract-driven reconstruction metadata model by allowing the projected OpenAPI document to carry the envelope identity required to reconstruct the original Java contract deterministically.
 
 Envelope identity is now preserved through `x-api-wrapper-type`, complementing the container identity metadata introduced in 1.2 through `x-data-container-type`.
 
@@ -348,7 +348,7 @@ Consumer Runtime
 
 Additional improvements in 1.2.1 include:
 
-- contract-driven envelope reconstruction through `x-api-wrapper-type`, eliminating duplicate client-side envelope configuration
+- contract-driven envelope reconstruction through `x-api-wrapper-type`, making the OpenAPI document the source of envelope identity during client generation
 - expanded end-to-end validation for application-defined containers with both built-in and BYOE envelopes
 - dedicated transport compatibility coverage for multipart, binary download, and form-urlencoded scenarios
 - clearer server-side failure diagnostics through a dedicated exception hierarchy
@@ -362,15 +362,16 @@ No contract migration is required for existing 1.2 users.
 
 ## Key Features
 
-| Feature                             | What it does                                                                                                                                                                                           | Default                           |
-|-------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
-| **BYOE** — Bring Your Own Envelope  | Reuse your existing response envelope (for example `ApiResponse<T>`) instead of `ServiceResponse<T>`. No migration required.                                                                           | `ServiceResponse<T>`              |
-| **BYOC** — Bring Your Own Contract  | Reuse your existing domain DTOs instead of generating duplicate models.                                                                                                                                | Generate from spec                |
-| **Application-defined containers**  | Register your own generic container contracts (for example `Paging<T>` or `Window<T>`) and have them participate in the same projection, metadata, and reconstruction pipeline as built-in containers. | Built-in containers only          |
-| **Container-aware reconstruction**  | Deterministically reconstruct built-in and configured generic container types from OpenAPI metadata instead of using container-specific generation logic.                                              | Enabled                           |
-| **Fallback to standard generation** | Disable the generics-aware template patching with a single Maven property. To fully revert to stock OpenAPI Generator behavior, switch the client module to `generatorName=java`.                      | Generics-aware generation enabled |
-| **Deterministic generation**        | Apply deterministic template patching, generated-source hygiene, and build-time validation to produce stable, reproducible Java clients.                                                               | Enabled                           |
-| **End-to-end samples**              | Complete producer, client, and consumer pipelines for Spring Boot 3, Spring Boot 4, `ServiceResponse`, and BYOE scenarios.                                                                             | See [samples](samples/)           |
+| Feature                                     | What it does                                                                                                                                                                                              | Default                           |
+|---------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
+| **BYOE** — Bring Your Own Envelope          | Reuse your existing response envelope (for example `ApiResponse<T>`) instead of `ServiceResponse<T>`. No migration required.                                                                              | `ServiceResponse<T>`              |
+| **BYOC** — Bring Your Own Contract          | Reuse your existing domain DTOs instead of generating duplicate models.                                                                                                                                   | Generate from spec                |
+| **Application-defined containers**          | Register your own generic container contracts (for example `Paging<T>` or `Window<T>`) and have them participate in the same projection, metadata, and reconstruction pipeline as built-in containers.    | Built-in containers only          |
+| **Contract-driven envelope reconstruction** | Reconstruct the Java envelope directly from `x-api-wrapper-type` metadata without duplicating envelope configuration on the client.                                                                       | Enabled                           |
+| **Container-aware reconstruction**          | Deterministically reconstruct built-in and configured generic container types from OpenAPI metadata instead of using container-specific generation logic.                                                 | Enabled                           |
+| **Fallback to standard generation**         | Disable the generics-aware template patching with a single Maven property. To fully revert to stock OpenAPI Generator behavior, switch the client module to `generatorName=java`.                         | Generics-aware generation enabled |
+| **Deterministic generation**                | Apply deterministic template patching, generated-source hygiene, and build-time validation to produce stable, reproducible Java clients.                                                                  | Enabled                           |
+| **End-to-end samples**                      | Complete producer → OpenAPI → generated client → consumer pipelines covering Spring Boot 3/4, `ServiceResponse`, BYOE, application-defined containers, and independent transport compatibility scenarios. | See [samples](samples/)           |
 
 ---
 
@@ -514,7 +515,7 @@ Teams that own their OpenAPI documents can publish the same contract semantics d
 - `x-data-item`
 - `x-ignore-model`
 
-Together, these extensions describe wrapper semantics, payload type, container identity, item type, and generation behavior, allowing generated clients to reconstruct the original Java contract deterministically without requiring Spring-based projection.
+Together, these extensions describe wrapper semantics, payload type, container identity, item type, and generation behavior, allowing generated clients to reconstruct the declared contract semantics deterministically without requiring Spring-based projection.
 
 ### Architecture
 
@@ -537,6 +538,7 @@ For internal architecture and design decisions, see the [architecture](docs/arch
 
 - ✔ Contract identity is preserved across server, OpenAPI, and generated client
 - ✔ Contract ownership remains with your application, not generated code
+- ✔ Envelope identity is preserved through `x-api-wrapper-type`
 - ✔ Built-in and application-defined generic containers share the same projection and reconstruction pipeline
 - ✔ Container identity is preserved through deterministic projection metadata
 - ✔ Generated clients reconstruct contract semantics instead of redefining them
@@ -548,13 +550,15 @@ For internal architecture and design decisions, see the [architecture](docs/arch
 
 ## Compatibility
 
-OpenAPI Generics is currently verified with:
+OpenAPI Generics supports:
 
 - **Java:** 17+
 - **Spring Boot:** 3.4.x, 3.5.x, 4.x
-- **springdoc-openapi:** 2.9.x (Spring Boot 3.x), 3.1.x (Spring Boot 4.x)
+- **springdoc-openapi:** 2.x for Spring Boot 3.x, 3.x for Spring Boot 4.x
 - **OpenAPI Generator:** 7.x
 - **Server scope:** Spring WebMvc (`springdoc-openapi-starter-webmvc-ui`)
+
+The 1.2.1 reference verification stack includes Spring Boot 3.5.16 with Springdoc 2.9.0, Spring Boot 4.1.0 with Springdoc 3.1.0, and OpenAPI Generator 7.24.0.
 
 See the full compatibility matrix and support policy: [Compatibility & Support Policy](docs/compatibility.md)
 
@@ -571,7 +575,7 @@ The generated OpenAPI document remains valid OpenAPI and can be consumed by stan
 What OpenAPI Generics adds:
 
 - Generics-aware Java client generation through an OpenAPI Generator specialization
-- Contract metadata via vendor extensions such as `x-api-wrapper`, `x-api-wrapper-type`, `x-api-wrapper-datatype`, `x-data-container`, `x-data-container-type`, and `x-data-item`
+- Contract metadata via vendor extensions such as `x-api-wrapper`, `x-api-wrapper-type`, `x-api-wrapper-datatype`, `x-data-container`, `x-data-container-type`, `x-data-item`, and `x-ignore-model`
 - Server-side OpenAPI enrichment through Springdoc integration
 - Container-aware reconstruction for both built-in and application-defined generic container contracts
 - Deterministic generated-source hygiene for cleaner Java client output
