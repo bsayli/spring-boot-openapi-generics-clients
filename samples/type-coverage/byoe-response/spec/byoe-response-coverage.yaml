@@ -16,7 +16,7 @@ info:
 
     Demonstrates Bring Your Own Envelope (BYOE) with built-in and
     application-defined generic containers.
-  version: 1.2.1
+  version: 1.3.0-SNAPSHOT
 servers:
 - url: http://localhost:8076/type-coverage/byoe-response
   description: Local BYOE response type coverage producer

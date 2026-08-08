@@ -19,7 +19,7 @@ info:
 
     Demonstrates the built-in ServiceResponse<T> envelope with both
     platform-provided and application-owned generic containers.
-  version: 1.2.1
+  version: 1.3.0-SNAPSHOT
 servers:
 - url: http://localhost:8074/type-coverage/service-response
   description: Local ServiceResponse type coverage producer

@@ -7,7 +7,7 @@ info:
     Verifies that standard OpenAPI Generator Java RestClient transport behavior coexists with
     contract-aware ServiceResponse<T> reconstruction for multipart/form-data,
     application/x-www-form-urlencoded, and application/octet-stream operations.
-  version: 1.2.1
+  version: 1.3.0-SNAPSHOT
 servers:
 - url: http://localhost:8078/transport-coverage
   description: Local transport coverage producer
