@@ -351,13 +351,13 @@ For the authoritative support matrix, see [Compatibility & Support Policy](../co
 
 ## Module Map
 
-| Module                                                                                         | Responsibility                                                                 |
-|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| [`openapi-generics-contract`](../../openapi-generics-contract/README.md)                       | Shared contracts and platform-owned generic types                              |
-| [`openapi-generics-server-starter`](../../openapi-generics-server-starter/README.md)           | Spring Boot contract discovery, projection, metadata enrichment, and validation |
-| [`openapi-generics-java-codegen`](../../openapi-generics-java-codegen/README.md)               | Contract-aware OpenAPI Generator specialization and reconstruction              |
-| [`openapi-generics-java-codegen-parent`](../../openapi-generics-java-codegen-parent/README.md) | Generator orchestration, template lifecycle, and generated-source hygiene       |
-| [`openapi-generics-platform-bom`](../../openapi-generics-platform-bom/README.md)               | Dependency alignment                                                            |
+| Module                                                                                                                                          | Responsibility                                                                  |
+|-------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| [`openapi-generics-contract`](https://github.com/blueprint-platform/openapi-generics/tree/main/openapi-generics-contract)                       | Shared contracts and platform-owned generic types                               |
+| [`openapi-generics-server-starter`](https://github.com/blueprint-platform/openapi-generics/tree/main/openapi-generics-server-starter)           | Spring Boot contract discovery, projection, metadata enrichment, and validation |
+| [`openapi-generics-java-codegen`](https://github.com/blueprint-platform/openapi-generics/tree/main/openapi-generics-java-codegen)               | Contract-aware OpenAPI Generator specialization and reconstruction              |
+| [`openapi-generics-java-codegen-parent`](https://github.com/blueprint-platform/openapi-generics/tree/main/openapi-generics-java-codegen-parent) | Generator orchestration, template lifecycle, and generated-source hygiene       |
+| [`openapi-generics-platform-bom`](https://github.com/blueprint-platform/openapi-generics/tree/main/openapi-generics-platform-bom)               | Dependency alignment                                                            |
 
 ---
 
