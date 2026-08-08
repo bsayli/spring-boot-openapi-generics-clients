@@ -13,6 +13,7 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.co
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.enrichment.WrapperSchemaEnricher;
+import io.github.blueprintplatform.openapi.generics.server.exception.OpenApiProjectionException;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -113,8 +114,9 @@ class WrapperSchemaProcessorTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> processor.process(openApi, descriptor));
+    OpenApiProjectionException ex =
+        assertThrows(
+            OpenApiProjectionException.class, () -> processor.process(openApi, descriptor));
 
     assertTrue(ex.getMessage().contains("Missing wrapper schema"));
     verifyNoInteractions(enricher);

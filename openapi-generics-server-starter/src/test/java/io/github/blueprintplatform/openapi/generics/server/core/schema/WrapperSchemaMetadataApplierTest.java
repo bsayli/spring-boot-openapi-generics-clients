@@ -1,11 +1,7 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema;
 
 import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.ContainerNames.PAGE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
@@ -15,6 +11,7 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.co
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerSource;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions;
+import io.github.blueprintplatform.openapi.generics.server.exception.OpenApiProjectionException;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.LinkedHashMap;
@@ -145,9 +142,9 @@ class WrapperSchemaMetadataApplierTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
-    IllegalStateException exception =
+    OpenApiProjectionException exception =
         assertThrows(
-            IllegalStateException.class,
+            OpenApiProjectionException.class,
             () -> WrapperSchemaMetadataApplier.apply(schemas, descriptor));
 
     assertTrue(exception.getMessage().contains("Missing wrapper schema"));

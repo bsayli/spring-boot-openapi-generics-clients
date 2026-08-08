@@ -13,6 +13,7 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.co
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.resolver.ConfiguredContainerTypesResolver;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.resolver.DefaultSupportedContainerTypesResolver;
+import io.github.blueprintplatform.openapi.generics.server.exception.OpenApiGenericsConfigurationException;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
@@ -182,8 +183,9 @@ class ResponseIntrospectionPolicyResolverTest {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(new EnvelopeProperties("ApiResponse"), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("Expected fully-qualified class name"));
   }
@@ -194,8 +196,9 @@ class ResponseIntrospectionPolicyResolverTest {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(new EnvelopeProperties("com.example.DoesNotExist"), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("Configured envelope class not found"));
   }
@@ -207,8 +210,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(InvalidEnvelopeInterface.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must be a concrete class, not an interface"));
   }
@@ -220,8 +224,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(AbstractEnvelope.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must be a concrete class, not an abstract class"));
   }
@@ -233,8 +238,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(InvalidEnvelopeRecord.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must be a class, not a record"));
   }
@@ -246,8 +252,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(InvalidEnvelopeMultipleTypes.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must declare exactly one type parameter"));
   }
@@ -259,8 +266,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(InvalidEnvelopeNoPayload.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must declare exactly one direct payload field"));
   }
@@ -272,8 +280,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(InvalidEnvelopeMultiplePayloads.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must declare exactly one direct payload field"));
   }
@@ -285,8 +294,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(InvalidEnvelopeNestedPayload.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("contains unsupported nested generic payload slot"));
   }
@@ -298,8 +308,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(InvalidEnvelopeEnum.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must be a class, not an enum"));
   }
@@ -311,8 +322,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(InvalidEnvelopeAnnotation.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must be a concrete class, not an interface"));
   }
@@ -324,8 +336,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(InvalidEnvelopeNoGenerics.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must declare exactly one type parameter"));
   }
@@ -350,8 +363,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(InvalidEnvelopeGenericArrayPayload.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("contains unsupported nested generic payload slot"));
   }
@@ -363,8 +377,9 @@ class ResponseIntrospectionPolicyResolverTest {
         new OpenApiGenericsProperties(
             new EnvelopeProperties(InvalidEnvelopeDeeplyNestedPayload.class.getName()), null);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+    OpenApiGenericsConfigurationException ex =
+        assertThrows(
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("contains unsupported nested generic payload slot"));
   }

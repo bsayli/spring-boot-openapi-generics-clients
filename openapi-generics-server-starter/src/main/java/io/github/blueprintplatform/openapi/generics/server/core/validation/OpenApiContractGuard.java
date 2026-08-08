@@ -6,6 +6,7 @@ import static io.github.blueprintplatform.openapi.generics.server.core.schema.co
 import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.DATA_ITEM;
 
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
+import io.github.blueprintplatform.openapi.generics.server.exception.OpenApiContractValidationException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
@@ -16,9 +17,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Validates that generated OpenAPI schemas conform to the contract defined by the response
  * descriptors.
- *
- * <p>This guard enforces that wrapper schemas are structurally correct and contain all required
- * vendor extensions expected by the client generator.
  *
  * <p>Specifically, it verifies:
  *
@@ -123,7 +121,7 @@ public class OpenApiContractGuard {
   private Map<String, Schema> getSchemas(OpenAPI openApi) {
     if (openApi.getComponents() == null || openApi.getComponents().getSchemas() == null) {
       log.error("OpenAPI validation failed: components.schemas is missing");
-      throw new IllegalStateException("OpenAPI components.schemas is missing");
+      throw new OpenApiContractValidationException("OpenAPI components.schemas is missing");
     }
 
     return openApi.getComponents().getSchemas();
@@ -163,13 +161,14 @@ public class OpenApiContractGuard {
 
   private void failMissingSchema(String schemaType, String schemaName) {
     log.error("Missing {} schema '{}'", schemaType, schemaName);
-    throw new IllegalStateException(
+    throw new OpenApiContractValidationException(
         "Missing required " + schemaType + " schema: '" + schemaName + "'");
   }
 
   private void failMissingExtensions(String wrapperName, String detail) {
     log.error("Wrapper '{}' missing {}", wrapperName, detail);
-    throw new IllegalStateException("Wrapper schema '" + wrapperName + "' is missing " + detail);
+    throw new OpenApiContractValidationException(
+        "Wrapper schema '" + wrapperName + "' is missing " + detail);
   }
 
   private void failInvalidExtension(
@@ -182,13 +181,13 @@ public class OpenApiContractGuard {
         expectedValue,
         actualValue);
 
-    throw new IllegalStateException(
+    throw new OpenApiContractValidationException(
         "Wrapper schema '" + wrapperName + "' has invalid extension: " + extensionName);
   }
 
   private void failMissingProperty(String wrapperName, String propertyName) {
     log.error("Wrapper '{}' missing required property '{}'", wrapperName, propertyName);
-    throw new IllegalStateException(
+    throw new OpenApiContractValidationException(
         "Wrapper schema '" + wrapperName + "' must define '" + propertyName + "' property");
   }
 }

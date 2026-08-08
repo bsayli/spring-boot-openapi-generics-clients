@@ -16,6 +16,7 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.co
 import io.github.blueprintplatform.openapi.generics.server.core.schema.ContractSchemaExclusionApplier;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
+import io.github.blueprintplatform.openapi.generics.server.exception.OpenApiProjectionException;
 import io.swagger.v3.oas.models.OpenAPI;
 import java.util.Optional;
 import java.util.Set;
@@ -227,14 +228,16 @@ class OpenApiPipelineOrchestratorTest {
 
     when(discoveryStrategy.discover()).thenReturn(Set.of(type));
     when(introspector.extract(type)).thenReturn(Optional.of(descriptor));
-    doThrow(new IllegalStateException("schema failure"))
-        .when(wrapperSchemaProcessor)
-        .process(openApi, descriptor);
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> orchestrator.run(openApi));
+    OpenApiProjectionException failure = new OpenApiProjectionException("schema failure");
 
-    assertEquals("schema failure", ex.getMessage());
+    doThrow(failure).when(wrapperSchemaProcessor).process(openApi, descriptor);
+
+    OpenApiProjectionException exception =
+        assertThrows(OpenApiProjectionException.class, () -> orchestrator.run(openApi));
+
+    assertSame(failure, exception);
+    assertEquals("schema failure", exception.getMessage());
 
     verify(wrapperSchemaProcessor).process(openApi, descriptor);
     verifyNoInteractions(marker, contractGuard);

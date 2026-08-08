@@ -5,6 +5,7 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.co
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerShape;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerSource;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
+import io.github.blueprintplatform.openapi.generics.server.exception.OpenApiGenericsConfigurationException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -60,11 +61,11 @@ public final class ConfiguredContainerTypesResolver {
 
   private Class<?> resolveContainerClass(String configuredType) {
     if (configuredType == null || configuredType.isBlank()) {
-      throw new IllegalStateException("Container type must not be null or blank");
+      throw new OpenApiGenericsConfigurationException("Container type must not be null or blank");
     }
 
     if (!configuredType.contains(".")) {
-      throw new IllegalStateException(
+      throw new OpenApiGenericsConfigurationException(
           "Invalid container type '"
               + configuredType
               + "'. Expected fully-qualified class name (e.g. com.example.Paging)");
@@ -73,7 +74,7 @@ public final class ConfiguredContainerTypesResolver {
     try {
       return Class.forName(configuredType);
     } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(
+      throw new OpenApiGenericsConfigurationException(
           "Configured container class not found: '"
               + configuredType
               + "'. Ensure the class exists and is on the application classpath.",
@@ -165,8 +166,9 @@ public final class ConfiguredContainerTypesResolver {
         && typeVariable.getName().equals(expected.getName());
   }
 
-  private IllegalStateException invalidContainer(Class<?> containerType, String reason) {
-    return new IllegalStateException(
+  private OpenApiGenericsConfigurationException invalidContainer(
+      Class<?> containerType, String reason) {
+    return new OpenApiGenericsConfigurationException(
         "Unsupported container type '" + containerType.getName() + "': " + reason);
   }
 }

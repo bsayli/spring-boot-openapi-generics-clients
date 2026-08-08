@@ -2,6 +2,7 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema;
 
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions;
+import io.github.blueprintplatform.openapi.generics.server.exception.OpenApiProjectionException;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
 
@@ -22,7 +23,7 @@ public final class WrapperSchemaMetadataApplier {
     Schema<?> wrapper = schemas.get(wrapperName);
 
     if (wrapper == null) {
-      throw new IllegalStateException("Missing wrapper schema: " + wrapperName);
+      throw new OpenApiProjectionException("Missing wrapper schema: " + wrapperName);
     }
 
     wrapper.addExtension(VendorExtensions.API_WRAPPER, Boolean.TRUE);

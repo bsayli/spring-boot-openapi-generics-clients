@@ -16,7 +16,7 @@ This project follows a contract-first release discipline:
 
 OpenAPI Generics 1.2.1 simplifies contract-driven wrapper reconstruction by making the generated OpenAPI document the single source of truth for envelope identity.
 
-This release removes redundant client-side envelope configuration, completes end-to-end validation for application-defined generic containers with the built-in `ServiceResponse<T>` envelope, and expands platform verification across contract reconstruction, framework compatibility, and standard HTTP transport behavior without changing runtime behavior.
+This release removes redundant client-side envelope configuration, completes end-to-end validation for application-defined generic containers with the built-in `ServiceResponse<T>` envelope, introduces a dedicated server-side exception model, and expands platform verification across contract reconstruction, framework compatibility, and standard HTTP transport behavior without changing runtime behavior.
 
 ### Added
 
@@ -25,11 +25,13 @@ This release removes redundant client-side envelope configuration, completes end
 - Added end-to-end validation for application-defined generic containers used with the built-in `ServiceResponse<T>` envelope.
 - Expanded sample coverage for producer → OpenAPI → generated client → consumer validation using application-owned generic containers.
 - Added a dedicated `transport-coverage` sample for multipart upload, binary download, and form-urlencoded compatibility with the Java RestClient generator.
+- Added a dedicated exception hierarchy for the `openapi-generics-server-starter` module covering configuration, descriptor validation, projection, and generated contract validation failures.
 
 ### Changed
 
 - Removed the need for client-side `openapi-generics.envelope` configuration when using aligned 1.2.1 producer and codegen components.
 - Unified envelope reconstruction with the existing contract-driven metadata model used for generic containers.
+- Replaced generic server-starter failure exceptions with platform-specific exception types while preserving fail-fast behavior and diagnostic messages.
 - Upgraded Spring Boot to **3.5.16**.
 - Upgraded the Spring Boot 4 sample baseline from **4.0.7** to **4.1.0**.
 - Upgraded Springdoc to **2.9.0** for the Spring Boot 3 platform line and **3.1.0** for Spring Boot 4 samples.
@@ -45,6 +47,8 @@ This release removes redundant client-side envelope configuration, completes end
 - Added verification that generated clients reconstruct wrapper inheritance without client-side envelope configuration.
 - Verified built-in `ServiceResponse<T>` and BYOE envelope generation using the same metadata-driven reconstruction pipeline.
 - Verified producer → OpenAPI → generated client → consumer flows after removing redundant client-side envelope configuration.
+- Added regression coverage for server-starter exception categorization across configuration, descriptor validation, projection, and contract validation failures.
+- Verified that server-starter failures preserve existing diagnostic messages and fail-fast behavior while exposing platform-specific exception types.
 - Added transport regression coverage for `multipart/form-data`, `application/octet-stream`, and `application/x-www-form-urlencoded`.
 - Verified that standard OpenAPI Generator Java RestClient transport behavior remains intact while generic JSON response reconstruction is enabled.
 - Verified multipart file plus structured JSON part generation together with `ServiceResponse<T>` reconstruction.

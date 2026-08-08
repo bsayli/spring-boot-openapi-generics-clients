@@ -1,10 +1,7 @@
 package io.github.blueprintplatform.openapi.generics.server.core.validation;
 
 import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.ContainerNames.PAGE;
-import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.API_WRAPPER;
-import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.API_WRAPPER_DATATYPE;
-import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.DATA_CONTAINER;
-import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.DATA_ITEM;
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
@@ -14,6 +11,7 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.co
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerShape;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerSource;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
+import io.github.blueprintplatform.openapi.generics.server.exception.OpenApiContractValidationException;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -99,7 +97,7 @@ class OpenApiContractGuardTest {
     OpenAPI openApi = new OpenAPI();
     Set<ResponseTypeDescriptor> descriptors = Set.of();
 
-    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
+    OpenApiContractValidationException ex = validateExpectingFailure(openApi, descriptors);
 
     assertEquals("OpenAPI components.schemas is missing", ex.getMessage());
   }
@@ -113,7 +111,7 @@ class OpenApiContractGuardTest {
     OpenAPI openApi = openApi();
     Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
+    OpenApiContractValidationException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("Missing required wrapper schema"));
     assertTrue(ex.getMessage().contains("ServiceResponseCustomerDto"));
@@ -129,7 +127,7 @@ class OpenApiContractGuardTest {
     OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
     Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
+    OpenApiContractValidationException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("missing required extensions"));
   }
@@ -147,7 +145,7 @@ class OpenApiContractGuardTest {
     OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
     Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
+    OpenApiContractValidationException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("invalid extension: " + API_WRAPPER));
   }
@@ -165,7 +163,7 @@ class OpenApiContractGuardTest {
     OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
     Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
+    OpenApiContractValidationException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("invalid extension: " + API_WRAPPER_DATATYPE));
   }
@@ -183,7 +181,7 @@ class OpenApiContractGuardTest {
     OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
     Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
+    OpenApiContractValidationException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("must define 'data' property"));
   }
@@ -203,7 +201,7 @@ class OpenApiContractGuardTest {
     OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
     Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
+    OpenApiContractValidationException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("must define 'data' property"));
   }
@@ -232,7 +230,7 @@ class OpenApiContractGuardTest {
     OpenAPI openApi = openApi(schema("ServiceResponsePageCustomerDto", wrapper));
     Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
+    OpenApiContractValidationException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("invalid extension: " + DATA_CONTAINER));
   }
@@ -263,7 +261,7 @@ class OpenApiContractGuardTest {
     OpenAPI openApi = openApi(schema("ServiceResponsePageCustomerDto", wrapper));
     Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
+    OpenApiContractValidationException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("invalid extension: " + DATA_CONTAINER));
   }
@@ -293,14 +291,15 @@ class OpenApiContractGuardTest {
     OpenAPI openApi = openApi(schema("ServiceResponsePageCustomerDto", wrapper));
     Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
+    OpenApiContractValidationException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("invalid extension: " + DATA_ITEM));
   }
 
-  private IllegalStateException validateExpectingFailure(
+  private OpenApiContractValidationException validateExpectingFailure(
       OpenAPI openApi, Set<ResponseTypeDescriptor> descriptors) {
-    return assertThrows(IllegalStateException.class, () -> guard.validate(openApi, descriptors));
+    return assertThrows(
+        OpenApiContractValidationException.class, () -> guard.validate(openApi, descriptors));
   }
 
   private OpenAPI openApi(NamedSchema... namedSchemas) {

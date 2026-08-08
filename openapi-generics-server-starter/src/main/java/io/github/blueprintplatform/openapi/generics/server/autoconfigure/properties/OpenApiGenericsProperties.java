@@ -14,5 +14,4 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = "openapi-generics")
 public record OpenApiGenericsProperties(
-        @Valid EnvelopeProperties envelope,
-        List<@Valid ContainerProperties> containers) {}
+    @Valid EnvelopeProperties envelope, List<@Valid ContainerProperties> containers) {}

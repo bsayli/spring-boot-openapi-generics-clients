@@ -1,6 +1,6 @@
 package io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor;
 
-import java.util.Objects;
+import io.github.blueprintplatform.openapi.generics.server.exception.OpenApiDescriptorValidationException;
 
 /**
  * Describes a supported generic container contract recognized by the projection pipeline.
@@ -28,29 +28,14 @@ public record SupportedContainerDescriptor(
     ContainerMatchMode matchMode) {
 
   public SupportedContainerDescriptor {
-    Objects.requireNonNull(type, "type must not be null");
-    Objects.requireNonNull(shape, "shape must not be null");
-    Objects.requireNonNull(source, "source must not be null");
-    Objects.requireNonNull(matchMode, "matchMode must not be null");
+    requireNonNull(type, "type");
+    requireNonBlank(schemaName, "schemaName");
+    requireNonBlank(containerName, "containerName");
+    requireNonNull(shape, "shape");
+    requireNonNull(source, "source");
+    requireNonNull(matchMode, "matchMode");
 
-    if (schemaName == null || schemaName.isBlank()) {
-      throw new IllegalArgumentException("schemaName must not be null or blank");
-    }
-
-    if (containerName == null || containerName.isBlank()) {
-      throw new IllegalArgumentException("containerName must not be null or blank");
-    }
-
-    if (shape == ContainerShape.OBJECT_WITH_ITEM_ARRAY
-        && (itemPropertyName == null || itemPropertyName.isBlank())) {
-      throw new IllegalArgumentException(
-          "itemPropertyName must not be null or blank for object containers");
-    }
-
-    if (shape == ContainerShape.DIRECT_ARRAY && itemPropertyName != null) {
-      throw new IllegalArgumentException(
-          "itemPropertyName must be null for direct array containers");
-    }
+    validateItemProperty(shape, itemPropertyName);
   }
 
   public String containerTypeName() {
@@ -66,5 +51,38 @@ public record SupportedContainerDescriptor(
       case EXACT -> type.equals(candidate);
       case ASSIGNABLE -> type.isAssignableFrom(candidate);
     };
+  }
+
+  private static void validateItemProperty(ContainerShape shape, String itemPropertyName) {
+
+    switch (shape) {
+      case OBJECT_WITH_ITEM_ARRAY -> {
+        if (itemPropertyName == null || itemPropertyName.isBlank()) {
+          fail("itemPropertyName must not be null or blank for object containers");
+        }
+      }
+
+      case DIRECT_ARRAY -> {
+        if (itemPropertyName != null) {
+          fail("itemPropertyName must be null for direct array containers");
+        }
+      }
+    }
+  }
+
+  private static void requireNonNull(Object value, String propertyName) {
+    if (value == null) {
+      fail(propertyName + " must not be null");
+    }
+  }
+
+  private static void requireNonBlank(String value, String propertyName) {
+    if (value == null || value.isBlank()) {
+      fail(propertyName + " must not be null or blank");
+    }
+  }
+
+  private static void fail(String message) {
+    throw new OpenApiDescriptorValidationException(message);
   }
 }

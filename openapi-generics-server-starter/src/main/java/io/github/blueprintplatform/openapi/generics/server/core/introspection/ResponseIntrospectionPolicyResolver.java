@@ -7,6 +7,7 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.co
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.resolver.ConfiguredContainerTypesResolver;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.resolver.SupportedContainerTypesResolver;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.PropertyNames;
+import io.github.blueprintplatform.openapi.generics.server.exception.OpenApiGenericsConfigurationException;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
@@ -74,11 +75,11 @@ public class ResponseIntrospectionPolicyResolver {
 
   private Class<?> resolveExternalEnvelopeType(String configuredType) {
     if (configuredType == null || configuredType.isBlank()) {
-      throw new IllegalStateException("Envelope type must not be null or blank");
+      throw new OpenApiGenericsConfigurationException("Envelope type must not be null or blank");
     }
 
     if (!configuredType.contains(".")) {
-      throw new IllegalStateException(
+      throw new OpenApiGenericsConfigurationException(
           "Invalid envelope type '"
               + configuredType
               + "'. Expected fully-qualified class name (e.g. com.example.ApiResponse)");
@@ -87,7 +88,7 @@ public class ResponseIntrospectionPolicyResolver {
     try {
       return Class.forName(configuredType);
     } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(
+      throw new OpenApiGenericsConfigurationException(
           "Configured envelope class not found: '"
               + configuredType
               + "'. Ensure the class exists and is on the application classpath.",
@@ -211,8 +212,9 @@ public class ResponseIntrospectionPolicyResolver {
         && left.getName().equals(right.getName());
   }
 
-  private IllegalStateException invalidEnvelope(Class<?> envelopeType, String reason) {
-    return new IllegalStateException(
+  private OpenApiGenericsConfigurationException invalidEnvelope(
+      Class<?> envelopeType, String reason) {
+    return new OpenApiGenericsConfigurationException(
         "Unsupported envelope type '" + envelopeType.getName() + "': " + reason);
   }
 
