@@ -83,12 +83,12 @@ public final class ConfiguredContainerTypesResolver {
   }
 
   private void validateConcreteContainer(Class<?> containerType) {
-    if (containerType.isInterface()) {
+    if (containerType.isAnnotation()) {
+      throw invalidContainer(containerType, "must be a class or record, not an annotation");
+    } else if (containerType.isInterface()) {
       throw invalidContainer(containerType, "must be a concrete class or record, not an interface");
     } else if (containerType.isEnum()) {
       throw invalidContainer(containerType, "must be a class or record, not an enum");
-    } else if (containerType.isAnnotation()) {
-      throw invalidContainer(containerType, "must be a class or record, not an annotation");
     } else if (containerType.isArray()) {
       throw invalidContainer(containerType, "must be a class or record, not an array");
     } else if (containerType.isPrimitive()) {

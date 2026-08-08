@@ -8,11 +8,11 @@ package io.github.blueprintplatform.openapi.generics.server.exception;
  */
 public final class OpenApiContractValidationException extends OpenApiGenericsServerException {
 
-    public OpenApiContractValidationException(String message) {
-        super(message);
-    }
+  public OpenApiContractValidationException(String message) {
+    super(message);
+  }
 
-    public OpenApiContractValidationException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public OpenApiContractValidationException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
