@@ -4,21 +4,25 @@ coverage:
       default:
         target: auto
         threshold: 2%
+
       contract:
         target: 80%
         threshold: 2%
         flags:
           - contract
+
       server-starter:
         target: 50%
         threshold: 2%
         flags:
           - server-starter
+
       java-codegen:
         target: 50%
         threshold: 2%
         flags:
           - java-codegen
+
     patch:
       default:
         target: 70%
@@ -41,12 +45,11 @@ flags:
   contract:
     paths:
       - openapi-generics-contract/
-    carryforward: true
+
   server-starter:
     paths:
       - openapi-generics-server-starter/
-    carryforward: true
+
   java-codegen:
     paths:
       - openapi-generics-java-codegen/
-    carryforward: true

@@ -39,16 +39,37 @@ jobs:
       - name: Build and install core modules
         run: mvn -B -ntp clean install
 
-      - name: Upload coverage to Codecov
+      - name: Upload contract coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: >-
-            ./openapi-generics-contract/target/site/jacoco/jacoco.xml,
-            ./openapi-generics-server-starter/target/site/jacoco/jacoco.xml,
-            ./openapi-generics-java-codegen/target/site/jacoco/jacoco.xml
-          flags: unittests
-          fail_ci_if_error: false
+          files: ./openapi-generics-contract/target/site/jacoco/jacoco.xml
+          flags: contract
+          name: contract
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
+
+      - name: Upload server starter coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./openapi-generics-server-starter/target/site/jacoco/jacoco.xml
+          flags: server-starter
+          name: server-starter
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
+
+      - name: Upload Java codegen coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./openapi-generics-java-codegen/target/site/jacoco/jacoco.xml
+          flags: java-codegen
+          name: java-codegen
+          disable_search: true
+          fail_ci_if_error: true
           verbose: true
 
       - name: Set up JDK 25 for samples
