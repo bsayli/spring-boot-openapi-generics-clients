@@ -7,13 +7,13 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics-java-codegen-parent</artifactId>
-        <version>1.2.1</version>
+        <version>1.3.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>transport-coverage-client</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>transport-coverage-client</name>
