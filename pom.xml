@@ -7,7 +7,7 @@
 
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics</artifactId>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.2.1</version>
     <packaging>pom</packaging>
 
     <name>openapi-generics (aggregator)</name>
@@ -29,7 +29,7 @@
         <url>https://github.com/blueprint-platform/openapi-generics</url>
         <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.2.1</tag>
     </scm>
 
     <developers>
@@ -59,7 +59,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <openapi-generics.version>1.2.1-SNAPSHOT</openapi-generics.version>
+        <openapi-generics.version>1.2.1</openapi-generics.version>
 
         <!-- Build Plugins -->
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>

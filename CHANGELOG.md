@@ -10,7 +10,7 @@ This project follows a contract-first release discipline:
 
 ---
 
-## [Unreleased]
+## [1.2.1] - 2026-08-08
 
 ### Patch release
 

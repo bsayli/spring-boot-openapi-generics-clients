@@ -3,7 +3,7 @@ info:
   title: Customer Service API
   description: Spring Boot 3 customer-service sample using ServiceResponse<T> and
     ServiceResponse<Page<T>> projection.
-  version: 1.2.1-SNAPSHOT
+  version: 1.2.1
 servers:
 - url: http://localhost:8084/customer-service
   description: Local customer-service producer

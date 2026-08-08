@@ -14,7 +14,7 @@
 
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>customer-service-sb3</artifactId>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.2.1</version>
     <packaging>jar</packaging>
 
     <name>customer-service-sb3</name>
@@ -22,8 +22,8 @@
 
     <properties>
         <java.version>21</java.version>
-        <openapi-generics-server-starter.version>1.2.1-SNAPSHOT</openapi-generics-server-starter.version>
-        <customer-contract.version>1.2.1-SNAPSHOT</customer-contract.version>
+        <openapi-generics-server-starter.version>1.2.1</openapi-generics-server-starter.version>
+        <customer-contract.version>1.2.1</customer-contract.version>
         <springdoc-openapi-starter.version>2.9.0</springdoc-openapi-starter.version>
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
