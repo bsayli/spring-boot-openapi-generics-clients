@@ -195,6 +195,74 @@ class ComponentContainerSchemaResolverTest {
     assertNull(result);
   }
 
+  @Test
+  @DisplayName("resolve -> should return null when mapped component schema is null")
+  void resolve_shouldReturnNull_whenMappedComponentSchemaIsNull() {
+    Map<String, Schema> schemas = new LinkedHashMap<>();
+    schemas.put("NullDto", null);
+
+    Schema<?> result = resolver.resolve(schemas, "NullDto", "WrapperDto", "data");
+
+    assertNull(result);
+  }
+
+  @Test
+  @DisplayName("resolve -> should return null for JsonSchema without types")
+  void resolve_shouldReturnNull_forJsonSchemaWithoutTypes() {
+    JsonSchema schema = new JsonSchema();
+
+    Schema<?> result =
+        resolver.resolve(schemas("JsonDto", schema), "JsonDto", "WrapperDto", "data");
+
+    assertNull(result);
+  }
+
+  @Test
+  @DisplayName("resolve -> should return null for JsonSchema without array type")
+  void resolve_shouldReturnNull_forJsonSchemaWithoutArrayType() {
+    JsonSchema schema = new JsonSchema();
+    schema.setTypes(java.util.Set.of("object"));
+
+    Schema<?> result =
+        resolver.resolve(schemas("JsonDto", schema), "JsonDto", "WrapperDto", "data");
+
+    assertNull(result);
+  }
+
+  @Test
+  @DisplayName("resolve -> should return null for composed schema without allOf")
+  void resolve_shouldReturnNull_forComposedSchemaWithoutAllOf() {
+    ComposedSchema composed = new ComposedSchema();
+
+    Schema<?> result =
+        resolver.resolve(schemas("ComposedDto", composed), "ComposedDto", "WrapperDto", "data");
+
+    assertNull(result);
+  }
+
+  @Test
+  @DisplayName("resolve -> should not dereference non-component reference")
+  void resolve_shouldNotDereferenceNonComponentReference() {
+    Schema<?> ref = new Schema<>().$ref("#/definitions/PageCustomerDto");
+
+    Schema<?> result =
+        resolver.resolve(schemas("ExternalRefDto", ref), "ExternalRefDto", "WrapperDto", "data");
+
+    assertNull(result);
+  }
+
+  @Test
+  @DisplayName("resolve -> should return null when no allOf candidate is container-like")
+  void resolve_shouldReturnNull_whenNoAllOfCandidateIsContainerLike() {
+    ComposedSchema composed = new ComposedSchema();
+    composed.setAllOf(List.of(new Schema<>().type("string"), new Schema<>().type("integer")));
+
+    Schema<?> result =
+        resolver.resolve(schemas("ComposedDto", composed), "ComposedDto", "WrapperDto", "data");
+
+    assertNull(result);
+  }
+
   private Map<String, Schema> schemas(String name, Schema<?> schema) {
     Map<String, Schema> schemas = new LinkedHashMap<>();
     schemas.put(name, schema);
