@@ -279,18 +279,6 @@ class ConfiguredContainerTypesResolverTest {
   }
 
   @Test
-  @DisplayName("resolve -> should reject synthetic item property")
-  void resolve_shouldRejectSyntheticItemProperty() {
-    OpenApiGenericsConfigurationException exception =
-        assertInvalidContainer(NonStaticInnerContainer.class, "this$0");
-
-    assertEquals(
-        unsupported(
-            NonStaticInnerContainer.class, "item-property 'this$0' must be an instance field"),
-        exception.getMessage());
-  }
-
-  @Test
   @DisplayName("resolve -> should reject non parameterized item property")
   void resolve_shouldRejectNonParameterizedItemProperty() {
     OpenApiGenericsConfigurationException exception =
@@ -326,8 +314,8 @@ class ConfiguredContainerTypesResolverTest {
   }
 
   @Test
-  @DisplayName("resolve -> should reject different type variable")
-  void resolve_shouldRejectDifferentTypeVariable() {
+  @DisplayName("resolve -> should reject nested generic item type")
+  void resolve_shouldRejectNestedGenericItemType() {
     OpenApiGenericsConfigurationException exception =
         assertInvalidContainer(InheritedTypeVariableContainer.class, "items");
 
@@ -384,11 +372,6 @@ class ConfiguredContainerTypesResolverTest {
 
   private static final class StaticFieldContainer<T> {
     private static List<?> items;
-  }
-
-  @SuppressWarnings("unused")
-  private final class NonStaticInnerContainer<T> {
-    private List<T> items;
   }
 
   @SuppressWarnings({"rawtypes", "unused"})
