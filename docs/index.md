@@ -39,44 +39,46 @@ Generated clients bind to the envelope, container, and DTO types you already own
 
 ## The Problem
 
-A typical Spring controller returns a generic contract such as:
+A Spring Boot API may expose a strongly typed generic contract:
 
 ```java
 ResponseEntity<ServiceResponse<Page<CustomerDto>>> getCustomers()
 ```
 
-A standard OpenAPI client generation flow often materializes that contract as a new generated wrapper model:
+That contract carries more than a JSON shape.
+
+`ServiceResponse<T>` defines the response envelope, `Page<T>` defines the pagination contract, and `CustomerDto` defines the payload.
+
+A conventional OpenAPI client generation flow can flatten that contract into a newly generated wrapper model:
 
 ```java
 class ServiceResponsePageCustomerDto {
-  PageCustomerDto data;
-  Meta meta;
+    PageCustomerDto data;
+    Meta meta;
 }
 ```
 
-The shape may look equivalent, but the original contract identity is no longer preserved.
+The generated type may represent a similar JSON structure, but the original Java contract identity is no longer preserved.
 
-The envelope is duplicated, generic structure is flattened into generated models, and every service boundary can introduce another reinterpretation of the same contract.
-
-With OpenAPI Generics:
+OpenAPI Generics keeps that identity intact:
 
 ```java
 public class ServiceResponsePageCustomerDto
-        extends ServiceResponse<Page<CustomerDto>> {}
+    extends ServiceResponse<Page<CustomerDto>> {}
 ```
 
-The generated wrapper becomes a thin type binding.
-
-The original envelope remains contract authority, while generated code provides transport integration around it.
-
----
-
-## Before vs After
+The generated wrapper becomes a thin type binding: it reuses the shared envelope and container contracts instead of redefining them.
 
 <table>
 <tr>
-<td align="center"><b>Default OpenAPI Generator</b></td>
-<td align="center"><b>OpenAPI Generics</b></td>
+<td align="center">
+<b>Default OpenAPI Generator</b><br/>
+<sub>contract materialized as generated models</sub>
+</td>
+<td align="center">
+<b>OpenAPI Generics</b><br/>
+<sub>contract reconstructed from shared Java types</sub>
+</td>
 </tr>
 <tr>
 <td><img src="https://raw.githubusercontent.com/blueprint-platform/openapi-generics/main/docs/images/proof/generated-client-wrapper-before.png" width="450"/></td>
@@ -84,22 +86,15 @@ The original envelope remains contract authority, while generated code provides 
 </tr>
 </table>
 
-**Without OpenAPI Generics**
+### Why It Matters
 
-- duplicated wrapper models
-- flattened generic contracts
-- growing generated model graphs
-- additional mapping layers
-- more opportunities for contract drift
+For a single endpoint, duplicated wrapper types may look harmless.
 
-**With OpenAPI Generics**
+Across many generated clients, they accumulate into additional generated models, mapping layers, and opportunities for contract drift.
 
-- shared envelope contract
-- preserved generic structure
-- reusable external DTOs through BYOC
-- built-in and application-defined container reconstruction
-- deterministic generated clients
-- OpenAPI metadata carrying contract identity across the generation boundary
+OpenAPI Generics keeps the ownership boundary explicit:
+
+> **Shared Java contracts remain the authority. Generated clients provide transport bindings around them instead of becoming alternative contract definitions.**
 
 ---
 
