@@ -44,7 +44,7 @@ For architecture details, see [Architecture](../architecture/architecture.md).
 </parent>
 ```
 
-The parent provides the OpenAPI Generics code generation lifecycle, tested OpenAPI Generator alignment, template patching, and generated-source hygiene.
+The parent provides the OpenAPI Generics-specific template preparation, generator integration, tested OpenAPI Generator alignment, source registration, and generated-source hygiene required for reconstruction.
 
 ---
 
@@ -141,7 +141,7 @@ The generator reconstructs supported wrapper and container contracts from OpenAP
 
 ## Contract-Driven Envelope Reconstruction
 
-OpenAPI Generics 1.2.1 removes the need to repeat envelope identity in the client configuration when producer and codegen components are aligned on the 1.2.1 release line.
+OpenAPI Generics reconstructs envelope identity from contract metadata carried by the OpenAPI document when producer and codegen components are aligned.
 
 The producer publishes the envelope type through:
 
@@ -165,14 +165,7 @@ Generated wrapper
 
 The generated OpenAPI document is therefore the source of reconstruction metadata for the client generator.
 
-For aligned 1.2.1 components, this client-side declaration is no longer required:
-
-```xml
-<!-- Not required with aligned 1.2.1 producer and codegen components -->
-<additionalProperty>
-    openapi-generics.envelope=com.example.contract.ApiResponse
-</additionalProperty>
-```
+The same envelope does not need to be declared again on the client through `openapi-generics.envelope`.
 
 This removes duplicated envelope configuration across producer and client generation.
 
@@ -214,7 +207,7 @@ public class ApiResponsePageCustomerDto
 }
 ```
 
-No duplicate `openapi-generics.envelope` declaration is required on the client for aligned 1.2.1 producer and codegen components.
+No duplicate `openapi-generics.envelope` declaration is required on the client when producer and codegen components are aligned.
 
 The application-owned envelope must be available as a dependency of the generated client module.
 
@@ -325,23 +318,15 @@ ServiceResponse<Set<T>>
 ServiceResponse<Page<T>>
 ```
 
-BYOE envelopes support the same response shapes:
+BYOE envelopes participate in the same supported response-shape model.
 
-```java
-ApiResponse<T>
-ApiResponse<List<T>>
-ApiResponse<Set<T>>
-ApiResponse<Page<T>>
-```
+Application-defined generic containers published through OpenAPI Generics metadata also participate in the same reconstruction pipeline when their Java types are available on the client classpath.
 
-Application-defined generic containers published through OpenAPI Generics metadata also participate in the same reconstruction model:
+Representative combinations include:
 
 ```java
 ServiceResponse<Window<T>>
-ServiceResponse<Batch<T>>
-
 ApiResponse<Paging<T>>
-ApiResponse<Window<T>>
 ```
 
 The effective Java type is reconstructed from the contract metadata carried by the input OpenAPI document.
@@ -383,19 +368,15 @@ Use fallback mode for:
 
 ## Verification
 
-After generation, verify that:
+After generation, verify the contract behavior that matters to the consuming module:
 
-- wrappers extend existing envelope contracts instead of redefining them
-- aligned 1.2.1 BYOE generation succeeds without client-side `openapi-generics.envelope`
-- `x-api-wrapper-type` is consumed to reconstruct the envelope identity
-- `x-data-container-type` is consumed to reconstruct configured container identity
-- built-in and application-defined containers follow the same reconstruction model
+- generated wrappers extend the intended shared envelope instead of redefining it
+- built-in or configured generic containers resolve to the intended Java contract types
+- BYOC mappings reuse the configured external Java models instead of generating duplicates
 - contract-owned infrastructure models are not regenerated
-- BYOC mappings resolve to the intended shared Java types
-- generated source cleanup removes duplicate and unused imports deterministically
-- standard Java RestClient transport behavior remains intact
+- generated sources compile against the required shared contract dependencies
 
-Expected built-in wrapper:
+Representative built-in wrapper:
 
 ```java
 public class ServiceResponsePageCustomerDto
@@ -403,7 +384,7 @@ public class ServiceResponsePageCustomerDto
 }
 ```
 
-Expected BYOE wrapper:
+Representative BYOE wrapper:
 
 ```java
 public class ApiResponseWindowCustomerDto
@@ -411,19 +392,7 @@ public class ApiResponseWindowCustomerDto
 }
 ```
 
-The 1.2.1 repository verification path covers:
-
-```text
-Producer
-    ↓
-OpenAPI
-    ↓
-Generated Client
-    ↓
-Consumer Runtime
-```
-
-including built-in envelopes, BYOE, application-defined containers, BYOC reuse, and standard transport compatibility.
+Repository verification additionally covers metadata consumption, generated-source hygiene, standard Java RestClient transport compatibility, and the complete producer → OpenAPI → generated client → consumer lifecycle.
 
 ---
 

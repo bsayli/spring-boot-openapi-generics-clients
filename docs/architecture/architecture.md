@@ -90,9 +90,9 @@ The principal extensions are:
 
 Together, these extensions preserve the identities required for deterministic client reconstruction while keeping the document valid OpenAPI.
 
-In 1.2.1, envelope identity is carried by `x-api-wrapper-type`.
+Envelope identity is carried by `x-api-wrapper-type`.
 
-This completes the same contract-driven metadata model already used for container identity through `x-data-container-type`.
+This completes the same contract-driven metadata model used for container identity through `x-data-container-type`.
 
 ```text
 Envelope identity
@@ -333,7 +333,7 @@ Supported capabilities include:
 - generated-source hygiene
 - fail-fast contract validation
 
-Current platform scope is Java and Spring Boot oriented:
+The current architectural scope is intentionally focused on:
 
 - Java 17+ for published platform artifacts
 - Spring Boot WebMvc
@@ -341,11 +341,9 @@ Current platform scope is Java and Spring Boot oriented:
 - OpenAPI Generator 7.x
 - Maven-based client generation
 
-Reference verification in the 1.2.1 line includes Spring Boot 3.5.16 with Springdoc 2.9.0 and Spring Boot 4.1.0 with Springdoc 3.1.0.
+These boundaries define the platform and tooling surface OpenAPI Generics currently owns. Exact verified framework and generator versions are maintained separately from the architecture definition.
 
-Spring Boot 4 reference samples use Java 25 LTS, while Spring Boot 3 samples continue to use the Java 21 baseline and published platform artifacts continue targeting Java 17+.
-
-For the authoritative support matrix, see [Compatibility & Support Policy](../compatibility.md).
+For the authoritative compatibility matrix, verified reference baselines, and support policy, see [Compatibility & Support Policy](../compatibility.md).
 
 ---
 

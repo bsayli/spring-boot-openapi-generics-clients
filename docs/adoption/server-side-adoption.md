@@ -233,17 +233,17 @@ openapi-generics:
       item-property: items
 ```
 
-The configured envelope becomes the contract owner for projected wrapper schemas.
+The configured envelope remains the Java contract authority for projected wrapper schemas.
 
-In 1.2.1, its fully qualified Java identity is preserved through:
+Its fully qualified Java identity is preserved through:
 
 ```yaml
 x-api-wrapper-type: io.example.contract.ApiResponse
 ```
 
-This is significant because the generated OpenAPI document now carries the envelope identity required by the Java code generator.
+The generated OpenAPI document therefore carries the envelope identity required by the Java code generator.
 
-For aligned 1.2.1 producer and codegen components, the same envelope no longer needs to be configured again on the client side through `openapi-generics.envelope`.
+When producer and codegen components are aligned, the same envelope does not need to be configured again on the client side through `openapi-generics.envelope`.
 
 ```text
 Producer configuration
@@ -317,7 +317,7 @@ The server starter follows fail-fast validation.
 
 Invalid configuration or unsupported projected contract state fails while the OpenAPI document is being generated rather than producing ambiguous metadata for downstream code generation.
 
-The 1.2.1 server-side failure model distinguishes platform-specific categories covering:
+The server-side failure model distinguishes platform-specific categories covering:
 
 - configuration failures
 - generic container descriptor validation failures
@@ -342,56 +342,30 @@ Because the starter participates only in OpenAPI document generation, these fail
 
 ## Verification
 
-After starting the application, verify that the generated OpenAPI document contains OpenAPI Generics metadata.
+After starting the application, verify that the generated OpenAPI document contains the expected OpenAPI Generics metadata.
 
-### Built-in container example
-
-```yaml
-x-api-wrapper: true
-x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.response.ServiceResponse
-x-api-wrapper-datatype: PageCustomerDto
-x-data-container: Page
-x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
-x-data-item: CustomerDto
-```
-
-### Application-defined container example
+A projected wrapper may look like:
 
 ```yaml
 x-api-wrapper: true
-x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.response.ServiceResponse
+x-api-wrapper-type: io.example.contract.ApiResponse
 x-api-wrapper-datatype: WindowCustomerDto
 x-data-container: Window
 x-data-container-type: io.example.contract.Window
 x-data-item: CustomerDto
 ```
 
-### BYOE example
+Verify the metadata relevant to the projected contract:
 
-```yaml
-x-api-wrapper: true
-x-api-wrapper-type: io.example.contract.ApiResponse
-x-api-wrapper-datatype: PagingCustomerDto
-x-data-container: Paging
-x-data-container-type: io.example.contract.Paging
-x-data-item: CustomerDto
-```
-
-Contract-owned infrastructure schemas may also contain:
-
-```yaml
-x-ignore-model: true
-```
-
-For 1.2.1, producer verification should confirm that:
-
-- wrapper schemas contain `x-api-wrapper-type`
-- configured containers preserve their Java identity through `x-data-container-type`
+- `x-api-wrapper-type` preserves the Java envelope identity
+- `x-data-container-type` preserves the Java container identity when a generic container is present
+- `x-data-item` identifies the concrete item or payload type
+- `x-ignore-model` is present on infrastructure or contract-owned schemas where exclusion from generated client models is expected
 - built-in and BYOE envelopes publish the same reconstruction metadata model
 - application-defined containers work with both built-in and BYOE envelopes
-- the OpenAPI document is generated successfully without introducing runtime request behavior changes
+- OpenAPI document generation succeeds without changing normal HTTP request behavior
 
-The repository includes end-to-end verification across producer → OpenAPI → generated client → consumer flows.
+The repository additionally verifies the complete producer → OpenAPI → generated client → consumer lifecycle through maintained end-to-end samples and regression coverage.
 
 ---
 
