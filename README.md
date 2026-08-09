@@ -138,50 +138,52 @@ Generics preserved from producer to consumer.
 
 ---
 
-## Get started
+## Get Started
 
-### 1. Try it in 2 minutes
+OpenAPI Generics participates at two points in the contract lifecycle:
 
-Runnable end-to-end sample stacks are available under [samples](samples/), covering Spring Boot 3 and Spring Boot 4 reference stacks, generic type coverage, BYOE, application-defined containers, and independent transport compatibility.
-
-See [samples/README.md](samples/README.md) for the complete sample topology, Docker-based setup, and stack overview.
-
-Run a sample producer (Spring Boot 3; equivalent pipeline under `samples/spring-boot-4/`):
-
-```bash
-cd samples/spring-boot-3/customer-service
-mvn clean package
-java -jar target/customer-service-*.jar
+```text
+Java Producer Contract
+        ↓
+OpenAPI Projection
+        ↓
+Contract-Aware Client Reconstruction
 ```
 
-Verify it's running:
+### 1. See the full lifecycle
 
-* Swagger UI — [http://localhost:8084/customer-service/swagger-ui/index.html](http://localhost:8084/customer-service/swagger-ui/index.html)
-* OpenAPI    — [http://localhost:8084/customer-service/v3/api-docs.yaml](http://localhost:8084/customer-service/v3/api-docs.yaml)
+The repository contains runnable end-to-end samples covering:
 
-Generate the client from the same pipeline:
+- Spring Boot 3 and Spring Boot 4 reference stacks
+- built-in `ServiceResponse<T>` contracts
+- BYOE envelopes
+- application-defined generic containers
+- BYOC reuse
+- transport compatibility
 
-```bash
-cd samples/spring-boot-3/customer-service-client
-mvn clean install
+Each sample follows the same lifecycle:
+
+```text
+Producer
+    ↓
+OpenAPI
+    ↓
+Generated Client
+    ↓
+Consumer
 ```
 
-Inspect the generated wrapper:
-
-```java
-public class ServiceResponsePageCustomerDto
-    extends ServiceResponse<Page<CustomerDto>> {}
-```
-
-No duplicated envelope. Generics preserved. Contract reused end-to-end.
+Start with [samples/README.md](samples/README.md) for the runnable projects, Docker-based setup, and verification paths.
 
 ---
 
-### 2. Use it in your project
+### 2. Add OpenAPI Generics to your project
 
-You don't copy code from this repo — you add two building blocks.
+OpenAPI Generics has separate producer-side and client-side integration points.
 
-**Server (producer):**
+#### Producer — project Java contract semantics into OpenAPI
+
+Add the server starter:
 
 ```xml
 <dependency>
@@ -191,12 +193,17 @@ You don't copy code from this repo — you add two building blocks.
 </dependency>
 ```
 
-> [!IMPORTANT]
-> `openapi-generics-server-starter` does not intercept application requests or change endpoint runtime behavior.
-> It is invoked only when Springdoc generates the OpenAPI document, for example when `/v3/api-docs` or `/v3/api-docs.yaml` is requested, or when the document is generated in CI.
-> If the OpenAPI document is never generated, this component does nothing.
+The starter participates only when Springdoc generates the OpenAPI document.
 
-**Client (consumer):**
+It does not intercept application requests or change endpoint runtime behavior.
+
+For the built-in `ServiceResponse<T>` contract, no envelope configuration is required. Applications using BYOE or application-defined generic containers can declare those contract types on the producer.
+
+See [Server-Side Adoption](docs/adoption/server-side-adoption.md) for the complete configuration model.
+
+#### Client — reconstruct the Java contract during generation
+
+Use the OpenAPI Generics codegen parent:
 
 ```xml
 <parent>
@@ -206,12 +213,17 @@ You don't copy code from this repo — you add two building blocks.
 </parent>
 ```
 
-The client generation flow uses the `java-generics-contract` generator
-instead of the standard `java` generator to preserve generic wrapper semantics.
+Configure the official OpenAPI Generator Maven plugin as usual, but select the OpenAPI Generics Java specialization:
 
-That's it. Run your service, generate the OpenAPI document, generate the client, and get contract-aligned wrappers.
+```xml
+<generatorName>java-generics-contract</generatorName>
+```
 
-For BYOE, BYOC, and fallback-to-standard-generation options, see the [Key features](#key-features) section below.
+Normal OpenAPI Generator choices remain consumer-controlled, including the input specification, client library, package layout, and generator options.
+
+The OpenAPI Generics integration prepares the reconstruction-specific template environment and restores the projected generic contract semantics without taking ownership of the ordinary OpenAPI Generator lifecycle.
+
+See [Client-Side Adoption](docs/adoption/client-side-adoption.md) for the complete generator configuration, BYOC mappings, fallback behavior, and generated-source setup.
 
 ---
 

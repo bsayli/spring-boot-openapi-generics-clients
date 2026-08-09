@@ -211,63 +211,39 @@ It adds a Java/Spring specialization layer on top of the upstream generator whil
 
 ## Get Started
 
+OpenAPI Generics integrates at two points in the contract lifecycle:
+
+```text
+Java Producer Contract
+        ↓
+OpenAPI Projection
+        ↓
+Contract-Aware Client Reconstruction
+```
+
 ### Producer
 
-Add the server starter:
+Add `openapi-generics-server-starter` to the Spring Boot service that owns the Java contract.
 
-```xml
-<dependency>
-    <groupId>io.github.blueprint-platform</groupId>
-    <artifactId>openapi-generics-server-starter</artifactId>
-    <version>1.2.1</version>
-</dependency>
-```
+The starter participates when Springdoc generates the OpenAPI document. It discovers supported generic response contracts and projects the metadata required for deterministic client reconstruction without changing application request handling.
 
-The starter participates only when Springdoc generates the OpenAPI document.
+For the built-in `ServiceResponse<T>` contract, no envelope configuration is required. BYOE envelopes and application-defined generic containers can be declared as part of the producer contract model.
 
-It does not intercept application requests or alter endpoint runtime behavior.
-
-For the built-in `ServiceResponse<T>` envelope, no envelope configuration is required.
-
-If your application owns its response envelope:
-
-```yaml
-openapi-generics:
-  envelope:
-    type: io.example.contract.ApiResponse
-```
-
-Optional application-defined containers can be registered on the producer as part of the same contract model.
-
----
+See [Server-Side Adoption](adoption/server-side-adoption.md) for dependency setup, BYOE configuration, custom containers, validation, and projection behavior.
 
 ### Client
 
-Use the OpenAPI Generics codegen parent:
-
-```xml
-<parent>
-    <groupId>io.github.blueprint-platform</groupId>
-    <artifactId>openapi-generics-java-codegen-parent</artifactId>
-    <version>1.2.1</version>
-</parent>
-```
-
-Configure the generator:
+Use `openapi-generics-java-codegen-parent` with the official OpenAPI Generator Maven plugin and select:
 
 ```xml
 <generatorName>java-generics-contract</generatorName>
 ```
 
-With aligned 1.2.1 producer and codegen components, no duplicate client-side envelope declaration is required.
+Normal OpenAPI Generator choices remain consumer-controlled, including the input specification, client library, package layout, and generator options.
 
-Generate the client:
+OpenAPI Generics prepares the reconstruction-specific environment and restores the projected Java contract semantics without replacing the ordinary OpenAPI Generator lifecycle.
 
-```bash
-mvn clean install
-```
-
-The resulting wrappers reuse the original contract types instead of redefining them.
+See [Client-Side Adoption](adoption/client-side-adoption.md) for the complete Maven configuration, BYOC mappings, fallback behavior, and generated-source setup.
 
 ---
 
