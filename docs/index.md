@@ -8,33 +8,17 @@ permalink: /
 
 # OpenAPI Generics for Spring Boot
 
-> Preserve your Java contract across OpenAPI projection and generated clients.
+> **Keep your Java contract intact from Spring Boot to generated clients.**
 
-OpenAPI Generics is a focused Java/Spring specialization for teams that want generated clients without surrendering contract ownership to generated models.
+OpenAPI Generics is a focused Java/Spring specialization that prevents generic API contracts from being flattened into newly generated wrapper models.
 
-A conventional OpenAPI generation flow can flatten generic response contracts into new generated wrapper types. OpenAPI Generics takes a different approach:
+Your Java contract remains the source of truth. OpenAPI carries the metadata required to reconstruct that contract deterministically on the client side.
 
-> **Java contracts remain the source of truth. OpenAPI carries the metadata required to reconstruct them.**
+**Java Contract → OpenAPI Projection → Contract Metadata → Contract-Aligned Client**
 
-```text
-Java Contract
-      ↓
-Deterministic OpenAPI Projection
-      ↓
-Contract Identity Metadata
-      ↓
-Deterministic Client Reconstruction
-      ↓
-Contract-Aligned Java Client
-```
+Generated clients bind to the envelope, container, and DTO types you already own instead of redefining them.
 
-The generated client does not redefine your shared envelope and container contracts.
-
-It binds concrete OpenAPI schemas back to the Java contract types you already own.
-
-**One contract authority. One projection boundary. Deterministic reconstruction.**
-
-[Get Started](#get-started) · [Explore the Architecture](#how-it-works)
+[Get Started](#get-started) · [See How It Works](#how-it-works)
 
 ---
 
