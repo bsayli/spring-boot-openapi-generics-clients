@@ -444,7 +444,7 @@ For internal architecture and design decisions, see the [architecture](docs/arch
 
 ## Compatibility
 
-OpenAPI Generics currently supports the following platform baseline:
+OpenAPI Generics currently supports:
 
 - **Java:** 17+
 - **Spring Boot:** 3.4.x, 3.5.x, and 4.x
@@ -452,17 +452,9 @@ OpenAPI Generics currently supports the following platform baseline:
 - **OpenAPI Generator:** 7.x
 - **Server integration:** Spring WebMvc via `springdoc-openapi-starter-webmvc-ui`
 
-### Verified Reference Baseline
+The repository maintains verified Spring Boot 3, Spring Boot 4, and OpenAPI Generator reference baselines within these supported ranges.
 
-The 1.2.1 release has been verified against:
-
-- Spring Boot **3.5.16** with Springdoc **2.9.0**
-- Spring Boot **4.1.0** with Springdoc **3.1.0**
-- OpenAPI Generator **7.24.0**
-
-These versions represent the reference verification baseline, while support remains defined by the compatibility ranges above.
-
-For the full support matrix, version policy, and compatibility details, see [Compatibility & Support Policy](docs/compatibility.md).
+For exact verified versions, the full compatibility matrix, and the support policy, see [Compatibility & Support Policy](docs/compatibility.md).
 
 ---
 
