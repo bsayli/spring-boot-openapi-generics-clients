@@ -25,7 +25,6 @@ Generated clients bind to the envelope, container, and DTO types you already own
 ## Explore
 
 - [The Problem](#the-problem)
-- [Before vs After](#before-vs-after)
 - [What's New in 1.2.1](#whats-new-in-121)
 - [Key Features](#key-features)
 - [How It Works](#how-it-works)
