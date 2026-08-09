@@ -10,7 +10,7 @@ permalink: /
 
 > Keep your Java API contract intact across OpenAPI projection and generated clients.
 
-OpenAPI Generics is a contract-preserving OpenAPI generation platform for Spring Boot that keeps your Java contracts consistent from server implementation to generated client.
+OpenAPI Generics is a Java/Spring specialization for preserving generic contract identity across OpenAPI projection and generated clients.
 
 Instead of treating generated OpenAPI models as new contract ownership, OpenAPI Generics treats OpenAPI as a deterministic projection of your Java contract and reconstructs that contract on the client side.
 
@@ -115,100 +115,42 @@ The original envelope remains contract authority, while generated code provides 
 
 ## What's New in 1.2.1
 
-OpenAPI Generics 1.2.1 completes the contract-driven reconstruction model by allowing the generated OpenAPI document to carry the envelope identity required by the Java client generator.
+OpenAPI Generics 1.2.1 completes the contract-driven reconstruction model by carrying Java envelope identity in the generated OpenAPI document through `x-api-wrapper-type`.
 
-The new `x-api-wrapper-type` vendor extension preserves the fully qualified Java envelope type in projected wrapper schemas.
-
-It complements the container identity metadata introduced in 1.2 through `x-data-container-type`.
+Together with the container identity metadata introduced in 1.2 through `x-data-container-type`, the document now carries the contract identity required by the Java generator to reconstruct both platform-owned and application-owned generic response contracts.
 
 ```text
 Java Contract
       ↓
 OpenAPI Projection
       ↓
-Envelope Identity
-Container Identity
-Payload / Item Identity
+Envelope + Container Identity
       ↓
 Generated Client Reconstruction
 ```
 
-For aligned 1.2.1 producer and codegen components, the Java generator can now reconstruct the envelope directly from the OpenAPI document.
+For aligned 1.2.1 producer and codegen components, this removes the need to repeat the envelope declaration on the client through `openapi-generics.envelope`.
 
-That removes the need to repeat the same envelope declaration on the client side through `openapi-generics.envelope`.
-
-```text
-Producer configuration
-        ↓
-Java envelope contract
-        ↓
-x-api-wrapper-type
-        ↓
-OpenAPI document
-        ↓
-Generated client
-```
-
-Built-in response contracts continue to work unchanged:
+The same reconstruction model applies across built-in and application-owned contracts, including:
 
 ```java
-ServiceResponse<T>
-ServiceResponse<List<T>>
-ServiceResponse<Set<T>>
-ServiceResponse<Page<T>>
-```
-
-The same reconstruction model applies to application-owned envelopes:
-
-```java
-ApiResponse<T>
-ApiResponse<List<T>>
-ApiResponse<Set<T>>
-ApiResponse<Page<T>>
-```
-
-Application-defined generic containers introduced in 1.2 remain part of the same projection and reconstruction pipeline:
-
-```yaml
-openapi-generics:
-  envelope:
-    type: io.example.contract.ApiResponse
-
-  containers:
-    - type: io.example.contract.Paging
-      item-property: content
-
-    - type: io.example.contract.Window
-      item-property: items
-```
-
-This supports contract shapes such as:
-
-```java
-ApiResponse<Paging<CustomerDto>>
+ServiceResponse<Page<CustomerDto>>
 ApiResponse<Window<CustomerDto>>
-```
-
-Application-defined containers are independent from BYOE and work with the built-in envelope as well:
-
-```java
-ServiceResponse<Window<CustomerDto>>
-ServiceResponse<Batch<CustomerDto>>
 ```
 
 ### 1.2.1 highlights
 
 - Contract-driven envelope reconstruction through `x-api-wrapper-type`
 - No duplicate client-side envelope configuration for aligned 1.2.1 components
-- Application-defined generic container validation with both built-in and BYOE envelopes
-- Dedicated transport compatibility coverage for multipart, binary download, and form-urlencoded flows
-- Dedicated server-starter exception hierarchy for configuration, descriptor validation, projection, and generated contract validation failures
-- Spring Boot 3.5.16 and Springdoc 2.9.0 alignment for the Spring Boot 3 reference line
-- Spring Boot 4.1.0, Springdoc 3.1.0, and Java 25 LTS reference coverage
+- Application-defined generic containers with both built-in and BYOE envelopes
+- Dedicated compatibility coverage for standard multipart, binary download, and form-urlencoded transport flows
+- Spring Boot 3 and Spring Boot 4 reference-stack verification
 - OpenAPI Generator 7.24.0 verification
 - Full backward compatibility with 1.2.0 runtime contracts
 
 No contract migration is required for existing 1.2 users.
+
+For the complete release history, see the [Changelog](https://github.com/blueprint-platform/openapi-generics/blob/main/CHANGELOG.md).
 
 ---
 
@@ -222,7 +164,7 @@ No contract migration is required for existing 1.2 users.
 | **Application-defined containers** | Register custom generic containers such as `Paging<T>` or `Window<T>`.       |
 | **Contract-driven reconstruction** | Reconstruct envelope identity directly from projected OpenAPI metadata.      |
 | **Container-aware reconstruction** | Built-in and configured containers share one deterministic pipeline.        |
-| **Deterministic generation**       | Stable projection, validation, and generated client output.                  |
+| **Deterministic reconstruction**   | Stable projection, validation, and contract-aligned client reconstruction.   |
 | **Generated-source hygiene**       | Deterministic cleanup of duplicate and unused generated imports.             |
 | **Fail-fast validation**           | Invalid contract metadata and projection states fail during generation.      |
 | **Standard transport compatibility** | Generic reconstruction coexists with standard Java RestClient transport generation. |
@@ -258,16 +200,6 @@ Key metadata includes:
 - `x-ignore-model`
 
 The Java code generator consumes that metadata and reconstructs contract-aligned wrapper types.
-
-```text
-Projection
-   │
-   ▼
-OpenAPI Document
-   │
-   ▼
-Reconstruction
-```
 
 The generated OpenAPI document remains valid OpenAPI and can still be consumed by standard tooling.
 
@@ -363,7 +295,7 @@ The resulting wrappers reuse the original contract types instead of redefining t
 
 ## Samples
 
-Repository samples validate the complete:
+Repository samples validate the complete contract lifecycle:
 
 ```text
 Producer
@@ -375,55 +307,26 @@ Generated Client
 Consumer Runtime
 ```
 
-lifecycle.
+The maintained sample suite covers Spring Boot 3 and Spring Boot 4 reference stacks, built-in `ServiceResponse<T>` contracts, BYOE envelopes, application-defined generic containers, type coverage, and standard transport interoperability.
 
-- [Sample Projects](https://github.com/blueprint-platform/openapi-generics/tree/main/samples)  
-  Spring Boot 3 and Spring Boot 4 end-to-end stacks, built-in `ServiceResponse<T>` coverage, BYOE coverage, type coverage, and transport compatibility validation.
-
-Current sample topology includes:
-
-```text
-samples
-├── domain-contracts
-├── spring-boot-3
-├── spring-boot-4
-├── type-coverage
-│   ├── service-response
-│   └── byoe-response
-└── transport-coverage
-```
-
-The `transport-coverage` sample verifies standard Java RestClient generation for:
-
-- `multipart/form-data`
-- `application/octet-stream`
-- `application/x-www-form-urlencoded`
-
-while generics-aware response reconstruction remains enabled.
+[Explore the sample projects](https://github.com/blueprint-platform/openapi-generics/tree/main/samples) for runnable end-to-end examples.
 
 ---
 
 ## Compatibility
 
-Published platform artifacts target:
+OpenAPI Generics currently supports:
 
-- Java 17+
-- Spring Boot WebMvc
-- springdoc-openapi WebMvc integration
-- OpenAPI Generator 7.x
-- Maven-based client generation
+- **Java:** 17+
+- **Spring Boot:** 3.4.x, 3.5.x, and 4.x
+- **springdoc-openapi:** 2.x with Spring Boot 3.x, and 3.x with Spring Boot 4.x
+- **OpenAPI Generator:** 7.x
+- **Server integration:** Spring WebMvc
+- **Client generation:** Maven
 
-The 1.2.1 reference verification line includes:
+The repository maintains exact Spring Boot 3, Spring Boot 4, and OpenAPI Generator reference baselines to verify compatibility without narrowing support to those exact versions.
 
-- Spring Boot 3.5.16 with Springdoc 2.9.0
-- Spring Boot 4.1.0 with Springdoc 3.1.0
-- Java 21 for Spring Boot 3 samples
-- Java 25 LTS for Spring Boot 4 reference samples
-- OpenAPI Generator 7.24.0
-
-Support policy is broader than a single reference baseline.
-
-See the full [Compatibility & Support Policy](compatibility.md) for the authoritative matrix and support boundaries.
+See the authoritative [Compatibility & Support Policy](compatibility.md) for the full matrix, verified reference baselines, and support boundaries.
 
 ---
 

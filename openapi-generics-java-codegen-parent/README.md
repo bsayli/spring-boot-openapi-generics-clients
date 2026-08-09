@@ -77,10 +77,10 @@ Inherit the parent:
 
 ```xml
 <parent>
-  <groupId>io.github.blueprint-platform</groupId>
-  <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>1.2.1</version>
-  <relativePath/>
+    <groupId>io.github.blueprint-platform</groupId>
+    <artifactId>openapi-generics-java-codegen-parent</artifactId>
+    <version>1.2.1</version>
+    <relativePath/>
 </parent>
 ```
 
@@ -108,15 +108,26 @@ target/generated-sources/openapi/src/gen/java
 
 ### BYOE — Bring Your Own Envelope
 
-```xml
-<additionalProperties>
-  <additionalProperty>
-    openapi-generics.envelope=io.example.contract.ApiResponse
-  </additionalProperty>
-</additionalProperties>
+For aligned OpenAPI Generics producer and codegen components, envelope identity is carried by the OpenAPI document through `x-api-wrapper-type`.
+
+For example, a producer using an application-owned envelope may project:
+
+```yaml
+x-api-wrapper: true
+x-api-wrapper-type: io.example.contract.ApiResponse
 ```
 
-Generated wrappers extend the configured envelope instead of the default `ServiceResponse<T>`.
+The `java-generics-contract` generator consumes this metadata and reconstructs generated wrappers against the original envelope type.
+
+```java
+public class ApiResponseCustomerDto
+    extends ApiResponse<CustomerDto> {
+}
+```
+
+The envelope therefore does not need to be declared again on the client through `openapi-generics.envelope`.
+
+The application-owned envelope type must be available as a dependency of the generated client module.
 
 ### BYOC — Bring Your Own Contract
 
@@ -150,7 +161,7 @@ This improves generated artifact quality without changing contract semantics.
 
 ## Compatibility Mode
 
-Disable OpenAPI Generics orchestration:
+Skip the OpenAPI Generics generics-aware template lifecycle:
 
 ```xml
 <openapi.generics.skip>true</openapi.generics.skip>
@@ -174,10 +185,14 @@ Consumers control normal OpenAPI Generator configuration:
 - client library
 - package names
 - config options
-- BYOE and BYOC mappings
+- BYOC mappings
 - OpenAPI Generator version within the supported 7.x line
 
-The parent controls the deterministic generation lifecycle.
+BYOE envelope identity is contract-driven and is reconstructed from `x-api-wrapper-type`; it is not a client-side mapping for aligned components.
+
+The parent provides a tested OpenAPI Generator baseline while allowing consumers to choose a version within the supported compatibility range.
+
+The parent controls the OpenAPI Generics-specific deterministic preparation and integration lifecycle required for reconstruction. Normal OpenAPI Generator choices and generation intent remain consumer-controlled.
 
 ---
 

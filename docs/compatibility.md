@@ -7,7 +7,7 @@ nav_exclude: true
 
 This page defines the officially supported runtime and build-time scope for **OpenAPI Generics 1.2.1**.
 
-It describes what the platform supports, what the repository verifies, and where responsibility remains with the surrounding OpenAPI and Spring ecosystem.
+It distinguishes supported platform and contract boundaries from the exact reference stacks exercised by the repository, and clarifies where responsibility remains with the surrounding OpenAPI and Spring ecosystem.
 
 ---
 
@@ -25,6 +25,8 @@ It describes what the platform supports, what the repository verifies, and where
 
 ## Supported Scope
 
+### Platform Scope
+
 OpenAPI Generics currently supports:
 
 - Java 17+
@@ -37,7 +39,9 @@ Published OpenAPI Generics artifacts continue to target Java 17+.
 
 The repository also maintains newer reference stacks to verify compatibility with current framework generations without raising the minimum Java requirement for published platform artifacts.
 
-The supported built-in response contract model includes:
+### Contract Scope
+
+The supported built-in response contract shapes include:
 
 ```java
 ServiceResponse<T>
@@ -55,31 +59,11 @@ YourEnvelope<Set<T>>
 YourEnvelope<Page<T>>
 ```
 
-`Page<T>` refers to:
+`Page<T>` refers to the platform-owned `io.github.blueprintplatform.openapi.generics.contract.paging.Page<T>` contract.
 
-```java
-io.github.blueprintplatform.openapi.generics.contract.paging.Page<T>
-```
+Application-defined generic containers are also supported when explicitly registered. They participate in the same projection, metadata enrichment, and deterministic reconstruction pipeline as built-in container types and may be used with either the built-in `ServiceResponse<T>` envelope or a BYOE envelope.
 
-Applications may also register their own generic container contracts.
-
-Example:
-
-```yaml
-openapi-generics:
-  containers:
-    - type: io.example.contract.Paging
-      item-property: content
-
-    - type: io.example.contract.Window
-      item-property: items
-```
-
-Configured containers participate in the same projection, metadata enrichment, and deterministic reconstruction pipeline as built-in container types.
-
-They may be used with either the built-in `ServiceResponse<T>` envelope or an application-owned BYOE envelope.
-
-For aligned 1.2.1 producer and codegen components, envelope identity is carried by the generated OpenAPI document through `x-api-wrapper-type`. Client generation therefore does not require the same envelope type to be declared again through `openapi-generics.envelope`.
+For aligned 1.2.1 producer and codegen components, envelope identity is carried by the generated OpenAPI document through `x-api-wrapper-type`; client generation does not require the envelope type to be declared again through `openapi-generics.envelope`.
 
 ---
 
@@ -93,7 +77,7 @@ For aligned 1.2.1 producer and codegen components, envelope identity is carried 
 | 17+  | 3.5.x       | 2.9.x             | WebMvc | Supported |
 | 17+  | 4.x         | 3.x               | WebMvc | Supported |
 
-The matrix defines the supported version lines. Exact versions exercised by the repository are documented separately below as verified reference baselines.
+The matrix defines supported version lines. Exact combinations exercised by the repository are documented separately as verified reference baselines.
 
 ### Build-Time — Client Generation
 
@@ -101,7 +85,7 @@ The matrix defines the supported version lines. Exact versions exercised by the 
 |------|-------------------|------------|-----------|
 | 17+  | 7.x               | Maven      | Supported |
 
-The client generation parent provides a tested default OpenAPI Generator version, but consumers may override `openapi-generator.version` within the supported 7.x line.
+The client generation parent provides a tested default OpenAPI Generator version, while consumers may override `openapi-generator.version` within the supported 7.x line.
 
 OpenAPI Generics 1.2.1 is verified with OpenAPI Generator **7.24.0**.
 
@@ -111,10 +95,10 @@ OpenAPI Generics 1.2.1 is verified with OpenAPI Generator **7.24.0**.
 
 The following reference stacks are exercised by repository samples and maintained verification paths for the 1.2.1 release line.
 
-| Platform line | Java | Spring Boot | springdoc-openapi | Purpose |
-|---------------|------|-------------|-------------------|---------|
+| Platform line | Java | Spring Boot | springdoc-openapi | Purpose                                                        |
+|---------------|------|-------------|-------------------|----------------------------------------------------------------|
 | Spring Boot 3 | 21   | 3.5.16      | 2.9.0             | Primary Spring Boot 3 integration and type-coverage validation |
-| Spring Boot 4 | 25   | 4.1.0       | 3.1.0             | Spring Boot 4 compatibility reference stack |
+| Spring Boot 4 | 25   | 4.1.0       | 3.1.0             | Spring Boot 4 compatibility reference stack                    |
 
 These are verified reference baselines, not minimum consumer requirements.
 
@@ -126,28 +110,21 @@ Spring Boot 4 samples use Java 25 LTS and the Spring Boot 4.1 `jarmode=tools` la
 
 ## Verified Capabilities
 
-The supported scope is validated through repository samples, dedicated type-coverage modules, contract snapshots, transport-coverage modules, and end-to-end producer/client/consumer verification.
+The supported scope is validated through repository samples, regression tests, contract snapshots, transport-coverage modules, and end-to-end producer/client/consumer verification.
 
-Verified contract capabilities include:
+Verified capability families include:
 
-- default `ServiceResponse<T>` projection
-- `Page<T>`, `List<T>`, and `Set<T>` container projection
-- application-defined generic container registration
-- configurable container descriptor validation
-- configurable container projection and reconstruction
-- application-defined containers used with the built-in `ServiceResponse<T>` envelope
-- application-defined containers used with BYOE envelopes
-- preservation of Java container identity through `x-data-container-type`
-- preservation of Java envelope identity through `x-api-wrapper-type`
-- contract-driven envelope reconstruction without duplicate client-side envelope configuration
-- BYOE envelope projection and reconstruction
-- BYOC external DTO reuse
-- generated wrapper reconstruction
-- ignored infrastructure model filtering
+- built-in `ServiceResponse<T>` projection and reconstruction
+- built-in `Page<T>`, `List<T>`, and `Set<T>` container support
+- application-defined generic container registration, validation, projection, and reconstruction
+- BYOE envelope projection and contract-driven reconstruction
+- BYOC external model reuse
+- preservation of Java envelope and container identity
+- generated wrapper reconstruction and ignored infrastructure-model filtering
 - generated-source hygiene and deterministic Java client output
 - end-to-end producer → OpenAPI → generated client → consumer validation
 
-Verified OpenAPI metadata includes:
+The public OpenAPI Generics metadata exercised by these verification paths includes:
 
 - `x-api-wrapper`
 - `x-api-wrapper-type`
@@ -157,32 +134,21 @@ Verified OpenAPI metadata includes:
 - `x-data-item`
 - `x-ignore-model`
 
-The 1.2.1 release line also verifies server-starter failure categorization across:
+The reference verification paths also cover fail-fast configuration, container descriptor, projection, and generated-contract validation behavior.
 
-- configuration failures
-- configured container descriptor validation failures
-- projection failures
-- generated contract validation failures
+### Transport Compatibility
 
-These failures use platform-specific exception types while preserving existing fail-fast behavior and diagnostic messages.
+OpenAPI Generics specializes contract-aware reconstruction of generic Java response types without replacing the standard transport model provided by OpenAPI Generator.
 
-### Transport compatibility
+The dedicated `transport-coverage` verification path confirms interoperability with standard Java RestClient generation for:
 
-OpenAPI Generics specializes generic JSON contract reconstruction. It does not replace the standard transport model provided by OpenAPI Generator.
+- `multipart/form-data`, including structured JSON parts alongside generic response reconstruction
+- `application/octet-stream` binary downloads using the standard Spring `Resource` abstraction
+- `application/x-www-form-urlencoded` requests alongside generic response reconstruction
 
-The dedicated `transport-coverage` sample verifies that generics-aware reconstruction remains compatible with standard Java RestClient generation for:
+These scenarios verify that generics-aware specialization does not interfere with standard transport generation; transport behavior itself remains owned by OpenAPI Generator.
 
-- `multipart/form-data`
-- `application/octet-stream`
-- `application/x-www-form-urlencoded`
-
-Verified scenarios include:
-
-- multipart file upload with a structured JSON part together with `ServiceResponse<T>` reconstruction
-- binary download using the standard Spring `Resource` abstraction without wrapper interference
-- form-urlencoded request generation together with generic response reconstruction
-
-Reference samples:
+Reference verification areas include:
 
 ```text
 samples/spring-boot-3
@@ -196,30 +162,22 @@ samples/transport-coverage
 
 ## Support Policy
 
-A combination is officially supported when:
+A platform combination is officially supported when it falls within a version line declared in the compatibility matrix and remains inside the documented platform scope.
 
-- it appears in the compatibility matrix
-- it stays within the documented platform scope
-- it is covered by samples, regression tests, or another maintained verification path
+Support for a declared version line is maintained through the project's compatibility strategy, which may include representative reference stacks, regression tests, contract snapshots, integration samples, and other maintained verification paths. Individual patch or minor combinations within a supported line are not required to appear as exact repository reference stacks unless explicitly documented otherwise.
 
-The compatibility matrix describes supported version lines. Verified reference baselines identify exact combinations exercised by the repository for the current release.
+The compatibility matrix defines supported version lines. Verified reference baselines identify exact combinations exercised by the repository for the current release and provide concrete compatibility reference points; they do not narrow the supported ranges to those exact versions.
 
-Inside that boundary, OpenAPI Generics owns:
+Inside the documented compatibility boundary, OpenAPI Generics owns:
 
-- generics-aware OpenAPI projection
-- OpenAPI Generics vendor extension metadata
-- envelope identity projection through `x-api-wrapper-type`
-- container identity projection through `x-data-container-type`
+- generic contract projection and its OpenAPI Generics vendor-extension metadata
+- preservation of Java envelope and container identity
 - application-defined generic container registration and validation
-- contract-aware Java client generation
-- wrapper reconstruction
-- container-aware reconstruction
-- BYOE and BYOC resolution
-- generated-source hygiene
-- fail-fast validation of projected and generated contract assumptions
-- fail-fast detection of upstream template patch drift
+- contract-aware Java reconstruction, including BYOE envelope reconstruction and BYOC external model resolution
+- generated wrapper correctness and reconstruction-specific source hygiene
+- fail-fast validation of OpenAPI Generics contract assumptions and upstream template patch drift
 
-Outside that boundary, behavior belongs to the surrounding ecosystem, such as:
+Outside that boundary, behavior remains owned by the surrounding ecosystem, including:
 
 - HTTP client library internals
 - standard OpenAPI Generator transport behavior
@@ -229,7 +187,7 @@ Outside that boundary, behavior belongs to the surrounding ecosystem, such as:
 
 OpenAPI Generics does not claim ownership of those behaviors merely because they are exercised by repository compatibility samples.
 
-### Producer and codegen alignment
+### Producer and Codegen Alignment
 
 OpenAPI Generics 1.2.1 preserves all 1.2.0 runtime contracts.
 
