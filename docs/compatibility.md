@@ -34,10 +34,10 @@ For usage and architecture details, see the adoption and architecture guides rat
 
 ### Server-Side Projection
 
-| Java | Spring Boot | springdoc-openapi | Integration | Status |
-|------|-------------|-------------------|-------------|--------|
+| Java | Spring Boot | springdoc-openapi | Integration | Status    |
+|------|-------------|-------------------|-------------|-----------|
 | 17+  | 3.4.x       | 2.8.x             | WebMvc      | Supported |
-| 17+  | 3.5.x       | 2.9.x             | WebMvc      | Supported |
+| 17+  | 3.5.x       | 2.8.x, 2.9.x      | WebMvc      | Supported |
 | 17+  | 4.x         | 3.x               | WebMvc      | Supported |
 
 Published OpenAPI Generics artifacts target Java 17+.
@@ -46,8 +46,8 @@ The matrix describes supported version lines. It does not mean that every patch 
 
 ### Client-Side Reconstruction
 
-| Java | OpenAPI Generator | Build integration | Status |
-|------|-------------------|-------------------|--------|
+| Java | OpenAPI Generator | Build integration | Status    |
+|------|-------------------|-------------------|-----------|
 | 17+  | 7.x               | Maven             | Supported |
 
 The Maven codegen parent provides a tested OpenAPI Generator default while allowing consumers to select another version within the supported 7.x compatibility line.
@@ -62,10 +62,10 @@ Verified reference baselines are exact combinations exercised by maintained repo
 
 ### Server Reference Stacks
 
-| Platform line | Java | Spring Boot | springdoc-openapi | Purpose |
-|---------------|------|-------------|-------------------|---------|
+| Platform line | Java | Spring Boot | springdoc-openapi | Purpose                                                       |
+|---------------|------|-------------|-------------------|---------------------------------------------------------------|
 | Spring Boot 3 | 21   | 3.5.16      | 2.9.0             | Primary Spring Boot 3 integration and type-coverage reference |
-| Spring Boot 4 | 25   | 4.1.0       | 3.1.0             | Spring Boot 4 compatibility reference |
+| Spring Boot 4 | 25   | 4.1.0       | 3.1.0             | Spring Boot 4 compatibility reference                         |
 
 ### Client Generation Reference
 
