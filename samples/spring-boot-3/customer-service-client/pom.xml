@@ -29,7 +29,7 @@
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <mockwebserver.version>5.3.2</mockwebserver.version>
-        <httpclient5.version>5.5.2</httpclient5.version>
+        <httpclient5.version>5.6.4</httpclient5.version>
         <slf4j-api.version>2.0.18</slf4j-api.version>
         <logback.version>1.5.32</logback.version>
 
