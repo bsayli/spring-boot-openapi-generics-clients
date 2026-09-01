@@ -22,20 +22,20 @@ bin/
 *.zip
 
 # =========================
-# Logs / DB
+# Logs / Databases
 # =========================
 *.log
 *.sql
 *.sqlite
 
 # =========================
-# OS files
+# Operating System
 # =========================
 .DS_Store
 Thumbs.db
 
 # =========================
-# IDE
+# IDEs
 # =========================
 .idea/
 *.iml
@@ -46,7 +46,6 @@ Thumbs.db
 # =========================
 # Maven
 # =========================
-# Maven flattened pom
 .flattened-pom.xml
 pom.xml.tag
 pom.xml.releaseBackup
@@ -57,16 +56,27 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 
-# keep maven wrapper
+# =========================
+# Gradle
+# =========================
+.gradle/
+
+# Keep Gradle Wrapper
+!gradle/wrapper/gradle-wrapper.jar
+
+# Keep Maven Wrapper
 !.mvn/wrapper/
 
 # =========================
 # Generated sources
 # =========================
-generated-sources/
-generated-classes/
+**/generated-sources/
+**/generated-classes/
 
-# allow samples if needed
+# Samples intentionally commit generated OpenAPI snapshots when required.
 !samples/**/generated-sources/
 
+# =========================
+# AI tooling
+# =========================
 AGENTS.md
