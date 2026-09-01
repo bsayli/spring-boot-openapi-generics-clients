@@ -90,7 +90,15 @@ ServiceResponse<Page<T>>
 ServiceResponse<Window<T>>
 
 ServiceResponse<Batch<T>>
+
+CompletionStage<ServiceResponse<T>>
+
+DeferredResult<ServiceResponse<Page<T>>>
 ```
+
+The asynchronous controller signatures provide representative integration coverage for the
+two supported unwrapping branches. They project to the same OpenAPI wrapper schemas as their
+synchronous equivalents.
 
 `Page<T>` is provided by OpenAPI Generics.
 
@@ -141,6 +149,7 @@ Across the suite, the samples verify:
 - `Set<T>` reconstruction
 - platform-provided generic container reconstruction
 - application-owned generic container reconstruction
+- Spring MVC asynchronous response-wrapper unwrapping
 - BYOE reconstruction
 - ignored infrastructure model handling
 - external model handling
@@ -176,6 +185,7 @@ The `type-coverage` projects act as executable regression suites for the OpenAPI
 They are intended to detect regressions in:
 
 - response type introspection
+- asynchronous controller return-type discovery and unwrapping
 - OpenAPI schema projection
 - vendor extension generation
 - vendor extension consistency
