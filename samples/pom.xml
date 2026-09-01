@@ -31,6 +31,7 @@
         <module>spring-boot-4</module>
         <module>type-coverage</module>
         <module>transport-coverage</module>
+        <module>generation-coverage</module>
     </modules>
     <build>
         <pluginManagement>

@@ -286,6 +286,16 @@ Available sample:
 
 See [`transport-coverage/README.md`](transport-coverage/README.md) for transport scenarios, validation flow, and regression scope.
 
+## Generation Coverage
+
+[`generation-coverage`](generation-coverage/README.md) validates build-time client generation
+topologies independently from runtime producer/consumer flows.
+
+Its `multi-spec-maven-client` sample runs two isolated OpenAPI Generator executions in one Maven
+module, using different specifications, output directories, and Java packages. A compile-time probe
+references generated types from both outputs so the build fails if either execution is missing or
+overwrites the other.
+
 ## Local Maven Build
 
 From the `samples` directory:
@@ -333,6 +343,7 @@ It does not become the owner of the envelope structure.
 - Spring Boot 3 and Spring Boot 4 stacks are intentionally equivalent.
 - Type-coverage samples validate generic reconstruction across supported contract shapes.
 - Transport-coverage validates compatibility with standard OpenAPI Generator transport behavior.
+- Generation-coverage validates isolated multi-spec Maven generation in a single client module.
 - You do not need to run every sample simultaneously.
 
 ## Summary
