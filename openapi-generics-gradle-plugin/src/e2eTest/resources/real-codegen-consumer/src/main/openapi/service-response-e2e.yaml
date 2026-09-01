@@ -1,0 +1,114 @@
+openapi: 3.1.0
+
+info:
+  title: OpenAPI Generics Gradle Plugin E2E
+  description: |
+    Focused contract-reconstruction fixture for the Gradle plugin.
+
+    It verifies:
+      - ServiceResponse<TypeSummaryDto>
+      - ServiceResponse<Page<TypeSummaryDto>>
+      - x-api-wrapper-type consumption
+      - x-data-container-type consumption
+      - x-ignore-model infrastructure filtering
+  version: 1.3.0-SNAPSHOT
+
+paths:
+  /summaries/{id}:
+    get:
+      operationId: getSummary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Summary response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseTypeSummaryDto"
+
+  /summaries:
+    get:
+      operationId: getSummaries
+      responses:
+        "200":
+          description: Paged summary response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponsePageTypeSummaryDto"
+
+components:
+  schemas:
+    TypeSummaryDto:
+      type: object
+      required:
+        - id
+        - code
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        enabled:
+          type: boolean
+
+    Meta:
+      type: object
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+      x-ignore-model: true
+
+    PageTypeSummaryDto:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeSummaryDto"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+      x-ignore-model: true
+
+    ServiceResponseTypeSummaryDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/TypeSummaryDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
+      x-api-wrapper-datatype: TypeSummaryDto
+
+    ServiceResponsePageTypeSummaryDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/PageTypeSummaryDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
+      x-api-wrapper-datatype: PageTypeSummaryDto
+      x-data-container: Page
+      x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
+      x-data-item: TypeSummaryDto
