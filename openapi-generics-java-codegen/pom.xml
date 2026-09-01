@@ -29,7 +29,7 @@
     </scm>
 
     <properties>
-        <openapi-generator.version>7.24.0</openapi-generator.version>
+        <openapi-generator.version>7.25.0</openapi-generator.version>
         <slf4j-api.version>2.0.18</slf4j-api.version>
         <junit.jupiter.version>5.14.3</junit.jupiter.version>
     </properties>
