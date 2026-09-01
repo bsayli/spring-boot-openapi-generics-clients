@@ -10,6 +10,57 @@ This project follows a contract-first release discipline:
 
 ---
 
+## [Unreleased]
+
+### Minor release
+
+OpenAPI Generics 1.3.0 expands the platform with first-class Gradle integration, stricter client-generation contract validation, and broader build-time verification coverage.
+
+This release introduces a dedicated Gradle plugin for contract-aware client generation, strengthens fail-fast validation of generic wrapper metadata, expands regression coverage for asynchronous Spring MVC response wrappers and multi-spec generation scenarios, and aligns the platform with OpenAPI Generator 7.25.0 while preserving full backward compatibility.
+
+### Added
+
+- Added first-class Gradle support through the new `openapi-generics-gradle-plugin`.
+- Added automatic template provisioning and lifecycle management for Gradle builds.
+- Added Gradle integration support for isolated multi-task client generation.
+- Added configuration cache compatible Gradle task wiring and generated-source registration.
+- Added end-to-end Gradle functional, integration, and real-codegen verification suites.
+- Added fail-fast validation for generic wrapper metadata during client generation.
+- Added dedicated exception types for invalid generic wrapper contracts.
+- Added regression coverage for asynchronous Spring MVC response wrapper discovery and reconstruction.
+- Added dedicated Gradle client sample demonstrating end-to-end client generation.
+- Added dedicated multi-spec Maven generation coverage validating multiple isolated generator executions within a single module.
+
+### Changed
+
+- Upgraded OpenAPI Generator to **7.25.0**.
+- Updated sample projects to use Spring Boot dependency management for improved dependency alignment.
+- Upgraded the Spring Boot 4 sample baseline from **4.1.0** to **4.1.1**.
+- Improved documentation describing unsupported custom OpenAPI component schema naming.
+- Expanded sample documentation covering asynchronous response wrappers, Gradle integration, and generation coverage.
+
+### Quality & Verification
+
+- Added comprehensive Gradle functional, integration, and end-to-end regression suites.
+- Verified isolated multi-task Gradle generation.
+- Verified configuration-cache compatibility.
+- Verified generated-source registration across Gradle Java projects.
+- Verified template preparation and upstream template compatibility.
+- Verified fail-fast validation of invalid wrapper metadata.
+- Verified asynchronous Spring MVC wrapper discovery using `CompletionStage` and `DeferredResult`.
+- Verified isolated multi-spec Maven generation within a single module.
+- Verified compatibility with OpenAPI Generator **7.25.0**.
+
+### Compatibility
+
+- Fully backward compatible with all 1.2.x runtime contracts.
+- Java 17+
+- Spring Boot 3.x / 4.x
+- OpenAPI Generator 7.x
+- Maven and Gradle based client generation
+
+---
+
 ## [1.2.1] - 2026-08-08
 
 ### Patch release
