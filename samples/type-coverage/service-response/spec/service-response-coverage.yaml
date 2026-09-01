@@ -13,12 +13,19 @@ info:
     - ServiceResponse<Page<T>>
     - ServiceResponse<Window<T>>
     - ServiceResponse<Batch<T>>
+    - CompletionStage<ServiceResponse<T>>
+    - DeferredResult<ServiceResponse<Page<T>>>
 
     Covers scalar, value, enum, DTO, list, set, paged, cursor-based window,
-    and batch-oriented payload types.
+    batch-oriented, and representative asynchronous controller response shapes.
 
     Demonstrates the built-in ServiceResponse<T> envelope with both
     platform-provided and application-owned generic containers.
+
+    Also verifies that supported Spring MVC asynchronous response wrappers are
+    removed before OpenAPI projection. The generated client therefore preserves
+    the underlying ServiceResponse<T> contract without exposing CompletionStage
+    or DeferredResult as client-side contract types.
   version: 1.3.0-SNAPSHOT
 servers:
 - url: http://localhost:8074/type-coverage/service-response
@@ -276,6 +283,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseBatchCoverageStatus"
+  /types/async/summary:
+    get:
+      tags:
+      - async-payload-controller
+      operationId: completionStageSummary
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseTypeSummaryDto"
+  /types/async/paged-summaries:
+    get:
+      tags:
+      - async-payload-controller
+      operationId: deferredPagedSummaries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponsePageTypeSummaryDto"
 components:
   schemas:
     CoverageStatus:
@@ -714,3 +745,13 @@ components:
       x-data-container: Batch
       x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Batch
       x-data-item: CoverageStatus
+    ServiceResponseTypeSummaryDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/TypeSummaryDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
+      x-api-wrapper-datatype: TypeSummaryDto

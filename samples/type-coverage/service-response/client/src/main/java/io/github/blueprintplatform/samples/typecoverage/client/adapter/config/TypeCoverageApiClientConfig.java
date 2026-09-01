@@ -22,6 +22,11 @@ public class TypeCoverageApiClientConfig {
   }
 
   @Bean
+  AsyncPayloadControllerApi asyncPayloadControllerApi(ApiClient typeCoverageApiClient) {
+    return new AsyncPayloadControllerApi(typeCoverageApiClient);
+  }
+
+  @Bean
   ScalarPayloadControllerApi scalarPayloadControllerApi(ApiClient typeCoverageApiClient) {
     return new ScalarPayloadControllerApi(typeCoverageApiClient);
   }

@@ -43,6 +43,12 @@ class OpenApiSnapshotGenerationTest {
     private static final String TYPE_SUMMARY_ITEM_MARKER = "x-data-item: TypeSummaryDto";
     private static final String COVERAGE_STATUS_ITEM_MARKER = "x-data-item: CoverageStatus";
 
+    private static final String ASYNC_DIRECT_PATH = "/types/async/summary:";
+    private static final String ASYNC_PAGE_PATH = "/types/async/paged-summaries:";
+    private static final String ASYNC_DIRECT_OPERATION = "operationId: completionStageSummary";
+    private static final String ASYNC_PAGE_OPERATION = "operationId: deferredPagedSummaries";
+    private static final String ASYNC_CONTROLLER_TAG = "async-payload-controller";
+
     @Autowired private MockMvc mockMvc;
 
     @Test
@@ -67,7 +73,12 @@ class OpenApiSnapshotGenerationTest {
                         LIST_CONTAINER_MARKER,
                         PAGE_CONTAINER_MARKER,
                         TYPE_SUMMARY_ITEM_MARKER,
-                        COVERAGE_STATUS_ITEM_MARKER);
+                        COVERAGE_STATUS_ITEM_MARKER,
+                        ASYNC_DIRECT_PATH,
+                        ASYNC_PAGE_PATH,
+                        ASYNC_DIRECT_OPERATION,
+                        ASYNC_PAGE_OPERATION,
+                        ASYNC_CONTROLLER_TAG);
 
         writeSnapshot(yaml);
     }

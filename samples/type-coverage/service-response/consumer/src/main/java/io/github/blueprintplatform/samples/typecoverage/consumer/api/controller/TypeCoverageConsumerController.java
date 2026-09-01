@@ -32,6 +32,16 @@ public class TypeCoverageConsumerController {
     this.service = service;
   }
 
+  @GetMapping("/async/summary")
+  public ResponseEntity<ServiceResponse<TypeSummaryDto>> asyncSummary() {
+    return ResponseEntity.ok(service.asyncSummary());
+  }
+
+  @GetMapping("/async/paged-summaries")
+  public ResponseEntity<ServiceResponse<Page<TypeSummaryDto>>> asyncPagedSummaries() {
+    return ResponseEntity.ok(service.asyncPagedSummaries());
+  }
+
   @GetMapping("/scalars/string")
   public ResponseEntity<ServiceResponse<String>> stringValue() {
     return ResponseEntity.ok(service.stringValue());

@@ -29,6 +29,16 @@ public class TypeCoverageConsumerServiceImpl implements TypeCoverageConsumerServ
   }
 
   @Override
+  public ServiceResponse<TypeSummaryDto> asyncSummary() {
+    return adapter.asyncSummary();
+  }
+
+  @Override
+  public ServiceResponse<Page<TypeSummaryDto>> asyncPagedSummaries() {
+    return adapter.asyncPagedSummaries();
+  }
+
+  @Override
   public ServiceResponse<String> stringValue() {
     return adapter.stringValue();
   }
