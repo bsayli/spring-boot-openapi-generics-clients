@@ -4,6 +4,7 @@ import io.github.blueprintplatform.openapi.generics.codegen.external.ExternalImp
 import io.github.blueprintplatform.openapi.generics.codegen.external.ExternalModelRegistry;
 import io.github.blueprintplatform.openapi.generics.codegen.filtering.ModelIgnoreDecider;
 import io.github.blueprintplatform.openapi.generics.codegen.metadata.EnvelopeMetadataResolver;
+import io.github.blueprintplatform.openapi.generics.codegen.validation.WrapperMetadataValidator;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,8 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
   private final ModelIgnoreDecider ignoreDecider = new ModelIgnoreDecider(registry);
   private final ExternalImportResolver importResolver = new ExternalImportResolver(registry);
   private final EnvelopeMetadataResolver envelopeResolver = new EnvelopeMetadataResolver();
+  private final WrapperMetadataValidator wrapperMetadataValidator =
+      new WrapperMetadataValidator();
 
   @Override
   public void processOpts() {
@@ -93,6 +96,7 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
               CodegenModel model = modelMap.getModel();
 
               if (model != null) {
+                wrapperMetadataValidator.validate(model);
                 importResolver.apply(model);
                 envelopeResolver.apply(model);
               }

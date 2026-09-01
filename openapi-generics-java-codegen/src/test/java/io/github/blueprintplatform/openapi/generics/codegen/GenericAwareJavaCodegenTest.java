@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.blueprintplatform.openapi.generics.codegen.contract.CodegenVendorExtensions;
+import io.github.blueprintplatform.openapi.generics.codegen.exception.OpenApiGenericsContractException;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -58,8 +60,6 @@ class GenericAwareJavaCodegenTest {
     GenericAwareJavaCodegen codegen = codegenWithExternalCustomer();
 
     CodegenModel wrapperModel = wrapperModel("ServiceResponseCustomerDto", SERVICE_RESPONSE_TYPE);
-
-    wrapperModel.vendorExtensions.put(CodegenVendorExtensions.DATA_ITEM, "CustomerDto");
 
     ModelsMap result = codegen.postProcessModels(modelsMap(wrapperModel));
 
@@ -394,6 +394,8 @@ class GenericAwareJavaCodegenTest {
     model.vendorExtensions.put(CodegenVendorExtensions.API_WRAPPER, Boolean.TRUE);
 
     model.vendorExtensions.put(CodegenVendorExtensions.API_WRAPPER_TYPE, wrapperType);
+
+    model.vendorExtensions.put(CodegenVendorExtensions.API_WRAPPER_DATATYPE, "CustomerDto");
 
     return model;
   }

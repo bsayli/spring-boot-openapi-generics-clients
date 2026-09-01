@@ -14,6 +14,10 @@ public final class CodegenVendorExtensions {
 
   public static final String API_WRAPPER_DATATYPE = "x-api-wrapper-datatype";
 
+  public static final String DATA_CONTAINER = "x-data-container";
+
+  public static final String DATA_CONTAINER_TYPE = "x-data-container-type";
+
   public static final String DATA_ITEM = "x-data-item";
 
   public static final String IGNORE_MODEL = "x-ignore-model";
