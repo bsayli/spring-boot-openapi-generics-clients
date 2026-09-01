@@ -156,6 +156,8 @@ WebAsyncTask<T>
 
 OpenAPI Generics reconstructs supported generic contract shapes after the framework wrapper has been unwrapped.
 
+> OpenAPI Generics expects projected OpenAPI component schema names to match the Java simple type names resolved during response introspection. Custom component schema names, including names declared through `@Schema(name = "...")`, are outside the supported contract scope.
+
 ---
 
 ## Application-Defined Generic Containers

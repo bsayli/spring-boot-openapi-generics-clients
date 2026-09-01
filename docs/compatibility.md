@@ -178,6 +178,7 @@ The following are not currently part of the supported scope:
 - non-Java client reconstruction
 - arbitrary nested generic graphs
 - automatic inference of unregistered custom generic containers
+- custom OpenAPI component schema names that differ from the Java simple type name, including names declared through `@Schema(name = "...")`
 
 These boundaries describe the current supported product surface; they do not imply ownership of adjacent ecosystem capabilities.
 
